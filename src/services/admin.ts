@@ -47,21 +47,40 @@ export async function obtenerMeticasGlobales(): Promise<KPIReporte> {
 }
 
 // Para Gestión de Usuarios
-export async function obtenerTodosLosAgentes(): Promise<Agente[]> {
+export async function obtenerTodosLosAgentes(): Promise<any[]> {
   const { data, error } = await supabase
     .from('agentes')
-    .select('*')
+    .select(`
+      *,
+      sedes_usuarios(sede_id)
+    `)
     .order('nombre');
 
   if (error) {
     console.error("Error obteniendo agentes para admin:", error);
     return [];
   }
-  return data as Agente[];
+  
+  // Transformar la data para que sea más fácil de usar en el frontend
+  return data.map(agente => ({
+    ...agente,
+    sedes_ids: agente.sedes_usuarios ? agente.sedes_usuarios.map((su: any) => su.sede_id) : []
+  }));
 }
 
-export async function guardarAgente(agente: any): Promise<boolean> {
-  if (agente.id) {
+export async function obtenerTodasLasSedes(): Promise<{id: string, nombre: string}[]> {
+  const { data, error } = await supabase.from('sedes').select('id, nombre').order('nombre');
+  if (error) {
+    console.error("Error obteniendo sedes:", error);
+    return [];
+  }
+  return data;
+}
+
+export async function guardarAgente(agente: any, sedes_ids: string[] = []): Promise<boolean> {
+  let agenteId = agente.id;
+
+  if (agenteId) {
     // Actualizar
     const { error } = await supabase
       .from('agentes')
@@ -71,7 +90,7 @@ export async function guardarAgente(agente: any): Promise<boolean> {
         rol: agente.rol,
         estado: agente.estado
       })
-      .eq('id', agente.id);
+      .eq('id', agenteId);
 
     if (error) {
       console.error("Error actualizando agente:", error);
@@ -79,19 +98,41 @@ export async function guardarAgente(agente: any): Promise<boolean> {
     }
   } else {
     // Crear
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('agentes')
       .insert([{
         nombre: agente.nombre,
         email: agente.email,
         rol: agente.rol,
         estado: 'DISPONIBLE'
-      }]);
+      }])
+      .select('id')
+      .single();
 
-    if (error) {
+    if (error || !data) {
       console.error("Error creando agente:", error);
       return false;
     }
+    agenteId = data.id;
   }
+
+  // Sincronizar Sedes
+  if (agenteId) {
+    // 1. Borrar accesos anteriores
+    await supabase.from('sedes_usuarios').delete().eq('agente_id', agenteId);
+    
+    // 2. Insertar nuevos accesos
+    if (sedes_ids.length > 0) {
+      const sedesToInsert = sedes_ids.map(sede_id => ({
+        agente_id: agenteId,
+        sede_id: sede_id
+      }));
+      const { error: errorSedes } = await supabase.from('sedes_usuarios').insert(sedesToInsert);
+      if (errorSedes) {
+        console.error("Error asignando sedes:", errorSedes);
+      }
+    }
+  }
+
   return true;
 }

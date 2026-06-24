@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { Users, Shield, Edit2, CheckCircle, XCircle } from 'lucide-react';
-import { obtenerTodosLosAgentes, guardarAgente } from '@/services/admin';
-import { Agente } from '@/services/recepcion'; // Importar base
+import { obtenerTodosLosAgentes, guardarAgente, obtenerTodasLasSedes } from '@/services/admin';
+import { Agente } from '@/services/recepcion';
 
 // Extendemos Agente base con campos extra para admin
 interface AgenteAdmin extends Agente {
   email?: string;
   rol?: string;
+  sedes_ids?: string[];
 }
 
 export default function UsuariosPage() {
@@ -18,30 +19,36 @@ export default function UsuariosPage() {
   const [formData, setFormData] = useState<Partial<AgenteAdmin>>({
     nombre: '',
     email: '',
-    rol: 'STAFF'
+    rol: 'STAFF',
+    sedes_ids: []
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [todasSedes, setTodasSedes] = useState<{id: string, nombre: string}[]>([]);
 
-  const cargarUsuarios = async () => {
+  const cargarDatos = async () => {
     setIsLoading(true);
-    const data = await obtenerTodosLosAgentes();
-    setUsuarios(data as AgenteAdmin[]);
+    const [usuariosData, sedesData] = await Promise.all([
+      obtenerTodosLosAgentes(),
+      obtenerTodasLasSedes()
+    ]);
+    setUsuarios(usuariosData as AgenteAdmin[]);
+    setTodasSedes(sedesData);
     setIsLoading(false);
   };
 
   useEffect(() => {
-    cargarUsuarios();
+    cargarDatos();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     
-    const exito = await guardarAgente({ ...formData, id: editId });
+    const exito = await guardarAgente({ ...formData, id: editId }, formData.sedes_ids || []);
     if (exito) {
-      cargarUsuarios();
-      setFormData({ nombre: '', email: '', rol: 'STAFF' });
+      cargarDatos();
+      setFormData({ nombre: '', email: '', rol: 'STAFF', sedes_ids: [] });
       setEditId(null);
     }
     
@@ -54,7 +61,8 @@ export default function UsuariosPage() {
       nombre: user.nombre,
       email: user.email || '',
       rol: user.rol || 'STAFF',
-      estado: user.estado
+      estado: user.estado,
+      sedes_ids: user.sedes_ids || []
     });
   };
 
@@ -95,7 +103,12 @@ export default function UsuariosPage() {
                     {usuarios.map(u => (
                       <tr key={u.id} className="hover:bg-indigo-50/50 transition-colors">
                         <td className="px-5 py-3 font-medium text-gray-900">{u.nombre}</td>
-                        <td className="px-5 py-3 text-gray-500">{u.email || <span className="italic text-xs text-gray-400">Sin acceso</span>}</td>
+                        <td className="px-5 py-3 text-gray-500">
+                          {u.email || <span className="italic text-xs text-gray-400">Sin acceso</span>}
+                          {u.sedes_ids && u.sedes_ids.length > 0 && (
+                            <div className="text-[10px] text-indigo-500 mt-1">{u.sedes_ids.length} sedes asignadas</div>
+                          )}
+                        </td>
                         <td className="px-5 py-3">
                           <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${u.rol === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                             {u.rol || 'STAFF'}
@@ -181,11 +194,36 @@ export default function UsuariosPage() {
                 </div>
               )}
               
+              <div className="pt-2 border-t border-gray-100">
+                <label className="block text-xs font-semibold text-gray-700 mb-2">Unidades de Negocio (Sedes)</label>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {todasSedes.map(sede => (
+                    <label key={sede.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                      <input 
+                        type="checkbox"
+                        checked={formData.sedes_ids?.includes(sede.id) || false}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          const current = formData.sedes_ids || [];
+                          if (checked) {
+                            setFormData({...formData, sedes_ids: [...current, sede.id]});
+                          } else {
+                            setFormData({...formData, sedes_ids: current.filter(id => id !== sede.id)});
+                          }
+                        }}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      {sede.nombre}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
               <div className="flex gap-2 mt-4">
                 {editId && (
                   <button 
                     type="button" 
-                    onClick={() => { setEditId(null); setFormData({ nombre: '', email: '', rol: 'STAFF' }); }}
+                    onClick={() => { setEditId(null); setFormData({ nombre: '', email: '', rol: 'STAFF', sedes_ids: [] }); }}
                     className="w-1/3 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-200"
                   >
                     Cancelar
