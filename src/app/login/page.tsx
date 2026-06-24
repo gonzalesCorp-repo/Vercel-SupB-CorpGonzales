@@ -35,7 +35,11 @@ export default function LoginPage() {
         setError('Por favor ingresa correo electrónico y contraseña');
       }
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión. Revisa tus credenciales.');
+      let msg = err.message || 'Error al iniciar sesión. Revisa tus credenciales.';
+      if (msg === 'Invalid login credentials') {
+        msg = 'Correo o contraseña incorrectos.';
+      }
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
