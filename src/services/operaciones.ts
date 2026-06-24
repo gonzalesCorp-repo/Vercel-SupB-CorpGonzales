@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { OATC } from './recepcion';
+import { registrarLog } from './logger';
 
 const supabase = createClient();
 
@@ -46,6 +47,8 @@ export async function terminarAtencion(oatcId: string): Promise<boolean> {
     console.error("Error terminando atención:", error);
     return false;
   }
+  
+  await registrarLog('OPERACIONES', `Terminó atención del ticket`, { ticket_id: oatcId });
   return true;
 }
 
@@ -68,5 +71,7 @@ export async function pedirInsumo(pedido: PedidoInsumo): Promise<boolean> {
     console.error("Error pidiendo insumo:", error);
     return false;
   }
+  
+  await registrarLog('OPERACIONES', `Pidió insumo a laboratorio`, { insumo: pedido.insumo_solicitado });
   return true;
 }

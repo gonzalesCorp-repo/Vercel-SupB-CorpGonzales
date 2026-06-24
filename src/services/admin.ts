@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { Agente } from './recepcion';
+import { registrarLog } from './logger';
 
 const supabase = createClient();
 
@@ -132,7 +133,10 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
         console.error("Error asignando sedes:", errorSedes);
       }
     }
+    }
   }
 
+  await registrarLog('ADMIN', `Gestionó usuario ${agente.email}`, { rol: agente.rol, sedes: sedes_ids.length });
+  
   return true;
 }

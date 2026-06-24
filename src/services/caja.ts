@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { OATC } from './recepcion';
+import { registrarLog } from './logger';
 
 const supabase = createClient();
 
@@ -65,6 +66,11 @@ export async function procesarPago(factura: Factura): Promise<boolean> {
     console.error("Error actualizando OATC:", oatcError);
     return false;
   }
+
+  await registrarLog('CAJA', `Procesó pago de ${factura.cliente_nombre}`, { 
+    total: factura.total, 
+    metodo: factura.metodo_pago 
+  });
 
   return true;
 }

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/store/useAppStore';
+import { registrarLog } from './logger';
 
 export interface Cliente {
   id: string;
@@ -111,6 +112,12 @@ export async function crearOatc(
     console.error("Error creando OATC:", error);
     throw new Error(error.message);
   }
+  
+  // Registrar en Logs
+  await registrarLog('RECEPCION', `Generó orden para el cliente ${clienteNombre}`, { 
+    servicios: puntoPartida.map(p => p.nombre).join(', '),
+    agenteAsignado: agenteNombre
+  });
   
   return data;
 }

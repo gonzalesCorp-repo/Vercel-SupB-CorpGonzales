@@ -8,7 +8,9 @@ interface Sede {
 
 interface AppState {
   sedeActiva: Sede | null;
+  userRol: string | null;
   setSedeActiva: (sede: Sede) => void;
+  setUserRol: (rol: string) => void;
   clearSede: () => void;
 }
 
@@ -16,8 +18,10 @@ export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       sedeActiva: null,
+      userRol: null,
       setSedeActiva: (sede) => set({ sedeActiva: sede }),
-      clearSede: () => set({ sedeActiva: null })
+      setUserRol: (rol) => set({ userRol: rol }),
+      clearSede: () => set({ sedeActiva: null, userRol: null })
     }),
     {
       name: 'erp-gonzales-storage', // name of the item in the storage (must be unique)

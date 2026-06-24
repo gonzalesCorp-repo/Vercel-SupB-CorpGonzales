@@ -14,7 +14,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
-  const { sedeActiva, setSedeActiva, clearSede } = useAppStore();
+  const { sedeActiva, setSedeActiva, clearSede, userRol, setUserRol } = useAppStore();
+  
   
   const [misSedes, setMisSedes] = useState<Sede[]>([]);
   const [loadingSedes, setLoadingSedes] = useState(true);
@@ -25,6 +26,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user && user.email) {
         setUserEmail(user.email);
+        
+        // Cargar rol desde la DB si no está en Zustand
+        if (!userRol) {
+          const { data: agente } = await supabase.from('agentes').select('rol').eq('email', user.email).single();
+          if (agente && agente.rol) {
+            setUserRol(agente.rol);
+          }
+        }
         
         // Cargar sedes permitidas
         const sedes = await obtenerSedesUsuario(user.email);
@@ -38,9 +47,43 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       setLoadingSedes(false);
     };
     fetchUserAndSedes();
-  }, [supabase.auth, sedeActiva, setSedeActiva]);
+  }, [supabase.auth, sedeActiva, setSedeActiva, userRol, setUserRol]);
   
-  const tienePermiso = (modulo: string) => true; // Por ahora todos tienen acceso a todo
+  const tienePermiso = (modulo: string) => {
+    if (!userRol) return false;
+    const roles = userRol.split(',');
+    
+    if (roles.includes('SUPERADMIN')) return true;
+    if (roles.includes('ADMIN') && modulo !== 'dev') return true;
+    
+    switch (modulo) {
+      case 'recepcion': return roles.includes('RECEPCION');
+      case 'caja': return roles.includes('CAJA');
+      case 'despacho': return roles.includes('DESPACHO');
+      case 'operaciones': return roles.includes('STAFF');
+      case 'wfm': return roles.includes('WFM') || roles.includes('RECEPCION');
+      case 'admin': return false; // Administradores ya cubiertos
+      case 'dev': return false; // Devs ya cubiertos
+      default: return false;
+    }
+  };
+
+  // Bloqueo Forzoso de Rutas
+  useEffect(() => {
+    if (!loadingSedes && userRol && pathname !== '/') {
+      const pathModulo = pathname.split('/')[1] || '';
+      
+      if (pathModulo && !tienePermiso(pathModulo)) {
+        // Redirigir al primer módulo al que sí tenga acceso
+        if (tienePermiso('recepcion')) router.push('/recepcion');
+        else if (tienePermiso('operaciones')) router.push('/operaciones');
+        else if (tienePermiso('caja')) router.push('/caja');
+        else if (tienePermiso('despacho')) router.push('/despacho');
+        else if (tienePermiso('admin')) router.push('/admin/reportes');
+        else if (tienePermiso('dev')) router.push('/dev');
+      }
+    }
+  }, [pathname, loadingSedes, userRol, router]);
 
   const handleLogout = async () => {
     clearSede();
@@ -254,6 +297,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <Link href="/admin/usuarios" className={navItemClass('/admin/usuarios')}>
                       <Shield className="w-5 h-5 mr-3" />
                       Gestión de Usuarios
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+            
+            {/* MÓDULO: DEVELOPER */}
+            {tienePermiso('dev') && (
+              <li>
+                <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Desarrollador</span>
+                <ul className="mt-2 space-y-1">
+                  <li>
+                    <Link href="/dev" className={navItemClass('/dev')}>
+                      <Settings className="w-5 h-5 mr-3" />
+                      System Logs
                     </Link>
                   </li>
                 </ul>
