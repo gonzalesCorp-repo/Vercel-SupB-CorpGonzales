@@ -133,7 +133,6 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
         console.error("Error asignando sedes:", errorSedes);
       }
     }
-    }
   }
 
   await registrarLog('ADMIN', `Gestionó usuario ${agente.email}`, { rol: agente.rol, sedes: sedes_ids.length });
