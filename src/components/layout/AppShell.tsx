@@ -263,6 +263,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {/* Otros módulos irán aquí según los roles... */}
 
           </ul>
+          
+          {/* MÓVIL: Cerrar Sesión (Solo visible en pantallas pequeñas) */}
+          <div className="mt-8 border-t border-gray-100 pt-6 sm:hidden">
+            <p className="text-xs font-semibold text-gray-500 mb-2 px-2 text-center break-words">{userEmail}</p>
+            <button 
+              onClick={handleLogout} 
+              className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Cerrar Sesión
+            </button>
+          </div>
         </div>
       </aside>
 
