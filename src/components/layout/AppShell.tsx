@@ -1,23 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('Cargando...');
   const pathname = usePathname();
   const router = useRouter();
+  const supabase = createClient();
 
-  // Roles placeholder (Esto vendrá luego de Supabase)
-  const currentUser = { nombre: 'Administrador', rol: 'ADMIN' };
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email || 'Usuario');
+      }
+    };
+    fetchUser();
+  }, [supabase.auth]);
   
   const tienePermiso = (modulo: string) => true; // Por ahora todos tienen acceso a todo
 
-  const handleLogout = () => {
-    // Aquí implementaremos Supabase logout
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     router.push('/login');
+    router.refresh();
   };
 
   const navItemClass = (path: string) => `flex items-center p-2 rounded-lg text-sm transition-colors ${
@@ -46,8 +57,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex items-center">
                 <div className="text-right mr-4 hidden sm:block">
-                    <p className="text-sm font-semibold text-gray-900">{currentUser.nombre}</p>
-                    <p className="text-xs text-primary-600 uppercase">{currentUser.rol}</p>
+                    <p className="text-sm font-semibold text-gray-900">{userEmail}</p>
+                    <p className="text-xs text-primary-600 uppercase">ADMIN</p>
                 </div>
                 <button 
                   onClick={handleLogout} 

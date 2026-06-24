@@ -1,4 +1,5 @@
 import NuevaOATC from '@/components/recepcion/NuevaOATC';
+import QueueMonitor from '@/components/recepcion/QueueMonitor';
 
 export default function RecepcionPage() {
   return (
@@ -14,13 +15,10 @@ export default function RecepcionPage() {
           <NuevaOATC />
         </div>
         
-        {/* Columna Derecha: Cola (Placeholder por ahora) */}
+        {/* Columna Derecha: Cola */}
         <div className="lg:col-span-2">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 shadow-sm h-full">
-            <h3 className="text-md font-bold text-yellow-800 mb-3">Listado de Atención (Hoy)</h3>
-            <div className="text-sm text-gray-500 italic text-center py-10 bg-white/50 rounded-lg border border-dashed border-gray-300">
-              Módulo de monitorización de cola en construcción...
-            </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm h-full">
+            <QueueMonitor />
           </div>
         </div>
       </div>
