@@ -27,12 +27,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       if (user && user.email) {
         setUserEmail(user.email);
         
-        // Cargar rol desde la DB si no está en Zustand
-        if (!userRol) {
-          const { data: agente } = await supabase.from('agentes').select('rol').eq('email', user.email).single();
-          if (agente && agente.rol) {
-            setUserRol(agente.rol);
-          }
+        // Cargar rol desde la DB siempre para evitar bugs de caché entre usuarios
+        const { data: agente } = await supabase.from('agentes').select('rol').eq('email', user.email).single();
+        if (agente && agente.rol) {
+          setUserRol(agente.rol);
         }
         
         // Cargar sedes permitidas

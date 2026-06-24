@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { useAppStore } from '@/store/useAppStore';
+import { useEffect } from 'react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,6 +13,12 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+  const { clearSede } = useAppStore();
+
+  useEffect(() => {
+    // Limpiar caché de sesión previa si entra al login directamente
+    clearSede();
+  }, [clearSede]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
