@@ -10,7 +10,7 @@ interface AppState {
   sedeActiva: Sede | null;
   userRol: string | null;
   setSedeActiva: (sede: Sede) => void;
-  setUserRol: (rol: string) => void;
+  setUserRol: (rol: string | null) => void;
   clearSede: () => void;
 }
 

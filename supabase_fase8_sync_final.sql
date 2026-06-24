@@ -27,6 +27,9 @@ DECLARE
     id_ven UUID;
 
 BEGIN
+    -- 0. Eliminar la restricción (CHECK constraint) del rol para permitir múltiples roles separados por comas
+    ALTER TABLE public.agentes DROP CONSTRAINT IF EXISTS agentes_rol_check;
+
     -- 1. Obtener el ID del Sandbox
     SELECT id INTO sandbox_id FROM sedes WHERE nombre ILIKE '%Prueba%' LIMIT 1;
     
