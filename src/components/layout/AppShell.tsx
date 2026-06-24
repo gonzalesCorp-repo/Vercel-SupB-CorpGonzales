@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings } from 'lucide-react';
+import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -159,6 +159,27 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <Link href="/wfm" className={navItemClass('/wfm')}>
                       <LayoutDashboard className="w-5 h-5 mr-3" />
                       Mapa WFM
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+
+            {/* MÓDULO: ADMINISTRACIÓN */}
+            {tienePermiso('admin') && (
+              <li>
+                <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Administración</span>
+                <ul className="mt-2 space-y-1">
+                  <li>
+                    <Link href="/admin/reportes" className={navItemClass('/admin/reportes')}>
+                      <Activity className="w-5 h-5 mr-3" />
+                      Dashboard Global
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/admin/usuarios" className={navItemClass('/admin/usuarios')}>
+                      <Shield className="w-5 h-5 mr-3" />
+                      Gestión de Usuarios
                     </Link>
                   </li>
                 </ul>
