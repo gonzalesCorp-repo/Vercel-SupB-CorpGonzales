@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield } from 'lucide-react';
+import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useAppStore } from '@/store/useAppStore';
+import { obtenerSedesUsuario, Sede } from '@/services/sedes';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,20 +14,36 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const { sedeActiva, setSedeActiva, clearSede } = useAppStore();
+  
+  const [misSedes, setMisSedes] = useState<Sede[]>([]);
+  const [loadingSedes, setLoadingSedes] = useState(true);
+  const [showSedesDropdown, setShowSedesDropdown] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndSedes = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserEmail(user.email || 'Usuario');
+      if (user && user.email) {
+        setUserEmail(user.email);
+        
+        // Cargar sedes permitidas
+        const sedes = await obtenerSedesUsuario(user.email);
+        setMisSedes(sedes);
+        
+        // Si no hay sede activa en Zustand y tiene sedes, autoseleccionar la primera
+        if (!sedeActiva && sedes.length === 1) {
+          setSedeActiva(sedes[0]);
+        }
       }
+      setLoadingSedes(false);
     };
-    fetchUser();
-  }, [supabase.auth]);
+    fetchUserAndSedes();
+  }, [supabase.auth, sedeActiva, setSedeActiva]);
   
   const tienePermiso = (modulo: string) => true; // Por ahora todos tienen acceso a todo
 
   const handleLogout = async () => {
+    clearSede();
     await supabase.auth.signOut();
     router.push('/login');
     router.refresh();
@@ -36,6 +54,36 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       ? 'bg-primary-50 text-primary-700 font-semibold' 
       : 'text-gray-600 hover:bg-gray-100'
   }`;
+
+  // PANTALLA DE SELECCIÓN OBLIGATORIA DE SEDE (Si no ha elegido y tiene múltiples)
+  if (!loadingSedes && !sedeActiva && misSedes.length > 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <MapPin className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Bienvenido</h1>
+          <p className="text-gray-500 mb-6">Por favor, selecciona la unidad de negocio a la que deseas ingresar hoy.</p>
+          
+          <div className="space-y-3">
+            {misSedes.map(sede => (
+              <button
+                key={sede.id}
+                onClick={() => setSedeActiva(sede)}
+                className="w-full bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-gray-200 text-gray-800 font-semibold py-4 px-6 rounded-xl transition-all flex items-center justify-between"
+              >
+                <span>{sede.nombre}</span>
+              </button>
+            ))}
+          </div>
+          <button onClick={handleLogout} className="mt-8 text-sm text-gray-400 hover:text-red-500 transition-colors">
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-gray-50">
@@ -55,18 +103,44 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 Gonzales Spa <span className="text-xs font-normal text-gray-500 ml-2">ERP</span>
               </span>
             </div>
-            <div className="flex items-center">
-                <div className="text-right mr-4 hidden sm:block">
+            <div className="flex items-center gap-4">
+                {/* Selector Dropdown de Sede Superior */}
+                {sedeActiva && misSedes.length > 1 && (
+                  <div className="relative">
+                    <button 
+                      onClick={() => setShowSedesDropdown(!showSedesDropdown)}
+                      className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      <MapPin className="w-4 h-4 text-indigo-600" />
+                      {sedeActiva.nombre}
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    </button>
+                    
+                    {showSedesDropdown && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                        {misSedes.map(sede => (
+                          <button
+                            key={sede.id}
+                            onClick={() => {
+                              setSedeActiva(sede);
+                              setShowSedesDropdown(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-sm transition-colors ${sede.id === sedeActiva.id ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
+                          >
+                            {sede.nombre}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className="text-right hidden sm:block border-l border-gray-200 pl-4">
                     <p className="text-sm font-semibold text-gray-900">{userEmail}</p>
-                    <p className="text-xs text-primary-600 uppercase">ADMIN</p>
+                    <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
+                        Cerrar Sesión
+                    </button>
                 </div>
-                <button 
-                  onClick={handleLogout} 
-                  className="flex items-center gap-2 text-sm bg-red-50 text-red-600 font-medium px-3 py-1.5 rounded-lg hover:bg-red-100 transition"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Salir</span>
-                </button>
             </div>
           </div>
         </div>
