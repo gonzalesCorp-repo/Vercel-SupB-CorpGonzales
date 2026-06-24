@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { useAppStore } from '@/store/useAppStore';
 import { Agente } from './recepcion';
 
 const supabase = createClient();
@@ -11,9 +12,13 @@ export interface KPIReporte {
 
 // Para Reportes
 export async function obtenerMeticasGlobales(): Promise<KPIReporte> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) return { totalVentas: 0, ticketsAtendidos: 0, ticketPromedio: 0 };
+
   const { data: facturas, error: errorFacturas } = await supabase
     .from('facturas')
-    .select('total');
+    .select('total')
+    .eq('sede_id', sedeId);
 
   if (errorFacturas) {
     console.error("Error obteniendo métricas (facturas):", errorFacturas);
@@ -23,7 +28,8 @@ export async function obtenerMeticasGlobales(): Promise<KPIReporte> {
   const { count: ticketsAtendidos, error: errorTickets } = await supabase
     .from('oatc')
     .select('*', { count: 'exact', head: true })
-    .in('estado_proceso', ['FINALIZADO', 'ASESORANDO']); // Asumimos activos + finalizados como atendidos
+    .in('estado_proceso', ['FINALIZADO', 'ASESORANDO'])
+    .eq('sede_id', sedeId); // Asumimos activos + finalizados como atendidos
 
   if (errorTickets) {
     console.error("Error obteniendo métricas (tickets):", errorTickets);

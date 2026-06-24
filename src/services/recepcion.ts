@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { useAppStore } from '@/store/useAppStore';
 
 export interface Cliente {
   id: string;
@@ -67,9 +68,14 @@ export async function obtenerCatalogo(tipo: 'servicio' | 'producto'): Promise<Bi
 }
 
 export async function obtenerAgentesDisponibles(): Promise<Agente[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) return [];
+
+  // Hacer join con sedes_usuarios para filtrar
   const { data, error } = await supabase
     .from('agentes')
-    .select('id, nombre, estado');
+    .select('id, nombre, estado, sedes_usuarios!inner(sede_id)')
+    .eq('sedes_usuarios.sede_id', sedeId);
     
   if (error) {
     console.error("Error obteniendo agentes:", error);
@@ -86,6 +92,8 @@ export async function crearOatc(
   agenteNombre: string,
   puntoPartida: any[]
 ) {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  
   const { data, error } = await supabase
     .from('oatc')
     .insert([{
@@ -94,7 +102,8 @@ export async function crearOatc(
       agente_id: agenteId,
       agente_nombre: agenteNombre,
       punto_partida: puntoPartida,
-      estado_proceso: 'ESPERA'
+      estado_proceso: 'ESPERA',
+      sede_id: sedeId
     }])
     .select();
     

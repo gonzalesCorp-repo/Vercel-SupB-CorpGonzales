@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { useAppStore } from '@/store/useAppStore';
 import { OATC } from './recepcion';
 
 const supabase = createClient();
@@ -13,12 +14,15 @@ export interface Factura {
   created_at?: string;
 }
 
-// Obtener todos los OATC que no han sido pagados
 export async function obtenerTicketsAbiertos(): Promise<OATC[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) return [];
+
   const { data, error } = await supabase
     .from('oatc')
     .select('*')
     .eq('estado_pago', 'Pendiente')
+    .eq('sede_id', sedeId)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -30,6 +34,8 @@ export async function obtenerTicketsAbiertos(): Promise<OATC[]> {
 
 // Procesar el pago y guardar factura
 export async function procesarPago(factura: Factura): Promise<boolean> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+
   // 1. Guardar factura
   const { error: facturaError } = await supabase
     .from('facturas')
@@ -39,7 +45,8 @@ export async function procesarPago(factura: Factura): Promise<boolean> {
         cliente_nombre: factura.cliente_nombre,
         total: factura.total,
         metodo_pago: factura.metodo_pago,
-        detalles: factura.detalles
+        detalles: factura.detalles,
+        sede_id: sedeId
       }
     ]);
 

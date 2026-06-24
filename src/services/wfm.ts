@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { useAppStore } from '@/store/useAppStore';
 
 const supabase = createClient();
 
@@ -18,10 +19,14 @@ export interface MapaSalonData {
 }
 
 export async function obtenerMapaSalon(): Promise<MapaSalonData[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) return [];
+
   // 1. Obtener ubicaciones
   const { data: ubicaciones, error: uError } = await supabase
     .from('ubicaciones')
     .select('*')
+    .eq('sede_id', sedeId)
     .order('nombre');
 
   if (uError) {
@@ -33,7 +38,8 @@ export async function obtenerMapaSalon(): Promise<MapaSalonData[]> {
   const { data: oatcs, error: oError } = await supabase
     .from('oatc')
     .select('*')
-    .eq('estado_proceso', 'ASESORANDO');
+    .eq('estado_proceso', 'ASESORANDO')
+    .eq('sede_id', sedeId);
 
   if (oError) {
     console.error("Error obteniendo oatcs activos para WFM:", oError);

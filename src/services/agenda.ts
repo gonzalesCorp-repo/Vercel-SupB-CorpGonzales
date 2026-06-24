@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { useAppStore } from '@/store/useAppStore';
 
 const supabase = createClient();
 
@@ -14,9 +15,13 @@ export interface Cita {
 }
 
 export async function obtenerCitas(): Promise<Cita[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) return [];
+
   const { data, error } = await supabase
     .from('citas')
     .select('*')
+    .eq('sede_id', sedeId)
     .order('fecha', { ascending: true })
     .order('hora_inicio', { ascending: true });
 
@@ -28,6 +33,8 @@ export async function obtenerCitas(): Promise<Cita[]> {
 }
 
 export async function crearCita(cita: Cita): Promise<boolean> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+
   const { error } = await supabase
     .from('citas')
     .insert([
@@ -36,7 +43,8 @@ export async function crearCita(cita: Cita): Promise<boolean> {
         fecha: cita.fecha,
         hora_inicio: cita.hora_inicio,
         hora_fin: cita.hora_fin,
-        notas: cita.notas
+        notas: cita.notas,
+        sede_id: sedeId
       }
     ]);
 
