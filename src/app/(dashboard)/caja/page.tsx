@@ -6,6 +6,7 @@ import { obtenerTicketsAbiertos, procesarPago, Factura } from '@/services/caja';
 import { OATC } from '@/services/recepcion';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { createClient } from '@/lib/supabase/client';
 
 export default function CajaPage() {
   const [tickets, setTickets] = useState<OATC[]>([]);
@@ -14,7 +15,8 @@ export default function CajaPage() {
   const [metodoPago, setMetodoPago] = useState('Efectivo');
   const [isProcessing, setIsProcessing] = useState(false);
   const [pagoExitoso, setPagoExitoso] = useState(false);
-
+  const supabase = createClient();
+  
   const cargarTickets = async () => {
     setIsLoading(true);
     const data = await obtenerTicketsAbiertos();
@@ -24,6 +26,15 @@ export default function CajaPage() {
 
   useEffect(() => {
     cargarTickets();
+    
+    // Realtime Suscripción
+    const channel = supabase.channel('realtime-caja')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarTickets())
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Calcular total de los bienes (punto de partida)

@@ -5,10 +5,12 @@ import { Map, AlertTriangle, Clock, RefreshCw } from 'lucide-react';
 import { obtenerMapaSalon, MapaSalonData } from '@/services/wfm';
 import { formatDistanceToNow, differenceInMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { createClient } from '@/lib/supabase/client';
 
 export default function WFMPage() {
   const [mapa, setMapa] = useState<MapaSalonData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const supabase = createClient();
 
   const cargarMapa = async () => {
     setIsLoading(true);
@@ -21,7 +23,17 @@ export default function WFMPage() {
     cargarMapa();
     // Actualización automática cada minuto para los semáforos
     const interval = setInterval(cargarMapa, 60000);
-    return () => clearInterval(interval);
+    
+    // Realtime Suscripción
+    const channel = supabase.channel('realtime-wfm')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarMapa())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ubicaciones' }, () => cargarMapa())
+      .subscribe();
+      
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Función para determinar el semáforo

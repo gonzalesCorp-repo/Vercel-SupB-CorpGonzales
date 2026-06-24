@@ -6,10 +6,13 @@ import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo } 
 import { OATC } from '@/services/recepcion';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { createClient } from '@/lib/supabase/client';
 
 export default function OperacionesPage() {
   const [tickets, setTickets] = useState<OATC[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const supabase = createClient();
+  
   
   // Para pruebas rápidas, asumimos que somos Juan Pérez. En la app real sacaremos esto del Auth Context.
   const AGENTE_NOMBRE_DEMO = 'Juan Pérez'; 
@@ -27,6 +30,15 @@ export default function OperacionesPage() {
 
   useEffect(() => {
     cargarMisTickets();
+    
+    // Realtime Suscripción
+    const channel = supabase.channel('realtime-operaciones')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarMisTickets())
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleTerminar = async (ticketId: string) => {

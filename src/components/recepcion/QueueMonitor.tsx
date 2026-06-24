@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { RefreshCw, Search, PauseCircle, PlayCircle, UserCheck } from 'lucide-react';
 import { obtenerTodosLosAgentes, cambiarEstadoAgente } from '@/services/agentes';
 import { Agente } from '@/services/recepcion';
+import { createClient } from '@/lib/supabase/client';
 
 export default function QueueMonitor() {
   const [agentes, setAgentes] = useState<Agente[]>([]);
@@ -12,6 +13,8 @@ export default function QueueMonitor() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedAgentId, setSelectedAgentId] = useState<string>('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const supabase = createClient();
 
   const cargarAgentes = async () => {
     setIsRefreshing(true);
@@ -23,13 +26,23 @@ export default function QueueMonitor() {
   useEffect(() => {
     cargarAgentes();
     
+    // Realtime Suscripción
+    const channel = supabase.channel('realtime-agentes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agentes' }, () => {
+        cargarAgentes();
+      })
+      .subscribe();
+      
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDropdown(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleRegistrarIngreso = async () => {

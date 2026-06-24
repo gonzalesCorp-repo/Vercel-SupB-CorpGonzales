@@ -6,10 +6,12 @@ import { obtenerOrdenesEnTranscurso } from '@/services/despacho';
 import { OATC } from '@/services/recepcion';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { createClient } from '@/lib/supabase/client';
 
 export default function DespachoPage() {
   const [ordenes, setOrdenes] = useState<OATC[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const supabase = createClient();
 
   const cargarOrdenes = async () => {
     setIsLoading(true);
@@ -20,6 +22,16 @@ export default function DespachoPage() {
 
   useEffect(() => {
     cargarOrdenes();
+    
+    // Realtime Suscripción
+    const channel = supabase.channel('realtime-despacho')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarOrdenes())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos_insumos' }, () => cargarOrdenes())
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
