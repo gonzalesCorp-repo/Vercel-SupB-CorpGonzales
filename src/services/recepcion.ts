@@ -23,6 +23,18 @@ export interface Agente {
   estado: string;
 }
 
+export interface OATC {
+  id?: string;
+  cliente_id?: string;
+  cliente_nombre: string;
+  agente_id?: string;
+  agente_nombre?: string;
+  punto_partida: any[];
+  estado_proceso?: string;
+  estado_pago?: string;
+  created_at?: string;
+}
+
 export async function buscarCliente(query: string): Promise<Cliente[]> {
   if (query.length < 3) return [];
   
