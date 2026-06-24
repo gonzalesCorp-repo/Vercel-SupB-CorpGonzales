@@ -2,14 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-// import { supabase } from '@/lib/supabase'; // We will use this when we wire up the real auth
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,25 +18,24 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // Placeholder logic for auth until Supabase Auth / Roles table is strictly defined
-      // For now, any non-empty login works to test the redirect
-      if (username && password) {
-        // Simulate network request
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        
-        // TODO: Replace with real Supabase authentication
-        // const { data, error } = await supabase.auth.signInWithPassword({
-        //   email: username, // or use custom user table
-        //   password,
-        // })
-        
-        // Redirect to a placeholder dashboard/reception page
+      if (email && password) {
+        const { data, error: authError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+
+        if (authError) {
+          throw authError;
+        }
+
+        // Redirect to dashboard/reception page
         router.push('/recepcion');
+        router.refresh(); // Refresh to update server components with new cookie
       } else {
-        setError('Por favor ingresa usuario y contraseña');
+        setError('Por favor ingresa correo electrónico y contraseña');
       }
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión');
+      setError(err.message || 'Error al iniciar sesión. Revisa tus credenciales.');
     } finally {
       setIsLoading(false);
     }
@@ -51,13 +51,14 @@ export default function LoginPage() {
         
         <form onSubmit={handleLogin}>
           <div className="mb-5">
-            <label className="block mb-2 text-sm font-medium text-gray-900">Usuario / Email</label>
-            <input 
-              type="text" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5" 
-              required 
+            <label className="block mb-2 text-sm font-medium text-gray-900">Correo Electrónico</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder="recepcion@gonzales.com"
+              required
             />
           </div>
           <div className="mb-6">
