@@ -1,0 +1,164 @@
+<script>
+    function oatcState() {
+        return {
+            // Nueva OATC (Split View)
+            oatcForm: { cliente_nombre: '', cliente_id: '', punto_partida: [], agente_id: '', agente_nombre: '' },
+            clientesSugeridos: [],
+            catalogoBienes: [],
+            catalogoQuery: '',
+            catalogoFiltroTipo: 'todos', // 'todos', 'servicio', 'producto'
+            catalogoFiltrado: [],
+            mostrarDropdownCatalogo: false,
+            // Modal de Catálogo Separado
+            modalCatalogoAbierto: null, // 'servicio' | 'producto' | null
+            modalCatalogoQuery: '',
+            modalCategoriaSeleccionada: 'todas',
+            categoriasCatalogoModal: [],
+            
+            isLoadingOatc: false,
+            msgOatc: '',
+            
+            async cargarCatalogoBienes() {
+                const res = await this.llamarServidor('obtenerServiciosDisponibles');
+                if (res.status === 'success') {
+                    // Pre-procesar JSON de atributos
+                    this.catalogoBienes = res.data.map(b => {
+                        if(b.atributos_producto && typeof b.atributos_producto === 'string') {
+                            try { b.atributos_producto_obj = JSON.parse(b.atributos_producto); } catch(e) {}
+                        }
+                        if(b.atributos_servicio && typeof b.atributos_servicio === 'string') {
+                            try { b.atributos_servicio_obj = JSON.parse(b.atributos_servicio); } catch(e) {}
+                        }
+                        return b;
+                    });
+                    this.filtrarCatalogo();
+                }
+            },
+            
+            abrirModalCatalogo(tipo) {
+                this.modalCatalogoAbierto = tipo;
+                this.modalCatalogoQuery = '';
+                this.modalCategoriaSeleccionada = 'todas';
+                
+                // Extraer categorías únicas
+                const categorias = new Set();
+                this.catalogoBienes.filter(b => {
+                    const t = b.tipo_bien ? b.tipo_bien.toString().toLowerCase() : '';
+                    return t === tipo;
+                }).forEach(b => {
+                    if (b.categoria) categorias.add(b.categoria.toString().toLowerCase().trim());
+                });
+                this.categoriasCatalogoModal = Array.from(categorias).sort();
+            },
+            
+            get bienesModalFiltrados() {
+                const tipo = this.modalCatalogoAbierto;
+                if (!tipo) return [];
+                
+                const q = this.modalCatalogoQuery.toLowerCase();
+                const catSel = this.modalCategoriaSeleccionada;
+                
+                return this.catalogoBienes.filter(b => {
+                    const tipoBienDB = b.tipo_bien ? b.tipo_bien.toString().toLowerCase() : '';
+                    if (tipoBienDB !== tipo) return false;
+                    
+                    const nombre = b.nombre ? b.nombre.toString().toLowerCase() : '';
+                    const cat = b.categoria ? b.categoria.toString().toLowerCase().trim() : '';
+                    
+                    if (catSel !== 'todas' && cat !== catSel) return false;
+                    
+                    if (q !== '') {
+                        let matchMarca = false;
+                        if (b.atributos_producto_obj && b.atributos_producto_obj.marca) {
+                            matchMarca = b.atributos_producto_obj.marca.toString().toLowerCase().includes(q);
+                        }
+                        const matchText = nombre.includes(q) || cat.includes(q) || matchMarca;
+                        if (!matchText) return false;
+                    }
+                    
+                    return true;
+                });
+            },
+            
+            setFiltroTipo(tipo) {
+                this.catalogoFiltroTipo = tipo;
+                this.filtrarCatalogo();
+            },
+
+            filtrarCatalogo() {
+                const q = this.catalogoQuery.toLowerCase();
+                console.log(`[DEBUG] Filtrando catálogo con query: '${q}', tipo: '${this.catalogoFiltroTipo}'`);
+                this.catalogoFiltrado = this.catalogoBienes.filter(b => {
+                    const nombre = b.nombre ? b.nombre.toString().toLowerCase() : '';
+                    const cat = b.categoria ? b.categoria.toString().toLowerCase() : '';
+                    const matchText = nombre.includes(q) || cat.includes(q);
+                    
+                    let matchTipo = true;
+                    if (this.catalogoFiltroTipo === 'servicio') {
+                        matchTipo = b.tipo_bien === 'servicio';
+                    } else if (this.catalogoFiltroTipo === 'producto') {
+                        matchTipo = b.tipo_bien === 'producto';
+                    }
+
+                    return matchText && matchTipo;
+                });
+            },
+
+            agregarAlPuntoPartida(bien) {
+                console.log("[DEBUG] Agregando bien al punto de partida:", bien);
+                this.oatcForm.punto_partida.push({
+                    id: bien.bien_id,
+                    nombre: bien.nombre,
+                    categoria: bien.categoria
+                });
+            },
+
+            async buscarClienteDebounced() {
+                if(this.oatcForm.cliente_nombre.length < 3) {
+                    this.clientesSugeridos = [];
+                    return;
+                }
+                console.log(`[DEBUG] Buscando sugerencias para cliente: '${this.oatcForm.cliente_nombre}'`);
+                const res = await this.llamarServidor('buscarCliente', this.oatcForm.cliente_nombre);
+                if(res.status === 'success') this.clientesSugeridos = res.data;
+            },
+
+            seleccionarCliente(cli) {
+                console.log("[DEBUG] Cliente seleccionado:", cli);
+                this.oatcForm.cliente_id = cli.usuario_id;
+                this.oatcForm.cliente_nombre = cli.nombre;
+                this.clientesSugeridos = [];
+            },
+
+            async crearOatcUI() {
+                console.log("[DEBUG] Iniciando crearOatcUI con form:", JSON.parse(JSON.stringify(this.oatcForm)));
+                this.isLoadingOatc = true;
+                this.msgOatc = '';
+                
+                // Si se seleccionó agente, sacar su nombre
+                if(this.oatcForm.agente_id) {
+                    const ag = this.colaAgentes.find(a => a.id === this.oatcForm.agente_id);
+                    if(ag) this.oatcForm.agente_nombre = ag.nombre;
+                    console.log("[DEBUG] Agente asignado a la OATC:", this.oatcForm.agente_nombre);
+                } else {
+                    console.log("[DEBUG] OATC sin agente, enviando a Lista de Espera General");
+                }
+                
+                const res = await this.llamarServidor('crearOATC', this.oatcForm);
+                console.log("[DEBUG] Respuesta del servidor a crearOATC:", res);
+                
+                if(res.status === 'success') {
+                    this.msgOatc = "¡Atención generada exitosamente!";
+                    // Limpiar formulario
+                    this.oatcForm = { cliente_nombre: '', cliente_id: '', punto_partida: [], agente_id: '', agente_nombre: '' };
+                    this.cargarCola(); // Refrescar cola
+                    setTimeout(() => {
+                        this.msgOatc = '';
+                        this.cambiarVista('view_monitor_cola');
+                    }, 2000);
+                }
+                this.isLoadingOatc = false;
+            }
+        };
+    }
+</script>

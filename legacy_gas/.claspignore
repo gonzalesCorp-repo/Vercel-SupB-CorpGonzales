@@ -1,0 +1,16 @@
+**/**
+!appsscript.json
+!Code.gs
+!Controller_*.gs
+!Index.html
+!View_Login.html
+!View_Layout.html
+!View_Desarrollo.html
+!View_Admin.html
+!View_Recepcion.html
+!View_Caja.html
+!View_Despacho.html
+!View_Operaciones.html
+!View_WFM.html
+!Part_*.html
+!Script_*.html

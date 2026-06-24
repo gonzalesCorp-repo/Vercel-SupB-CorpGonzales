@@ -1,0 +1,179 @@
+              <!-- ========================================== -->
+              <!-- VISTAS: WFM & CAPACIDAD -->
+              <!-- ========================================== -->
+
+              <!-- TIPOS DE ESTACIÓN -->
+              <div x-show="currentView === 'view_wfm_tipos'" style="display: none;" x-transition>
+                 <div class="flex justify-between items-center mb-6">
+                     <h2 class="text-2xl font-bold text-gray-800">Catálogo de Tipos de Estación</h2>
+                     <button @click="cargarTiposEstacionUI" class="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg text-gray-700 font-medium text-sm transition">Actualizar</button>
+                 </div>
+
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                     <!-- Formulario -->
+                     <div class="col-span-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit">
+                         <h3 class="text-lg font-bold text-gray-800 mb-4">Nuevo Tipo</h3>
+                         <form @submit.prevent="guardarTipoEstacionUI">
+                             <div class="mb-4">
+                                 <label class="block mb-2 text-sm font-medium text-gray-900">Nombre del Tipo</label>
+                                 <input type="text" x-model="nuevoTipoEstacion.nombre_tipo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" placeholder="Ej. Silla de Barbería" required>
+                             </div>
+                             <div class="mb-4">
+                                 <label class="block mb-2 text-sm font-medium text-gray-900">Icono Visual</label>
+                                 <select x-model="nuevoTipoEstacion.icono_referencial" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+                                     <option value="espejo">Espejo (Tocadores)</option>
+                                     <option value="gota">Gota (Lavacabezas/Químicos)</option>
+                                     <option value="silla">Silla (Manicure/Espera)</option>
+                                     <option value="sillon">Sillón (Pedicure/Barbería)</option>
+                                     <option value="camilla">Camilla (Cosmiatría/Masajes)</option>
+                                 </select>
+                             </div>
+                             <button type="submit" class="w-full text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg text-sm px-5 py-2.5">Crear Tipo</button>
+                         </form>
+                     </div>
+
+                     <!-- Tabla -->
+                     <div class="col-span-1 md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                         <table class="w-full text-sm text-left text-gray-500">
+                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                                 <tr>
+                                     <th class="px-6 py-3">Nombre</th>
+                                     <th class="px-6 py-3">Icono (SVG)</th>
+                                     <th class="px-6 py-3 text-right">Acciones</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 <template x-for="tipo in tiposEstacion" :key="tipo.tipo_id">
+                                     <tr class="bg-white border-b hover:bg-gray-50">
+                                         <td class="px-6 py-4 font-bold text-gray-900" x-text="tipo.nombre_tipo"></td>
+                                         <td class="px-6 py-4 text-gray-400 capitalize" x-text="tipo.icono_referencial"></td>
+                                         <td class="px-6 py-4 text-right">
+                                            <button class="text-red-500 hover:text-red-700 font-medium text-xs">Eliminar</button>
+                                         </td>
+                                     </tr>
+                                 </template>
+                             </tbody>
+                         </table>
+                         <div x-show="tiposEstacion.length === 0" class="p-4 text-center text-gray-500">No hay tipos creados.</div>
+                     </div>
+                 </div>
+              </div>
+
+              <!-- GESTIÓN DE ÁREAS -->
+              <div x-show="currentView === 'view_wfm_areas'" style="display: none;" x-transition>
+                 <div class="flex justify-between items-center mb-6">
+                     <h2 class="text-2xl font-bold text-gray-800">Gestión de Áreas del Salón</h2>
+                     <button @click="cargarWFM_UI" class="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg text-gray-700 font-medium text-sm transition">Actualizar</button>
+                 </div>
+                 
+                 <!-- Agregar Área -->
+                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                     <h3 class="text-lg font-bold text-gray-800 mb-4">Agregar Nueva Área</h3>
+                     <form @submit.prevent="alert('La adición a la base de datos simulada será implementada pronto.')" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                         <div>
+                             <label class="block mb-2 text-sm font-medium text-gray-900">Nombre Personalizado</label>
+                             <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" placeholder="Ej. Zona VIP">
+                         </div>
+                         <div>
+                             <label class="block mb-2 text-sm font-medium text-gray-900">Tipo de Estación</label>
+                             <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+                                 <template x-for="t in tiposEstacion" :key="t.tipo_id">
+                                    <option :value="t.nombre_tipo" x-text="t.nombre_tipo"></option>
+                                 </template>
+                             </select>
+                         </div>
+                         <div>
+                             <label class="block mb-2 text-sm font-medium text-gray-900">Capacidad (Cantidad)</label>
+                             <input type="number" min="1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+                         </div>
+                         <div>
+                             <button type="submit" class="w-full text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5">Añadir Área</button>
+                         </div>
+                     </form>
+                 </div>
+
+                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                     <template x-if="salonActual">
+                         <div>
+                             <h3 class="text-lg font-bold text-primary-700 mb-4" x-text="salonActual.nombre_salon"></h3>
+                             <div class="overflow-x-auto">
+                                 <table class="w-full text-sm text-left text-gray-500">
+                                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                                         <tr>
+                                             <th class="px-6 py-3">Nombre Área</th>
+                                             <th class="px-6 py-3">Tipo Estación</th>
+                                             <th class="px-6 py-3">Capacidad</th>
+                                             <th class="px-6 py-3 text-right">Acciones</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody>
+                                         <template x-for="zona in salonActual.zonas_fisicas" :key="zona.zona_id">
+                                             <tr class="bg-white border-b hover:bg-gray-50">
+                                                 <td class="px-6 py-4 font-medium text-gray-900" x-text="zona.nombre"></td>
+                                                 <td class="px-6 py-4 uppercase text-xs font-semibold text-gray-400" x-text="zona.tipo"></td>
+                                                 <td class="px-6 py-4 font-bold text-gray-700" x-text="zona.cantidad"></td>
+                                                 <td class="px-6 py-4 text-right">
+                                                    <button class="text-red-500 hover:text-red-700 font-medium text-xs ml-3">Eliminar</button>
+                                                 </td>
+                                             </tr>
+                                         </template>
+                                     </tbody>
+                                 </table>
+                             </div>
+                         </div>
+                     </template>
+                     <div x-show="!salonActual && !isLoadingWfm" class="text-center p-8 text-gray-500">
+                        No hay datos del salón.
+                     </div>
+                 </div>
+              </div>
+
+              <div x-show="currentView === 'view_wfm_mapa'" style="display: none;" x-transition>
+                 <div class="flex justify-between items-center mb-6">
+                     <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                         <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                         Mapa del Salón en Vivo
+                     </h2>
+                     <button @click="cargarWFM_UI" class="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg text-gray-700 font-medium text-sm flex items-center shadow-sm transition">
+                         Actualizar Mapa
+                     </button>
+                 </div>
+                 
+                 <template x-if="salonActual">
+                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                         <!-- Iterar sobre zonas físicas del salón -->
+                         <template x-for="zona in salonActual.zonas_fisicas" :key="zona.zona_id">
+                             <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col">
+                                 <div class="flex justify-between items-start mb-4 border-b pb-3">
+                                     <div>
+                                         <h3 class="font-bold text-gray-800 text-lg leading-tight" x-text="zona.nombre"></h3>
+                                        <div class="mt-1 flex items-center text-xs text-gray-500">
+                                            <span class="uppercase font-semibold tracking-wide mr-2" x-text="zona.tipo"></span>
+                                        </div>
+                                     </div>
+                                     <span class="bg-gray-100 text-gray-800 text-xs font-bold px-2 py-1 rounded" x-text="'Capacidad: ' + zona.cantidad"></span>
+                                 </div>
+                                 
+                                 <!-- Renderear los "asientos" o "estaciones" visuales -->
+                                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-auto pt-2">
+                                     <template x-for="i in Array.from({ length: zona.cantidad })">
+                                         <div class="border border-green-200 bg-green-50 rounded-lg p-3 text-center cursor-pointer hover:bg-green-100 transition relative group shadow-sm flex flex-col items-center justify-center h-20">
+                                             <svg class="w-6 h-6 text-green-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                             <span class="text-xs font-bold text-green-700">Libre</span>
+                                             
+                                             <!-- Tooltip simulado -->
+                                             <div class="hidden group-hover:flex absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1.5 rounded shadow-lg z-10 whitespace-nowrap font-medium">
+                                                Asignar Ticket / Cliente
+                                             </div>
+                                         </div>
+                                     </template>
+                                 </div>
+                             </div>
+                         </template>
+                     </div>
+                 </template>
+                 <div x-show="!salonActual && !isLoadingWfm" class="text-center p-12 bg-white rounded-xl border border-dashed border-gray-300 text-gray-500 mt-6">
+                     <p class="mb-2 font-medium">No se encontró configuración física para este salón.</p>
+                     <p class="text-sm">Ve a "Gestión de Áreas" para configurarlo o ejecuta <code>poblarDatosPruebaWFM()</code> en tu editor.</p>
+                 </div>
+              </div>

@@ -1,0 +1,101 @@
+<script>
+    function globalState() {
+        return {
+            isLoggedIn: false,
+            currentUser: null,
+            loginForm: { username: '', password: '' },
+            loginError: '',
+            isLoading: false,
+            sidebarOpen: window.innerWidth >= 640,
+            currentView: 'view_clientes', // Vista por defecto
+            
+            // Helper para verificar roles y accesos
+            tienePermiso(permisoRequerido) {
+                if (!this.currentUser || !this.currentUser.rol) return false;
+                return this.currentUser.rol.includes('admin') || this.currentUser.rol.includes(permisoRequerido);
+            },
+
+            // Workspace Drag & Drop
+            panelIzquierdo: 'monitor_cola',
+            panelDerecho: 'nueva_oatc',
+            draggedItem: null,
+
+            onDragStart(widgetId) {
+                this.draggedItem = widgetId;
+            },
+            onDrop(panel) {
+                console.log(`[DEBUG] Drop en panel: ${panel}. Item: ${this.draggedItem}`);
+                if (this.draggedItem) {
+                    if (panel === 'izquierdo') this.panelIzquierdo = this.draggedItem;
+                    if (panel === 'derecho') this.panelDerecho = this.draggedItem;
+                    this.draggedItem = null;
+                    if (this.panelIzquierdo === 'monitor_cola' || this.panelDerecho === 'monitor_cola') {
+                        console.log("[DEBUG] Actualizando Monitor Cola después de drop.");
+                        this.cargarCola();
+                    }
+                }
+            },
+
+            llamarServidor(funcion, ...args) {
+                return new Promise((resolve, reject) => {
+                    if (typeof google === 'undefined') {
+                        console.warn("Entorno local simulado");
+                        resolve({ status: "error", message: "Entorno local simulado" });
+                        return;
+                    }
+                    google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[funcion](...args);
+                });
+            },
+            
+            async login() {
+                console.log("[DEBUG] Login con:", this.loginForm.username);
+                this.isLoading = true;
+                this.loginError = '';
+                try {
+                    const res = await this.llamarServidor('validarLogin', this.loginForm.username, this.loginForm.password);
+                    if(res.status === 'success') {
+                        this.currentUser = res.data;
+                        this.isLoggedIn = true;
+                        this.actualizarMonitorCola(); // Carga datos iniciales de Recepción y Agentes
+                        this.cargarCatalogoBienes();
+                    } else {
+                        this.loginError = res.message;
+                    }
+                } catch (error) {
+                    this.loginError = 'Error de conexión con el servidor.';
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            
+            logout() {
+                this.isLoggedIn = false;
+                this.currentUser = null;
+                this.loginForm.password = '';
+            },
+
+            cambiarVista(vista) {
+                this.currentView = vista;
+                if (window.innerWidth < 640) this.sidebarOpen = false; // cierra en móviles
+                if(vista === 'view_monitor_cola' || vista === 'view_recepcion_workspace') {
+                    this.actualizarMonitorCola();
+                }
+                if(vista === 'view_wfm_mapa' || vista === 'view_wfm_areas') {
+                    this.cargarWFM_UI();
+                    this.cargarTiposEstacionUI();
+                }
+                if(vista === 'view_wfm_tipos') this.cargarTiposEstacionUI();
+            }
+        };
+    }
+
+    // PUNTO DE ENTRADA GLOBAL PARA ALPINE
+    function appData() {
+        return {
+            ...globalState(),
+            ...recepcionState(),
+            ...oatcState(),
+            ...wfmState()
+        };
+    }
+</script>

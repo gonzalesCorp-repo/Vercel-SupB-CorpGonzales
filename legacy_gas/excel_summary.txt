@@ -1,0 +1,257 @@
+=== Registros Admin.xlsx ===
+Sheet: Usuarios
+                       Nombre           Correo (Gmail)    Rol     PIN
+0           Cristian Gonzales      crial0810@gmail.com  ADMIN  3010.0
+1               Nombre Cajero  correo-cajero@gmail.com   CAJA     NaN
+2                 Tomás Ramos                      NaN  CAJA1  2005.0
+3                Ariana Laiza                      NaN  CAJA2  1212.0
+4  Zendel Adriano Vilca Laiza                      NaN  CAJA3  2143.0
+
+Sheet: Agentes
+  Fecha Registro  Ficha    Colaboradores    Relación Laboral Salón HR entrada HR salida Día Descanso  Unnamed: 8  DNI  Estado Especialidad  Valor.especialidad         Nickname  Celular  Genero
+0     2022-01-01      1   Vidal Gonzales  Agente dependiente    RD          -         -      domingo         NaN  NaN  Activo    Estilismo                   0   Vidal Gonzales      NaN     NaN
+1     2022-01-01      2  Vilma Chuquilin  Agente dependiente    RD   11:00 am   8:30 pm       jueves         NaN  NaN  Activo    Estilismo                   0  Vilma Chuquilin      NaN     NaN
+2     2022-01-01      3    Koko Vascones  Agente dependiente    RD    9:00 am   8:00 pm        lunes         NaN  NaN  Activo    Estilismo                   0    Koko Vascones      NaN     NaN
+3     2022-01-01      4     Ángel Romero  Agente dependiente    RD    9:00 am   8:00 pm       martes         NaN  NaN  Activo    Estilismo                   0     Ángel Romero      NaN     NaN
+4     2022-01-01      5  Eduard Gonzales  Agente dependiente    RD    9:00 am   8:00 pm    miercoles         NaN  NaN  Activo    Estilismo                   0  Eduard Gonzales      NaN     NaN
+
+Sheet: Catalogo servicios
+   #ID          Descripción 1  Precio Venta Unitario Aproximado 2 Categoría 3            Subscategoría 4  Costo 5  % Comisión  Procedimiento  Especialistas
+0    1                Alisado                                 400   Estilismo  Alisados, laceados, botox  Directo       0.375            NaN            NaN
+1    2       Baño de Keratina                                 150   Estilismo  Alisados, laceados, botox  Directo       0.375            NaN            NaN
+2    3          botox capilar                                 120   Estilismo  Alisados, laceados, botox  Directo       0.375            NaN            NaN
+3    4  Laceado cabello corto                                 190   Estilismo  Alisados, laceados, botox  Directo       0.375            NaN            NaN
+4    5  Laceado cabello largo                                 450   Estilismo  Alisados, laceados, botox  Directo       0.375            NaN            NaN
+
+Sheet: Catalogo productos
+    SKU 1    TIPO 2      UNIDAD 3  STOCK 4                                              DESCRIPCION 5  DESCRIPCION_DETALLADA 6 MONEDA 7  TIPO AFECTACION 8  PRECIO UNITARIO 9  VALOR UNITARIO 10  COSTO UNITARIO 11  CODIGO BARRA 12   CATEGORIA 13
+0  P00001  PRODUCTO  Unidad(Bien)       20                              Acondicionador AGI MAX x250ml                      NaN      PEN                 10                 65                  0                  0              NaN        AGI MAX
+1  P00002  PRODUCTO  Unidad(Bien)       20                              Ampolla keratina AGI MAX x7ml                      NaN      PEN                 10                 35                  0                  0              NaN        AGI MAX
+2  P00003  PRODUCTO  Unidad(Bien)       20           Shampoo Daily Moisturizing  AMERICAN CREW x250ml                      NaN      PEN                 10                 75                  0                  0              NaN  AMERICAN CREW
+3  P00004  PRODUCTO  Unidad(Bien)       20                Shampoo Anti Dandruff  AMERICAN CREW x250ml                      NaN      PEN                 10                 75                  0                  0              NaN  AMERICAN CREW
+4  P00005  PRODUCTO  Unidad(Bien)       20  Shampoo Power Cleanser Style Remover AMERICAN CREW x250ml                      NaN      PEN                 10                 75                  0                  0              NaN  AMERICAN CREW
+
+Sheet: Catálogo insumos
+  Proveedor                  Marca    Línea Nombre Producto      Tipo Presentacion Unidad medida     Costo  Observación Doc. Ingreso   Num Documento  Unnamed: 11  Unnamed: 12
+0   General               Genérico  Pestaña     Pestaña 1x1  Pestañas         50GR            GR  S/.10.00          NaN      FACTURA  FA001-00012311            1            1
+1    LOreal  L'Oréal Professionnel  Majirel     Majirel 2,1     Tinte         50GR            GR  S/.10.00          NaN      FACTURA  FA001-00012311            1            0
+2    LOreal  L'Oréal Professionnel  Majirel    Majirel 6,11     Tinte         50GR            GR  S/.10.00          NaN      FACTURA  FA001-00012311            1            0
+3    LOreal  L'Oréal Professionnel  Majirel     Majirel 8,1     Tinte         50GR            GR  S/.10.00          NaN      FACTURA  FA001-00012311            1            0
+4    LOreal  L'Oréal Professionnel  Majirel    Majirel 5,64     Tinte         50GR            GR  S/.10.00          NaN      FACTURA  FA001-00012311            1            0
+
+Sheet: Recetas
+Empty DataFrame
+Columns: [Servicio - Receta, Insumo Requerido, Cantidad Estándar, Costo]
+Index: []
+
+Sheet: Catálogo JorgeCh
+   Nro.        Codigo Barra Descripcion Unnamed: 3  Unnamed: 4 Unnamed: 5  Unnamed: 6  Unnamed: 7  Unnamed: 8  Unnamed: 9  Unnamed: 10  Activo        Unnamed: 12      Descripcion.1  Activo.1
+0     2  789601000000000000     PESTAÑA        1X1          50         GR         NaN         NaN         NaN         NaN          NaN    True   PESTAÑA 1X1 50GR   PESTAÑA 1X1 50GR      True
+1     3  789601000000000000     MAJIREL        2,1          50         GR         NaN         NaN         NaN         NaN          NaN    True   MAJIREL 2,1 50GR   MAJIREL 2,1 50GR      True
+2     4  789601000000000000     MAJIREL       6,11          50         GR         NaN         NaN         NaN         NaN          NaN    True  MAJIREL 6,11 50GR  MAJIREL 6,11 50GR      True
+3     5  789601000000000000     MAJIREL        8,1          50         GR         NaN         NaN         NaN         NaN          NaN    True   MAJIREL 8,1 50GR   MAJIREL 8,1 50GR      True
+4     6  789601000000000000     MAJIREL       5,64          50         GR         NaN         NaN         NaN         NaN          NaN    True  MAJIREL 5,64 50GR  MAJIREL 5,64 50GR      True
+
+Sheet: Pendientes_Liquidacion
+      ID_Autorización     Fecha Solicitud             Agente              Rango Fechas  Monto a Pagar Estado (Pendiente/Pagado)       Autorizado Por          Fecha del Pago
+0  AUTH-20260103-2348 2026-01-03 23:48:00       Cocó Pacheco  2026-01-03 al 2026-01-03          272.5                    Pagado  crial0810@gmail.com 2026-01-04 20:42:32.414
+1  AUTH-20260103-2355 2026-01-03 23:55:00    Eduard Gonzales  2026-01-03 al 2026-01-03          252.4                    Pagado  crial0810@gmail.com 2026-01-04 20:42:46.201
+2  AUTH-20260104-0001 2026-01-04 00:01:00  Felina Verastegui  2026-01-03 al 2026-01-03          274.9                    Pagado  crial0810@gmail.com 2026-01-04 20:43:00.954
+3  AUTH-20260104-0626 2026-01-04 06:26:00       Gladis Ramos  2026-01-03 al 2026-01-03           30.0                    Pagado  crial0810@gmail.com 2026-01-05 20:29:35.700
+4  AUTH-20260104-0632 2026-01-04 00:00:00     Jessica Huaman  2026-01-03 al 2026-01-03          211.5                    Pagado  crial0810@gmail.com 2026-01-04 20:43:16.466
+
+Sheet: Historico_Cierres
+                    Fecha              Usuario   Fondo  VentasEf  VentasOtros  IngresosExtra  Egresos  Esperado    Real    Diferencia           Notas                                                                                                                                                                                                                                                                                                                                                                     DetalleBilletes   TC
+0 2025-12-29 23:23:15.350  crial0810@gmail.com  1240.0        40        370.0            462     12.0    1730.0  1728.0 -2.000000e+00  nota prueba GA  {"soles":[{"d":"200","c":"1"},{"d":"100","c":"11"},{"d":"50","c":"1"},{"d":"20","c":"11"},{"d":"10","c":"11"},{"d":"5","c":"2"},{"d":"2","c":"2"},{"d":"1","c":"2"},{"d":"0.5","c":"2"},{"d":"0.2","c":"2"},{"d":"0.1","c":"2"}],"dolares":[{"d":"100","c":"0"},{"d":"50","c":"0"},{"d":"20","c":"0"},{"d":"10","c":"0"},{"d":"5","c":"01"},{"d":"2","c":"01"},{"d":"1","c":"1"}]}  3.8
+1 2026-01-02 23:56:29.001  crial0810@gmail.com  2109.4       930          NaN           2860   2699.2    3200.2  3200.2  4.547474e-13             NaN                                                                                                                                                                                                                                                                                                                                                                                 NaN  NaN
+2 2026-01-12 21:44:19.474                  NaN  3003.7      1260          NaN              0    191.5    4072.2     0.0 -4.072200e+03             NaN                                                                                                                                                                                                                                                                                                                                                                                 NaN  NaN
+3 2026-01-14 22:01:41.424                  NaN  1158.2      1065          NaN              0    310.0    1913.2     0.0 -1.913200e+03             NaN                                                                                                                                                                                                                                                                                                                                                                                 NaN  NaN
+4 2026-01-15 22:09:22.576                  NaN  2526.3      1353          NaN              0   1382.6    2496.7     0.0 -2.496700e+03             NaN                                                                                                                                                                                                                                                                                                                                                                                 NaN  NaN
+
+Sheet: Log del modulo
+  se supone que aquí iría el log del módulo, qué usuarios consultan e interactúan con el módulo para poder rastrear errores, corregirlos y mejorar también el desempeño del programa Unnamed: 1 Unnamed: 2 Unnamed: 3       Unnamed: 4
+0                                                                                                                                                                                NaN        NaN        NaN        NaN              NaN
+1                                                                                                                                                                                NaN        NaN        NaN        NaN              NaN
+2                                                                                                                                                                              Fecha       Hora        Día    Usuario  Hoja Modificada
+
+Sheet: Configuracion
+Empty DataFrame
+Columns: [Medios de pago, Categoría Servicio, Subcategoría Servicio, Marca Producto, Línea Producto]
+Index: []
+
+=== Registros ERP VentaRD.xlsx ===
+Sheet: BBDD_Productos
+      SKU      Marca      Línea              Nombre Presentacion  Precio   Proveedor  Stock Tienda  Stock Principal  Costo Unitario Ubicación en Almacén  Stock Mínimo  Precio Min
+0  P00001  Kerastase  Nutritive          Bain Satin        250ml     110  CARGA_2025            89                4           74.34          POR_DEFINIR             5          98
+1  P00002  Kerastase  Nutritive    Bain Satin Riche        250ml     110  CARGA_2025            95               10           74.34          POR_DEFINIR             5          98
+2  P00003  Kerastase  Nutritive          Lait Vital        200ml     110  CARGA_2025            90                0           99.12          POR_DEFINIR             5          98
+3  P00004  Kerastase  Nutritive        Masquintense        200ml     110  CARGA_2025            86                0          134.50          POR_DEFINIR             5          98
+4  P00005  Kerastase  Nutritive  Masquintense Riche        200ml     110  CARGA_2025            87                0          134.50          POR_DEFINIR             5          98
+
+Sheet: Kardex_Movimientos
+         ID_MOVIMIENTO              FECHA_HORA  TIPO_MOVIMIENTO     SKU                                DESCRIPCION  CANTIDAD                  ORIGEN            DESTINO     DOCUMENTO_REF  COSTO_UNITARIO
+0  MOV-1770220011976-0 2026-02-04 10:46:51.976  INGRESO_FACTURA  P00650                    Hidratante  Kids Equave        24  PROVEEDOR: 20510643306  ALMACEN_PRINCIPAL         F014-5672          24.195
+1  MOV-1770220061014-0 2026-02-04 10:47:41.014         TRASPASO  P00650                    Hidratante  Kids Equave        24       ALMACEN_PRINCIPAL     ALMACEN_TIENDA  TR-1770220049745           0.000
+2    MOV-1771680189110 2026-02-21 08:23:09.110            VENTA  P00051                        Bain Curl Manifesto         1          ALMACEN_TIENDA            CLIENTE     BY03-00003747          82.600
+3    MOV-1771868152130 2026-02-23 12:35:52.130            VENTA  P00023  Elixir Ultime Originale Dorado (Repuesto)         1          ALMACEN_TIENDA            CLIENTE       BS-00003944         112.100
+4    MOV-1771869168802 2026-02-23 12:52:48.802            VENTA  P00395                       Shampoo Nutri Enrich         1          ALMACEN_TIENDA            CLIENTE       BS-00003945          41.400
+
+Sheet: Ventas_Tickets
+          Ticket                   Fecha                                                     Cliente       Asesor  Subtotal  Total      Estado                  Expectativas   Emisor Método Pago Tipo Doc        Nro Doc  Notas_Pago
+0  BY03-00003747 2026-02-21 08:23:09.110  Cristian Gonzales Zegarra | DNI: 74074559 | Cel: 952803788          NaN       110    110  COMPLETADO  Sin expectativas registradas       VG    EFECTIVO   Boleta  BY03-00003747         NaN
+1    BS-00003944 2026-02-23 12:35:52.130                                                     cliente  Dilma Laiza       170    170  COMPLETADO  Sin expectativas registradas  Anselmo     TARJETA   Boleta    BS-00003944         NaN
+2    BS-00003945 2026-02-23 12:52:48.802                                                        rosa  Dilma Laiza       455    455  COMPLETADO  Sin expectativas registradas  Anselmo     TARJETA   Boleta    BS-00003945         NaN
+3    BS-00003946 2026-02-23 12:56:48.607                                                        rosa  Dilma Laiza       190    190  COMPLETADO  Sin expectativas registradas  Anselmo     TARJETA   Boleta    BS-00003946         NaN
+4    BS-00003947 2026-02-23 13:49:24.474                                                        rosa  Dilma Laiza        65     65  COMPLETADO  Sin expectativas registradas  Anselmo     TARJETA   Boleta    BS-00003947         NaN
+
+Sheet: Ventas_Detalle
+                    Fecha         Ticket     SKU                                   Producto  Cant  P. Unit  Subtotal
+0 2026-02-21 08:23:09.110  BY03-00003747  P00051                        Bain Curl Manifesto     1      110       110
+1 2026-02-23 12:35:52.130    BS-00003944  P00023  Elixir Ultime Originale Dorado (Repuesto)     1      170       170
+2 2026-02-23 12:52:48.802    BS-00003945  P00395                       Shampoo Nutri Enrich     1       70        70
+3 2026-02-23 12:52:48.802    BS-00003945  P00413                             Shampoo Fusion     1      165       165
+4 2026-02-23 12:52:48.802    BS-00003945  P00604                       Shampoo Post Quimica     1      110       110
+
+Sheet: Demanda_Expectativas
+                    Fecha                                                     Cliente       Asesor        Expectativas_Cosmetica  Expectativas_Forma Estado_Venta (aquí pondremos "Interés sin compra")
+0 2026-02-21 08:23:09.110  Cristian Gonzales Zegarra | DNI: 74074559 | Cel: 952803788          NaN  Sin expectativas registradas                 NaN                    Venta Referencia: BY03-00003747
+1 2026-02-23 12:35:52.130                                                     cliente  Dilma Laiza  Sin expectativas registradas                 NaN                      Venta Referencia: BS-00003944
+2 2026-02-23 12:52:48.802                                                        rosa  Dilma Laiza  Sin expectativas registradas                 NaN                      Venta Referencia: BS-00003945
+3 2026-02-23 12:56:48.607                                                        rosa  Dilma Laiza  Sin expectativas registradas                 NaN                      Venta Referencia: BS-00003946
+4 2026-02-23 13:49:24.474                                                        rosa  Dilma Laiza  Sin expectativas registradas                 NaN                      Venta Referencia: BS-00003947
+
+Sheet: Estrucutra de BD
+   Unnamed: 0          Unnamed: 1         Unnamed: 2    Unnamed: 3                                Unnamed: 4  Unnamed: 5  Unnamed: 6  Unnamed: 7  Unnamed: 8      Unnamed: 9        Unnamed: 10   Unnamed: 11                                       Unnamed: 12
+0         NaN  Kardex_Movimientos                NaN           NaN                                       NaN         NaN         NaN         NaN         NaN  Ventas_Detalle                NaN           NaN                                               NaN
+1         NaN             Columna  Nombre Encabezado  Tipo de Dato                      Descripción / Origen         NaN         NaN         NaN         NaN         Columna  Nombre Encabezado  Tipo de Dato                                       Descripción
+2         NaN                   A      ID_MOVIMIENTO         Texto       Generado (ej: MOV-1001) o Timestamp         NaN         NaN         NaN         NaN               A              Fecha           NaN                                               NaN
+3         NaN                   B         FECHA_HORA         Fecha                   new Date() del servidor         NaN         NaN         NaN         NaN               B          ID_TICKET         Texto  Vincula este producto con la hoja Ventas_Tickets
+4         NaN                   C    TIPO_MOVIMIENTO         Texto  VENTA, INGRESO_FACTURA, TRASPASO, AJUSTE         NaN         NaN         NaN         NaN               C                SKU         Texto                        Identificador del producto
+
+Sheet: Hoja_Temporal_CSV
+       MARCA      LINEA  NOMBRE DE PRODUCTO CONTENIDO   COSTO  ALMACEN  TIENDA  TOTAL  COSTO TOTAL
+0  Kerastase  Nutritive          Bain Satin     250ml   74.34        4      13     17      1263.78
+1  Kerastase  Nutritive    Bain Satin Riche     250ml   74.34       10      11     21      1561.14
+2  Kerastase  Nutritive          Lait Vital     200ml   99.12        0       9      9       892.08
+3  Kerastase  Nutritive        Masquintense     200ml  134.50        0       7      7       941.50
+4  Kerastase  Nutritive  Masquintense Riche     200ml  134.50        0       5      5       672.50
+
+=== Registros Laboratorio.xlsx ===
+Sheet: RegistroDespachos
+                  Fecha/Hora  ID OATC  ID ODI      Cliente  Categoria OATC             Agente        Insumo Nombre  Insumo Marca  Insumo Tipo  Cantidad  Costo Almacén Origen
+0  14/12/2025 12:54:02 p. m.       10       1  turno/calle    Colorimetria  Felina Verastegui        Prueba Insumo  Prueba Marca  Prueba Tipo     12312    NaN    LABORATORIO
+1  14/12/2025 12:56:45 p. m.       10       2  turno/calle    Colorimetria  Felina Verastegui        Insumo Prueba  Marca Prueba  Tipo Prueba      2222    NaN    LABORATORIO
+2  14/12/2025 10:04:31 p. m.       54       3      cliente  Corte y diseño    Agente Fantasma  2025-01-07 00:00:00  ColorSublime   Tinte tubo        22    NaN    LABORATORIO
+3  14/12/2025 10:24:58 p. m.       54       4      cliente  Corte y diseño    Agente Fantasma  2025-03-07 00:00:00    Color Wear   Exfoliante       122    NaN    LABORATORIO
+4        2025-12-15 19:36:44       40       1       victor      Cosmiatria       Nancy Siccha                  09T       Exitenn   Mascarilla         1    NaN    LABORATORIO
+
+Sheet: Catalogo
+                   Marca     Línea Nombre Producto     Tipo Presentacion Unidad medida     Costo
+0               Genérico  Genérico     Pestaña 1x1  Pestaña        1 UND           UND  S/.10.00
+1  L'Oréal Professionnel   Majirel     Majirel 2,1    Tinte         50GR            GR  S/.10.00
+2  L'Oréal Professionnel   Majirel    Majirel 6,11    Tinte         50GR            GR  S/.10.00
+3  L'Oréal Professionnel   Majirel     Majirel 8,1    Tinte         50GR            GR  S/.10.00
+4  L'Oréal Professionnel   Majirel    Majirel 5,64    Tinte         50GR            GR  S/.10.00
+
+Sheet: DB_Inventario
+  Proveedor    Marca    Línea    Nombre                   SKU   Presentacion      Tipo  Stock Principal  Stock Laboratorio  Costo Unitario  Stock Mínimo Ubicación en Almacén  Stock En Uso
+0   AGI MAX  AGI MAX  AGI MAX         1         AGI-AGI-1-ALI  Botella 750ml  ALISANTE                5                 99              16             5      RACK SIN NOMBRE         630.0
+1   AGI MAX  AGI MAX  AGI MAX         2         AGI-AGI-2-ALI  Botella 750ml  ALISANTE                8                 99              16             5      RACK SIN NOMBRE         525.0
+2   AGI MAX  AGI MAX  AGI MAX         3         AGI-AGI-3-ALI  Botella 750ml  ALISANTE                0                100              16             5      RACK SIN NOMBRE           NaN
+3      BAOR     BAOR     BAOR     BOTOX     BAO-BAO-BOTOX-ALI  Botella 750ml  ALISANTE                8                 99              16             5      RACK SIN NOMBRE         348.0
+4      BAOR     BAOR     BAOR  KERATINA  BAO-BAO-KERATINA-ALI  Botella 750ml  ALISANTE                9                 98              16             5      RACK SIN NOMBRE          67.0
+
+Sheet: Hoja 9
+                               Unnamed: 0    Unnamed: 1 Unnamed: 2 Unnamed: 3 Unnamed: 4 Unnamed: 5 Unnamed: 6 Unnamed: 7
+0            Masquintense grueso x 500 ml           NaN        NaN        NaN        NaN        NaN        NaN        NaN
+1                 BAIN DIVALENT x 1000 ML          BAIN   DIVALENT          x       1000         ML        NaN        NaN
+2          BAIN CURL MANIFESTO  x 1000 ML          BAIN       CURL  MANIFESTO        NaN          x       1000         ML
+3           MASCARILLA MAGISTRAL x 500 ML    MASCARILLA  MAGISTRAL          x        500         ML        NaN        NaN
+4  MASQUINTENSE GRUESO KERASTASE x 500 ML  MASQUINTENSE     GRUESO  KERASTASE          x        500         ML        NaN
+
+Sheet: DB_Movimientos
+       ID_MOVIMIENTO              FECHA_HORA TIPO_MOVIMIENTO                       SKU DESCRIPCION  CANTIDAD       ORIGEN   DESTINO           AGENTE  COSTO_UNITARIO
+0  ODI-1769857092651 2026-01-31 05:58:12.651  SALIDA CONSUMO  GEN-GEN-GEN-SANDALIA-SAN    SANDALIA         1  LABORATORIO  OATC: 39          Xiomara               0
+1  ODI-1769877795507 2026-01-31 11:43:15.507  SALIDA CONSUMO  GEN-GEN-GEN-SANDALIA-SAN    SANDALIA         1  LABORATORIO   OATC: 9          Xiomara               0
+2  ODI-1769910436011 2026-01-31 20:47:16.011             NaN  GEN-GEN-GEN-SANDALIA-SAN    SANDALIA         1  LABORATORIO   OATC: 9          Xiomara               0
+3  ODI-1769910436011 2026-01-31 20:47:16.011             NaN  GEN-GEN-GEN-SANDALIA-SAN    SANDALIA         1  LABORATORIO   OATC: 9          Xiomara               0
+4  ODI-1769910538165 2026-01-31 20:48:58.165             NaN      GEN-GEN-GEN-SAND-SAN    SANDALIA         1  LABORATORIO  OATC: 88  Eduard Gonzales               0
+
+Sheet: Insumos_EnCurso
+Empty DataFrame
+Columns: [ID_MOVIMIENTO, FECHA_HORA, TIPO_MOVIMIENTO, SKU, DESCRIPCION, CANTIDAD, ORIGEN, DESTINO, DOCUMENTO_REF, COSTO_UNITARIO]
+Index: []
+
+Sheet: DB_Despachos_ODI
+Empty DataFrame
+Columns: [Fecha, Dependiente, Nombre Producto, Marca, Tipo, cantidad, Volumen, Unnamed: 7, Observación, Unnamed: 9, Costo , nombre.client. = Ticket, Hora, OATC ID, Nombre Cliente, DNI]
+Index: []
+
+Sheet: DB_Metricas
+Empty DataFrame
+Columns: []
+Index: []
+
+Sheet: Notas
+                               Catálogos  cómo hacer llegar a un tono con lo que tenemos
+0  mejorar la coordinacion con rececpión                                             NaN
+1          ayudas visuales - calculadora                                             NaN
+2     Pendiente el desarrollo de recetas                                             NaN
+3                             Inventario                                             NaN
+
+=== Ventas 2025.xlsx ===
+Sheet: Registro ventas caja
+                    Fecha          Ticket_ID  ID_OATC      Cliente           Agente Servicio_Original       Servicio_Final Servicio_SubCategoria Servicio_Categoria  Monto_Efectivo  Monto Tarjeta  Monto_Deposito  Monto_Final  Comisión   Estado      RUC         Boleta  Unnamed: 17  Unnamed: 18  Unnamed: 19  Unnamed: 20  Unnamed: 21  Unnamed: 22  Unnamed: 23  Unnamed: 24  Unnamed: 25  Unnamed: 26  Unnamed: 27  Unnamed: 28  Unnamed: 29  Unnamed: 30  Unnamed: 31  Unnamed: 32  Unnamed: 33  Unnamed: 34  Unnamed: 35  Unnamed: 36  Unnamed: 37  Unnamed: 38  Unnamed: 39  Unnamed: 40  Unnamed: 41  Unnamed: 42  Unnamed: 43  Unnamed: 44  Unnamed: 45  Unnamed: 46  Unnamed: 47  Unnamed: 48  Unnamed: 49  Unnamed: 50          Unnamed: 51  Unnamed: 52
+0 2025-10-23 22:17:38.000            TKT-177        1  POR ASIGNAR  Vilma Chuquilin           Reserva       RESERVA - CITA               Reserva          Estilismo               0            200               0          200         0  Cobrado       VG  BR03-00003821          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN                  NaN          NaN
+1 2025-12-31 10:09:00.956  TKT-1767192954162        3        Saomi    Koko Vascones    Corte y diseño  Corte cabello corto        Corte y diseño          Estilismo               0              0              60           40        15  Cobrado  Anselmo    BS-00003925          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN                  NaN          NaN
+2 2025-12-31 10:09:00.956  TKT-1767192954162        4        Saomi   Jessica Huaman        Cosmiatria           Depilación            Cosmiatria         Cosmiatría               0              0               0           20        10  Cobrado  Anselmo    BS-00003925          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN  2026-05-01 00:00:00          NaN
+3 2026-01-02 17:05:56.461  TKT-1767391556461        5       Flavio   Rocio Melendez        Cosmiatria             Pedicure            Cosmiatria         Cosmiatría               0             50               0           50        25  Cobrado     EIRL  BX03-00002930          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN              Anselmo      60177.0
+4 2026-01-02 18:42:01.395  TKT-1767397321395        4     Milagros   Jessica Huaman        Cosmiatria           Depilación            Cosmiatria         Cosmiatría               0            215               0           35         0  Cobrado     EIRL  BX03-00002931          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN          NaN             Cristian      37868.5
+
+Sheet: Movimientos Caja
+                    Fecha Movimiento   Monto                                       Concepto              Usuario    ID_Autorización
+0 2025-12-31 00:52:22.998    Ingreso  3107.1                          FONDO INICIAL DE CAJA  crial0810@gmail.com  MAN-1767160342998
+1 2026-01-02 06:59:26.891    Ingreso  2109.4                          FONDO INICIAL DE CAJA  crial0810@gmail.com  MAN-1767355166890
+2 2026-01-02 20:36:40.169     Egreso   150.5    LIQUIDACIÓN DIARIA A XIOMARA DEL 29/12/2025  crial0810@gmail.com  MAN-1767404200169
+3 2026-01-02 20:36:54.255     Egreso   371.2   LIQUIDACIÓN DIARIA A SALOME C DEL 31/12/2025  crial0810@gmail.com  MAN-1767404214255
+4 2026-01-02 20:37:12.474     Egreso   292.5  LIQUIDACIÓN DIARIA A JESSICA H DEL 31/12/2025  crial0810@gmail.com  MAN-1767404232474
+
+Sheet: CpC_Agentes
+          ID_Ticket         Fecha_Venta             Agente RUC/DNI        Documento Celular Cliente  Monto_Total  Monto_Pagado  Saldo_Pendiente   Fecha_Vencimiento Estado (Vigente/Vencido/Cancelado)                                                                          Nota
+0  AD-20260519-1053 2026-05-19 10:53:07      Koko Vascones       -  RECIBO ADELANTO               -          200             0              200 2026-05-19 10:53:07                            Vigente                 Autorizado por Tomás Ramos. Descontar en próxima liquidación.
+1  AD-20260521-2046 2026-05-21 20:46:00      Koko Vascones       -  RECIBO ADELANTO               -           50             0               50 2026-05-21 20:46:00                            Vigente           Autorizado por Kevin Rojas Firma. Descontar en próxima liquidación.
+2  AD-20260522-1549 2026-05-22 15:49:18      Koko Vascones       -  RECIBO ADELANTO               -           25             0               25 2026-05-22 15:49:18                            Vigente  Autorizado por Zendel Adriano Vilca Laiza. Descontar en próxima liquidación.
+3  AD-20260523-1603 2026-05-23 16:03:31      Koko Vascones       -  RECIBO ADELANTO               -          100             0              100 2026-05-23 16:03:31                            Vigente           Autorizado por Kevin Rojas Firma. Descontar en próxima liquidación.
+4  AD-20260602-2033 2026-06-02 20:33:56  Felina Verastegui       -  RECIBO ADELANTO               -          100             0              100 2026-06-02 20:33:56                            Vigente           Autorizado por Kevin Rojas Firma. Descontar en próxima liquidación.
+
+Sheet: Cuentas_Por_Cobrar
+     ID_Ticket             Fecha_Venta          Cliente  RUC/DNI  Documento  Celular Cliente  Monto_Total  Monto_Pagado  Saldo_Pendiente  Fecha_Vencimiento Estado (Vigente/Vencido/Cancelado)                           Nota
+0  TK001-00003 2026-01-05 10:26:03.243  Brenda Gonzales      NaN        NaN              NaN           80             0               80                NaN                            Vigente                 Peinado armado
+1  TK001-00005 2026-01-05 16:14:17.616          claudia      NaN        NaN              NaN          340             0              340                NaN                            Vigente  Tratamiento capilar Kérastase
+2  TK001-00006 2026-01-06 18:22:37.038  Brenda Gonzales      NaN        NaN              NaN           90             0               90                NaN                            Vigente                       Manicura
+3  PC001-00001 2026-01-08 23:31:28.933         veronica      NaN        NaN              NaN           40             0               40                NaN                            Vigente                     Depilación
+4  TK001-00008 2026-01-11 19:51:31.785          CLAUDIA      NaN        NaN              NaN          415             0              415                NaN                            Vigente  Tratamiento capilar Kérastase
+
+Sheet: Config_Sistema
+          RUCs Correlativo Boleta Correlativo Factura         Ticket
+0         EIRL      BX03-00005607       BX03-00004170   TKTCE1-00000
+1           VG      BY03-00004766       BY03-00004129  TKTCVG1-00000
+2      Anselmo        BS-00004892       FS01-00000104   TKTV01-00107
+3     Cristian        0003-014506                   -   TKTCG1-00000
+4  Jose Emilio        0003-014596                   -   TKTEG1-00001
+
+Sheet: Registro_Proveedores
+           RUC             Nombre Comercial          Fecha Registro  Contacto  Celular  Email  Dirección
+0  20416414018                 L'OREAL PERU 2026-01-22 14:40:08.079       NaN      NaN    NaN        NaN
+1  20605502700     DISTRIBUCIONES ROALROMER 2026-01-23 16:26:07.797       NaN      NaN    NaN        NaN
+2  20509553034                ALFAPARF PERU 2026-01-26 10:54:11.966       NaN      NaN    NaN        NaN
+3  20510643306  REVLON BEAUTYGE ANDINA S.A. 2026-01-30 10:15:36.415       NaN      NaN    NaN        NaN
+
+Sheet: Control_Facturas_Compra
+                  ID          Fecha_Registro                    Emisor          RUC Serie  Correlativo  F_Emision F_Vencimiento  Base_Imponible      IGV  ISC_Otros     Total             Estado        Observacion  Laboratorio  Ventas  Total.1
+0  FAC-20260122-1441 2026-01-22 14:41:40.456              L'OREAL PERU  20416414018  F005        13924 2026-01-22    2026-03-08         6192.00  1114.56          0   7306.56  Pendiente de pago  Sin observaciones          NaN     NaN      NaN
+1  FAC-20260123-0937 2026-01-23 09:37:51.199              L'OREAL PERU  20416414018  F005        14051 2026-01-23    2026-03-09        13382.18  2408.79          0  15790.97  Pendiente de pago                NaN          NaN     NaN      NaN
+2  FAC-20260123-0939 2026-01-23 09:39:35.761              L'OREAL PERU  20416414018  F005        14052 2026-01-23    2026-03-09         5131.26   923.63          0   6054.89  Pendiente de pago                NaN          NaN     NaN      NaN
+3  FAC-20260123-1629 2026-01-23 16:29:04.193  DISTRIBUCIONES ROALROMER  20605502700   NaN        12417 2026-01-22    2026-01-22          406.78    73.22          0    480.00             Pagado                NaN          NaN     NaN      NaN
+4  FAC-20260126-1056 2026-01-26 10:56:26.417             ALFAPARF PERU  20509553034   NaN       110099 2026-01-22    2026-04-27         9322.12  1677.98          0  11000.10  Pendiente de pago                NaN          NaN     NaN      NaN
+

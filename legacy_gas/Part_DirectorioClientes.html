@@ -1,0 +1,47 @@
+                 <h2 class="text-2xl font-bold mb-4 text-gray-800">Directorio de Clientes</h2>
+                 <!-- Buscador -->
+                 <div class="bg-white p-4 rounded-lg shadow-sm mb-6 border border-gray-100">
+                     <form class="flex items-center" @submit.prevent="buscarClienteUI">   
+                        <div class="relative w-full">
+                            <input type="text" x-model="searchQuery" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5" placeholder="Buscar por Nombre, DNI o Celular..." required>
+                        </div>
+                        <button type="submit" class="p-2.5 ms-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700">Buscar</button>
+                    </form>
+                    
+                    <!-- Resultados Búsqueda -->
+                    <div class="mt-4" x-show="clientesResultados.length > 0">
+                        <ul class="divide-y divide-gray-200 border rounded-lg">
+                            <template x-for="cli in clientesResultados" :key="cli.usuario_id">
+                                <li class="p-3 hover:bg-gray-50 flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium text-gray-900" x-text="cli.nombre"></p>
+                                        <p class="text-xs text-gray-500" x-text="'DNI: '+cli.dni+' | Cel: '+cli.celular"></p>
+                                    </div>
+                                    <button @click="seleccionarClienteParaOATC(cli)" class="text-xs bg-green-100 text-green-800 px-3 py-1.5 rounded font-medium hover:bg-green-200 transition">Crear OATC</button>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                 </div>
+
+                 <!-- Formulario Nuevo Cliente -->
+                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                     <h3 class="text-lg font-semibold mb-4 text-gray-800">Registrar Nuevo Cliente</h3>
+                     <form @submit.prevent="guardarNuevoClienteUI">
+                         <div class="grid gap-4 mb-4 sm:grid-cols-2">
+                            <div><label class="block mb-2 text-sm font-medium text-gray-900">Nombre Completo</label><input type="text" x-model="nuevoCliente.nombre" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" required></div>
+                            <div><label class="block mb-2 text-sm font-medium text-gray-900">Celular</label><input type="text" x-model="nuevoCliente.celular" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"></div>
+                            <div><label class="block mb-2 text-sm font-medium text-gray-900">DNI</label><input type="text" x-model="nuevoCliente.dni" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"></div>
+                            <div><label class="block mb-2 text-sm font-medium text-gray-900">Origen</label>
+                                <select x-model="nuevoCliente.origen_captacion" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+                                    <option value="">Seleccione...</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="tiktok">TikTok</option>
+                                    <option value="paso">Paso por el local</option>
+                                </select>
+                            </div>
+                         </div>
+                         <button type="submit" class="text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg text-sm px-5 py-2.5" :disabled="isLoadingGuardar">Guardar Cliente</button>
+                         <span x-show="msgClienteGuardado" class="ml-3 text-sm text-green-600" x-text="msgClienteGuardado"></span>
+                     </form>
+                 </div>

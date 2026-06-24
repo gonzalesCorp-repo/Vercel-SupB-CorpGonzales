@@ -1,0 +1,37 @@
+<script>
+    function wfmState() {
+        return {
+            // WFM y Capacidad
+            salonActual: null,
+            isLoadingWfm: false,
+
+            async cargarWFM_UI() {
+                this.isLoadingWfm = true;
+                const res = await this.llamarServidor('obtenerDatosSalon');
+                if (res.status === 'success') {
+                    this.salonActual = res.data;
+                }
+                this.isLoadingWfm = false;
+            },
+
+            // CRUD Tipos de Estacion
+            tiposEstacion: [],
+            nuevoTipoEstacion: { nombre_tipo: '', icono_referencial: 'espejo' },
+            
+            async cargarTiposEstacionUI() {
+                const res = await this.llamarServidor('obtenerTiposArea');
+                if (res.status === 'success') {
+                    this.tiposEstacion = res.data;
+                }
+            },
+            
+            async guardarTipoEstacionUI() {
+                const res = await this.llamarServidor('guardarTipoArea', this.nuevoTipoEstacion);
+                if (res.status === 'success') {
+                    this.nuevoTipoEstacion = { nombre_tipo: '', icono_referencial: 'espejo' };
+                    this.cargarTiposEstacionUI();
+                }
+            }
+        };
+    }
+</script>

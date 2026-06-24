@@ -1,0 +1,43 @@
+                 <div class="flex justify-between items-center mb-6" x-init="cargarAgendaUI()">
+                     <h2 class="text-2xl font-bold text-gray-800">Agenda CRM</h2>
+                     <div class="flex space-x-2">
+                         <button @click="vistaAgenda = 'calendario'" :class="vistaAgenda === 'calendario' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'" class="px-3 py-1.5 rounded-lg font-medium text-sm transition">Calendario</button>
+                         <button @click="vistaAgenda = 'lista'" :class="vistaAgenda === 'lista' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'" class="px-3 py-1.5 rounded-lg font-medium text-sm transition">Lista</button>
+                     </div>
+                 </div>
+                 
+                 <!-- VISTA LISTA -->
+                 <div x-show="vistaAgenda === 'lista'" class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                     <table class="w-full text-sm text-left text-gray-500">
+                         <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                             <tr>
+                                 <th scope="col" class="px-6 py-3">Fecha</th>
+                                 <th scope="col" class="px-6 py-3">Hora</th>
+                                 <th scope="col" class="px-6 py-3">Cliente</th>
+                                 <th scope="col" class="px-6 py-3">Estado</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+                             <template x-for="evento in eventosAgenda" :key="evento.evento_id">
+                                 <tr class="bg-white border-b hover:bg-gray-50">
+                                     <td class="px-6 py-4 font-medium text-gray-900" x-text="evento.fecha"></td>
+                                     <td class="px-6 py-4" x-text="evento.hora_inicio + ' - ' + evento.hora_fin"></td>
+                                     <td class="px-6 py-4" x-text="evento.cliente_nombre"></td>
+                                     <td class="px-6 py-4">
+                                         <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded" x-text="evento.estado"></span>
+                                     </td>
+                                 </tr>
+                             </template>
+                             <tr x-show="eventosAgenda.length === 0">
+                                 <td colspan="4" class="px-6 py-8 text-center text-gray-500">No hay eventos programados.</td>
+                             </tr>
+                         </tbody>
+                     </table>
+                 </div>
+
+                 <!-- VISTA CALENDARIO (Maqueta básica) -->
+                 <div x-show="vistaAgenda === 'calendario'" class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 text-center text-gray-500 h-64 flex flex-col justify-center items-center">
+                     <svg class="w-12 h-12 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                     <p>Vista de calendario mensual estará disponible próximamente.</p>
+                     <p class="text-xs mt-2">La información se muestra en la Vista Lista por ahora.</p>
+                 </div>

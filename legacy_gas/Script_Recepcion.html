@@ -1,0 +1,112 @@
+<script>
+    function recepcionState() {
+        return {
+            // Variables Recepción
+            searchQuery: '',
+            clientesResultados: [],
+            nuevoCliente: { nombre: '', celular: '', dni: '', origen_captacion: '', notas: '' },
+            isLoadingGuardar: false,
+            msgClienteGuardado: '',
+            
+            // Monitor Cola
+            colaAgentes: [],
+            oatcsEnEspera: [],
+            usuariosDisponibles: [],
+            agenteSeleccionadoIngreso: '',
+            
+            // Agenda CRM
+            eventosAgenda: [],
+            vistaAgenda: 'calendario', // o 'lista'
+            
+            async cargarAgendaUI() {
+                const res = await this.llamarServidor('obtenerAgenda');
+                if (res.status === 'success') this.eventosAgenda = res.data;
+            },
+
+            async buscarClienteUI() {
+                if(!this.searchQuery) return;
+                console.log("[DEBUG] Buscando cliente:", this.searchQuery);
+                const res = await this.llamarServidor('buscarCliente', this.searchQuery);
+                if(res.status === 'success') this.clientesResultados = res.data;
+            },
+
+            async guardarNuevoClienteUI() {
+                this.isLoadingGuardar = true;
+                this.msgClienteGuardado = '';
+                console.log("[DEBUG] Guardando cliente:", this.nuevoCliente);
+                const res = await this.llamarServidor('guardarCliente', this.nuevoCliente);
+                if(res.status === 'success') {
+                    this.msgClienteGuardado = 'Cliente guardado correctamente.';
+                    // Limpiar formulario
+                    this.nuevoCliente = { nombre: '', celular: '', dni: '', origen_captacion: '', notas: '' };
+                    setTimeout(() => this.msgClienteGuardado = '', 3000);
+                }
+                this.isLoadingGuardar = false;
+            },
+
+            async actualizarMonitorCola() {
+                this.isLoading = true;
+                await Promise.all([
+                    this.cargarCola(),
+                    this.cargarUsuariosDisponibles()
+                ]);
+                this.isLoading = false;
+            },
+
+            async cargarCola() {
+                console.log("[DEBUG] Ejecutando cargarCola()...");
+                const resCola = await this.llamarServidor('obtenerColaAgentes');
+                console.log("[DEBUG] Cola agentes obtenida. RAW Data:", JSON.parse(JSON.stringify(resCola.data)));
+                if(resCola.status === 'success') {
+                    this.colaAgentes = resCola.data.map(row => {
+                        console.log("[DEBUG] Mapeando agente individual:", row);
+                        return {
+                            id: row.agente_id,
+                            estado: row.estado,
+                            timestamp: row.timestamp,
+                            posicion: row.posicion,
+                            nombre: row.nombre
+                        };
+                    });
+                    console.log("[DEBUG] colaAgentes procesada por Alpine:", JSON.parse(JSON.stringify(this.colaAgentes)));
+                }
+                
+                const resOatc = await this.llamarServidor('obtenerMonitorCola');
+                console.log("[DEBUG] Monitor Cola (OATCs en espera/curso) obtenido:", resOatc);
+                if(resOatc.status === 'success') {
+                    // Mostrar tanto en ESPERA como ASESORANDO o TRABAJANDO
+                    this.oatcsEnEspera = resOatc.data.filter(o => ['ESPERA', 'ASESORANDO', 'TRABAJANDO'].includes(o.estado_proceso));
+                }
+            },
+            
+            async cargarUsuariosDisponibles() {
+                const res = await this.llamarServidor('obtenerUsuariosDisponibles');
+                if(res.status === 'success') {
+                    this.usuariosDisponibles = res.data;
+                }
+            },
+            
+            async registrarIngresoSeleccionado() {
+                if(!this.agenteSeleccionadoIngreso) return;
+                const usr = this.usuariosDisponibles.find(u => u.id === this.agenteSeleccionadoIngreso);
+                if(!usr) return;
+                
+                this.isLoading = true;
+                await this.llamarServidor('registrarAsistencia', usr.id, usr.nombre);
+                this.agenteSeleccionadoIngreso = '';
+                await this.actualizarMonitorCola();
+            },
+            
+            async forzarDisponible(agente) {
+                console.log(`[DEBUG] Forzando a DISPONIBLE al agente: ${agente.nombre} (${agente.id})`);
+                this.isLoading = true;
+                await this.llamarServidor('cambiarEstadoAgente', agente.id, 'DISPONIBLE');
+                await this.actualizarMonitorCola();
+            },
+            
+            abrirModalPausa(agente) {
+                alert("Aquí se abrirá el modal para seleccionar el motivo de Pausa (Configurado por Admin) para: " + agente.nombre);
+            }
+        };
+    }
+</script>

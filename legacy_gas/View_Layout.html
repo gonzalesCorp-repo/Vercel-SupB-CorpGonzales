@@ -1,0 +1,125 @@
+    <!-- CONTENEDOR PRINCIPAL DE LA APP -->
+    <div x-show="isLoggedIn" style="display: none;" class="relative">
+        
+        <!-- Loading Overlay Global -->
+        <div x-show="isLoading" 
+             x-transition.opacity
+             class="fixed inset-0 z-[9999] bg-white/70 backdrop-blur-sm flex items-center justify-center">
+             <div class="flex flex-col items-center gap-3">
+                 <!-- Spinner -->
+                 <div class="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                 <p class="text-sm font-semibold text-primary-700 animate-pulse">Cargando datos...</p>
+             </div>
+        </div>
+
+        <!-- Navbar Superior -->
+        <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
+          <div class="px-3 py-3 lg:px-5 lg:pl-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center justify-start">
+                <button @click="sidebarOpen = !sidebarOpen" class="p-2 text-gray-500 rounded-lg hover:bg-gray-100 transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path></svg>
+                </button>
+                <span class="ms-2 md:me-24 text-xl font-bold text-primary-700 tracking-tight">Gonzales Spa <span class="text-xs font-normal text-gray-500 ml-2">ERP</span></span>
+              </div>
+              <div class="flex items-center">
+                  <div class="text-right mr-4 hidden sm:block">
+                      <p class="text-sm font-semibold text-gray-900" x-text="currentUser ? currentUser.nombre : ''"></p>
+                      <p class="text-xs text-primary-600 uppercase" x-text="currentUser ? currentUser.rol : ''"></p>
+                  </div>
+                  <button @click="logout" class="text-sm bg-red-50 text-red-600 font-medium px-3 py-1.5 rounded-lg hover:bg-red-100 transition">Salir</button>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Sidebar Lateral Izquierdo -->
+        <aside class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform bg-white border-r border-gray-200" :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }">
+           <div class="h-full px-3 pb-4 overflow-y-auto bg-white">
+              <ul class="space-y-4 font-medium">
+                 
+                 <!-- MÓDULO: DESARROLLO -->
+                 <li x-show="tienePermiso('desarrollo')">
+                     <span class="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Desarrollo</span>
+                     <ul class="mt-2 space-y-1">
+                        <li><a href="#" @click.prevent="cambiarVista('view_dev_accesos')" :class="currentView === 'view_dev_accesos' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Gestión de Accesos</span></a></li>
+                     </ul>
+                 </li>
+
+                 <!-- MÓDULO: ADMINISTRACIÓN -->
+                 <li x-show="tienePermiso('admin')">
+                     <span class="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Administración</span>
+                     <ul class="mt-2 space-y-1">
+                        <li><a href="#" @click.prevent="cambiarVista('view_admin_reportes')" :class="currentView === 'view_admin_reportes' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Reportes Globales</span></a></li>
+                     </ul>
+                 </li>
+
+                 <!-- MÓDULO: RECEPCIÓN -->
+                 <li x-show="tienePermiso('admin') || tienePermiso('recepcion')">
+                     <span class="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Recepción CRM</span>
+                     <ul class="mt-2 space-y-1">
+                         <li><a href="#" @click.prevent="cambiarVista('view_recepcion_workspace')" :class="currentView === 'view_recepcion_workspace' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Workspace Recepción</span></a></li>
+                         <li><a href="#" @click.prevent="cambiarVista('view_recepcion_reportes')" :class="currentView === 'view_recepcion_reportes' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Reportes Recepción</span></a></li>
+                     </ul>
+                 </li>
+
+                 <!-- MÓDULO: CAJA POS -->
+                 <li x-show="tienePermiso('admin') || tienePermiso('caja') || tienePermiso('recepcion')">
+                     <span class="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Caja y Cobros</span>
+                     <ul class="mt-2 space-y-1">
+                         <li><a href="#" @click.prevent="cambiarVista('view_caja_pos')" :class="currentView === 'view_caja_pos' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Punto de Venta (POS)</span></a></li>
+                         <li><a href="#" @click.prevent="cambiarVista('view_caja_facturas')" :class="currentView === 'view_caja_facturas' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Registro Facturas</span></a></li>
+                         <li><a href="#" @click.prevent="cambiarVista('view_caja_deuda_interna')" :class="currentView === 'view_caja_deuda_interna' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Control Deuda Agentes</span></a></li>
+                         <li><a href="#" @click.prevent="cambiarVista('view_caja_tickets_abiertos')" :class="currentView === 'view_caja_tickets_abiertos' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Tickets No Cobrados</span></a></li>
+                     </ul>
+                 </li>
+
+                 <!-- MÓDULO: DESPACHO / LABORATORIO -->
+                 <li x-show="tienePermiso('admin') || tienePermiso('despacho')">
+                     <span class="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Despacho e Insumos</span>
+                     <ul class="mt-2 space-y-1">
+                         <li><a href="#" @click.prevent="cambiarVista('view_lab_dashboard')" :class="currentView === 'view_lab_dashboard' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Órdenes en Transcurso</span></a></li>
+                         <li><a href="#" @click.prevent="cambiarVista('view_lab_gestionar_pedidos')" :class="currentView === 'view_lab_gestionar_pedidos' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Pedidos de Insumos</span></a></li>
+                     </ul>
+                 </li>
+
+                 <!-- MÓDULO: OPERACIONES / STAFF DE APOYO -->
+                 <li x-show="tienePermiso('admin') || tienePermiso('operaciones')">
+                     <span class="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Staff Operaciones</span>
+                     <ul class="mt-2 space-y-1">
+                         <li><a href="#" @click.prevent="cambiarVista('view_op_generar_oatc')" :class="currentView === 'view_op_generar_oatc' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Generar OATC Asistida</span></a></li>
+                         <li><a href="#" @click.prevent="cambiarVista('view_op_solicitar_insumo')" :class="currentView === 'view_op_solicitar_insumo' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Solicitar Insumos</span></a></li>
+                         <li><a href="#" @click.prevent="cambiarVista('view_op_liquidar')" :class="currentView === 'view_op_liquidar' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Solicitar Liquidación</span></a></li>
+                     </ul>
+                 </li>
+
+                 <!-- MÓDULO: WFM Y OPERACIONES -->
+                 <li x-show="tienePermiso('admin') || tienePermiso('operaciones') || tienePermiso('recepcion')">
+                     <span class="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Operaciones WFM</span>
+                     <ul class="mt-2 space-y-1">
+                         <li><a href="#" @click.prevent="cambiarVista('view_wfm_mapa')" :class="currentView === 'view_wfm_mapa' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Mapa del Salón</span></a></li>
+                         <li x-show="tienePermiso('admin')"><a href="#" @click.prevent="cambiarVista('view_wfm_areas')" :class="currentView === 'view_wfm_areas' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Gestión de Áreas</span></a></li>
+                         <li x-show="tienePermiso('admin')"><a href="#" @click.prevent="cambiarVista('view_wfm_tipos')" :class="currentView === 'view_wfm_tipos' ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center p-2 rounded-lg text-sm"><span class="ms-3">Tipos de Estación</span></a></li>
+                     </ul>
+                 </li>
+
+              </ul>
+           </div>
+        </aside>
+
+        <!-- Contenedor Principal Dinámico -->
+        <main class="p-4 pt-24 bg-gray-50 min-h-screen transition-all duration-300" :class="sidebarOpen ? 'sm:ml-64' : 'ml-0'">
+           <div class="max-w-7xl mx-auto">
+              
+              <!-- VISTAS MODULARES INYECTADAS -->
+              <?!= include('View_Desarrollo'); ?>
+              <?!= include('View_Admin'); ?>
+              <?!= include('View_Recepcion'); ?>
+              <?!= include('View_Caja'); ?>
+              <?!= include('View_Despacho'); ?>
+              <?!= include('View_Operaciones'); ?>
+              <?!= include('View_WFM'); ?>
+
+           </div>
+        </main>
+    </div>

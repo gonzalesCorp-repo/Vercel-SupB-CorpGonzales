@@ -1,0 +1,27 @@
+    <!-- PANTALLA DE LOGIN -->
+    <div x-show="!isLoggedIn" class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-50 bg-opacity-95" style="display: none;" x-transition>
+        <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg border border-gray-100">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-primary-600">Gonzales Spa</h1>
+                <p class="text-gray-500 mt-2">Acceso al Sistema ERP</p>
+            </div>
+            
+            <form @submit.prevent="login">
+                <div class="mb-5">
+                    <label class="block mb-2 text-sm font-medium text-gray-900">Usuario</label>
+                    <input type="text" x-model="loginForm.username" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-2 text-sm font-medium text-gray-900">Contraseña</label>
+                    <input type="password" x-model="loginForm.password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5" required>
+                </div>
+                
+                <div x-show="loginError" class="mb-4 text-sm text-red-600 font-medium" x-text="loginError" style="display: none;"></div>
+                
+                <button type="submit" class="w-full text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg text-sm px-5 py-3 text-center transition" :disabled="isLoading">
+                    <span x-show="!isLoading">Ingresar al Sistema</span>
+                    <span x-show="isLoading">Verificando...</span>
+                </button>
+            </form>
+        </div>
+    </div>

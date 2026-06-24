@@ -1,0 +1,100 @@
+<!-- ========================================== -->
+<!-- VISTA: WORKSPACE RECEPCIÓN CRM -->
+<!-- ========================================== -->
+<div x-show="currentView === 'view_recepcion_workspace'" style="display: none;" x-transition class="h-full flex flex-col">
+    
+    <!-- BARRA DE HERRAMIENTAS ARRASTRABLES -->
+    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200 mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-gray-800 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            Herramientas
+        </h2>
+        <div class="flex space-x-3 overflow-x-auto">
+            <!-- Herramienta: Monitor -->
+            <div draggable="true" @dragstart="onDragStart('monitor_cola')" class="cursor-move bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded flex items-center font-medium shadow-sm hover:bg-blue-100 transition whitespace-nowrap">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg> Monitor
+            </div>
+            <!-- Herramienta: OATC -->
+            <div draggable="true" @dragstart="onDragStart('nueva_oatc')" class="cursor-move bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded flex items-center font-medium shadow-sm hover:bg-green-100 transition whitespace-nowrap">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> OATC
+            </div>
+            <!-- Herramienta: Clientes -->
+            <div draggable="true" @dragstart="onDragStart('directorio_clientes')" class="cursor-move bg-purple-50 border border-purple-200 text-purple-700 px-3 py-1.5 rounded flex items-center font-medium shadow-sm hover:bg-purple-100 transition whitespace-nowrap">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> Clientes
+            </div>
+            <!-- Herramienta: Agenda -->
+            <div draggable="true" @dragstart="onDragStart('agenda_crm')" class="cursor-move bg-orange-50 border border-orange-200 text-orange-700 px-3 py-1.5 rounded flex items-center font-medium shadow-sm hover:bg-orange-100 transition whitespace-nowrap">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> Agenda
+            </div>
+        </div>
+    </div>
+
+    <!-- PANELES DE TRABAJO -->
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
+        <!-- PANEL IZQUIERDO -->
+        <div class="bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 p-2 min-h-[600px] flex flex-col"
+             @dragover.prevent @drop="onDrop('izquierdo')">
+            
+            <template x-if="!panelIzquierdo">
+                <div class="flex-1 flex flex-col items-center justify-center text-gray-400">
+                    <svg class="w-12 h-12 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <p class="font-medium">Arrastra una herramienta aquí</p>
+                </div>
+            </template>
+            
+            <div class="flex-1 overflow-y-auto" x-show="panelIzquierdo">
+                <!-- Monitor -->
+                <div x-show="panelIzquierdo === 'monitor_cola'"><?!= include('Part_MonitorCola'); ?></div>
+                <!-- OATC -->
+                <div x-show="panelIzquierdo === 'nueva_oatc'"><?!= include('Part_NuevaOATC'); ?></div>
+                <!-- Clientes -->
+                <div x-show="panelIzquierdo === 'directorio_clientes'"><?!= include('Part_DirectorioClientes'); ?></div>
+                <!-- Agenda -->
+                <div x-show="panelIzquierdo === 'agenda_crm'"><?!= include('Part_AgendaCRM'); ?></div>
+            </div>
+        </div>
+
+        <!-- PANEL DERECHO -->
+        <div class="bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 p-2 min-h-[600px] flex flex-col"
+             @dragover.prevent @drop="onDrop('derecho')">
+            
+            <template x-if="!panelDerecho">
+                <div class="flex-1 flex flex-col items-center justify-center text-gray-400">
+                    <svg class="w-12 h-12 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <p class="font-medium">Arrastra una herramienta aquí</p>
+                </div>
+            </template>
+            
+            <div class="flex-1 overflow-y-auto" x-show="panelDerecho">
+                <!-- Monitor -->
+                <div x-show="panelDerecho === 'monitor_cola'"><?!= include('Part_MonitorCola'); ?></div>
+                <!-- OATC -->
+                <div x-show="panelDerecho === 'nueva_oatc'"><?!= include('Part_NuevaOATC'); ?></div>
+                <!-- Clientes -->
+                <div x-show="panelDerecho === 'directorio_clientes'"><?!= include('Part_DirectorioClientes'); ?></div>
+                <!-- Agenda -->
+                <div x-show="panelDerecho === 'agenda_crm'"><?!= include('Part_AgendaCRM'); ?></div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Modales -->
+    <?!= include('Part_ModalCatalogo'); ?>
+
+</div>
+
+<!-- ========================================== -->
+<!-- VISTA: REPORTES RECEPCIÓN -->
+<!-- ========================================== -->
+<div x-show="currentView === 'view_recepcion_reportes'" style="display: none;" x-transition>
+   <h2 class="text-2xl font-bold mb-4 text-gray-800">Reportes de Recepción</h2>
+   <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+       <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+       </div>
+       <h3 class="text-lg font-semibold text-gray-900 mb-2">Panel de Métricas de Recepción</h3>
+       <p class="text-gray-500 max-w-lg mx-auto">Visualiza la cantidad de clientes captados, el rendimiento de agendamiento y los tiempos promedio de espera generados hoy.</p>
+   </div>
+</div>

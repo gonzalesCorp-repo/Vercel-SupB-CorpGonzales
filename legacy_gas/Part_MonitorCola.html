@@ -1,0 +1,93 @@
+<div class="h-full flex flex-col gap-4">
+    <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-gray-800">Monitor de Cola (Agentes)</h2>
+        <div class="flex gap-2">
+            <button @click="actualizarMonitorCola" class="text-sm text-primary-600 bg-primary-50 px-3 py-1 rounded-lg hover:bg-primary-100 transition-colors">Actualizar</button>
+        </div>
+    </div>
+    
+    <!-- Registro de Asistencia -->
+    <div class="bg-white p-4 rounded-xl border shadow-sm flex items-end gap-4">
+        <div class="flex-grow">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Registrar Ingreso de Agente</label>
+            <div class="relative w-full" x-data="{ open: false, search: '' }">
+                <input type="text" 
+                       x-model="search" 
+                       @focus="open = true; search = ''" 
+                       @click.away="open = false" 
+                       placeholder="Buscar o seleccionar agente..." 
+                       class="w-full text-sm border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 pr-8"
+                       :value="agenteSeleccionadoIngreso ? (usuariosDisponibles.find(u => u.id === agenteSeleccionadoIngreso)?.nombre || '') : search">
+                
+                <!-- Icono desplegable -->
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+
+                <!-- Lista desplegable -->
+                <div x-show="open" 
+                     x-transition.opacity
+                     class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                    <template x-for="usr in usuariosDisponibles.filter(u => u.nombre.toLowerCase().includes(search.toLowerCase()))" :key="usr.id">
+                        <div @click="agenteSeleccionadoIngreso = usr.id; search = ''; open = false" 
+                             class="px-3 py-2 text-sm text-gray-700 hover:bg-primary-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors"
+                             x-text="usr.nombre">
+                        </div>
+                    </template>
+                    <div x-show="usuariosDisponibles.filter(u => u.nombre.toLowerCase().includes(search.toLowerCase())).length === 0" class="px-3 py-2 text-sm text-gray-500 text-center italic">
+                        No se encontraron agentes
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button @click="registrarIngresoSeleccionado" 
+                :disabled="!agenteSeleccionadoIngreso"
+                class="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-700 disabled:opacity-50">
+            Registrar Ingreso
+        </button>
+    </div>
+
+    <!-- Cola de Agentes -->
+    <div class="flex-grow overflow-y-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <template x-for="(agente, index) in colaAgentes" :key="agente.id">
+                <div class="border rounded-xl shadow-sm bg-white overflow-hidden" 
+                     :class="{'border-green-300': agente.estado === 'DISPONIBLE', 'border-yellow-300': agente.estado === 'ASESORANDO', 'border-blue-300': agente.estado === 'TRABAJANDO'}">
+                    <div class="p-2 border-b border-gray-100 flex justify-between items-center"
+                         :class="{'bg-green-50': agente.estado === 'DISPONIBLE', 'bg-yellow-50': agente.estado === 'ASESORANDO', 'bg-blue-50': agente.estado === 'TRABAJANDO'}">
+                        <div class="flex items-center gap-2">
+                            <span class="flex items-center justify-center w-5 h-5 bg-white border border-gray-300 rounded-full text-xs font-bold" x-text="index + 1"></span>
+                            <span class="font-bold text-gray-800 text-sm truncate" x-text="agente.nombre"></span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs text-gray-500 uppercase font-semibold">Estado</span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full" 
+                                  :class="{
+                                      'bg-green-100 text-green-800': agente.estado === 'DISPONIBLE',
+                                      'bg-yellow-100 text-yellow-800': agente.estado === 'ASESORANDO',
+                                      'bg-blue-100 text-blue-800': agente.estado === 'TRABAJANDO'
+                                  }" x-text="agente.estado">
+                            </span>
+                        </div>
+                        
+                        <div class="mt-2 pt-2 border-t border-gray-100 flex gap-2">
+                            <template x-if="agente.estado === 'DISPONIBLE'">
+                                <button @click="abrirModalPausa(agente)" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded w-full">Pausar</button>
+                            </template>
+                            <template x-if="agente.estado !== 'DISPONIBLE'">
+                                <button @click="forzarDisponible(agente)" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-2 py-1 rounded w-full border border-green-200">Volver a Disponible</button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template x-if="colaAgentes.length === 0">
+                <div class="col-span-full text-center py-6 bg-gray-50 border border-dashed rounded-xl">
+                    <p class="text-gray-500 text-sm">No hay agentes en turno.</p>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
