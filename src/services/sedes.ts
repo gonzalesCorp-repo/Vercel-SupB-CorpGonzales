@@ -14,7 +14,7 @@ export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
     .from('agentes')
     .select('id')
     .eq('email', userEmail)
-    .single();
+    .maybeSingle();
 
   if (errAgente || !agente) {
     console.error("Error obteniendo agente para sedes:", errAgente);

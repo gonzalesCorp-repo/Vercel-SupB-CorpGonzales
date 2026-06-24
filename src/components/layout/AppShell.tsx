@@ -28,9 +28,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         setUserEmail(user.email);
         
         // Cargar rol desde la DB siempre para evitar bugs de caché entre usuarios
-        const { data: agente } = await supabase.from('agentes').select('rol').eq('email', user.email).single();
+        // Usamos maybeSingle() para evitar el error 406 si el usuario aún no existe en la tabla agentes
+        const { data: agente, error: errAgente } = await supabase.from('agentes').select('rol').eq('email', user.email).maybeSingle();
         if (agente && agente.rol) {
           setUserRol(agente.rol);
+        } else {
+          // Si no tiene rol en la base de datos, forzamos a null para mostrar la pantalla de error
+          setUserRol(null);
         }
         
         // Cargar sedes permitidas
@@ -95,6 +99,28 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       ? 'bg-primary-50 text-primary-700 font-semibold' 
       : 'text-gray-600 hover:bg-gray-100'
   }`;
+
+  // Si no se encontró el rol del usuario (No está en la tabla agentes)
+  if (!loadingSedes && !userRol && userEmail !== 'Cargando...') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-lg border border-red-100 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Acceso Denegado</h1>
+          <p className="text-gray-500 mb-6">Tu cuenta de acceso <b>({userEmail})</b> existe, pero no ha sido vinculada al ERP. No tienes ningún rol asignado en la base de datos.</p>
+          <div className="bg-orange-50 text-orange-800 text-sm p-4 rounded-lg mb-6 text-left border border-orange-200">
+            <strong>Solución:</strong><br/>
+            Ve a tu SQL Editor en Supabase y asegúrate de ejecutar exitosamente el script <code>supabase_fase8_sync_final.sql</code>.
+          </div>
+          <button onClick={handleLogout} className="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors">
+            Cerrar Sesión e Intentar de Nuevo
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // PANTALLA DE SELECCIÓN OBLIGATORIA DE SEDE (Si no ha elegido y tiene múltiples)
   if (!loadingSedes && !sedeActiva && misSedes.length > 0) {
