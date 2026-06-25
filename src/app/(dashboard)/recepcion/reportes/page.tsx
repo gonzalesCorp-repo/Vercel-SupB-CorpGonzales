@@ -12,6 +12,7 @@ import {
 
 export default function RecepcionReportesPage() {
   const [fecha, setFecha] = useState('2026-06-24');
+  const [isRealtimeConnected, setIsRealtimeConnected] = useState(true);
   
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 bg-slate-50 min-h-screen">
@@ -55,9 +56,17 @@ export default function RecepcionReportesPage() {
             </select>
           </div>
 
-          <button className="mt-4 p-2 border border-blue-200 text-blue-600 rounded-md hover:bg-blue-50 transition-colors">
-            <RefreshCcw className="w-4 h-4" />
-          </button>
+          <div className="flex flex-col ml-2">
+            <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 opacity-0">Sync</label>
+            <button 
+              onClick={() => setIsRealtimeConnected(!isRealtimeConnected)}
+              className="relative p-1.5 border border-slate-200 text-slate-500 rounded-md hover:bg-slate-50 hover:text-blue-600 transition-colors"
+              title={isRealtimeConnected ? "Sincronizado en tiempo real" : "Conexión perdida. Clic para recargar."}
+            >
+              <RefreshCcw className="w-4 h-4" />
+              <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white ${isRealtimeConnected ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`}></span>
+            </button>
+          </div>
         </div>
       </div>
 
