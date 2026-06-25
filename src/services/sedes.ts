@@ -13,7 +13,7 @@ export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
   const { data: agente, error: errAgente } = await supabase
     .from('agentes')
     .select('id')
-    .eq('email', userEmail)
+    .ilike('email', userEmail)
     .maybeSingle();
 
   if (errAgente || !agente) {
