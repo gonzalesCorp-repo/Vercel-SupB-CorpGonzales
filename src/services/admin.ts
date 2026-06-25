@@ -63,7 +63,7 @@ export async function obtenerTodosLosAgentes(): Promise<any[]> {
   }
   
   // Transformar la data para que sea más fácil de usar en el frontend
-  return data.map(agente => ({
+  return data.map((agente: any) => ({
     ...agente,
     sedes_ids: agente.sedes_usuarios ? agente.sedes_usuarios.map((su: any) => su.sede_id) : []
   }));

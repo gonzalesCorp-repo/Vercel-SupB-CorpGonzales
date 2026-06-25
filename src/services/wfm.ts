@@ -48,7 +48,7 @@ export async function obtenerMapaSalon(): Promise<MapaSalonData[]> {
   // 3. Mapear datos
   const mapa = (ubicaciones as Ubicacion[]).map(ubi => {
     // Buscar si hay un OATC en esta ubicacion
-    const ocupante = (oatcs || []).find(o => o.ubicacion_id === ubi.id);
+    const ocupante = (oatcs || []).find((o: any) => o.ubicacion_id === ubi.id);
     
     // Calcular tiempo estimado total del punto de partida
     let tiempo_estimado = 0;
