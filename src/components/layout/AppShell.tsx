@@ -7,6 +7,7 @@ import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, 
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { obtenerSedesUsuario, Sede } from '@/services/sedes';
+import { NotificationTicker } from './NotificationTicker';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -171,10 +172,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <Menu className="w-6 h-6" />
               </button>
-              <span className="ms-2 md:me-24 text-xl font-bold text-primary-700 tracking-tight">
+              <span className="ms-2 md:me-24 text-xl font-bold text-primary-700 tracking-tight whitespace-nowrap">
                 Gonzales Spa <span className="text-xs font-normal text-gray-500 ml-2">ERP</span>
               </span>
             </div>
+            
+            <NotificationTicker />
+
             <div className="flex items-center gap-4">
                 {/* Selector Dropdown de Sede Superior */}
                 {sedeActiva && misSedes.length > 1 && (
