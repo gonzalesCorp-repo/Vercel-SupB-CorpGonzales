@@ -174,9 +174,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <Menu className="w-6 h-6" />
               </button>
-              <span className="ms-2 md:me-24 text-xl font-bold text-primary-700 tracking-tight whitespace-nowrap">
-                Gonzales Spa <span className="text-xs font-normal text-gray-500 ml-2">ERP</span>
-              </span>
+              <div className="flex items-center gap-2 ms-2 md:me-24">
+                <img src="/vaikuntha-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+                <span className="text-xl font-bold text-primary-700 tracking-tight whitespace-nowrap">
+                  {sedeActiva ? sedeActiva.nombre : 'Vaikuntha'} <span className="text-xs font-normal text-gray-500 ml-1">ERP</span>
+                </span>
+              </div>
             </div>
             
             <NotificationTicker />

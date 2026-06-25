@@ -57,9 +57,10 @@ export default function LoginPage() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-50 bg-opacity-95">
       <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-lg border border-gray-100">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary-600">Gonzales Spa</h1>
-          <p className="text-gray-500 mt-2">Acceso al Sistema ERP</p>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <img src="/vaikuntha-logo.png" alt="Vaikuntha ERP Logo" className="w-16 h-16 object-contain mb-3" />
+          <h1 className="text-3xl font-bold text-primary-600">Vaikuntha ERP</h1>
+          <p className="text-gray-500 mt-2">Acceso al Sistema Sandbox</p>
         </div>
         
         <form onSubmit={handleLogin}>
