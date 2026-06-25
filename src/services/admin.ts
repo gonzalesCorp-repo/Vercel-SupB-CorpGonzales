@@ -36,7 +36,7 @@ export async function obtenerMeticasGlobales(): Promise<KPIReporte> {
     console.error("Error obteniendo métricas (tickets):", errorTickets);
   }
 
-  const totalVentas = (facturas || []).reduce((sum, item) => sum + Number(item.total), 0);
+  const totalVentas = (facturas || []).reduce((sum: number, item: any) => sum + Number(item.total), 0);
   const cantFacturas = (facturas || []).length;
   const ticketPromedio = cantFacturas > 0 ? totalVentas / cantFacturas : 0;
 
