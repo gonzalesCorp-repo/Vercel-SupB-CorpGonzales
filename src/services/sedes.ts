@@ -9,6 +9,8 @@ export interface Sede {
 }
 
 export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
+  if (!userEmail) return [];
+
   // 1. Obtener ID y rol del agente
   const { data: agente, error: errAgente } = await supabase
     .from('agentes')
@@ -16,8 +18,12 @@ export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
     .ilike('email', userEmail.trim())
     .maybeSingle();
 
-  if (errAgente || !agente) {
+  if (errAgente) {
     console.error("Error obteniendo agente para sedes:", errAgente);
+    return [];
+  }
+  
+  if (!agente) {
     return [];
   }
 
