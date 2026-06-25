@@ -29,8 +29,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         
         // Cargar rol desde la DB siempre para evitar bugs de caché entre usuarios
         // Usamos maybeSingle() para evitar el error 406 si el usuario aún no existe en la tabla agentes
-        // Usamos ilike para evitar problemas de mayúsculas/minúsculas en el correo
-        const { data: agente, error: errAgente } = await supabase.from('agentes').select('rol').ilike('email', user.email).maybeSingle();
+        // Usamos ilike y trim() para evitar problemas de mayúsculas/minúsculas y espacios invisibles en el correo
+        const { data: agente, error: errAgente } = await supabase.from('agentes').select('rol').ilike('email', user.email.trim()).maybeSingle();
         
         if (errAgente) console.error('Error fetching agente:', errAgente);
 
