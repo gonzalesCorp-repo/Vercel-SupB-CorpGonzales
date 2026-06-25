@@ -11,6 +11,7 @@ import { NotificationTicker } from './NotificationTicker';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('Cargando...');
   const pathname = usePathname();
   const router = useRouter();
@@ -167,8 +168,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-start">
               <button 
-                onClick={() => setSidebarOpen(!sidebarOpen)} 
-                className="p-2 text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 transition-colors"
+                onClick={() => { setSidebarOpen(!sidebarOpen); setDesktopSidebarCollapsed(!desktopSidebarCollapsed); }} 
+                className="p-2 text-gray-500 rounded-lg hover:bg-gray-100 transition-colors"
+                title="Alternar Menú"
               >
                 <Menu className="w-6 h-6" />
               </button>
@@ -224,9 +226,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar Lateral Izquierdo */}
       <aside 
-        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 bg-white border-r border-gray-200 transition-transform lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 bg-white border-r border-gray-200 transition-transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } ${desktopSidebarCollapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}`}
       >
         <div className="h-full px-3 pb-4 overflow-y-auto bg-white">
           <ul className="space-y-4 font-medium">
@@ -370,7 +372,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Contenido Principal */}
-      <div className="p-4 lg:ml-64 pt-20 min-h-screen">
+      <div className={`p-4 pt-20 min-h-screen transition-all ${desktopSidebarCollapsed ? 'lg:ml-0' : 'lg:ml-64'}`}>
         {children}
       </div>
 
