@@ -9,10 +9,10 @@ export interface Sede {
 }
 
 export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
-  // 1. Obtener ID del agente
+  // 1. Obtener ID y rol del agente
   const { data: agente, error: errAgente } = await supabase
     .from('agentes')
-    .select('id')
+    .select('id, rol')
     .ilike('email', userEmail)
     .maybeSingle();
 
@@ -21,7 +21,18 @@ export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
     return [];
   }
 
-  // 2. Obtener sedes permitidas
+  // Si es SUPERADMIN, darle acceso automático a TODAS las sedes
+  if (agente.rol && agente.rol.toUpperCase() === 'SUPERADMIN') {
+    const { data: todasSedes, error: errTodas } = await supabase
+      .from('sedes')
+      .select('id, nombre, direccion');
+      
+    if (!errTodas && todasSedes) {
+      return todasSedes;
+    }
+  }
+
+  // 2. Obtener sedes permitidas si no es SUPERADMIN
   const { data: sedesUsuarios, error: errSedes } = await supabase
     .from('sedes_usuarios')
     .select('sede_id, sedes(id, nombre, direccion)')

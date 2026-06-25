@@ -27,28 +27,24 @@ DECLARE
     id_ven UUID;
 
 BEGIN
-    -- 0. Eliminar la restricción (CHECK constraint) del rol para permitir múltiples roles separados por comas
-    ALTER TABLE public.agentes DROP CONSTRAINT IF EXISTS agentes_rol_check;
-
     -- 1. Obtener el ID del Sandbox
     SELECT id INTO sandbox_id FROM sedes WHERE nombre ILIKE '%Prueba%' LIMIT 1;
     
-    -- Si no existe la sede de prueba, no podemos hacer mucho
+    -- Si no existe la sede de prueba, la creamos al vuelo para garantizar que funcione
     IF sandbox_id IS NULL THEN
-        RAISE NOTICE 'No se encontro la sede de Prueba';
-        RETURN;
+        INSERT INTO public.sedes (nombre, direccion, tipo) VALUES ('Sandbox Prueba', 'Virtual', 'PROPIO') RETURNING id INTO sandbox_id;
     END IF;
 
-    -- 2. Buscamos los IDs de los usuarios que creaste manualmente en Authentication
-    SELECT id INTO id_op1 FROM auth.users WHERE email = correo_op1;
-    SELECT id INTO id_op2 FROM auth.users WHERE email = correo_op2;
-    SELECT id INTO id_op3 FROM auth.users WHERE email = correo_op3;
-    SELECT id INTO id_rec FROM auth.users WHERE email = correo_rec;
-    SELECT id INTO id_caj FROM auth.users WHERE email = correo_caj;
-    SELECT id INTO id_des FROM auth.users WHERE email = correo_des;
-    SELECT id INTO id_wfm FROM auth.users WHERE email = correo_wfm;
-    SELECT id INTO id_adm FROM auth.users WHERE email = correo_adm;
-    SELECT id INTO id_ven FROM auth.users WHERE email = correo_ven;
+    -- 2. Buscamos los IDs usando ILIKE para evitar problemas de mayúsculas o espacios extra
+    SELECT id INTO id_op1 FROM auth.users WHERE email ILIKE correo_op1;
+    SELECT id INTO id_op2 FROM auth.users WHERE email ILIKE correo_op2;
+    SELECT id INTO id_op3 FROM auth.users WHERE email ILIKE correo_op3;
+    SELECT id INTO id_rec FROM auth.users WHERE email ILIKE correo_rec;
+    SELECT id INTO id_caj FROM auth.users WHERE email ILIKE correo_caj;
+    SELECT id INTO id_des FROM auth.users WHERE email ILIKE correo_des;
+    SELECT id INTO id_wfm FROM auth.users WHERE email ILIKE correo_wfm;
+    SELECT id INTO id_adm FROM auth.users WHERE email ILIKE correo_adm;
+    SELECT id INTO id_ven FROM auth.users WHERE email ILIKE correo_ven;
 
     -- 3. Insertamos o actualizamos en la tabla 'agentes' (El ERP real)
     IF id_op1 IS NOT NULL THEN
@@ -67,7 +63,7 @@ BEGIN
     END IF;
 
     IF id_rec IS NOT NULL THEN
-        INSERT INTO public.agentes (id, nombre, email, rol, estado) VALUES (id_rec, 'Recepcionista Prueba', correo_rec, 'RECEPCION,WFM', 'DISPONIBLE') ON CONFLICT (id) DO UPDATE SET rol = 'RECEPCION,WFM';
+        INSERT INTO public.agentes (id, nombre, email, rol, estado) VALUES (id_rec, 'Recepcionista Prueba', correo_rec, 'RECEPCION', 'DISPONIBLE') ON CONFLICT (id) DO UPDATE SET rol = 'RECEPCION';
         INSERT INTO public.sedes_usuarios (agente_id, sede_id) VALUES (id_rec, sandbox_id) ON CONFLICT DO NOTHING;
     END IF;
 
