@@ -9,6 +9,7 @@ import { Modal } from '@/components/ui/Modal';
 // Extendemos Agente base con campos extra para admin
 interface AgenteAdmin extends Agente {
   email?: string;
+  password?: string;
   rol?: string;
   sedes_ids?: string[];
 }
@@ -21,6 +22,7 @@ export default function UsuariosPage() {
   const [formData, setFormData] = useState<Partial<AgenteAdmin>>({
     nombre: '',
     email: '',
+    password: '',
     rol: 'STAFF',
     estado: 'DISPONIBLE',
     sedes_ids: []
@@ -59,7 +61,7 @@ export default function UsuariosPage() {
 
   const openNewUserModal = () => {
     setEditId(null);
-    setFormData({ nombre: '', email: '', rol: 'STAFF', estado: 'DISPONIBLE', sedes_ids: [] });
+    setFormData({ nombre: '', email: '', password: '', rol: 'STAFF', estado: 'DISPONIBLE', sedes_ids: [] });
     setIsModalOpen(true);
   };
 
@@ -78,7 +80,7 @@ export default function UsuariosPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditId(null);
-    setFormData({ nombre: '', email: '', rol: 'STAFF', estado: 'DISPONIBLE', sedes_ids: [] });
+    setFormData({ nombre: '', email: '', password: '', rol: 'STAFF', estado: 'DISPONIBLE', sedes_ids: [] });
   };
 
   return (
@@ -188,6 +190,21 @@ export default function UsuariosPage() {
               placeholder="Para acceder al sistema ERP"
             />
           </div>
+          
+          {!editId && (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Contraseña Inicial *</label>
+              <input 
+                type="text" 
+                value={formData.password}
+                onChange={e => setFormData({...formData, password: e.target.value})}
+                className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                required={!editId}
+                placeholder="Ej. temporal123"
+              />
+              <p className="text-[10px] text-slate-500 mt-1">El usuario usará esta contraseña para su primer ingreso.</p>
+            </div>
+          )}
           
           <div className="grid grid-cols-2 gap-4">
             <div>

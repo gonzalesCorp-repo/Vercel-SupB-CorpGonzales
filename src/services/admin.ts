@@ -98,23 +98,34 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
       return false;
     }
   } else {
-    // Crear
-    const { data, error } = await supabase
-      .from('agentes')
-      .insert([{
-        nombre: agente.nombre,
-        email: agente.email,
-        rol: agente.rol,
-        estado: 'DISPONIBLE'
-      }])
-      .select('id')
-      .single();
-
-    if (error || !data) {
-      console.error("Error creando agente:", error);
+    // Crear vía API (Supabase Auth)
+    try {
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: agente.nombre,
+          email: agente.email,
+          password: agente.password,
+          rol: agente.rol,
+          sedes_ids: sedes_ids
+        })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        console.error("Error desde API:", result.error);
+        alert(`Error al crear usuario: ${result.error}`);
+        return false;
+      }
+      agenteId = result.userId;
+      
+      // Las sedes ya se asignaron en el backend para usuarios nuevos
+      await registrarLog('ADMIN', `Creó usuario ${agente.email}`, { rol: agente.rol, sedes: sedes_ids.length });
+      return true;
+    } catch (err) {
+      console.error("Error llamando a API:", err);
       return false;
     }
-    agenteId = data.id;
   }
 
   // Sincronizar Sedes
