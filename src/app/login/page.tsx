@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { useEffect } from 'react';
+import { registrarLog } from '@/services/logger';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -35,6 +36,9 @@ export default function LoginPage() {
         if (authError) {
           throw authError;
         }
+
+        // Registrar auditoría de inicio de sesión
+        await registrarLog('AUTH', 'Inicio de sesión exitoso', { method: 'password' });
 
         // Redirect to dashboard/reception page
         router.push('/recepcion');
