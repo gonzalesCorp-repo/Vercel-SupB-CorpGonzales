@@ -265,6 +265,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       Reportes Recepción
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/wfm" className={navItemClass('/wfm')}>
+                      <LayoutDashboard className="w-5 h-5 mr-3" />
+                      Mapa WFM
+                    </Link>
+                  </li>
                 </ul>
               </li>
             )}
@@ -307,13 +313,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   <li>
                     <Link href="/operaciones" className={navItemClass('/operaciones')}>
                       <Briefcase className="w-5 h-5 mr-3" />
-                      Staff en Cabina
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/wfm" className={navItemClass('/wfm')}>
-                      <LayoutDashboard className="w-5 h-5 mr-3" />
-                      Mapa WFM
+                      Workspace Operativo
                     </Link>
                   </li>
                 </ul>

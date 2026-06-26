@@ -1,39 +1,81 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, CheckSquare, Plus, Bell, RefreshCw } from 'lucide-react';
+import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus } from 'lucide-react';
 import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo } from '@/services/operaciones';
 import { OATC } from '@/services/recepcion';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { createClient } from '@/lib/supabase/client';
+import { Modal } from '@/components/ui/Modal';
 
-export default function OperacionesPage() {
-  const [tickets, setTickets] = useState<OATC[]>([]);
+// Extendemos OATC localmente para la demo si es necesario
+interface OATCExtended extends OATC {
+  estado_ui?: 'Espera' | 'En Curso' | 'Finalizado';
+}
+
+export default function WorkspaceOperativoPage() {
+  const [tickets, setTickets] = useState<OATCExtended[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
   
+  // Modales
+  const [showLabModal, setShowLabModal] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [showAddServiceModal, setShowAddServiceModal] = useState(false);
   
-  // Para pruebas rápidas, asumimos que somos Juan Pérez. En la app real sacaremos esto del Auth Context.
-  const AGENTE_NOMBRE_DEMO = 'Juan Pérez'; 
-
+  // Estados para Lab
   const [insumo, setInsumo] = useState('');
+  const [cabinaSolicitante, setCabinaSolicitante] = useState('');
   const [isEnviando, setIsEnviando] = useState(false);
   const [mensajeOk, setMensajeOk] = useState('');
 
-  const cargarMisTickets = async () => {
+  // Estados para PIN y Añadir Servicio
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState(false);
+  const [selectedOatc, setSelectedOatc] = useState<OATCExtended | null>(null);
+
+  const cargarTickets = async () => {
     setIsLoading(true);
-    const data = await obtenerTicketsAsignados(AGENTE_NOMBRE_DEMO);
+    // Para modo Quiosco, traemos todos los tickets activos de la sede (usaremos un mock si la DB está vacía)
+    let data = await obtenerTicketsAsignados('ALL'); // Simulamos pedir todos
+    
+    // MOCK DATA SI ESTA VACIO
+    if (!data || data.length === 0) {
+      data = [
+        {
+          id: 'mock-1',
+          sede_id: 'sede-1',
+          codigo_ticket: 'OATC-1001',
+          cliente_id: 'c-1',
+          cliente_nombre: 'María Gómez',
+          estado_proceso: 'ASESORANDO',
+          agente_nombre: 'Lucía (Estilista)',
+          punto_partida: [{ servicio: 'Corte de Dama', cantidad: 1, monto: 50 }],
+          estado_ui: 'Espera'
+        } as any,
+        {
+          id: 'mock-2',
+          sede_id: 'sede-1',
+          codigo_ticket: 'OATC-1002',
+          cliente_id: 'c-2',
+          cliente_nombre: 'Pedro Pascal',
+          estado_proceso: 'ASESORANDO',
+          agente_nombre: 'Carlos (Barbero)',
+          punto_partida: [{ servicio: 'Corte y Barba', cantidad: 1, monto: 40 }],
+          estado_ui: 'En Curso'
+        } as any
+      ];
+    }
+
     setTickets(data);
     setIsLoading(false);
   };
 
   useEffect(() => {
-    cargarMisTickets();
+    cargarTickets();
     
     // Realtime Suscripción
     const channel = supabase.channel('realtime-operaciones')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarMisTickets())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarTickets())
       .subscribe();
       
     return () => {
@@ -41,139 +83,281 @@ export default function OperacionesPage() {
     };
   }, []);
 
-  const handleTerminar = async (ticketId: string) => {
-    if (confirm("¿Estás seguro de terminar la atención de este cliente? Pasará a caja para el cobro.")) {
-      await terminarAtencion(ticketId);
-      cargarMisTickets();
+  // --- Handlers de Acciones ---
+
+  const handleIniciarAtencion = (id: string) => {
+    // Mock: Cambiar estado local a En Curso
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, estado_ui: 'En Curso' } : t));
+  };
+
+  const handleEnviarCaja = async (id: string) => {
+    if (confirm("¿Enviar esta orden a Caja para finalizar la cobranza?")) {
+      // Mock: Quitar de la lista
+      setTickets(prev => prev.filter(t => t.id !== id));
+      // En producción: await terminarAtencion(id);
     }
   };
+
+  // --- Flujo Añadir Servicio ---
+
+  const iniciarAñadirServicio = (oatc: OATCExtended) => {
+    setSelectedOatc(oatc);
+    setPin('');
+    setPinError(false);
+    setShowPinModal(true);
+  };
+
+  const verificarPin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Validar PIN (Mock: cualquier PIN de 4 dígitos es válido, menos 0000)
+    if (pin.length >= 4 && pin !== '0000') {
+      setShowPinModal(false);
+      setShowAddServiceModal(true);
+    } else {
+      setPinError(true);
+    }
+  };
+
+  const confirmarNuevoServicio = () => {
+    alert(`Servicio extra añadido a la orden de ${selectedOatc?.cliente_nombre}.`);
+    setShowAddServiceModal(false);
+    setSelectedOatc(null);
+  };
+
+  // --- Flujo Laboratorio ---
 
   const handlePedirInsumo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!insumo) return;
+    if (!insumo || !cabinaSolicitante) return;
     
     setIsEnviando(true);
-    const pedido: PedidoInsumo = {
-      agente_id: 'd0e3a9c7-5e60-4e4c-8b8a-3d2e1f8a9b7c', // ID dummy por ahora
-      agente_nombre: AGENTE_NOMBRE_DEMO,
-      insumo_solicitado: insumo
-    };
-    
-    const exito = await pedirInsumo(pedido);
-    if (exito) {
-      setMensajeOk('¡Pedido enviado al laboratorio!');
+    // Mock envío
+    setTimeout(() => {
+      setMensajeOk('¡Pedido enviado a Laboratorio!');
       setInsumo('');
-      setTimeout(() => setMensajeOk(''), 3000);
-    }
-    setIsEnviando(false);
+      setCabinaSolicitante('');
+      setTimeout(() => {
+        setMensajeOk('');
+        setShowLabModal(false);
+      }, 2000);
+      setIsEnviando(false);
+    }, 1000);
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="bg-indigo-100 p-3 rounded-full text-indigo-600">
+    <div className="max-w-7xl mx-auto space-y-6">
+      
+      {/* Header Modo Quiosco */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-5 rounded-2xl border border-gray-200 shadow-sm gap-4">
+        <div className="flex items-center gap-4">
+          <div className="bg-indigo-900 p-3 rounded-xl text-white shadow-md">
             <User className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Hola, {AGENTE_NOMBRE_DEMO}</h1>
-            <p className="text-sm text-gray-500">Panel de Operaciones en Cabina</p>
+            <h1 className="text-2xl font-bold text-gray-900">Workspace Operativo</h1>
+            <p className="text-sm text-gray-500 font-medium">Panel Compartido - Operaciones de Piso</p>
           </div>
         </div>
-        <button onClick={cargarMisTickets} className="p-2 text-gray-400 hover:text-indigo-600 transition">
-          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        {/* Mis Clientes Actuales */}
-        <div className="space-y-4">
-          <h2 className="font-bold text-gray-800 flex items-center gap-2">
-            <CheckSquare className="w-5 h-5 text-indigo-600" />
-            Mis Clientes Activos
-          </h2>
-          
-          {isLoading ? (
-            <div className="text-center p-8 bg-white rounded-xl border border-gray-200">Cargando...</div>
-          ) : tickets.length === 0 ? (
-            <div className="text-center p-8 bg-white rounded-xl border border-gray-200 shadow-sm text-gray-500">
-              No tienes clientes asignados en este momento.
-            </div>
-          ) : (
-            tickets.map(ticket => (
-              <div key={ticket.id} className="bg-white p-5 rounded-xl border-l-4 border-l-indigo-500 border border-gray-200 shadow-sm">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-lg text-gray-900">{ticket.cliente_nombre}</h3>
-                  <span className="text-xs text-gray-400">
-                    {ticket.created_at ? formatDistanceToNow(new Date(ticket.created_at), { addSuffix: true, locale: es }) : ''}
-                  </span>
-                </div>
-                
-                <div className="bg-gray-50 p-3 rounded-lg mb-4">
-                  <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Servicios a realizar:</p>
-                  <ul className="text-sm space-y-1 text-gray-700">
-                    {ticket.punto_partida?.map((item: any, i: number) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
-                        {item.nombre}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <button 
-                  onClick={() => handleTerminar(ticket.id!)}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
-                >
-                  <CheckSquare className="w-5 h-5" />
-                  Terminar Atención
-                </button>
-              </div>
-            ))
-          )}
+        <div className="flex gap-3 w-full md:w-auto">
+          <button 
+            onClick={() => setShowLabModal(true)}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-orange-100 hover:bg-orange-200 text-orange-700 px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
+          >
+            <Beaker className="w-5 h-5" />
+            Solicitud a Lab
+          </button>
+          <button onClick={cargarTickets} className="p-2.5 text-gray-500 bg-gray-100 rounded-xl hover:text-indigo-600 hover:bg-indigo-50 transition shadow-sm">
+            <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
-
-        {/* Pedir Insumos al Laboratorio */}
-        <div className="space-y-4">
-          <h2 className="font-bold text-gray-800 flex items-center gap-2">
-            <Bell className="w-5 h-5 text-red-500" />
-            Solicitud Rápida a Laboratorio
-          </h2>
-          
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-            <form onSubmit={handlePedirInsumo} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">¿Qué necesitas?</label>
-                <textarea 
-                  value={insumo}
-                  onChange={e => setInsumo(e.target.value)}
-                  rows={3}
-                  className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50"
-                  placeholder="Ej: Mezcla tinte rubio cenizo, Toallas limpias, Guantes M..."
-                  required
-                />
-              </div>
-              
-              <button 
-                type="submit" 
-                disabled={isEnviando || !insumo}
-                className="w-full bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-bold py-3 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                {isEnviando ? 'Enviando...' : 'Pedir Insumo'}
-              </button>
-              
-              {mensajeOk && (
-                <div className="p-3 bg-green-50 text-green-700 text-sm font-medium rounded-lg text-center border border-green-200">
-                  {mensajeOk}
-                </div>
-              )}
-            </form>
-          </div>
-        </div>
-
       </div>
+
+      {/* Grid de Atenciones Activas */}
+      <div className="space-y-4">
+        <h2 className="font-bold text-gray-800 text-lg flex items-center gap-2">
+          Atenciones en Piso
+        </h2>
+        
+        {isLoading ? (
+          <div className="text-center p-12 bg-white rounded-2xl border border-gray-200">Cargando...</div>
+        ) : tickets.length === 0 ? (
+          <div className="text-center p-12 bg-white rounded-2xl border border-gray-200 shadow-sm text-gray-500 font-medium">
+            No hay atenciones activas en este momento.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {tickets.map(ticket => {
+              const isEnCurso = ticket.estado_ui === 'En Curso';
+              
+              return (
+                <div key={ticket.id} className={`bg-white rounded-2xl border ${isEnCurso ? 'border-indigo-200 shadow-md' : 'border-gray-200 shadow-sm'} overflow-hidden transition-all`}>
+                  
+                  {/* Info Header */}
+                  <div className={`p-4 border-b ${isEnCurso ? 'bg-indigo-50' : 'bg-gray-50'} flex justify-between items-start`}>
+                    <div>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{ticket.codigo_ticket}</span>
+                      <h3 className="text-xl font-black text-gray-800 mt-0.5">{ticket.cliente_nombre}</h3>
+                      <p className="text-sm text-gray-600 mt-1"><span className="font-semibold text-gray-400">Atendido por:</span> {ticket.agente_nombre}</p>
+                    </div>
+                    <div>
+                       {isEnCurso ? (
+                         <span className="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold text-xs rounded-full uppercase tracking-widest flex items-center gap-1">
+                           <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> En Curso
+                         </span>
+                       ) : (
+                         <span className="px-3 py-1 bg-yellow-100 text-yellow-700 font-bold text-xs rounded-full uppercase tracking-widest">
+                           En Espera
+                         </span>
+                       )}
+                    </div>
+                  </div>
+
+                  {/* Servicios */}
+                  <div className="p-4 bg-white">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Servicios Solicitados</p>
+                    <ul className="space-y-1 mb-4">
+                      {ticket.punto_partida?.map((srv: any, i: number) => (
+                        <li key={i} className="flex justify-between items-center text-sm font-medium text-gray-700 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                          <span>{srv.servicio}</span>
+                          <span className="text-gray-400 font-bold">x{srv.cantidad || 1}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    {/* Panel de Botones Táctiles */}
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                      
+                      {!isEnCurso && (
+                        <button 
+                          onClick={() => handleIniciarAtencion(ticket.id)}
+                          className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                        >
+                          <PlayCircle className="w-5 h-5" /> Iniciar
+                        </button>
+                      )}
+
+                      {isEnCurso && (
+                        <>
+                          <button 
+                            onClick={() => iniciarAñadirServicio(ticket)}
+                            className="flex-1 bg-white hover:bg-gray-50 border-2 border-dashed border-gray-300 text-gray-600 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
+                          >
+                            <PlusCircle className="w-5 h-5" /> Extra
+                          </button>
+                          <button 
+                            onClick={() => handleEnviarCaja(ticket.id)}
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                          >
+                            <CheckCircle className="w-5 h-5" /> Terminar
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* MODAL: Solicitud a Laboratorio */}
+      <Modal isOpen={showLabModal} onClose={() => setShowLabModal(false)} title="Solicitud a Laboratorio" maxWidth="max-w-md">
+        <form onSubmit={handlePedirInsumo} className="space-y-5 mt-2">
+           <div>
+             <label className="block text-sm font-bold text-gray-700 mb-1">Insumo Necesario</label>
+             <input 
+               type="text" 
+               value={insumo}
+               onChange={(e) => setInsumo(e.target.value)}
+               placeholder="Ej: Tinte Rubio 7.1, Oxidante 20vol..." 
+               className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium"
+               required
+             />
+           </div>
+           <div>
+             <label className="block text-sm font-bold text-gray-700 mb-1">Ubicación / Cabina Solicitante</label>
+             <input 
+               type="text" 
+               value={cabinaSolicitante}
+               onChange={(e) => setCabinaSolicitante(e.target.value)}
+               placeholder="Ej: Tocador 4, Cabina VIP..." 
+               className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium"
+               required
+             />
+           </div>
+           
+           {mensajeOk && (
+             <div className="bg-emerald-50 text-emerald-700 p-3 rounded-lg text-sm font-bold border border-emerald-200 text-center">
+               {mensajeOk}
+             </div>
+           )}
+
+           <button 
+             type="submit" 
+             disabled={isEnviando}
+             className="w-full bg-orange-600 text-white font-bold py-3.5 rounded-xl hover:bg-orange-700 disabled:opacity-50 transition-colors shadow-md text-lg"
+           >
+             {isEnviando ? 'Enviando...' : 'Enviar Solicitud Urgente'}
+           </button>
+        </form>
+      </Modal>
+
+      {/* MODAL: Solicitar PIN para añadir servicios */}
+      <Modal isOpen={showPinModal} onClose={() => setShowPinModal(false)} title="Autorización Requerida" maxWidth="max-w-sm">
+        <form onSubmit={verificarPin} className="space-y-5 mt-4 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="bg-red-100 p-4 rounded-full text-red-600">
+              <Lock className="w-8 h-8" />
+            </div>
+          </div>
+          <h3 className="font-bold text-gray-800 text-lg">Ingrese su PIN de Operario</h3>
+          <p className="text-sm text-gray-500">Para modificar la orden de {selectedOatc?.cliente_nombre}, identifíquese.</p>
+          
+          <input 
+            type="password" 
+            maxLength={4}
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            className="w-full text-center text-3xl tracking-[1em] font-black border-b-2 border-gray-300 focus:border-indigo-600 focus:outline-none py-2 bg-transparent"
+            autoFocus
+          />
+          {pinError && <p className="text-red-500 text-sm font-bold">PIN incorrecto. Intente nuevamente.</p>}
+
+          <button 
+             type="submit" 
+             className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-black transition-colors shadow-md"
+           >
+             Verificar y Continuar
+           </button>
+        </form>
+      </Modal>
+
+      {/* MODAL: Añadir Servicio (Mockup Catálogo) */}
+      <Modal isOpen={showAddServiceModal} onClose={() => setShowAddServiceModal(false)} title={`Añadir a: ${selectedOatc?.cliente_nombre}`} maxWidth="max-w-xl">
+        <div className="space-y-4 mt-2">
+           <div className="relative mb-4">
+              <input type="text" placeholder="Buscar servicio..." className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 bg-gray-50" />
+              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
+           </div>
+           
+           <div className="space-y-2 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
+             {['Tratamiento Capilar Profundo', 'Peinado Especial', 'Decoloración Extra'].map((s, i) => (
+               <div key={i} className="flex justify-between items-center p-3 border border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
+                 <div>
+                   <p className="font-bold text-gray-800">{s}</p>
+                   <p className="text-xs text-gray-500">Adicional</p>
+                 </div>
+                 <button onClick={confirmarNuevoServicio} className="bg-indigo-100 text-indigo-700 p-2 rounded-lg hover:bg-indigo-200 transition-colors">
+                   <Plus className="w-5 h-5" />
+                 </button>
+               </div>
+             ))}
+           </div>
+        </div>
+      </Modal>
+
     </div>
   );
 }
