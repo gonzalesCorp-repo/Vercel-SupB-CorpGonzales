@@ -132,7 +132,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   // PANTALLA DE SELECCIÓN OBLIGATORIA DE SEDE (Si no ha elegido y tiene múltiples)
-  if (!loadingSedes && !sedeActiva && misSedes.length > 0) {
+  if (!loadingSedes && !sedeActiva && misSedes.length > 1) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 max-w-md w-full text-center">
