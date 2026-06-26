@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, Shield, Edit2, CheckCircle, XCircle } from 'lucide-react';
+import { Users, Shield, Edit2, CheckCircle, XCircle, Plus } from 'lucide-react';
 import { obtenerTodosLosAgentes, guardarAgente, obtenerTodasLasSedes } from '@/services/admin';
 import { Agente } from '@/services/recepcion';
+import { Modal } from '@/components/ui/Modal';
 
 // Extendemos Agente base con campos extra para admin
 interface AgenteAdmin extends Agente {
@@ -16,10 +17,12 @@ export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<AgenteAdmin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<AgenteAdmin>>({
     nombre: '',
     email: '',
     rol: 'STAFF',
+    estado: 'DISPONIBLE',
     sedes_ids: []
   });
   const [editId, setEditId] = useState<string | null>(null);
@@ -48,14 +51,19 @@ export default function UsuariosPage() {
     const exito = await guardarAgente({ ...formData, id: editId }, formData.sedes_ids || []);
     if (exito) {
       cargarDatos();
-      setFormData({ nombre: '', email: '', rol: 'STAFF', sedes_ids: [] });
-      setEditId(null);
+      closeModal();
     }
     
     setIsSaving(false);
   };
 
-  const handleEdit = (user: AgenteAdmin) => {
+  const openNewUserModal = () => {
+    setEditId(null);
+    setFormData({ nombre: '', email: '', rol: 'STAFF', estado: 'DISPONIBLE', sedes_ids: [] });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (user: AgenteAdmin) => {
     setEditId(user.id!);
     setFormData({
       nombre: user.nombre,
@@ -64,184 +72,197 @@ export default function UsuariosPage() {
       estado: user.estado,
       sedes_ids: user.sedes_ids || []
     });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditId(null);
+    setFormData({ nombre: '', email: '', rol: 'STAFF', estado: 'DISPONIBLE', sedes_ids: [] });
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
-        <p className="text-sm text-gray-500 mt-1">Administra los roles, accesos y estado del personal en el sistema.</p>
+    <div className="max-w-7xl mx-auto space-y-6 p-6 min-h-[calc(100vh-4rem)] bg-slate-50">
+      
+      {/* Header Admin */}
+      <div className="flex justify-between items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="bg-indigo-100 p-3 rounded-xl text-indigo-600 shadow-sm">
+            <Users className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Gestión de Usuarios</h1>
+            <p className="text-sm text-slate-500">Administra los roles, accesos y estado del personal en el sistema.</p>
+          </div>
+        </div>
+        <button 
+          onClick={openNewUserModal} 
+          className="flex items-center gap-2 text-sm text-white bg-indigo-600 px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-md font-semibold"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Nuevo Usuario</span>
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
+          <h3 className="font-bold text-slate-800 flex items-center gap-2">
+            Directorio del Staff
+          </h3>
+        </div>
         
-        {/* Columna Izquierda: Lista de Usuarios */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
-              <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                <Users className="w-5 h-5 text-indigo-600" /> 
-                Directorio del Staff
-              </h3>
-            </div>
-            
-            <div className="overflow-x-auto">
-              {isLoading ? (
-                <div className="p-10 text-center text-gray-500">Cargando usuarios...</div>
-              ) : (
-                <table className="w-full text-sm text-left text-gray-600">
-                  <thead className="text-xs text-gray-500 uppercase bg-gray-50/50">
-                    <tr>
-                      <th className="px-5 py-3">Nombre</th>
-                      <th className="px-5 py-3">Correo / Acceso</th>
-                      <th className="px-5 py-3">Rol</th>
-                      <th className="px-5 py-3">Estado</th>
-                      <th className="px-5 py-3">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {usuarios.map(u => (
-                      <tr key={u.id} className="hover:bg-indigo-50/50 transition-colors">
-                        <td className="px-5 py-3 font-medium text-gray-900">{u.nombre}</td>
-                        <td className="px-5 py-3 text-gray-500">
-                          {u.email || <span className="italic text-xs text-gray-400">Sin acceso</span>}
-                          {u.sedes_ids && u.sedes_ids.length > 0 && (
-                            <div className="text-[10px] text-indigo-500 mt-1">{u.sedes_ids.length} sedes asignadas</div>
-                          )}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${u.rol === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                            {u.rol || 'STAFF'}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3">
-                          {u.estado === 'INACTIVO' ? (
-                            <span className="flex items-center gap-1 text-red-600 font-semibold text-xs"><XCircle className="w-3 h-3"/> Inactivo</span>
-                          ) : (
-                            <span className="flex items-center gap-1 text-green-600 font-semibold text-xs"><CheckCircle className="w-3 h-3"/> Activo</span>
-                          )}
-                        </td>
-                        <td className="px-5 py-3">
-                          <button onClick={() => handleEdit(u)} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition">
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
+        <div className="overflow-x-auto">
+          {isLoading ? (
+            <div className="p-10 text-center text-slate-500">Cargando usuarios...</div>
+          ) : (
+            <table className="w-full text-sm text-left text-slate-600">
+              <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="px-6 py-4">Nombre Completo</th>
+                  <th className="px-6 py-4">Correo / Acceso</th>
+                  <th className="px-6 py-4">Rol</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {usuarios.map(u => (
+                  <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-slate-900">{u.nombre}</td>
+                    <td className="px-6 py-4 text-slate-500">
+                      {u.email || <span className="italic text-xs text-slate-400">Sin acceso de Login</span>}
+                      {u.sedes_ids && u.sedes_ids.length > 0 && (
+                        <div className="text-[10px] font-bold text-indigo-500 mt-1 uppercase tracking-wider">{u.sedes_ids.length} sedes asignadas</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${u.rol === 'ADMIN' ? 'bg-purple-100 text-purple-700' : u.rol === 'RECEPCION' ? 'bg-teal-100 text-teal-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {u.rol || 'STAFF'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {u.estado === 'INACTIVO' ? (
+                        <span className="flex items-center gap-1.5 text-red-600 font-bold text-xs"><XCircle className="w-4 h-4"/> INACTIVO</span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs"><CheckCircle className="w-4 h-4"/> ACTIVO</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => openEditModal(u)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
-
-        {/* Columna Derecha: Formulario */}
-        <div>
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-24">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-                <Shield className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">
-                {editId ? 'Editar Usuario' : 'Nuevo Usuario'}
-              </h3>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Nombre Completo *</label>
-                <input 
-                  type="text" 
-                  value={formData.nombre}
-                  onChange={e => setFormData({...formData, nombre: e.target.value})}
-                  className="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Correo Electrónico (Para Login)</label>
-                <input 
-                  type="email" 
-                  value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
-                  className="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Nivel de Acceso (Rol)</label>
-                <select 
-                  value={formData.rol}
-                  onChange={e => setFormData({...formData, rol: e.target.value})}
-                  className="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  <option value="STAFF">STAFF (Barbero/Estilista)</option>
-                  <option value="ADMIN">ADMINISTRADOR</option>
-                  <option value="RECEPCION">RECEPCIÓN</option>
-                </select>
-              </div>
-
-              {editId && (
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Estado</label>
-                  <select 
-                    value={formData.estado}
-                    onChange={e => setFormData({...formData, estado: e.target.value})}
-                    className="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    <option value="DISPONIBLE">ACTIVO (Disponible)</option>
-                    <option value="INACTIVO">SUSPENDIDO (Inactivo)</option>
-                  </select>
-                </div>
-              )}
-              
-              <div className="pt-2 border-t border-gray-100">
-                <label className="block text-xs font-semibold text-gray-700 mb-2">Unidades de Negocio (Sedes)</label>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {todasSedes.map(sede => (
-                    <label key={sede.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                      <input 
-                        type="checkbox"
-                        checked={formData.sedes_ids?.includes(sede.id) || false}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          const current = formData.sedes_ids || [];
-                          if (checked) {
-                            setFormData({...formData, sedes_ids: [...current, sede.id]});
-                          } else {
-                            setFormData({...formData, sedes_ids: current.filter(id => id !== sede.id)});
-                          }
-                        }}
-                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      {sede.nombre}
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="flex gap-2 mt-4">
-                {editId && (
-                  <button 
-                    type="button" 
-                    onClick={() => { setEditId(null); setFormData({ nombre: '', email: '', rol: 'STAFF', sedes_ids: [] }); }}
-                    className="w-1/3 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-200"
-                  >
-                    Cancelar
-                  </button>
-                )}
-                <button 
-                  type="submit" 
-                  disabled={isSaving || !formData.nombre}
-                  className={`${editId ? 'w-2/3' : 'w-full'} bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50`}
-                >
-                  {isSaving ? 'Guardando...' : 'Guardar'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
       </div>
+
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={closeModal}
+        title={editId ? 'Editar Usuario' : 'Nuevo Usuario'}
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nombre Completo *</label>
+            <input 
+              type="text" 
+              value={formData.nombre}
+              onChange={e => setFormData({...formData, nombre: e.target.value})}
+              className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              required
+              placeholder="Ej. Juan Pérez"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Correo Electrónico</label>
+            <input 
+              type="email" 
+              value={formData.email}
+              onChange={e => setFormData({...formData, email: e.target.value})}
+              className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              placeholder="Para acceder al sistema ERP"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Rol de Acceso</label>
+              <select 
+                value={formData.rol}
+                onChange={e => setFormData({...formData, rol: e.target.value})}
+                className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white"
+              >
+                <option value="STAFF">Staff (Servicios)</option>
+                <option value="ADMIN">Administrador</option>
+                <option value="RECEPCION">Recepción</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Estado</label>
+              <select 
+                value={formData.estado}
+                onChange={e => setFormData({...formData, estado: e.target.value})}
+                className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white"
+              >
+                <option value="DISPONIBLE">ACTIVO</option>
+                <option value="INACTIVO">SUSPENDIDO</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="pt-4 border-t border-slate-100">
+            <label className="block text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider">Asignación de Sedes</label>
+            <div className="space-y-3 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+              {todasSedes.map(sede => (
+                <label key={sede.id} className="flex items-center gap-3 text-sm text-slate-700 cursor-pointer p-2 hover:bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 transition-colors">
+                  <input 
+                    type="checkbox"
+                    checked={formData.sedes_ids?.includes(sede.id) || false}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      const current = formData.sedes_ids || [];
+                      if (checked) {
+                        setFormData({...formData, sedes_ids: [...current, sede.id]});
+                      } else {
+                        setFormData({...formData, sedes_ids: current.filter(id => id !== sede.id)});
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 focus:ring-2 cursor-pointer"
+                  />
+                  <span className="font-semibold">{sede.nombre}</span>
+                </label>
+              ))}
+              {todasSedes.length === 0 && (
+                <div className="text-xs text-slate-500 italic">No hay sedes creadas en el sistema.</div>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex gap-3 pt-6 border-t border-slate-100">
+            <button 
+              type="button" 
+              onClick={closeModal}
+              className="w-1/2 bg-slate-100 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              disabled={isSaving || !formData.nombre}
+              className="w-1/2 bg-indigo-600 text-white px-4 py-3 rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-md shadow-indigo-600/20"
+            >
+              {isSaving ? 'Guardando...' : (editId ? 'Actualizar' : 'Crear Usuario')}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
     </div>
   );
 }

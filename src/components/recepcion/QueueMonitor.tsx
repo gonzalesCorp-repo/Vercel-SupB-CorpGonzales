@@ -146,45 +146,43 @@ export default function QueueMonitor() {
       </div>
 
       {/* Cola de Agentes */}
-      <div className="flex-grow overflow-y-auto mt-2">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="flex-grow overflow-y-auto mt-2 custom-scrollbar pr-1">
+        <div className="flex flex-col gap-3">
           {agentesEnCola.map((agente, index) => {
             const colors = getStatusColor(agente.estado);
             return (
-              <div key={agente.id} className={`border rounded-xl shadow-sm bg-white overflow-hidden ${colors.border}`}>
-                <div className={`p-3 border-b border-gray-100 flex justify-between items-center ${colors.bgHdr}`}>
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-6 h-6 bg-white border border-gray-300 rounded-full text-xs font-bold text-gray-700">
-                      {index + 1}
-                    </span>
-                    <span className="font-bold text-gray-800 text-sm truncate">{agente.nombre}</span>
+              <div key={agente.id} className={`border rounded-xl shadow-sm bg-white overflow-hidden transition-all hover:shadow-md ${colors.border}`}>
+                <div className={`p-3 flex items-center justify-between ${colors.bgHdr}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-700 shadow-sm text-xs shrink-0">
+                      #{index + 1}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-slate-800 text-sm leading-tight truncate">{agente.nombre}</h4>
+                      <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wide">Especialista</p>
+                    </div>
                   </div>
+                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/50 shrink-0 ${colors.badgeBg} ${colors.badgeTxt}`}>
+                    {agente.estado}
+                  </span>
                 </div>
-                <div className="p-3">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-gray-500 uppercase font-semibold">Estado</span>
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${colors.badgeBg} ${colors.badgeTxt}`}>
-                      {agente.estado}
-                    </span>
-                  </div>
-                  
-                  <div className="mt-3 pt-3 border-t border-gray-100 flex gap-2">
-                    {agente.estado === 'DISPONIBLE' ? (
-                      <button 
-                        onClick={() => handleCambiarEstado(agente.id, 'INACTIVO')} 
-                        className="flex items-center justify-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg w-full font-medium transition-colors"
-                      >
-                        <PauseCircle className="w-4 h-4" /> Pausar / Salir
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => handleCambiarEstado(agente.id, 'DISPONIBLE')} 
-                        className="flex items-center justify-center gap-1 text-xs bg-green-50 hover:bg-green-100 text-green-700 px-3 py-1.5 rounded-lg w-full font-medium border border-green-200 transition-colors"
-                      >
-                        <PlayCircle className="w-4 h-4" /> Volver a Disponible
-                      </button>
-                    )}
-                  </div>
+                
+                <div className="px-3 py-2 bg-slate-50/50 border-t border-slate-100 flex gap-2">
+                  {agente.estado === 'DISPONIBLE' ? (
+                    <button 
+                      onClick={() => handleCambiarEstado(agente.id, 'INACTIVO')} 
+                      className="flex items-center justify-center gap-1.5 text-xs text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg w-full font-semibold transition-colors shadow-sm"
+                    >
+                      <PauseCircle className="w-4 h-4" /> Pausar / Salir
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => handleCambiarEstado(agente.id, 'DISPONIBLE')} 
+                      className="flex items-center justify-center gap-1.5 text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg w-full font-semibold border border-emerald-200 transition-colors shadow-sm"
+                    >
+                      <PlayCircle className="w-4 h-4" /> Volver a Disponible
+                    </button>
+                  )}
                 </div>
               </div>
             );

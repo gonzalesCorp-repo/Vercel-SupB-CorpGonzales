@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Clock, CheckCircle2, UserCircle2, ArrowRight } from 'lucide-react';
+import { Clock, CheckCircle2, UserCircle2, ArrowRight, Edit2, XCircle, CheckSquare } from 'lucide-react';
 
 const MOCK_ACTIVE_OATCS = [
   { id: '1', cliente: 'María López', agente: 'Jessica Huaman', servicio: 'Corte', tiempo: '10 min', estado: 'EN PROCESO' },
@@ -58,9 +58,17 @@ export default function ActiveOATCsTable() {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button className="text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-50 transition-colors">
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center justify-end gap-1">
+                    <button title="Editar OATC" className="text-slate-400 hover:text-blue-600 p-1.5 rounded-md hover:bg-blue-50 transition-colors">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button title="Finalizar" className="text-slate-400 hover:text-emerald-600 p-1.5 rounded-md hover:bg-emerald-50 transition-colors">
+                      <CheckSquare className="w-4 h-4" />
+                    </button>
+                    <button title="Cancelar" className="text-slate-400 hover:text-red-600 p-1.5 rounded-md hover:bg-red-50 transition-colors">
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
