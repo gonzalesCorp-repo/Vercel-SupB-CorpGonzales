@@ -18,8 +18,8 @@ export async function POST(request: Request) {
 
     // 1. Crear usuario en auth.users (Supabase Authentication)
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
+      email: email.trim(),
+      password: password.trim(),
       email_confirm: true,
       user_metadata: {
         full_name: nombre,
@@ -39,8 +39,8 @@ export async function POST(request: Request) {
       .from('agentes')
       .insert([{
         id: userId, // Forzamos el mismo UUID
-        nombre,
-        email,
+        nombre: nombre.trim(),
+        email: email.trim(),
         rol,
         estado: 'DISPONIBLE'
       }]);
