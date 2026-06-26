@@ -6,8 +6,10 @@ const supabase = createClient();
 export interface Ubicacion {
   id: string;
   nombre: string;
-  tipo: 'lavadero' | 'tocador' | 'silla' | 'cabina' | 'sillón' | 'en_espera';
+  tipo: 'lavadero' | 'tocador' | 'silla' | 'cabina' | 'sillón' | 'en_espera' | 'pared' | 'ruta';
   estado: string;
+  grid_x?: number;
+  grid_y?: number;
 }
 
 export interface MapaSalonData {
@@ -31,10 +33,25 @@ export async function obtenerMapaSalon(): Promise<MapaSalonData[]> {
 
   if (uError) {
     console.error("Error obteniendo ubicaciones:", uError);
-    return [];
   }
 
-  // 2. Obtener OATCs activos (ASESORANDO) para cruzar con ubicaciones
+  // 2. MOCK FALLBACK SI LA BD ESTÁ VACÍA (Para propósitos de demostración/mockup)
+  let ubicacionesReales = ubicaciones || [];
+  if (ubicacionesReales.length === 0) {
+    ubicacionesReales = [
+      { id: 'u1', nombre: 'Lavadero 1', tipo: 'lavadero', estado: 'OCUPADO', grid_x: 2, grid_y: 2 },
+      { id: 'u2', nombre: 'Lavadero 2', tipo: 'lavadero', estado: 'DISPONIBLE', grid_x: 3, grid_y: 2 },
+      { id: 'u3', nombre: 'Tocador 1', tipo: 'tocador', estado: 'OCUPADO', grid_x: 5, grid_y: 4 },
+      { id: 'u4', nombre: 'Tocador 2', tipo: 'tocador', estado: 'DISPONIBLE', grid_x: 6, grid_y: 4 },
+      { id: 'u5', nombre: 'Cabina VIP', tipo: 'cabina', estado: 'DISPONIBLE', grid_x: 8, grid_y: 2 },
+      // Paredes simuladas
+      { id: 'p1', nombre: 'Pared', tipo: 'pared', estado: 'ESTATICO', grid_x: 4, grid_y: 1 },
+      { id: 'p2', nombre: 'Pared', tipo: 'pared', estado: 'ESTATICO', grid_x: 4, grid_y: 2 },
+      { id: 'p3', nombre: 'Pared', tipo: 'pared', estado: 'ESTATICO', grid_x: 4, grid_y: 3 },
+    ] as Ubicacion[];
+  }
+
+  // 3. Obtener OATCs activos (ASESORANDO) para cruzar con ubicaciones
   const { data: oatcs, error: oError } = await supabase
     .from('oatc')
     .select('*')
@@ -45,10 +62,19 @@ export async function obtenerMapaSalon(): Promise<MapaSalonData[]> {
     console.error("Error obteniendo oatcs activos para WFM:", oError);
   }
 
-  // 3. Mapear datos
-  const mapa = (ubicaciones as Ubicacion[]).map(ubi => {
+  // MOCK FALLBACK OATCs si DB vacía
+  let oatcsReales = oatcs || [];
+  if (oatcsReales.length === 0) {
+    oatcsReales = [
+      { ubicacion_id: 'u1', agente_nombre: 'Carlos', cliente_nombre: 'Ana M.', hora_inicio_atencion: new Date(Date.now() - 15 * 60000).toISOString(), punto_partida: [{atributos_servicio: {tiempo_estimado_min: 30}}] },
+      { ubicacion_id: 'u3', agente_nombre: 'Lucía', cliente_nombre: 'Pedro', hora_inicio_atencion: new Date(Date.now() - 40 * 60000).toISOString(), punto_partida: [{atributos_servicio: {tiempo_estimado_min: 45}}] },
+    ];
+  }
+
+  // 4. Mapear datos
+  const mapa = ubicacionesReales.map(ubi => {
     // Buscar si hay un OATC en esta ubicacion
-    const ocupante = (oatcs || []).find((o: any) => o.ubicacion_id === ubi.id);
+    const ocupante = oatcsReales.find((o: any) => o.ubicacion_id === ubi.id);
     
     // Calcular tiempo estimado total del punto de partida
     let tiempo_estimado = 0;
