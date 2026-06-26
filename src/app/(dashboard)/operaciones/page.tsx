@@ -7,10 +7,14 @@ import { OATC } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
 
-// Extendemos OATC localmente para la demo si es necesario
+// Extendemos OATC localmente para la demo
 interface OATCExtended extends OATC {
   estado_ui?: 'Espera' | 'En Curso' | 'Finalizado';
+  codigo_ticket?: string;
 }
+
+// Tipo de acción pendiente tras el PIN
+type PendingAction = 'ADD_SERVICE' | 'LAB_REQUEST' | null;
 
 export default function WorkspaceOperativoPage() {
   const [tickets, setTickets] = useState<OATCExtended[]>([]);
@@ -22,21 +26,22 @@ export default function WorkspaceOperativoPage() {
   const [showPinModal, setShowPinModal] = useState(false);
   const [showAddServiceModal, setShowAddServiceModal] = useState(false);
   
+  // Estados para PIN (Seguridad)
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+  const [selectedOatc, setSelectedOatc] = useState<OATCExtended | null>(null);
+
   // Estados para Lab
   const [insumo, setInsumo] = useState('');
   const [cabinaSolicitante, setCabinaSolicitante] = useState('');
   const [isEnviando, setIsEnviando] = useState(false);
   const [mensajeOk, setMensajeOk] = useState('');
 
-  // Estados para PIN y Añadir Servicio
-  const [pin, setPin] = useState('');
-  const [pinError, setPinError] = useState(false);
-  const [selectedOatc, setSelectedOatc] = useState<OATCExtended | null>(null);
-
   const cargarTickets = async () => {
     setIsLoading(true);
     // Para modo Quiosco, traemos todos los tickets activos de la sede (usaremos un mock si la DB está vacía)
-    let data = await obtenerTicketsAsignados('ALL'); // Simulamos pedir todos
+    let data = await obtenerTicketsAsignados('ALL');
     
     // MOCK DATA SI ESTA VACIO
     if (!data || data.length === 0) {
@@ -51,7 +56,7 @@ export default function WorkspaceOperativoPage() {
           agente_nombre: 'Lucía (Estilista)',
           punto_partida: [{ servicio: 'Corte de Dama', cantidad: 1, monto: 50 }],
           estado_ui: 'Espera'
-        } as any,
+        } as OATCExtended,
         {
           id: 'mock-2',
           sede_id: 'sede-1',
@@ -62,7 +67,7 @@ export default function WorkspaceOperativoPage() {
           agente_nombre: 'Carlos (Barbero)',
           punto_partida: [{ servicio: 'Corte y Barba', cantidad: 1, monto: 40 }],
           estado_ui: 'En Curso'
-        } as any
+        } as OATCExtended
       ];
     }
 
@@ -83,24 +88,23 @@ export default function WorkspaceOperativoPage() {
     };
   }, []);
 
-  // --- Handlers de Acciones ---
+  // --- Handlers de Acciones de Tarjeta ---
 
   const handleIniciarAtencion = (id: string) => {
-    // Mock: Cambiar estado local a En Curso
     setTickets(prev => prev.map(t => t.id === id ? { ...t, estado_ui: 'En Curso' } : t));
   };
 
   const handleEnviarCaja = async (id: string) => {
     if (confirm("¿Enviar esta orden a Caja para finalizar la cobranza?")) {
-      // Mock: Quitar de la lista
       setTickets(prev => prev.filter(t => t.id !== id));
       // En producción: await terminarAtencion(id);
     }
   };
 
-  // --- Flujo Añadir Servicio ---
+  // --- Flujo Centralizado de PIN (Seguridad) ---
 
-  const iniciarAñadirServicio = (oatc: OATCExtended) => {
+  const requerirPinParaAccion = (action: PendingAction, oatc: OATCExtended | null = null) => {
+    setPendingAction(action);
     setSelectedOatc(oatc);
     setPin('');
     setPinError(false);
@@ -112,7 +116,15 @@ export default function WorkspaceOperativoPage() {
     // Validar PIN (Mock: cualquier PIN de 4 dígitos es válido, menos 0000)
     if (pin.length >= 4 && pin !== '0000') {
       setShowPinModal(false);
-      setShowAddServiceModal(true);
+      setPinError(false);
+      
+      // Enrutar a la acción correspondiente tras validar seguridad
+      if (pendingAction === 'ADD_SERVICE') {
+        setShowAddServiceModal(true);
+      } else if (pendingAction === 'LAB_REQUEST') {
+        setShowLabModal(true);
+      }
+      
     } else {
       setPinError(true);
     }
@@ -122,9 +134,8 @@ export default function WorkspaceOperativoPage() {
     alert(`Servicio extra añadido a la orden de ${selectedOatc?.cliente_nombre}.`);
     setShowAddServiceModal(false);
     setSelectedOatc(null);
+    setPendingAction(null);
   };
-
-  // --- Flujo Laboratorio ---
 
   const handlePedirInsumo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,6 +150,7 @@ export default function WorkspaceOperativoPage() {
       setTimeout(() => {
         setMensajeOk('');
         setShowLabModal(false);
+        setPendingAction(null);
       }, 2000);
       setIsEnviando(false);
     }, 1000);
@@ -161,7 +173,7 @@ export default function WorkspaceOperativoPage() {
         
         <div className="flex gap-3 w-full md:w-auto">
           <button 
-            onClick={() => setShowLabModal(true)}
+            onClick={() => requerirPinParaAccion('LAB_REQUEST')}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-orange-100 hover:bg-orange-200 text-orange-700 px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
           >
             <Beaker className="w-5 h-5" />
@@ -196,7 +208,7 @@ export default function WorkspaceOperativoPage() {
                   {/* Info Header */}
                   <div className={`p-4 border-b ${isEnCurso ? 'bg-indigo-50' : 'bg-gray-50'} flex justify-between items-start`}>
                     <div>
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{ticket.codigo_ticket}</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{ticket.codigo_ticket || 'S/N'}</span>
                       <h3 className="text-xl font-black text-gray-800 mt-0.5">{ticket.cliente_nombre}</h3>
                       <p className="text-sm text-gray-600 mt-1"><span className="font-semibold text-gray-400">Atendido por:</span> {ticket.agente_nombre}</p>
                     </div>
@@ -240,7 +252,7 @@ export default function WorkspaceOperativoPage() {
                       {isEnCurso && (
                         <>
                           <button 
-                            onClick={() => iniciarAñadirServicio(ticket)}
+                            onClick={() => requerirPinParaAccion('ADD_SERVICE', ticket)}
                             className="flex-1 bg-white hover:bg-gray-50 border-2 border-dashed border-gray-300 text-gray-600 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
                           >
                             <PlusCircle className="w-5 h-5" /> Extra
@@ -262,8 +274,42 @@ export default function WorkspaceOperativoPage() {
         )}
       </div>
 
+      {/* MODAL GLOBAL DE SEGURIDAD: Solicitar PIN */}
+      <Modal isOpen={showPinModal} onClose={() => setShowPinModal(false)} title="Autorización Requerida" maxWidth="max-w-sm">
+        <form onSubmit={verificarPin} className="space-y-5 mt-4 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="bg-red-100 p-4 rounded-full text-red-600">
+              <Lock className="w-8 h-8" />
+            </div>
+          </div>
+          <h3 className="font-bold text-gray-800 text-lg">Ingrese su PIN Operativo</h3>
+          <p className="text-sm text-gray-500">
+            {pendingAction === 'ADD_SERVICE' 
+              ? `Para modificar la orden de ${selectedOatc?.cliente_nombre}, identifíquese.` 
+              : `Autorización requerida para solicitar insumos urgentes.`}
+          </p>
+          
+          <input 
+            type="password" 
+            maxLength={4}
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            className="w-full text-center text-3xl tracking-[1em] font-black border-b-2 border-gray-300 focus:border-indigo-600 focus:outline-none py-2 bg-transparent"
+            autoFocus
+          />
+          {pinError && <p className="text-red-500 text-sm font-bold">PIN incorrecto. Intente nuevamente.</p>}
+
+          <button 
+             type="submit" 
+             className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-black transition-colors shadow-md"
+           >
+             Verificar y Continuar
+           </button>
+        </form>
+      </Modal>
+
       {/* MODAL: Solicitud a Laboratorio */}
-      <Modal isOpen={showLabModal} onClose={() => setShowLabModal(false)} title="Solicitud a Laboratorio" maxWidth="max-w-md">
+      <Modal isOpen={showLabModal} onClose={() => setShowLabModal(false)} title="Solicitud a Laboratorio (Autorizada)" maxWidth="max-w-md">
         <form onSubmit={handlePedirInsumo} className="space-y-5 mt-2">
            <div>
              <label className="block text-sm font-bold text-gray-700 mb-1">Insumo Necesario</label>
@@ -274,6 +320,7 @@ export default function WorkspaceOperativoPage() {
                placeholder="Ej: Tinte Rubio 7.1, Oxidante 20vol..." 
                className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium"
                required
+               autoFocus
              />
            </div>
            <div>
@@ -300,36 +347,6 @@ export default function WorkspaceOperativoPage() {
              className="w-full bg-orange-600 text-white font-bold py-3.5 rounded-xl hover:bg-orange-700 disabled:opacity-50 transition-colors shadow-md text-lg"
            >
              {isEnviando ? 'Enviando...' : 'Enviar Solicitud Urgente'}
-           </button>
-        </form>
-      </Modal>
-
-      {/* MODAL: Solicitar PIN para añadir servicios */}
-      <Modal isOpen={showPinModal} onClose={() => setShowPinModal(false)} title="Autorización Requerida" maxWidth="max-w-sm">
-        <form onSubmit={verificarPin} className="space-y-5 mt-4 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-red-100 p-4 rounded-full text-red-600">
-              <Lock className="w-8 h-8" />
-            </div>
-          </div>
-          <h3 className="font-bold text-gray-800 text-lg">Ingrese su PIN de Operario</h3>
-          <p className="text-sm text-gray-500">Para modificar la orden de {selectedOatc?.cliente_nombre}, identifíquese.</p>
-          
-          <input 
-            type="password" 
-            maxLength={4}
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            className="w-full text-center text-3xl tracking-[1em] font-black border-b-2 border-gray-300 focus:border-indigo-600 focus:outline-none py-2 bg-transparent"
-            autoFocus
-          />
-          {pinError && <p className="text-red-500 text-sm font-bold">PIN incorrecto. Intente nuevamente.</p>}
-
-          <button 
-             type="submit" 
-             className="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-black transition-colors shadow-md"
-           >
-             Verificar y Continuar
            </button>
         </form>
       </Modal>
