@@ -175,7 +175,7 @@ export default function UsuariosPage() {
               type="text" 
               value={formData.nombre}
               onChange={e => setFormData({...formData, nombre: e.target.value})}
-              className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
               required
               placeholder="Ej. Juan Pérez"
             />
@@ -186,7 +186,7 @@ export default function UsuariosPage() {
               type="email" 
               value={formData.email}
               onChange={e => setFormData({...formData, email: e.target.value})}
-              className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
               placeholder="Para acceder al sistema ERP"
             />
           </div>
@@ -198,7 +198,7 @@ export default function UsuariosPage() {
                 type="text" 
                 value={formData.password}
                 onChange={e => setFormData({...formData, password: e.target.value})}
-                className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                 required={!editId}
                 placeholder="Ej. temporal123"
               />
@@ -212,7 +212,7 @@ export default function UsuariosPage() {
               <select 
                 value={formData.rol}
                 onChange={e => setFormData({...formData, rol: e.target.value})}
-                className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white"
+                className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
               >
                 <option value="STAFF">Staff (Servicios)</option>
                 <option value="ADMIN">Administrador</option>
@@ -225,7 +225,7 @@ export default function UsuariosPage() {
               <select 
                 value={formData.estado}
                 onChange={e => setFormData({...formData, estado: e.target.value})}
-                className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white"
+                className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
               >
                 <option value="DISPONIBLE">ACTIVO</option>
                 <option value="INACTIVO">SUSPENDIDO</option>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown } from 'lucide-react';
+import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, Palette } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { obtenerSedesUsuario, Sede } from '@/services/sedes';
@@ -356,7 +356,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </li>
             )}
 
-            {/* Otros módulos irán aquí según los roles... */}
+            {/* MÓDULO: MI CUENTA (Para todos) */}
+            <li>
+              <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Mi Cuenta</span>
+              <ul className="mt-2 space-y-1">
+                <li>
+                  <Link href="/configuracion" className={navItemClass('/configuracion')}>
+                    <Palette className="w-5 h-5 mr-3" />
+                    Configuración Visual
+                  </Link>
+                </li>
+              </ul>
+            </li>
 
           </ul>
           
