@@ -103,8 +103,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const navItemClass = (path: string) => `flex items-center p-2 rounded-lg text-sm transition-colors ${
     pathname.startsWith(path) 
-      ? 'bg-primary-50 text-primary-700 font-semibold' 
-      : 'text-gray-600 hover:bg-gray-100'
+      ? 'bg-primary-50 text-primary-700 font-semibold dark:bg-primary-900/30 dark:text-primary-400' 
+      : 'text-gray-600 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-800'
   }`;
 
   // Si no se encontró el rol del usuario (No está en la tabla agentes)
@@ -160,10 +160,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="relative min-h-screen bg-gray-50">
+    <div className="relative min-h-screen bg-gray-50 dark:bg-slate-950">
       
       {/* Navbar Superior */}
-      <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
+      <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm dark:bg-slate-900 dark:border-slate-800">
         <div className="px-3 py-3 lg:px-5 lg:pl-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-start">
@@ -216,8 +216,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   </div>
                 )}
                 
-                <div className="text-right hidden sm:block border-l border-gray-200 pl-4">
-                    <p className="text-sm font-semibold text-gray-900">{userEmail}</p>
+                <div className="text-right hidden sm:block border-l border-gray-200 dark:border-slate-800 pl-4">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-slate-200">{userEmail}</p>
                     <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
                         Cerrar Sesión
                     </button>
@@ -229,11 +229,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar Lateral Izquierdo */}
       <aside 
-        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 bg-white border-r border-gray-200 transition-transform ${
+        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 bg-white border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 transition-transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } ${desktopSidebarCollapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}`}
       >
-        <div className="h-full px-3 pb-4 overflow-y-auto bg-white">
+        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-slate-900">
           <ul className="space-y-4 font-medium">
              
             {/* MÓDULO: RECEPCIÓN */}

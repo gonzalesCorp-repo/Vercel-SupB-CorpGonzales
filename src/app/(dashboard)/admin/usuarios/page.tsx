@@ -214,9 +214,11 @@ export default function UsuariosPage() {
                 onChange={e => setFormData({...formData, rol: e.target.value})}
                 className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
               >
-                <option value="STAFF">Staff (Servicios)</option>
+                <option value="STAFF">Operaciones de Piso (Staff)</option>
+                <option value="RECEPCION">Recepción CRM</option>
+                <option value="CAJA">Caja y Cobros</option>
+                <option value="DESPACHO">Laboratorio / Despacho</option>
                 <option value="ADMIN">Administrador</option>
-                <option value="RECEPCION">Recepción</option>
               </select>
             </div>
             
