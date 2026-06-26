@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { obtenerSedesUsuario, Sede } from '@/services/sedes';
 import { NotificationTicker } from './NotificationTicker';
+import { registrarLog } from '@/services/logger';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -95,6 +96,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, [pathname, loadingSedes, userRol, router]);
 
   const handleLogout = async () => {
+    await registrarLog('AUTH', 'Cierre de sesión');
     clearSede();
     await supabase.auth.signOut();
     router.push('/login');
