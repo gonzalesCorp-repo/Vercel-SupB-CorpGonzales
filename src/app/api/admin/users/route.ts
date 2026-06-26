@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Usamos el cliente de supabase base con el SERVICE_ROLE_KEY para saltar RLS
-// y tener permisos de auth.admin
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(request: Request) {
   try {
+    // Inicializar cliente dentro del handler para evitar errores en build time de Next.js
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     const body = await request.json();
     const { nombre, email, password, rol, sedes_ids } = body;
 
