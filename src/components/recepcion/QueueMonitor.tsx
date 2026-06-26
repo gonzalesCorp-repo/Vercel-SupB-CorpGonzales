@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { RefreshCw, Search, PauseCircle, PlayCircle, UserCheck } from 'lucide-react';
+import { RefreshCw, Search, PauseCircle, PlayCircle, UserCheck, UserMinus, Coffee, Clock, FileText } from 'lucide-react';
 import { obtenerTodosLosAgentes, cambiarEstadoAgente } from '@/services/agentes';
 import { Agente } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
+import { Modal } from '@/components/ui/Modal';
+import { format } from 'date-fns';
 
 export default function QueueMonitor() {
   const [agentes, setAgentes] = useState<Agente[]>([]);
@@ -13,6 +15,9 @@ export default function QueueMonitor() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedAgentId, setSelectedAgentId] = useState<string>('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Modal de Detalle de Agente
+  const [selectedAgentForModal, setSelectedAgentForModal] = useState<Agente | null>(null);
 
   const supabase = createClient();
 
@@ -53,47 +58,66 @@ export default function QueueMonitor() {
     cargarAgentes();
   };
 
-  const handleCambiarEstado = async (id: string, estado: string) => {
+  const handleRegistrarSalida = async () => {
+    if (!selectedAgentId) return;
+    await cambiarEstadoAgente(selectedAgentId, 'INACTIVO');
+    setSearch('');
+    setSelectedAgentId('');
+    cargarAgentes();
+  };
+
+  const handleCambiarEstado = async (e: React.MouseEvent, id: string, estado: string) => {
+    e.stopPropagation(); // Evitar abrir el modal
     await cambiarEstadoAgente(id, estado);
     cargarAgentes();
   };
 
-  // Filtrar agentes en turno (excluir inactivos/fuera de turno si es necesario, 
-  // en la versión anterior mostraba todos los que están en la cola)
-  // Asumiremos que si están en la lista es porque están activos, o podemos mostrar solo los no INACTIVO
-  const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO');
+  const openAgentModal = (agente: Agente) => {
+    setSelectedAgentForModal(agente);
+  };
 
-  // Para el dropdown de búsqueda, mostramos todos
+  const closeAgentModal = () => {
+    setSelectedAgentForModal(null);
+  };
+
+  const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO');
   const searchResults = agentes.filter(a => a.nombre.toLowerCase().includes(search.toLowerCase()));
 
   const getStatusColor = (estado: string) => {
     switch(estado) {
-      case 'DISPONIBLE': return { border: 'border-green-300', bgHdr: 'bg-green-50', badgeBg: 'bg-green-100', badgeTxt: 'text-green-800' };
+      case 'DISPONIBLE': return { border: 'border-emerald-300', bgHdr: 'bg-emerald-50', badgeBg: 'bg-emerald-100', badgeTxt: 'text-emerald-800' };
       case 'ASESORANDO': return { border: 'border-yellow-300', bgHdr: 'bg-yellow-50', badgeBg: 'bg-yellow-100', badgeTxt: 'text-yellow-800' };
+      case 'REFRIGERIO': return { border: 'border-orange-300', bgHdr: 'bg-orange-50', badgeBg: 'bg-orange-100', badgeTxt: 'text-orange-800' };
       case 'OCUPADO': 
       case 'TRABAJANDO': return { border: 'border-blue-300', bgHdr: 'bg-blue-50', badgeBg: 'bg-blue-100', badgeTxt: 'text-blue-800' };
-      default: return { border: 'border-gray-300', bgHdr: 'bg-gray-50', badgeBg: 'bg-gray-100', badgeTxt: 'text-gray-800' };
+      default: return { border: 'border-slate-300', bgHdr: 'bg-slate-50', badgeBg: 'bg-slate-100', badgeTxt: 'text-slate-800' };
     }
   };
 
+  // Mock data for modal details
+  const getMockOATCs = () => [
+    { id: '1021', cliente: 'María López', servicio: 'Corte Clásico', estado: 'Completado', hora: '10:30 AM' },
+    { id: '1025', cliente: 'Juan Pérez', servicio: 'Corte Fade', estado: 'En Transcurso', hora: '11:45 AM' },
+  ];
+
   return (
-    <div className="h-full flex flex-col gap-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-800">Monitor de Cola (Agentes)</h2>
+    <div className="h-full flex flex-col gap-3">
+      {/* Header Compacto */}
+      <div className="flex justify-between items-center bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm">
+        <h2 className="text-sm font-bold text-slate-800 ml-2">Monitor de Cola</h2>
         <button 
           onClick={cargarAgentes} 
           disabled={isRefreshing}
-          className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 p-1.5 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+          title="Actualizar"
         >
-          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          <span>Actualizar</span>
+          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
         </button>
       </div>
       
-      {/* Registro de Ingreso */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-end gap-3">
-        <div className="flex-grow w-full relative" ref={dropdownRef}>
-          <label className="block text-xs font-semibold text-gray-600 mb-1">Registrar Ingreso de Agente</label>
+      {/* Registro de Ingreso/Salida */}
+      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-2">
+        <div className="relative" ref={dropdownRef}>
           <div className="relative">
             <input 
               type="text" 
@@ -104,15 +128,15 @@ export default function QueueMonitor() {
                 setShowDropdown(true);
               }}
               onFocus={() => { setShowDropdown(true); setSearch(''); }}
-              placeholder="Buscar o seleccionar agente..." 
-              className="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 pr-8 bg-gray-50"
+              placeholder="Buscar agente..." 
+              className="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 pr-7 bg-slate-50 outline-none"
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <Search className="w-4 h-4 text-gray-400" />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+              <Search className="w-3.5 h-3.5 text-slate-400" />
             </div>
 
             {showDropdown && (
-              <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+              <div className="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-40 overflow-y-auto custom-scrollbar">
                 {searchResults.map(usr => (
                   <div 
                     key={usr.id}
@@ -121,66 +145,100 @@ export default function QueueMonitor() {
                       setSearch(usr.nombre);
                       setShowDropdown(false);
                     }} 
-                    className="px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors"
+                    className="px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-50 last:border-0 transition-colors"
                   >
                     {usr.nombre}
                   </div>
                 ))}
                 {searchResults.length === 0 && (
-                  <div className="px-3 py-2 text-sm text-gray-500 text-center italic">
-                    No se encontraron agentes
+                  <div className="px-3 py-2 text-xs text-slate-500 text-center italic">
+                    No encontrado
                   </div>
                 )}
               </div>
             )}
           </div>
         </div>
-        <button 
-          onClick={handleRegistrarIngreso} 
-          disabled={!selectedAgentId}
-          className="w-full sm:w-auto bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 flex items-center justify-center gap-2"
-        >
-          <UserCheck className="w-4 h-4" />
-          Registrar Ingreso
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={handleRegistrarIngreso} 
+            disabled={!selectedAgentId}
+            className="w-1/2 bg-blue-600 text-white p-2 rounded-lg text-xs font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <UserCheck className="w-3.5 h-3.5" />
+            Ingreso
+          </button>
+          <button 
+            onClick={handleRegistrarSalida} 
+            disabled={!selectedAgentId}
+            className="w-1/2 bg-slate-100 text-slate-600 p-2 rounded-lg text-xs font-semibold hover:bg-red-50 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <UserMinus className="w-3.5 h-3.5" />
+            Salida
+          </button>
+        </div>
       </div>
 
       {/* Cola de Agentes */}
-      <div className="flex-grow overflow-y-auto mt-2 custom-scrollbar pr-1">
-        <div className="flex flex-col gap-3">
+      <div className="flex-grow overflow-y-auto custom-scrollbar pr-1">
+        <div className="flex flex-col gap-2.5">
           {agentesEnCola.map((agente, index) => {
             const colors = getStatusColor(agente.estado);
+            // Mock de hora de posicionamiento
+            const timeStr = format(new Date(new Date().getTime() - (index * 15 * 60000)), 'hh:mm a');
+
             return (
-              <div key={agente.id} className={`border rounded-xl shadow-sm bg-white overflow-hidden transition-all hover:shadow-md ${colors.border}`}>
-                <div className={`p-3 flex items-center justify-between ${colors.bgHdr}`}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-700 shadow-sm text-xs shrink-0">
+              <div 
+                key={agente.id} 
+                onClick={() => openAgentModal(agente)}
+                className={`border rounded-xl shadow-sm bg-white overflow-hidden transition-all hover:shadow-md cursor-pointer ${colors.border}`}
+              >
+                <div className={`p-2.5 flex items-center justify-between ${colors.bgHdr}`}>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-700 shadow-sm text-xs shrink-0">
                       #{index + 1}
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-bold text-slate-800 text-sm leading-tight truncate">{agente.nombre}</h4>
-                      <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wide">Especialista</p>
+                      <h4 className="font-bold text-slate-800 text-xs leading-tight truncate">{agente.nombre}</h4>
+                      <p className="text-[9px] text-slate-500 mt-0.5 flex items-center gap-1 font-medium">
+                        <Clock className="w-3 h-3" /> {timeStr}
+                      </p>
                     </div>
                   </div>
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/50 shrink-0 ${colors.badgeBg} ${colors.badgeTxt}`}>
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border border-white/50 shrink-0 uppercase tracking-wider ${colors.badgeBg} ${colors.badgeTxt}`}>
                     {agente.estado}
                   </span>
                 </div>
                 
-                <div className="px-3 py-2 bg-slate-50/50 border-t border-slate-100 flex gap-2">
-                  {agente.estado === 'DISPONIBLE' ? (
-                    <button 
-                      onClick={() => handleCambiarEstado(agente.id, 'INACTIVO')} 
-                      className="flex items-center justify-center gap-1.5 text-xs text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg w-full font-semibold transition-colors shadow-sm"
-                    >
-                      <PauseCircle className="w-4 h-4" /> Pausar / Salir
-                    </button>
+                <div className="px-2.5 py-1.5 bg-slate-50/50 border-t border-slate-100 flex gap-1.5">
+                  {agente.estado === 'REFRIGERIO' ? (
+                     <button 
+                       onClick={(e) => handleCambiarEstado(e, agente.id, 'DISPONIBLE')} 
+                       className="flex items-center justify-center gap-1 text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md w-full font-bold border border-emerald-200 transition-colors shadow-sm"
+                     >
+                       <PlayCircle className="w-3.5 h-3.5" /> Fin Refrigerio
+                     </button>
+                  ) : agente.estado === 'DISPONIBLE' ? (
+                    <>
+                      <button 
+                        onClick={(e) => handleCambiarEstado(e, agente.id, 'REFRIGERIO')} 
+                        className="flex items-center justify-center gap-1 text-[10px] text-orange-700 hover:text-orange-900 bg-orange-50 hover:bg-orange-100 border border-orange-200 px-2 py-1 rounded-md w-1/2 font-bold transition-colors shadow-sm"
+                      >
+                        <Coffee className="w-3.5 h-3.5" /> Refrigerio
+                      </button>
+                      <button 
+                        onClick={(e) => handleCambiarEstado(e, agente.id, 'INACTIVO')} 
+                        className="flex items-center justify-center gap-1 text-[10px] text-slate-600 hover:text-red-700 bg-white hover:bg-red-50 border border-slate-200 px-2 py-1 rounded-md w-1/2 font-bold transition-colors shadow-sm"
+                      >
+                        <PauseCircle className="w-3.5 h-3.5" /> Pausar
+                      </button>
+                    </>
                   ) : (
                     <button 
-                      onClick={() => handleCambiarEstado(agente.id, 'DISPONIBLE')} 
-                      className="flex items-center justify-center gap-1.5 text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg w-full font-semibold border border-emerald-200 transition-colors shadow-sm"
+                      onClick={(e) => handleCambiarEstado(e, agente.id, 'DISPONIBLE')} 
+                      className="flex items-center justify-center gap-1 text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md w-full font-bold border border-emerald-200 transition-colors shadow-sm"
                     >
-                      <PlayCircle className="w-4 h-4" /> Volver a Disponible
+                      <PlayCircle className="w-3.5 h-3.5" /> Liberar Agente
                     </button>
                   )}
                 </div>
@@ -189,13 +247,78 @@ export default function QueueMonitor() {
           })}
           
           {agentesEnCola.length === 0 && (
-            <div className="col-span-full text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-xl">
-              <p className="text-gray-500 text-sm font-medium">No hay agentes en turno.</p>
-              <p className="text-gray-400 text-xs mt-1">Busca y registra el ingreso de un agente arriba.</p>
+            <div className="col-span-full text-center py-8 bg-slate-50 border border-dashed border-slate-300 rounded-xl">
+              <p className="text-slate-500 text-xs font-bold">No hay agentes en turno.</p>
             </div>
           )}
         </div>
       </div>
+
+      {/* Modal Detalle de Agente */}
+      {selectedAgentForModal && (
+        <Modal
+          isOpen={!!selectedAgentForModal}
+          onClose={closeAgentModal}
+          title={`Detalle: ${selectedAgentForModal.nombre}`}
+          maxWidth="max-w-lg"
+        >
+          <div className="space-y-5 mt-2">
+            
+            {/* Panel de Horarios */}
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-slate-400" /> 
+                Registro Horario (Hoy)
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">Hora Llegada</p>
+                  <p className="text-sm font-black text-slate-800">08:45 AM</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">Hora Salida</p>
+                  <p className="text-sm font-black text-slate-400 italic">-- : --</p>
+                </div>
+                <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 shadow-sm">
+                  <p className="text-[10px] text-orange-600 font-bold uppercase">Inicio Refrigerio</p>
+                  <p className="text-sm font-black text-orange-900">01:00 PM</p>
+                </div>
+                <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 shadow-sm">
+                  <p className="text-[10px] text-orange-600 font-bold uppercase">Fin Refrigerio</p>
+                  <p className="text-sm font-black text-orange-900">01:45 PM</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Panel de OATCs */}
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <FileText className="w-4 h-4 text-slate-400" /> 
+                Atenciones (OATCs) Asignadas
+              </h4>
+              
+              <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                {getMockOATCs().map(oatc => (
+                  <div key={oatc.id} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-1.5">
+                    <div className="flex justify-between items-start">
+                      <span className="font-bold text-sm text-slate-800">{oatc.cliente}</span>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${oatc.estado === 'Completado' ? 'bg-emerald-100 text-emerald-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        {oatc.estado}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="text-xs text-slate-600 font-medium">{oatc.servicio}</p>
+                      <span className="text-[10px] text-slate-400 font-bold">{oatc.hora}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </Modal>
+      )}
+
     </div>
   );
 }
