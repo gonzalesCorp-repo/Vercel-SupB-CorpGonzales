@@ -242,7 +242,7 @@ export default function WorkspaceOperativoPage() {
                       
                       {!isEnCurso && (
                         <button 
-                          onClick={() => handleIniciarAtencion(ticket.id)}
+                          onClick={() => ticket.id && handleIniciarAtencion(ticket.id)}
                           className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
                         >
                           <PlayCircle className="w-5 h-5" /> Iniciar
@@ -258,7 +258,7 @@ export default function WorkspaceOperativoPage() {
                             <PlusCircle className="w-5 h-5" /> Extra
                           </button>
                           <button 
-                            onClick={() => handleEnviarCaja(ticket.id)}
+                            onClick={() => ticket.id && handleEnviarCaja(ticket.id)}
                             className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
                           >
                             <CheckCircle className="w-5 h-5" /> Terminar
