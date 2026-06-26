@@ -72,7 +72,7 @@ export async function obtenerMapaSalon(): Promise<MapaSalonData[]> {
   }
 
   // 4. Mapear datos
-  const mapa = ubicacionesReales.map(ubi => {
+  const mapa = (ubicacionesReales as Ubicacion[]).map((ubi: Ubicacion) => {
     // Buscar si hay un OATC en esta ubicacion
     const ocupante = oatcsReales.find((o: any) => o.ubicacion_id === ubi.id);
     
