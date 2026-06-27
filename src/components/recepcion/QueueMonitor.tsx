@@ -207,7 +207,7 @@ export default function QueueMonitor() {
                     <div className="flex flex-col gap-1">
                       <div className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
                         <Clock className="w-3.5 h-3.5" />
-                        Desde hace 15m (Dummy)
+                        En turno
                       </div>
                       
                       {/* BADGE DE ALERTA "PASAR LA VOZ" */}
