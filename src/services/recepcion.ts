@@ -26,6 +26,8 @@ export interface Agente {
   rol?: string;
   especialidad?: string;
   badge?: string;
+  created_at?: string;
+  ultimo_cambio_estado?: string;
 }
 
 export interface OATC {
