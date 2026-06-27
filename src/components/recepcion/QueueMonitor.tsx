@@ -83,7 +83,7 @@ export default function QueueMonitor() {
   const handleForzarCierre = async () => {
     if (confirm('¿Forzar el cierre? Esto vaciará la cola y cancelará atenciones colgadas.')) {
       setIsRefreshing(true);
-      await fetch('/api/cron/reset-queue');
+      await supabase.from('agentes').update({ estado: 'INACTIVO', badge: null }).neq('estado', 'INACTIVO');
       // Podriamos tambien iterar y cerrar OATCs pero por ahora reseteamos cola
       setShowAuditModal(false);
       cargarDatos();
