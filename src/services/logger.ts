@@ -29,6 +29,7 @@ export async function registrarLog(modulo: string, accion: string, detalles: any
 }
 
 export async function obtenerLogs(limit = 100) {
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('system_logs')
     .select('*, sedes(nombre)')
