@@ -39,12 +39,15 @@ export default function BotonAsistencia() {
 
   const handleSolicitar = async (tipo_id: string) => {
     setIsLoading(true);
-    const ok = await solicitarAsistencia(tipo_id);
-    if (ok) {
+    try {
+      await solicitarAsistencia(tipo_id);
       setIsModalOpen(false);
       await cargarDatos();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   if (peticionPendiente) {

@@ -21,8 +21,11 @@ export interface Peticion {
 
 export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
   const { sedeActiva } = useAppStore.getState();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!sedeActiva || !user?.email) return false;
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError) throw new Error("Error de autenticación: " + authError.message);
+  if (!user?.email) throw new Error("Usuario no autenticado");
+  if (!sedeActiva) throw new Error("No hay una sede seleccionada en el Workspace");
   
   const userEmail = user.email;
 
@@ -33,7 +36,9 @@ export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
     .eq('email', userEmail)
     .single();
 
-  if (errA || !agente) return false;
+  if (errA || !agente) {
+    throw new Error("No se encontró el perfil de agente asociado a tu usuario (" + userEmail + "). Comunícate con tu administrador.");
+  }
 
   // Insertar petición
   const { error } = await supabase.from('cola_peticiones').insert([{
@@ -45,7 +50,7 @@ export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
 
   if (error) {
     console.error("Error solicitando asistencia:", error);
-    return false;
+    throw new Error("Error de base de datos al solicitar asistencia: " + error.message);
   }
   return true;
 }

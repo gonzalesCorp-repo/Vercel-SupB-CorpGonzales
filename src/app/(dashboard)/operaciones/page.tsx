@@ -44,33 +44,7 @@ export default function WorkspaceOperativoPage() {
     // Para modo Quiosco, traemos todos los tickets activos de la sede (usaremos un mock si la DB está vacía)
     let data = await obtenerTicketsAsignados('ALL');
     
-    // MOCK DATA SI ESTA VACIO
-    if (!data || data.length === 0) {
-      data = [
-        {
-          id: 'mock-1',
-          sede_id: 'sede-1',
-          codigo_ticket: 'OATC-1001',
-          cliente_id: 'c-1',
-          cliente_nombre: 'María Gómez',
-          estado_proceso: 'ASESORANDO',
-          agente_nombre: 'Lucía (Estilista)',
-          punto_partida: [{ servicio: 'Corte de Dama', cantidad: 1, monto: 50 }],
-          estado_ui: 'Espera'
-        } as OATCExtended,
-        {
-          id: 'mock-2',
-          sede_id: 'sede-1',
-          codigo_ticket: 'OATC-1002',
-          cliente_id: 'c-2',
-          cliente_nombre: 'Pedro Pascal',
-          estado_proceso: 'ASESORANDO',
-          agente_nombre: 'Carlos (Barbero)',
-          punto_partida: [{ servicio: 'Corte y Barba', cantidad: 1, monto: 40 }],
-          estado_ui: 'En Curso'
-        } as OATCExtended
-      ];
-    }
+    // Eliminamos MOCK DATA SI ESTA VACIO
 
     setTickets(data);
     setIsLoading(false);
