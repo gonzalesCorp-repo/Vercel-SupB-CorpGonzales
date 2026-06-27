@@ -5,6 +5,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function run() {
   const { data, error } = await supabase.from('agentes').select('*').limit(1);
-  console.log(error || data);
+  console.log("Columns:", Object.keys(data[0] || {}));
 }
 run();

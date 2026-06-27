@@ -124,13 +124,19 @@ export async function resolverPeticion(id: string, estado: 'APROBADO' | 'RECHAZA
       // Sale de la cola (ej. Fin de Turno, Refrigerio)
       await supabase.from('agentes').update({ estado: 'INACTIVO' }).eq('id', agente_id);
     } else {
-      // Mantiene su posicion. Si entra por primera vez o es un pase rapido.
+      // Mantiene su posicion o ingresa por primera vez
       if (es_operativo) {
-        // Asegurar que esta disponible si no penaliza
-        await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', agente_id);
+        // Asegurar que esta disponible y actualizar su hora de ingreso a la cola
+        await supabase.from('agentes').update({ 
+          estado: 'DISPONIBLE',
+          ultimo_cambio_estado: new Date().toISOString()
+        }).eq('id', agente_id);
       } else {
         // Es administrativo, solo marco asistencia pero no atiende clientes en piso
-        await supabase.from('agentes').update({ estado: 'ADMINISTRATIVO' }).eq('id', agente_id);
+        await supabase.from('agentes').update({ 
+          estado: 'ADMINISTRATIVO',
+          ultimo_cambio_estado: new Date().toISOString()
+        }).eq('id', agente_id);
       }
     }
   }

@@ -98,7 +98,14 @@ export default function QueueMonitor() {
     }
   };
 
-  const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO' && (showAllAgents ? true : (a.estado !== 'ADMINISTRATIVO' && a.rol === 'STAFF')));
+  const agentesEnCola = agentes
+    .filter(a => a.estado !== 'INACTIVO' && (showAllAgents ? true : (a.estado !== 'ADMINISTRATIVO' && a.rol === 'STAFF')))
+    .sort((a, b) => {
+      // Ordenar por tiempo de ingreso a la cola (los que más tiempo llevan esperando van primero)
+      const timeA = new Date((a as any).ultimo_cambio_estado || a.created_at).getTime();
+      const timeB = new Date((b as any).ultimo_cambio_estado || b.created_at).getTime();
+      return timeA - timeB;
+    });
   const agentesColgados = agentes.filter(a => a.estado !== 'INACTIVO');
 
   const getStatusColor = (estado: string) => {
@@ -219,7 +226,10 @@ export default function QueueMonitor() {
                         <span className="bg-white text-slate-800 text-xs font-black w-5 h-5 flex items-center justify-center rounded-full shadow-sm border border-slate-100">
                           {numTurno}
                         </span>
+                      <div className="flex flex-col">
                         <h4 className="font-bold text-slate-800 text-sm">{agente.nombre}</h4>
+                        <span className="text-xs font-medium text-slate-500">{agente.badge || 'Sin especialidad'}</span>
+                      </div>
                       </div>
                       {(agente as any).especialidad && (
                         <span className="text-xs text-slate-500 ml-7">{(agente as any).especialidad}</span>
@@ -234,8 +244,8 @@ export default function QueueMonitor() {
                   <div className={`px-4 py-3 flex items-center justify-between bg-white border-t border-slate-50`}>
                     <div className="flex flex-col gap-1">
                       <div className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                        <Clock className="w-3.5 h-3.5" />
-                        En turno
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        {(agente as any).ultimo_cambio_estado ? format(new Date((agente as any).ultimo_cambio_estado), 'hh:mm a') : 'Reciente'}
                       </div>
                       
                       {/* BADGE DE ALERTA "PASAR LA VOZ" */}

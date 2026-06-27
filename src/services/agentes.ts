@@ -22,7 +22,10 @@ export async function obtenerTodosLosAgentes(): Promise<Agente[]> {
 export async function cambiarEstadoAgente(id: string, nuevoEstado: string) {
   const { error } = await supabase
     .from('agentes')
-    .update({ estado: nuevoEstado })
+    .update({ 
+      estado: nuevoEstado,
+      ultimo_cambio_estado: new Date().toISOString()
+    })
     .eq('id', id);
     
   if (error) {
