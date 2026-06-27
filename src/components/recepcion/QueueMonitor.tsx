@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, PauseCircle, PlayCircle, Clock, FileText, CheckCircle, XCircle, Inbox } from 'lucide-react';
+import { RefreshCw, PauseCircle, PlayCircle, Clock, FileText, CheckCircle, XCircle, Inbox, Power } from 'lucide-react';
 import { obtenerTodosLosAgentes, cambiarEstadoAgente } from '@/services/agentes';
 import { Agente } from '@/services/recepcion';
 import { obtenerPeticionesPendientesPorSede, resolverPeticion, Peticion } from '@/services/peticiones';
@@ -68,6 +68,14 @@ export default function QueueMonitor() {
     cargarDatos();
   };
 
+  const handleCerrarDia = async () => {
+    if (confirm('¿Estás seguro de cerrar el día? Esto sacará a todos los agentes de la cola activa y los pondrá como INACTIVO.')) {
+      setIsRefreshing(true);
+      await fetch('/api/cron/reset-queue');
+      cargarDatos();
+    }
+  };
+
   const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO' && a.estado !== 'ADMINISTRATIVO');
 
   const getStatusColor = (estado: string) => {
@@ -94,6 +102,14 @@ export default function QueueMonitor() {
         </div>
         
         <div className="flex gap-2">
+          <button 
+            onClick={handleCerrarDia}
+            className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors border border-red-100 font-medium text-sm shadow-sm"
+            title="Cerrar Día (Vaciar Cola)"
+          >
+            <Power className="w-4 h-4" />
+            <span className="hidden sm:inline">Cerrar Día</span>
+          </button>
           <button 
             onClick={cargarDatos}
             className="p-2 bg-white text-slate-500 rounded-lg hover:bg-slate-100 hover:text-indigo-600 transition-colors border border-slate-200 shadow-sm"
