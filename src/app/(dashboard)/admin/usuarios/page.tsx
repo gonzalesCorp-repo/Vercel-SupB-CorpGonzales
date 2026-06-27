@@ -44,6 +44,11 @@ export default function UsuariosPage() {
     
     // Filtrar usuarios por Sede Activa para mantener el contexto
     const filtrados = usuariosData.filter(u => {
+      // Regla de Privacidad: Los ADMIN normales no pueden ver ni editar a los SUPERADMIN
+      if (userRol !== 'SUPERADMIN' && u.rol === 'SUPERADMIN') {
+        return false;
+      }
+
       if (!sedeActiva) return true;
       if (u.rol === 'SUPERADMIN') return true; // Superadmins se ven en todas las sedes
       return u.sedes_ids?.includes(sedeActiva.id);
