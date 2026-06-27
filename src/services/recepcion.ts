@@ -139,3 +139,26 @@ export async function crearOatc(
   
   return data;
 }
+
+export async function obtenerOatcsActivosDelDia(): Promise<OATC[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) return [];
+
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const { data, error } = await supabase
+    .from('oatc')
+    .select('*')
+    .eq('sede_id', sedeId)
+    .gte('created_at', startOfDay.toISOString())
+    .neq('estado_proceso', 'FINALIZADO')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error("Error obteniendo OATCs del día:", error);
+    return [];
+  }
+
+  return data as OATC[];
+}

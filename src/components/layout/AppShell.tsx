@@ -339,6 +339,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       Gestión de Usuarios
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/admin/configuracion" className={navItemClass('/admin/configuracion')}>
+                      <Settings className="w-5 h-5 mr-3" />
+                      Configuración WFM
+                    </Link>
+                  </li>
                 </ul>
               </li>
             )}
