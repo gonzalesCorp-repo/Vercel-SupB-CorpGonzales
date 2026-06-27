@@ -8,11 +8,15 @@ import { obtenerPeticionesPendientesPorSede, resolverPeticion, Peticion } from '
 import { createClient } from '@/lib/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Modal } from '@/components/ui/Modal';
+import { OATC, obtenerOatcsActivosDelDia } from '@/services/recepcion';
 
 export default function QueueMonitor() {
   const [agentes, setAgentes] = useState<Agente[]>([]);
   const [peticiones, setPeticiones] = useState<Peticion[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [activeOATCs, setActiveOATCs] = useState<OATC[]>([]);
   
   const supabase = createClient();
 
@@ -69,9 +73,19 @@ export default function QueueMonitor() {
   };
 
   const handleCerrarDia = async () => {
-    if (confirm('¿Estás seguro de cerrar el día? Esto sacará a todos los agentes de la cola activa y los pondrá como INACTIVO.')) {
+    setIsRefreshing(true);
+    const oatcsData = await obtenerOatcsActivosDelDia();
+    setActiveOATCs(oatcsData);
+    setIsRefreshing(false);
+    setShowAuditModal(true);
+  };
+
+  const handleForzarCierre = async () => {
+    if (confirm('¿Forzar el cierre? Esto vaciará la cola y cancelará atenciones colgadas.')) {
       setIsRefreshing(true);
       await fetch('/api/cron/reset-queue');
+      // Podriamos tambien iterar y cerrar OATCs pero por ahora reseteamos cola
+      setShowAuditModal(false);
       cargarDatos();
     }
   };
@@ -104,11 +118,11 @@ export default function QueueMonitor() {
         <div className="flex gap-2">
           <button 
             onClick={handleCerrarDia}
-            className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors border border-red-100 font-medium text-sm shadow-sm"
-            title="Cerrar Día (Vaciar Cola)"
+            className="flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors border border-purple-100 font-medium text-sm shadow-sm"
+            title="Auditoría de Cierre (Timbre)"
           >
             <Power className="w-4 h-4" />
-            <span className="hidden sm:inline">Cerrar Día</span>
+            <span className="hidden sm:inline">Timbre de Cierre</span>
           </button>
           <button 
             onClick={cargarDatos}
@@ -233,6 +247,37 @@ export default function QueueMonitor() {
           </div>
         )}
       </div>
+
+      <Modal isOpen={showAuditModal} onClose={() => setShowAuditModal(false)} title="Auditoría de Cierre (Timbre)">
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Revisa los elementos colgados antes de forzar el cierre del día. Lo ideal es que los operarios cierren sus propios tickets.
+          </p>
+          
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+            <h4 className="font-bold text-orange-800 text-sm mb-2">Agentes Aún en Cola ({agentesEnCola.length})</h4>
+            <ul className="text-xs text-orange-700 space-y-1 ml-4 list-disc">
+              {agentesEnCola.length === 0 ? <li>Ninguno</li> : agentesEnCola.map(a => <li key={a.id}>{a.nombre} ({a.estado})</li>)}
+            </ul>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <h4 className="font-bold text-blue-800 text-sm mb-2">Órdenes de Atención sin Finalizar ({activeOATCs.length})</h4>
+            <ul className="text-xs text-blue-700 space-y-1 ml-4 list-disc">
+              {activeOATCs.length === 0 ? <li>Ninguna</li> : activeOATCs.map(o => <li key={o.id}>{o.cliente_nombre} - {o.agente_nombre || 'Sin Agente'} ({o.estado_proceso})</li>)}
+            </ul>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <button onClick={() => setShowAuditModal(false)} className="px-4 py-2 text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 font-bold transition-colors">
+              Cancelar
+            </button>
+            <button onClick={handleForzarCierre} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold transition-colors shadow-sm">
+              Forzar Cierre de Cola
+            </button>
+          </div>
+        </div>
+      </Modal>
 
     </div>
   );

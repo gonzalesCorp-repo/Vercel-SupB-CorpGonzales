@@ -19,6 +19,17 @@ export default function ActiveOATCsTable() {
     setIsLoading(false);
   };
 
+  const handlePreCobro = async (oatcId: string) => {
+    const { error } = await supabase
+      .from('oatc')
+      .update({ estado_proceso: 'PRE_COBRADO' })
+      .eq('id', oatcId);
+    
+    if (!error) {
+      cargarDatos();
+    }
+  };
+
   useEffect(() => {
     cargarDatos();
 
@@ -98,11 +109,24 @@ export default function ActiveOATCsTable() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button title="Editar OATC" className="text-slate-400 hover:text-blue-600 p-1.5 rounded-md hover:bg-blue-50 transition-colors">
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button title="Finalizar" className="text-slate-400 hover:text-emerald-600 p-1.5 rounded-md hover:bg-emerald-50 transition-colors">
-                        <CheckSquare className="w-4 h-4" />
+                      {oatc.estado_proceso === 'ASESORANDO' && (
+                        <button 
+                          onClick={() => handlePreCobro(oatc.id!)}
+                          className="p-1.5 text-orange-500 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors border border-orange-100 bg-orange-50/50 shadow-sm flex items-center gap-1 text-xs font-bold"
+                          title="Enviar a Pre-Cobro"
+                        >
+                          <CheckSquare className="w-4 h-4" />
+                          <span className="hidden sm:inline">Pre-Cobrar</span>
+                        </button>
+                      )}
+                      {oatc.estado_proceso === 'PRE_COBRADO' && (
+                        <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded-md">
+                          EN CAJA
+                        </span>
+                      )}
+                      
+                      <button className="p-1.5 text-slate-400 hover:bg-slate-100 hover:text-indigo-600 rounded-lg transition-colors" title="Ver Detalles">
+                        <ArrowRight className="w-4 h-4" />
                       </button>
                       <button title="Cancelar" className="text-slate-400 hover:text-red-600 p-1.5 rounded-md hover:bg-red-50 transition-colors">
                         <XCircle className="w-4 h-4" />

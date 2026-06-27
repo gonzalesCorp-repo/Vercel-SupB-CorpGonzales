@@ -23,7 +23,7 @@ export async function obtenerTicketsAsignados(agenteNombre: string): Promise<OAT
     .from('oatc')
     .select('*')
     .eq('agente_nombre', agenteNombre)
-    .eq('estado_proceso', 'ASESORANDO')
+    .in('estado_proceso', ['ASESORANDO', 'PRE_COBRADO'])
     .eq('sede_id', sedeId);
 
   if (error) {
@@ -33,8 +33,57 @@ export async function obtenerTicketsAsignados(agenteNombre: string): Promise<OAT
   return data as OATC[];
 }
 
-// 2. Terminar Atención (Liquidación)
 export async function terminarAtencion(oatcId: string): Promise<boolean> {
+  // 1. Obtener la OATC actual
+  const { data: oatc, error: errOatc } = await supabase
+    .from('oatc')
+    .select('*')
+    .eq('id', oatcId)
+    .single();
+
+  if (errOatc || !oatc) return false;
+
+  // 2. Obtener Agente ID
+  const { data: agente } = await supabase
+    .from('agentes')
+    .select('id')
+    .eq('nombre', oatc.agente_nombre)
+    .single();
+
+  if (agente) {
+    if (oatc.estado_pago === 'Pagado') {
+      // FAST-PASS: Si ya está pagado (Pre-cobro o cobrado), reingresa directo a DISPONIBLE
+      await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', agente.id);
+    } else {
+      // No está pagado: Va al Inbox de Recepción
+      // Buscar o crear la configuración de "Retorno de Servicio"
+      let { data: configRetorno } = await supabase
+        .from('config_peticiones')
+        .select('id')
+        .eq('nombre', 'Retorno de Servicio')
+        .single();
+        
+      if (!configRetorno) {
+        const { data: newConfig } = await supabase.from('config_peticiones').insert([{
+          nombre: 'Retorno de Servicio',
+          penaliza_cola: false,
+          color: 'bg-indigo-100 text-indigo-800'
+        }]).select('id').single();
+        configRetorno = newConfig;
+      }
+
+      if (configRetorno) {
+        await supabase.from('cola_peticiones').insert([{
+          agente_id: agente.id,
+          sede_id: oatc.sede_id,
+          tipo_id: configRetorno.id,
+          estado: 'PENDIENTE'
+        }]);
+      }
+    }
+  }
+
+  // 3. Finalizar OATC
   const { error } = await supabase
     .from('oatc')
     .update({ 
