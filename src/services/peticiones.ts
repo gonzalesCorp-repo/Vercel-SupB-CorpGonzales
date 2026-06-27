@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 
 export interface Peticion {
@@ -20,6 +20,7 @@ export interface Peticion {
 }
 
 export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
+  const supabase = createClient();
   const { sedeActiva } = useAppStore.getState();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   
@@ -56,6 +57,7 @@ export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
 }
 
 export async function obtenerMiPeticionPendiente(): Promise<Peticion | null> {
+  const supabase = createClient();
   const { sedeActiva } = useAppStore.getState();
   const { data: { user } } = await supabase.auth.getUser();
   if (!sedeActiva || !user?.email) return null;
@@ -85,6 +87,7 @@ export async function obtenerMiPeticionPendiente(): Promise<Peticion | null> {
 }
 
 export async function obtenerPeticionesPendientesPorSede(): Promise<Peticion[]> {
+  const supabase = createClient();
   const { sedeActiva } = useAppStore.getState();
   if (!sedeActiva) return [];
 
@@ -103,6 +106,7 @@ export async function obtenerPeticionesPendientesPorSede(): Promise<Peticion[]> 
 }
 
 export async function resolverPeticion(id: string, estado: 'APROBADO' | 'RECHAZADO', agente_id: string, penaliza_cola: boolean, es_operativo: boolean): Promise<boolean> {
+  const supabase = createClient();
   // 1. Update petition state
   const { error } = await supabase
     .from('cola_peticiones')
