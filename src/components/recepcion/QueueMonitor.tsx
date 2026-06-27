@@ -50,7 +50,7 @@ export default function QueueMonitor() {
   }, []);
 
   const handleResolver = async (pet: Peticion, estado: 'APROBADO' | 'RECHAZADO') => {
-    const es_operativo = pet.agentes?.rol === 'STAFF';
+    const es_operativo = (pet as any).agente?.rol === 'STAFF';
     const penaliza_cola = pet.config_peticiones?.penaliza_cola || false;
     
     await resolverPeticion(pet.id, estado, pet.agente_id, penaliza_cola, es_operativo);
