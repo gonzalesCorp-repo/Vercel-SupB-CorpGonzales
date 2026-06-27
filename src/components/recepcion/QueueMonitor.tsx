@@ -63,8 +63,13 @@ export default function QueueMonitor() {
   };
 
   const handleCambiarEstadoManual = async (id: string, estado: string) => {
-    await cambiarEstadoAgente(id, estado);
-    cargarDatos();
+    try {
+      await cambiarEstadoAgente(id, estado);
+      cargarDatos();
+    } catch (error: any) {
+      console.error(error);
+      alert('Error cambiando estado: ' + error.message);
+    }
   };
 
   const handleClearBadge = async (id: string) => {
@@ -83,14 +88,17 @@ export default function QueueMonitor() {
   const handleForzarCierre = async () => {
     if (confirm('¿Forzar el cierre? Esto vaciará la cola y cancelará atenciones colgadas.')) {
       setIsRefreshing(true);
-      await supabase.from('agentes').update({ estado: 'INACTIVO', badge: null }).neq('estado', 'INACTIVO');
-      // Podriamos tambien iterar y cerrar OATCs pero por ahora reseteamos cola
+      const { error } = await supabase.from('agentes').update({ estado: 'INACTIVO', badge: null }).neq('estado', 'INACTIVO');
+      if (error) {
+        alert('Error forzando cierre: ' + error.message);
+      }
       setShowAuditModal(false);
       cargarDatos();
     }
   };
 
-  const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO' && a.estado !== 'ADMINISTRATIVO');
+  const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO' && a.estado !== 'ADMINISTRATIVO' && a.rol === 'STAFF');
+  const agentesColgados = agentes.filter(a => a.estado !== 'INACTIVO');
 
   const getStatusColor = (estado: string) => {
     switch(estado) {
@@ -196,6 +204,9 @@ export default function QueueMonitor() {
                         </span>
                         <h4 className="font-bold text-slate-800 text-sm">{agente.nombre}</h4>
                       </div>
+                      {(agente as any).especialidad && (
+                        <span className="text-xs text-slate-500 ml-7">{(agente as any).especialidad}</span>
+                      )}
                     </div>
                     
                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${colors.badgeBg} ${colors.badgeTxt}`}>
@@ -255,9 +266,9 @@ export default function QueueMonitor() {
           </p>
           
           <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-            <h4 className="font-bold text-orange-800 text-sm mb-2">Agentes Aún en Cola ({agentesEnCola.length})</h4>
+            <h4 className="font-bold text-orange-800 text-sm mb-2">Agentes Aún en Cola ({agentesColgados.length})</h4>
             <ul className="text-xs text-orange-700 space-y-1 ml-4 list-disc">
-              {agentesEnCola.length === 0 ? <li>Ninguno</li> : agentesEnCola.map(a => <li key={a.id}>{a.nombre} ({a.estado})</li>)}
+              {agentesColgados.length === 0 ? <li>Ninguno</li> : agentesColgados.map(a => <li key={a.id}>{a.nombre} ({a.estado})</li>)}
             </ul>
           </div>
 
