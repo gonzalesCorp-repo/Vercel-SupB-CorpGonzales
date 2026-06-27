@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, PauseCircle, PlayCircle, Clock, FileText, CheckCircle, XCircle, Inbox, Power } from 'lucide-react';
+import { RefreshCw, PauseCircle, PlayCircle, Clock, FileText, CheckCircle, XCircle, Inbox, Power, Filter } from 'lucide-react';
 import { obtenerTodosLosAgentes, cambiarEstadoAgente } from '@/services/agentes';
 import { Agente } from '@/services/recepcion';
 import { obtenerPeticionesPendientesPorSede, resolverPeticion, Peticion } from '@/services/peticiones';
 import { createClient } from '@/lib/supabase/client';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Modal } from '@/components/ui/Modal';
 import { OATC, obtenerOatcsActivosDelDia } from '@/services/recepcion';
@@ -16,6 +16,7 @@ export default function QueueMonitor() {
   const [peticiones, setPeticiones] = useState<Peticion[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showAllAgents, setShowAllAgents] = useState(false);
   const [activeOATCs, setActiveOATCs] = useState<OATC[]>([]);
   
   const supabase = createClient();
@@ -97,7 +98,7 @@ export default function QueueMonitor() {
     }
   };
 
-  const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO' && a.estado !== 'ADMINISTRATIVO' && a.rol === 'STAFF');
+  const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO' && (showAllAgents ? true : (a.estado !== 'ADMINISTRATIVO' && a.rol === 'STAFF')));
   const agentesColgados = agentes.filter(a => a.estado !== 'INACTIVO');
 
   const getStatusColor = (estado: string) => {
@@ -133,6 +134,13 @@ export default function QueueMonitor() {
             <span className="hidden sm:inline">Timbre de Cierre</span>
           </button>
           <button 
+            onClick={() => setShowAllAgents(!showAllAgents)}
+            className={`p-2 rounded-lg transition-colors border shadow-sm flex items-center justify-center ${showAllAgents ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+            title="Mostrar todos los usuarios"
+          >
+            <Filter className="w-4 h-4" />
+          </button>
+          <button 
             onClick={cargarDatos}
             className="p-2 bg-white text-slate-500 rounded-lg hover:bg-slate-100 hover:text-indigo-600 transition-colors border border-slate-200 shadow-sm"
             title="Refrescar Cola"
@@ -153,13 +161,13 @@ export default function QueueMonitor() {
             {peticiones.map(pet => (
               <div key={pet.id} className="bg-white p-3 rounded-xl shadow-sm border border-indigo-100 flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-slate-800 text-sm">{pet.agentes?.nombre} <span className="text-xs text-slate-400 font-normal">({pet.agentes?.rol})</span></div>
+                  <div className="font-bold text-slate-800 text-sm">{(pet as any).agente?.nombre || 'Buscando...'} <span className="text-xs text-slate-400 font-normal">({(pet as any).agente?.rol || ''})</span></div>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${pet.config_peticiones?.color}`}>
                       {pet.config_peticiones?.nombre}
                     </span>
                     <span className="text-[10px] text-slate-400">
-                      Hace {formatDistanceToNow(new Date(pet.created_at), { locale: es })}
+                      {format(new Date(pet.created_at), 'hh:mm a')} • Hace {formatDistanceToNow(new Date(pet.created_at), { locale: es })}
                     </span>
                   </div>
                 </div>
@@ -190,6 +198,15 @@ export default function QueueMonitor() {
             {agentesEnCola.map((agente, index) => {
               const colors = getStatusColor(agente.estado);
               const isDisp = agente.estado === 'DISPONIBLE';
+              const isOperativo = agente.rol === 'STAFF';
+              
+              // Calcular el número real de turno (solo para operativos)
+              let numTurno = '-';
+              if (isOperativo) {
+                // Contar cuántos STAFF hay antes o en este index
+                const priorStaff = agentesEnCola.slice(0, index + 1).filter(a => a.rol === 'STAFF');
+                numTurno = priorStaff.length.toString();
+              }
               
               return (
                 <div 
@@ -200,7 +217,7 @@ export default function QueueMonitor() {
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
                         <span className="bg-white text-slate-800 text-xs font-black w-5 h-5 flex items-center justify-center rounded-full shadow-sm border border-slate-100">
-                          {index + 1}
+                          {numTurno}
                         </span>
                         <h4 className="font-bold text-slate-800 text-sm">{agente.nombre}</h4>
                       </div>
