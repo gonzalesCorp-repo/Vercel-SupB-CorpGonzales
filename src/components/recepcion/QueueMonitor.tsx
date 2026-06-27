@@ -1,87 +1,74 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { RefreshCw, Search, PauseCircle, PlayCircle, UserCheck, UserMinus, Coffee, Clock, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { RefreshCw, PauseCircle, PlayCircle, Clock, FileText, CheckCircle, XCircle, Inbox } from 'lucide-react';
 import { obtenerTodosLosAgentes, cambiarEstadoAgente } from '@/services/agentes';
 import { Agente } from '@/services/recepcion';
+import { obtenerPeticionesPendientesPorSede, resolverPeticion, Peticion } from '@/services/peticiones';
 import { createClient } from '@/lib/supabase/client';
-import { Modal } from '@/components/ui/Modal';
-import { format } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export default function QueueMonitor() {
   const [agentes, setAgentes] = useState<Agente[]>([]);
+  const [peticiones, setPeticiones] = useState<Peticion[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [search, setSearch] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedAgentId, setSelectedAgentId] = useState<string>('');
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Modal de Detalle de Agente
-  const [selectedAgentForModal, setSelectedAgentForModal] = useState<Agente | null>(null);
-
+  
   const supabase = createClient();
 
-  const cargarAgentes = async () => {
+  const cargarDatos = async () => {
     setIsRefreshing(true);
-    const data = await obtenerTodosLosAgentes();
-    setAgentes(data);
+    const [dataAgentes, dataPeticiones] = await Promise.all([
+      obtenerTodosLosAgentes(),
+      obtenerPeticionesPendientesPorSede()
+    ]);
+    setAgentes(dataAgentes);
+    setPeticiones(dataPeticiones);
     setIsRefreshing(false);
   };
 
   useEffect(() => {
-    cargarAgentes();
+    cargarDatos();
     
-    // Realtime Suscripción
-    const channel = supabase.channel('realtime-agentes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'agentes' }, () => {
-        cargarAgentes();
-      })
+    const channelAgentes = supabase.channel('realtime-agentes-queue')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agentes' }, () => cargarDatos())
       .subscribe();
       
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
+    const channelPeticiones = supabase.channel('realtime-peticiones-queue')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cola_peticiones' }, () => cargarDatos())
+      .subscribe();
+      
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      supabase.removeChannel(channel);
+      supabase.removeChannel(channelAgentes);
+      supabase.removeChannel(channelPeticiones);
     };
   }, []);
 
-  const handleRegistrarIngreso = async () => {
-    if (!selectedAgentId) return;
-    await cambiarEstadoAgente(selectedAgentId, 'DISPONIBLE');
-    setSearch('');
-    setSelectedAgentId('');
-    cargarAgentes();
+  const handleResolver = async (pet: Peticion, estado: 'APROBADO' | 'RECHAZADO') => {
+    const es_operativo = pet.agentes?.rol === 'STAFF';
+    const penaliza_cola = pet.config_peticiones?.penaliza_cola || false;
+    
+    await resolverPeticion(pet.id, estado, pet.agente_id, penaliza_cola, es_operativo);
+    
+    // Si aprueba y NO penaliza, le ponemos el badge
+    if (estado === 'APROBADO' && !penaliza_cola) {
+      await supabase.from('agentes').update({ badge: pet.config_peticiones?.nombre }).eq('id', pet.agente_id);
+    }
+
+    cargarDatos();
   };
 
-  const handleRegistrarSalida = async () => {
-    if (!selectedAgentId) return;
-    await cambiarEstadoAgente(selectedAgentId, 'INACTIVO');
-    setSearch('');
-    setSelectedAgentId('');
-    cargarAgentes();
-  };
-
-  const handleCambiarEstado = async (e: React.MouseEvent, id: string, estado: string) => {
-    e.stopPropagation(); // Evitar abrir el modal
+  const handleCambiarEstadoManual = async (id: string, estado: string) => {
     await cambiarEstadoAgente(id, estado);
-    cargarAgentes();
+    cargarDatos();
   };
 
-  const openAgentModal = (agente: Agente) => {
-    setSelectedAgentForModal(agente);
+  const handleClearBadge = async (id: string) => {
+    await supabase.from('agentes').update({ badge: null }).eq('id', id);
+    cargarDatos();
   };
 
-  const closeAgentModal = () => {
-    setSelectedAgentForModal(null);
-  };
-
-  const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO');
-  const searchResults = agentes.filter(a => a.nombre.toLowerCase().includes(search.toLowerCase()));
+  const agentesEnCola = agentes.filter(a => a.estado !== 'INACTIVO' && a.estado !== 'ADMINISTRATIVO');
 
   const getStatusColor = (estado: string) => {
     switch(estado) {
@@ -94,230 +81,142 @@ export default function QueueMonitor() {
     }
   };
 
-  // Mock data for modal details
-  const getMockOATCs = () => [
-    { id: '1021', cliente: 'María López', servicio: 'Corte Clásico', estado: 'Completado', hora: '10:30 AM' },
-    { id: '1025', cliente: 'Juan Pérez', servicio: 'Corte Fade', estado: 'En Transcurso', hora: '11:45 AM' },
-  ];
-
   return (
-    <div className="h-full flex flex-col gap-3">
-      {/* Header Compacto */}
-      <div className="flex justify-between items-center bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-800 ml-2">Monitor de Cola</h2>
-        <button 
-          onClick={cargarAgentes} 
-          disabled={isRefreshing}
-          className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 p-1.5 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
-          title="Actualizar"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-        </button>
-      </div>
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full min-h-[600px]">
       
-      {/* Registro de Ingreso/Salida */}
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-2">
-        <div className="relative" ref={dropdownRef}>
-          <div className="relative">
-            <input 
-              type="text" 
-              value={selectedAgentId ? (agentes.find(a => a.id === selectedAgentId)?.nombre || '') : search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setSelectedAgentId('');
-                setShowDropdown(true);
-              }}
-              onFocus={() => { setShowDropdown(true); setSearch(''); }}
-              placeholder="Buscar agente..." 
-              className="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 pr-7 bg-slate-50 outline-none"
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
-              <Search className="w-3.5 h-3.5 text-slate-400" />
-            </div>
-
-            {showDropdown && (
-              <div className="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-40 overflow-y-auto custom-scrollbar">
-                {searchResults.map(usr => (
-                  <div 
-                    key={usr.id}
-                    onClick={() => {
-                      setSelectedAgentId(usr.id);
-                      setSearch(usr.nombre);
-                      setShowDropdown(false);
-                    }} 
-                    className="px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-50 last:border-0 transition-colors"
-                  >
-                    {usr.nombre}
-                  </div>
-                ))}
-                {searchResults.length === 0 && (
-                  <div className="px-3 py-2 text-xs text-slate-500 text-center italic">
-                    No encontrado
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+      {/* HEADER COLA */}
+      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
+        <div>
+          <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+            Monitor de Cola
+          </h3>
+          <p className="text-xs text-slate-500 font-medium">Asistencia y Disponibilidad en Piso</p>
         </div>
+        
         <div className="flex gap-2">
           <button 
-            onClick={handleRegistrarIngreso} 
-            disabled={!selectedAgentId}
-            className="w-1/2 bg-blue-600 text-white p-2 rounded-lg text-xs font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+            onClick={cargarDatos}
+            className="p-2 bg-white text-slate-500 rounded-lg hover:bg-slate-100 hover:text-indigo-600 transition-colors border border-slate-200 shadow-sm"
+            title="Refrescar Cola"
           >
-            <UserCheck className="w-3.5 h-3.5" />
-            Ingreso
-          </button>
-          <button 
-            onClick={handleRegistrarSalida} 
-            disabled={!selectedAgentId}
-            className="w-1/2 bg-slate-100 text-slate-600 p-2 rounded-lg text-xs font-semibold hover:bg-red-50 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5 shadow-sm"
-          >
-            <UserMinus className="w-3.5 h-3.5" />
-            Salida
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-indigo-600' : ''}`} />
           </button>
         </div>
       </div>
 
-      {/* Cola de Agentes */}
-      <div className="flex-grow overflow-y-auto custom-scrollbar pr-1">
-        <div className="flex flex-col gap-2.5">
-          {agentesEnCola.map((agente, index) => {
-            const colors = getStatusColor(agente.estado);
-            // Mock de hora de posicionamiento
-            const timeStr = format(new Date(new Date().getTime() - (index * 15 * 60000)), 'hh:mm a');
-
-            return (
-              <div 
-                key={agente.id} 
-                onClick={() => openAgentModal(agente)}
-                className={`border rounded-xl shadow-sm bg-white overflow-hidden transition-all hover:shadow-md cursor-pointer ${colors.border}`}
-              >
-                <div className={`p-2.5 flex items-center justify-between ${colors.bgHdr}`}>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-700 shadow-sm text-xs shrink-0">
-                      #{index + 1}
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-slate-800 text-xs leading-tight truncate">{agente.nombre}</h4>
-                      <p className="text-[9px] text-slate-500 mt-0.5 flex items-center gap-1 font-medium">
-                        <Clock className="w-3 h-3" /> {timeStr}
-                      </p>
-                    </div>
-                  </div>
-                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border border-white/50 shrink-0 uppercase tracking-wider ${colors.badgeBg} ${colors.badgeTxt}`}>
-                    {agente.estado}
-                  </span>
-                </div>
-                
-                <div className="px-2.5 py-1.5 bg-slate-50/50 border-t border-slate-100 flex gap-1.5">
-                  {agente.estado === 'REFRIGERIO' ? (
-                     <button 
-                       onClick={(e) => handleCambiarEstado(e, agente.id, 'DISPONIBLE')} 
-                       className="flex items-center justify-center gap-1 text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md w-full font-bold border border-emerald-200 transition-colors shadow-sm"
-                     >
-                       <PlayCircle className="w-3.5 h-3.5" /> Fin Refrigerio
-                     </button>
-                  ) : agente.estado === 'DISPONIBLE' ? (
-                    <>
-                      <button 
-                        onClick={(e) => handleCambiarEstado(e, agente.id, 'REFRIGERIO')} 
-                        className="flex items-center justify-center gap-1 text-[10px] text-orange-700 hover:text-orange-900 bg-orange-50 hover:bg-orange-100 border border-orange-200 px-2 py-1 rounded-md w-1/2 font-bold transition-colors shadow-sm"
-                      >
-                        <Coffee className="w-3.5 h-3.5" /> Refrigerio
-                      </button>
-                      <button 
-                        onClick={(e) => handleCambiarEstado(e, agente.id, 'INACTIVO')} 
-                        className="flex items-center justify-center gap-1 text-[10px] text-slate-600 hover:text-red-700 bg-white hover:bg-red-50 border border-slate-200 px-2 py-1 rounded-md w-1/2 font-bold transition-colors shadow-sm"
-                      >
-                        <PauseCircle className="w-3.5 h-3.5" /> Pausar
-                      </button>
-                    </>
-                  ) : (
-                    <button 
-                      onClick={(e) => handleCambiarEstado(e, agente.id, 'DISPONIBLE')} 
-                      className="flex items-center justify-center gap-1 text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md w-full font-bold border border-emerald-200 transition-colors shadow-sm"
-                    >
-                      <PlayCircle className="w-3.5 h-3.5" /> Liberar Agente
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-          
-          {agentesEnCola.length === 0 && (
-            <div className="col-span-full text-center py-8 bg-slate-50 border border-dashed border-slate-300 rounded-xl">
-              <p className="text-slate-500 text-xs font-bold">No hay agentes en turno.</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Modal Detalle de Agente */}
-      {selectedAgentForModal && (
-        <Modal
-          isOpen={!!selectedAgentForModal}
-          onClose={closeAgentModal}
-          title={`Detalle: ${selectedAgentForModal.nombre}`}
-          maxWidth="max-w-lg"
-        >
-          <div className="space-y-5 mt-2">
-            
-            {/* Panel de Horarios */}
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-slate-400" /> 
-                Registro Horario (Hoy)
-              </h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">Hora Llegada</p>
-                  <p className="text-sm font-black text-slate-800">08:45 AM</p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">Hora Salida</p>
-                  <p className="text-sm font-black text-slate-400 italic">-- : --</p>
-                </div>
-                <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 shadow-sm">
-                  <p className="text-[10px] text-orange-600 font-bold uppercase">Inicio Refrigerio</p>
-                  <p className="text-sm font-black text-orange-900">01:00 PM</p>
-                </div>
-                <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 shadow-sm">
-                  <p className="text-[10px] text-orange-600 font-bold uppercase">Fin Refrigerio</p>
-                  <p className="text-sm font-black text-orange-900">01:45 PM</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Panel de OATCs */}
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-slate-400" /> 
-                Atenciones (OATCs) Asignadas
-              </h4>
-              
-              <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-                {getMockOATCs().map(oatc => (
-                  <div key={oatc.id} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-1.5">
-                    <div className="flex justify-between items-start">
-                      <span className="font-bold text-sm text-slate-800">{oatc.cliente}</span>
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${oatc.estado === 'Completado' ? 'bg-emerald-100 text-emerald-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {oatc.estado}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center mt-1">
-                      <p className="text-xs text-slate-600 font-medium">{oatc.servicio}</p>
-                      <span className="text-[10px] text-slate-400 font-bold">{oatc.hora}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+      {/* BUZON DE ENTRADA (WFM INBOX) */}
+      {peticiones.length > 0 && (
+        <div className="bg-indigo-50 border-b border-indigo-100 p-4 shrink-0">
+          <div className="flex items-center gap-2 mb-3">
+            <Inbox className="w-5 h-5 text-indigo-600" />
+            <h4 className="font-bold text-indigo-900 text-sm">Buzón de Solicitudes WFM ({peticiones.length})</h4>
           </div>
-        </Modal>
+          <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
+            {peticiones.map(pet => (
+              <div key={pet.id} className="bg-white p-3 rounded-xl shadow-sm border border-indigo-100 flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-slate-800 text-sm">{pet.agentes?.nombre} <span className="text-xs text-slate-400 font-normal">({pet.agentes?.rol})</span></div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${pet.config_peticiones?.color}`}>
+                      {pet.config_peticiones?.nombre}
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      Hace {formatDistanceToNow(new Date(pet.created_at), { locale: es })}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => handleResolver(pet, 'RECHAZADO')} className="p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors">
+                    <XCircle className="w-5 h-5" />
+                  </button>
+                  <button onClick={() => handleResolver(pet, 'APROBADO')} className="p-1.5 text-emerald-500 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-colors shadow-sm bg-emerald-50/50">
+                    <CheckCircle className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
+
+      {/* LISTA DE AGENTES EN COLA ACTIVA */}
+      <div className="flex-1 overflow-y-auto bg-slate-50/50 p-4">
+        {agentesEnCola.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center opacity-70">
+            <Clock className="w-12 h-12 text-slate-300 mb-3" />
+            <p className="text-slate-500 font-medium">La cola de piso está vacía.</p>
+            <p className="text-xs text-slate-400 max-w-[250px] mt-2">Los agentes deben enviar su solicitud de Inicio de Turno para aparecer aquí.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {agentesEnCola.map((agente, index) => {
+              const colors = getStatusColor(agente.estado);
+              const isDisp = agente.estado === 'DISPONIBLE';
+              
+              return (
+                <div 
+                  key={agente.id} 
+                  className={`bg-white rounded-xl border-l-4 ${colors.border} border-y border-r border-slate-200 shadow-sm overflow-hidden flex flex-col`}
+                >
+                  <div className={`px-4 py-3 ${colors.bgHdr} flex justify-between items-center`}>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-white text-slate-800 text-xs font-black w-5 h-5 flex items-center justify-center rounded-full shadow-sm border border-slate-100">
+                          {index + 1}
+                        </span>
+                        <h4 className="font-bold text-slate-800 text-sm">{agente.nombre}</h4>
+                      </div>
+                    </div>
+                    
+                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${colors.badgeBg} ${colors.badgeTxt}`}>
+                      {agente.estado}
+                    </span>
+                  </div>
+
+                  <div className={`px-4 py-3 flex items-center justify-between bg-white border-t border-slate-50`}>
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                        <Clock className="w-3.5 h-3.5" />
+                        Desde hace 15m (Dummy)
+                      </div>
+                      
+                      {/* BADGE DE ALERTA "PASAR LA VOZ" */}
+                      {(agente as any).badge && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-100 text-purple-700 animate-pulse">
+                            🚨 {(agente as any).badge}
+                          </span>
+                          <button 
+                            onClick={() => handleClearBadge(agente.id)}
+                            className="text-[10px] text-slate-400 hover:text-red-500 font-bold underline"
+                          >
+                            Quitar alerta
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                      {isDisp ? (
+                        <button onClick={() => handleCambiarEstadoManual(agente.id, 'REFRIGERIO')} className="p-1.5 text-slate-400 hover:bg-orange-50 hover:text-orange-600 rounded-md transition-colors" title="Pasar a Refrigerio">
+                          <PauseCircle className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <button onClick={() => handleCambiarEstadoManual(agente.id, 'DISPONIBLE')} className="p-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-md transition-colors" title="Retornar a Disponible">
+                          <PlayCircle className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button onClick={() => handleCambiarEstadoManual(agente.id, 'INACTIVO')} className="p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors" title="Sacar de Cola (Fin de Turno)">
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
 
     </div>
   );

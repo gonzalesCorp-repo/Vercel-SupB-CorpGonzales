@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
+import BotonAsistencia from '@/components/wfm/BotonAsistencia';
 
 export default function DespachoPage() {
   const [ordenes, setOrdenes] = useState<OATC[]>([]);
@@ -77,14 +78,15 @@ export default function DespachoPage() {
             <p className="text-sm text-slate-500">Monitorea los servicios en transcurso y prepara los insumos necesarios.</p>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap sm:flex-nowrap">
+          <BotonAsistencia />
           <button 
             onClick={cargarOrdenes} 
             disabled={isLoading}
-            className="flex items-center gap-2 text-sm text-purple-600 bg-purple-50 px-4 py-2.5 rounded-xl hover:bg-purple-100 transition-colors disabled:opacity-50 font-semibold"
+            className="flex items-center gap-2 text-sm text-purple-600 bg-purple-50 px-4 py-2.5 rounded-xl hover:bg-purple-100 transition-colors disabled:opacity-50 font-semibold h-[46px]"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Actualizar</span>
+            <span className="hidden sm:inline">Actualizar</span>
           </button>
         </div>
       </div>

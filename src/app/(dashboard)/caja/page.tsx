@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
+import BotonAsistencia from '@/components/wfm/BotonAsistencia';
 
 export default function CajaPage() {
   const [tickets, setTickets] = useState<OATC[]>([]);
@@ -87,8 +88,11 @@ export default function CajaPage() {
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Punto de Venta (Caja)</h1>
           <p className="text-sm text-slate-500 mt-1">Cobra los tickets OATC pendientes y genera la facturación.</p>
         </div>
-        <div className="bg-orange-50 text-orange-700 px-4 py-2 rounded-xl border border-orange-200 font-semibold shadow-sm">
-          {tickets.length} Tickets Pendientes
+        <div className="flex gap-3 flex-wrap sm:flex-nowrap">
+          <BotonAsistencia />
+          <div className="bg-orange-50 text-orange-700 px-4 py-2 rounded-xl border border-orange-200 font-semibold shadow-sm whitespace-nowrap">
+            {tickets.length} Pendientes
+          </div>
         </div>
       </div>
 
