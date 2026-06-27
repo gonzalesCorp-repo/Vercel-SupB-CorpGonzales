@@ -99,7 +99,7 @@ export default function QueueMonitor() {
   };
 
   const agentesEnCola = agentes
-    .filter(a => a.estado !== 'INACTIVO' && (showAllAgents ? true : (a.estado !== 'ADMINISTRATIVO' && a.rol === 'STAFF')))
+    .filter(a => a.estado !== 'INACTIVO' && (showAllAgents ? true : a.rol === 'STAFF'))
     .sort((a, b) => {
       // Ordenar por tiempo de ingreso a la cola (los que más tiempo llevan esperando van primero)
       const timeA = new Date((a as any).ultimo_cambio_estado || a.created_at).getTime();
@@ -112,7 +112,6 @@ export default function QueueMonitor() {
     switch(estado) {
       case 'DISPONIBLE': return { border: 'border-emerald-300', bgHdr: 'bg-emerald-50', badgeBg: 'bg-emerald-100', badgeTxt: 'text-emerald-800' };
       case 'ASESORANDO': return { border: 'border-yellow-300', bgHdr: 'bg-yellow-50', badgeBg: 'bg-yellow-100', badgeTxt: 'text-yellow-800' };
-      case 'REFRIGERIO': return { border: 'border-orange-300', bgHdr: 'bg-orange-50', badgeBg: 'bg-orange-100', badgeTxt: 'text-orange-800' };
       case 'OCUPADO': 
       case 'TRABAJANDO': return { border: 'border-blue-300', bgHdr: 'bg-blue-50', badgeBg: 'bg-blue-100', badgeTxt: 'text-blue-800' };
       default: return { border: 'border-slate-300', bgHdr: 'bg-slate-50', badgeBg: 'bg-slate-100', badgeTxt: 'text-slate-800' };
@@ -265,15 +264,12 @@ export default function QueueMonitor() {
                     </div>
                     
                     <div className="flex items-center gap-1">
-                      {isDisp ? (
-                        <button onClick={() => handleCambiarEstadoManual(agente.id, 'REFRIGERIO')} className="p-1.5 text-slate-400 hover:bg-orange-50 hover:text-orange-600 rounded-md transition-colors" title="Pasar a Refrigerio">
-                          <PauseCircle className="w-4 h-4" />
-                        </button>
-                      ) : (
-                        <button onClick={() => handleCambiarEstadoManual(agente.id, 'DISPONIBLE')} className="p-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-md transition-colors" title="Retornar a Disponible">
-                          <PlayCircle className="w-4 h-4" />
-                        </button>
-                      )}
+                      <button 
+                        onClick={() => handleCambiarEstadoManual(agente.id, isDisp ? 'OCUPADO' : 'DISPONIBLE')}
+                        className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors border border-transparent hover:border-slate-200"
+                      >
+                        {isDisp ? <PauseCircle className="w-4 h-4" /> : <PlayCircle className="w-4 h-4 text-emerald-600" />}
+                      </button>
                       <button onClick={() => handleCambiarEstadoManual(agente.id, 'INACTIVO')} className="p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors" title="Sacar de Cola (Fin de Turno)">
                         <XCircle className="w-4 h-4" />
                       </button>

@@ -81,8 +81,7 @@ export default function BotonAsistencia() {
   const getStatusColor = (estado: string) => {
     switch (estado) {
       case 'DISPONIBLE': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'REFRIGERIO': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'ADMINISTRATIVO': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+      case 'OCUPADO': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       default: return 'bg-slate-100 text-slate-500 border-slate-200';
     }
   };

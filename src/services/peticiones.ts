@@ -126,19 +126,11 @@ export async function resolverPeticion(id: string, estado: 'APROBADO' | 'RECHAZA
       await supabase.from('agentes').update({ estado: 'INACTIVO' }).eq('id', agente_id);
     } else {
       // Mantiene su posicion o ingresa por primera vez
-      if (es_operativo) {
-        // Asegurar que esta disponible y actualizar su hora de ingreso a la cola
-        await supabase.from('agentes').update({ 
-          estado: 'DISPONIBLE',
-          ultimo_cambio_estado: new Date().toISOString()
-        }).eq('id', agente_id);
-      } else {
-        // Es administrativo, solo marco asistencia pero no atiende clientes en piso
-        await supabase.from('agentes').update({ 
-          estado: 'ADMINISTRATIVO',
-          ultimo_cambio_estado: new Date().toISOString()
-        }).eq('id', agente_id);
-      }
+      // Al ser administrativo o STAFF, el estado es DISPONIBLE, pero su rol los separa en UI.
+      await supabase.from('agentes').update({ 
+        estado: 'DISPONIBLE',
+        ultimo_cambio_estado: new Date().toISOString()
+      }).eq('id', agente_id);
     }
   }
 
