@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, Shield, Edit2, CheckCircle, XCircle, Plus } from 'lucide-react';
+import { Users, Shield, Edit2, CheckCircle, XCircle, Plus, Search } from 'lucide-react';
 import { obtenerTodosLosAgentes, guardarAgente, obtenerTodasLasSedes } from '@/services/admin';
 import { Agente } from '@/services/recepcion';
 import { Modal } from '@/components/ui/Modal';
@@ -18,6 +18,8 @@ interface AgenteAdmin extends Agente {
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<AgenteAdmin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('ALL');
   const { sedeActiva, userRol } = useAppStore();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -116,6 +118,35 @@ export default function UsuariosPage() {
         </button>
       </div>
 
+      {/* Barra de Búsqueda y Filtros */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6 p-4 flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="Buscar por nombre o correo..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-slate-50 focus:bg-white"
+          />
+        </div>
+        <div className="w-full md:w-64">
+          <select 
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-slate-50 focus:bg-white appearance-none cursor-pointer"
+          >
+            <option value="ALL">Todos los roles</option>
+            <option value="SUPERADMIN">Super Admin</option>
+            <option value="ADMIN">Administrador</option>
+            <option value="RECEPCION">Recepción CRM</option>
+            <option value="CAJA">Caja y Cobros</option>
+            <option value="DESPACHO">Laboratorio / Despacho</option>
+            <option value="STAFF">Operaciones de Piso (Staff)</option>
+          </select>
+        </div>
+      </div>
+
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
           <h3 className="font-bold text-slate-800 flex items-center gap-2">
@@ -138,7 +169,11 @@ export default function UsuariosPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {usuarios.map(u => (
+                {usuarios.filter(u => {
+                  const matchSearch = u.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || (u.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchRole = roleFilter === 'ALL' || u.rol === roleFilter;
+                  return matchSearch && matchRole;
+                }).map(u => (
                   <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-900">{u.nombre}</td>
                     <td className="px-6 py-4 text-slate-500">
