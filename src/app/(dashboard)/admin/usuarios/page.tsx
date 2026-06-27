@@ -5,6 +5,7 @@ import { Users, Shield, Edit2, CheckCircle, XCircle, Plus } from 'lucide-react';
 import { obtenerTodosLosAgentes, guardarAgente, obtenerTodasLasSedes } from '@/services/admin';
 import { Agente } from '@/services/recepcion';
 import { Modal } from '@/components/ui/Modal';
+import { useAppStore } from '@/store/useAppStore';
 
 // Extendemos Agente base con campos extra para admin
 interface AgenteAdmin extends Agente {
@@ -17,6 +18,7 @@ interface AgenteAdmin extends Agente {
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<AgenteAdmin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { sedeActiva, userRol } = useAppStore();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<AgenteAdmin>>({
@@ -37,7 +39,15 @@ export default function UsuariosPage() {
       obtenerTodosLosAgentes(),
       obtenerTodasLasSedes()
     ]);
-    setUsuarios(usuariosData as AgenteAdmin[]);
+    
+    // Filtrar usuarios por Sede Activa para mantener el contexto
+    const filtrados = usuariosData.filter(u => {
+      if (!sedeActiva) return true;
+      if (u.rol === 'SUPERADMIN') return true; // Superadmins se ven en todas las sedes
+      return u.sedes_ids?.includes(sedeActiva.id);
+    });
+
+    setUsuarios(filtrados as AgenteAdmin[]);
     setTodasSedes(sedesData);
     setIsLoading(false);
   };
