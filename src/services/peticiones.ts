@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
+import { registrarLog } from './logger';
 
 export interface Peticion {
   id: string;
@@ -141,5 +142,6 @@ export async function resolverPeticion(id: string, estado: 'APROBADO' | 'RECHAZA
     }
   }
 
+  await registrarLog('WFM', 'PETICION_RESUELTA', { peticion_id: id, resolucion: estado, agente_id, penaliza_cola });
   return true;
 }

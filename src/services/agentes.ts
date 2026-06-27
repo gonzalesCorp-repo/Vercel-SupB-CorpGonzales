@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { Agente } from './recepcion';
+import { registrarLog } from './logger';
 
 const supabase = createClient();
 

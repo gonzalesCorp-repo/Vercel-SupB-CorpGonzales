@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 
-const supabase = createClient();
-
 export async function registrarLog(modulo: string, accion: string, detalles: any = {}) {
+  const supabase = createClient();
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !user.email) return false;

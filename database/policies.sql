@@ -16,6 +16,11 @@ ON public.agentes FOR SELECT
 TO authenticated 
 USING (true);
 
+CREATE POLICY "Permitir actualizar a usuarios autenticados" 
+ON public.agentes FOR UPDATE
+TO authenticated 
+USING (true);
+
 -- ------------------------------------------
 -- TABLA: cola_peticiones
 -- ------------------------------------------
