@@ -20,8 +20,11 @@ export interface Peticion {
 }
 
 export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
-  const { sedeActiva, userEmail } = useAppStore.getState();
-  if (!sedeActiva || !userEmail) return false;
+  const { sedeActiva } = useAppStore.getState();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!sedeActiva || !user?.email) return false;
+  
+  const userEmail = user.email;
 
   // Obtener agente_id por email
   const { data: agente, error: errA } = await supabase
@@ -48,8 +51,11 @@ export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
 }
 
 export async function obtenerMiPeticionPendiente(): Promise<Peticion | null> {
-  const { sedeActiva, userEmail } = useAppStore.getState();
-  if (!sedeActiva || !userEmail) return null;
+  const { sedeActiva } = useAppStore.getState();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!sedeActiva || !user?.email) return null;
+  
+  const userEmail = user.email;
 
   const { data: agente, error: errA } = await supabase
     .from('agentes')
@@ -92,8 +98,6 @@ export async function obtenerPeticionesPendientesPorSede(): Promise<Peticion[]> 
 }
 
 export async function resolverPeticion(id: string, estado: 'APROBADO' | 'RECHAZADO', agente_id: string, penaliza_cola: boolean, es_operativo: boolean): Promise<boolean> {
-  const { userEmail } = useAppStore.getState();
-  
   // 1. Update petition state
   const { error } = await supabase
     .from('cola_peticiones')
