@@ -23,6 +23,9 @@ export interface Agente {
   id: string;
   nombre: string;
   estado: string;
+  rol?: string;
+  especialidad?: string;
+  badge?: string;
 }
 
 export interface OATC {
