@@ -149,7 +149,7 @@ export default function NuevaOATC() {
             className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 transition-colors"
           >
             <option value="cliente">Atención a Cliente</option>
-            <option value="turno">Turno Especial</option>
+            <option value="turno">Turno</option>
             <option value="apoyo">Apoyo Interno</option>
             <option value="garantia">Garantía / Corrección</option>
           </select>
