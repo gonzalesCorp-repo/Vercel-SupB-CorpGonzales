@@ -82,20 +82,27 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
   let agenteId = agente.id;
 
   if (agenteId) {
-    // Actualizar
-    const { error } = await supabase
-      .from('agentes')
-      .update({
-        nombre: agente.nombre,
-        email: agente.email,
-        rol: agente.rol,
-        especialidad: agente.especialidad,
-        estado: agente.estado
-      })
-      .eq('id', agenteId);
-
-    if (error) {
-      console.error("Error actualizando agente:", error);
+    try {
+      const response = await fetch(`/api/admin/users/${agenteId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: agente.nombre,
+          email: agente.email,
+          rol: agente.rol,
+          especialidad: agente.especialidad,
+          estado: agente.estado,
+          sedes_ids: sedes_ids
+        })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        console.error("Error desde API:", result.error);
+        alert(`Error al actualizar usuario: ${result.error}`);
+        return false;
+      }
+    } catch (err) {
+      console.error("Error llamando a API:", err);
       return false;
     }
   } else {
@@ -121,30 +128,11 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
       }
       agenteId = result.userId;
       
-      // Las sedes ya se asignaron en el backend para usuarios nuevos
       await registrarLog('ADMIN', `Creó usuario ${agente.email}`, { rol: agente.rol, sedes: sedes_ids.length });
       return true;
     } catch (err) {
       console.error("Error llamando a API:", err);
       return false;
-    }
-  }
-
-  // Sincronizar Sedes
-  if (agenteId) {
-    // 1. Borrar accesos anteriores
-    await supabase.from('sedes_usuarios').delete().eq('agente_id', agenteId);
-    
-    // 2. Insertar nuevos accesos
-    if (sedes_ids.length > 0) {
-      const sedesToInsert = sedes_ids.map(sede_id => ({
-        agente_id: agenteId,
-        sede_id: sede_id
-      }));
-      const { error: errorSedes } = await supabase.from('sedes_usuarios').insert(sedesToInsert);
-      if (errorSedes) {
-        console.error("Error asignando sedes:", errorSedes);
-      }
     }
   }
 
