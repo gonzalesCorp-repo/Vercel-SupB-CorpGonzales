@@ -39,6 +39,7 @@ export interface OATC {
   punto_partida: any[];
   estado_proceso?: string;
   estado_pago?: string;
+  tipo_demanda?: string;
   created_at?: string;
 }
 

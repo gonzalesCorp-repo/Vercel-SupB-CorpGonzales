@@ -77,7 +77,8 @@ export async function terminarAtencion(oatcId: string): Promise<boolean> {
           agente_id: agente.id,
           sede_id: oatc.sede_id,
           tipo_id: configRetorno.id,
-          estado: 'PENDIENTE'
+          estado: 'PENDIENTE',
+          oatc_id: oatc.id
         }]);
       }
     }

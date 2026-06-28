@@ -4,6 +4,8 @@ import { registrarLog } from './logger';
 export interface ConfigPeticion {
   id: string;
   nombre: string;
+  estado_destino: string;
+  actualiza_timestamp: boolean;
   penaliza_cola: boolean;
   color: string;
 }
@@ -26,7 +28,9 @@ export async function guardarConfigPeticion(config: Partial<ConfigPeticion>): Pr
   
   const payload = {
     nombre: config.nombre,
-    penaliza_cola: config.penaliza_cola,
+    estado_destino: config.estado_destino || 'DISPONIBLE',
+    actualiza_timestamp: config.actualiza_timestamp || false,
+    penaliza_cola: config.penaliza_cola || false,
     color: config.color || 'bg-slate-100 text-slate-700'
   };
 

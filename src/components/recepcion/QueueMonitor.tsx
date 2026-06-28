@@ -50,13 +50,9 @@ export default function QueueMonitor() {
   }, []);
 
   const handleResolver = async (pet: Peticion, estado: 'APROBADO' | 'RECHAZADO') => {
-    const es_operativo = (pet as any).agente?.rol === 'STAFF';
-    const penaliza_cola = pet.config_peticiones?.penaliza_cola || false;
+    await resolverPeticion(pet, estado);
     
-    await resolverPeticion(pet.id, estado, pet.agente_id, penaliza_cola, es_operativo);
-    
-    // Si aprueba y NO penaliza, le ponemos el badge
-    if (estado === 'APROBADO' && !penaliza_cola) {
+    if (estado === 'APROBADO' && pet.config_peticiones?.estado_destino !== 'INACTIVO') {
       await supabase.from('agentes').update({ badge: pet.config_peticiones?.nombre }).eq('id', pet.agente_id);
     }
 

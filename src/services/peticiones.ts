@@ -12,12 +12,15 @@ export interface Peticion {
   config_peticiones?: {
     nombre: string;
     color: string;
+    estado_destino: string;
+    actualiza_timestamp: boolean;
     penaliza_cola: boolean;
   };
   agentes?: {
     nombre: string;
     rol: string;
   };
+  oatc_id?: string;
 }
 
 export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
@@ -94,7 +97,11 @@ export async function obtenerPeticionesPendientesPorSede(): Promise<Peticion[]> 
 
   const { data, error } = await supabase
     .from('cola_peticiones')
-    .select('*, config_peticiones(nombre, color, penaliza_cola), agente:agentes!cola_peticiones_agente_id_fkey(nombre, rol)')
+    .select(`
+      id, created_at, agente_id, estado, config_id, oatc_id,
+      agente:agentes!cola_peticiones_agente_id_fkey(nombre, rol),
+      config_peticiones(nombre, estado_destino, actualiza_timestamp, penaliza_cola)
+    `)
     .eq('estado', 'PENDIENTE')
     .eq('sede_id', sedeActiva.id)
     .order('created_at', { ascending: true });
@@ -106,13 +113,13 @@ export async function obtenerPeticionesPendientesPorSede(): Promise<Peticion[]> 
   return data as Peticion[];
 }
 
-export async function resolverPeticion(id: string, estado: 'APROBADO' | 'RECHAZADO', agente_id: string, penaliza_cola: boolean, es_operativo: boolean): Promise<boolean> {
+export async function resolverPeticion(pet: Peticion, estado: 'APROBADO' | 'RECHAZADO'): Promise<boolean> {
   const supabase = createClient();
   // 1. Update petition state
   const { error } = await supabase
     .from('cola_peticiones')
     .update({ estado, resolved_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq('id', pet.id);
 
   if (error) {
     console.error("Error resolviendo peticion:", error);
@@ -121,19 +128,29 @@ export async function resolverPeticion(id: string, estado: 'APROBADO' | 'RECHAZA
 
   // 2. If approved, change agent state
   if (estado === 'APROBADO') {
-    if (penaliza_cola) {
-      // Sale de la cola (ej. Fin de Turno, Refrigerio)
-      await supabase.from('agentes').update({ estado: 'INACTIVO' }).eq('id', agente_id);
-    } else {
-      // Mantiene su posicion o ingresa por primera vez
-      // Al ser administrativo o STAFF, el estado es DISPONIBLE, pero su rol los separa en UI.
-      await supabase.from('agentes').update({ 
-        estado: 'DISPONIBLE',
-        ultimo_cambio_estado: new Date().toISOString()
-      }).eq('id', agente_id);
+    const conf = pet.config_peticiones;
+    const destino = conf?.estado_destino || 'DISPONIBLE';
+    
+    // Determinar si actualiza timestamp
+    let actualiza = conf?.actualiza_timestamp || false;
+    
+    // Logica especial para Retorno de Servicio
+    if (conf?.nombre === 'Retorno de Servicio' && pet.oatc_id) {
+      const { data: oatc } = await supabase.from('oatc').select('tipo_demanda').eq('id', pet.oatc_id).single();
+      if (oatc && (oatc.tipo_demanda === 'cliente' || oatc.tipo_demanda === 'turno')) {
+        actualiza = true;
+      }
     }
+
+    const updatePayload: any = { estado: destino };
+    
+    if (actualiza) {
+      updatePayload.ultimo_cambio_estado = new Date().toISOString();
+    }
+
+    await supabase.from('agentes').update(updatePayload).eq('id', pet.agente_id);
   }
 
-  await registrarLog('WFM', 'PETICION_RESUELTA', { peticion_id: id, resolucion: estado, agente_id, penaliza_cola });
+  await registrarLog('WFM', 'PETICION_RESUELTA', { peticion_id: pet.id, resolucion: estado, agente_id: pet.agente_id });
   return true;
 }
