@@ -148,7 +148,11 @@ export async function resolverPeticion(pet: Peticion, estado: 'APROBADO' | 'RECH
       updatePayload.ultimo_cambio_estado = new Date().toISOString();
     }
 
-    await supabase.from('agentes').update(updatePayload).eq('id', pet.agente_id);
+    const { error: errorAgente } = await supabase.from('agentes').update(updatePayload).eq('id', pet.agente_id);
+    if (errorAgente) {
+      console.error("Error actualizando estado del agente:", errorAgente);
+      throw new Error("No se pudo actualizar el estado del agente: " + errorAgente.message);
+    }
   }
 
   await registrarLog('WFM', 'PETICION_RESUELTA', { peticion_id: pet.id, resolucion: estado, agente_id: pet.agente_id });

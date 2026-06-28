@@ -29,21 +29,27 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
       cargarAgentes();
     }
   }, [sedeActiva]);
+  
+  // Resetear agenteId cuando se cambia de sede
+  useEffect(() => {
+    setAgenteId('');
+  }, [sedeActiva?.id]);
 
   const cargarAgentes = async () => {
-    const data = await obtenerAgentesDisponibles();
-    
-    // Filtrar solo operativos (STAFF) que NO esten INACTIVOS (tienen asistencia)
-    const operativosActivos = data.filter(a => a.rol === 'STAFF' && a.estado !== 'INACTIVO');
-    
-    // Ordenar por ultimo_cambio_estado (los mas antiguos primero, igual que la cola)
-    const ordenados = operativosActivos.sort((a, b) => {
-      const timeA = new Date((a as any).ultimo_cambio_estado || a.created_at).getTime();
-      const timeB = new Date((b as any).ultimo_cambio_estado || b.created_at).getTime();
-      return timeA - timeB;
-    });
-    
-    setAgentes(ordenados);
+    try {
+      const data = await obtenerAgentesDisponibles();
+      
+      const operativosActivos = data.filter(a => a.rol === 'STAFF' && a.estado !== 'INACTIVO');
+      const ordenados = operativosActivos.sort((a, b) => {
+        const timeA = new Date((a as any).ultimo_cambio_estado || a.created_at).getTime();
+        const timeB = new Date((b as any).ultimo_cambio_estado || b.created_at).getTime();
+        return timeA - timeB;
+      });
+      
+      setAgentes(ordenados);
+    } catch (error) {
+      console.error("Error al cargar agentes en NuevaOATC:", error);
+    }
   };
 
   const handleAddBien = (bien: Bien) => {
@@ -88,6 +94,7 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
       }, 1500);
       
     } catch (err) {
+      console.error("Error al crear OATC:", err);
       setMessage('Error al generar la atención. Revisa la consola.');
     } finally {
       setIsSubmitting(false);

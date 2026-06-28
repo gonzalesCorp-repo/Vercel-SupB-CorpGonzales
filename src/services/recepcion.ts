@@ -155,6 +155,8 @@ export async function obtenerOatcsActivosDelDia(): Promise<OATC[]> {
   const sedeId = useAppStore.getState().sedeActiva?.id;
   if (!sedeId) return [];
 
+  // Nota: Al ejecutarse en el cliente (Browser), setHours asume la zona horaria local de la sede.
+  // toISOString() lo convierte a UTC para comparar correctamente con 'timestamptz' en Supabase.
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
 

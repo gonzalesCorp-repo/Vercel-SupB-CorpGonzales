@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { RefreshCw, PauseCircle, PlayCircle, Clock, FileText, CheckCircle, XCircle, Inbox, Power, Filter } from 'lucide-react';
-import { obtenerTodosLosAgentes, cambiarEstadoAgente } from '@/services/agentes';
-import { Agente } from '@/services/recepcion';
+import { cambiarEstadoAgente } from '@/services/agentes';
+import { Agente, obtenerAgentesDisponibles } from '@/services/recepcion';
 import { obtenerPeticionesPendientesPorSede, resolverPeticion, Peticion } from '@/services/peticiones';
+import { useAppStore } from '@/store/useAppStore';
 import { createClient } from '@/lib/supabase/client';
 import { formatDistanceToNow, format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -19,22 +20,29 @@ export default function QueueMonitor() {
   const [showAllAgents, setShowAllAgents] = useState(false);
   const [activeOATCs, setActiveOATCs] = useState<OATC[]>([]);
   
+  const { sedeActiva } = useAppStore();
   const supabase = createClient();
 
   const cargarDatos = async () => {
     setIsRefreshing(true);
-    const [dataAgentes, dataPeticiones] = await Promise.all([
-      obtenerTodosLosAgentes(),
-      obtenerPeticionesPendientesPorSede()
-    ]);
-    setAgentes(dataAgentes);
-    setPeticiones(dataPeticiones);
-    setIsRefreshing(false);
+    try {
+      const [dataAgentes, dataPeticiones] = await Promise.all([
+        obtenerAgentesDisponibles(),
+        obtenerPeticionesPendientesPorSede()
+      ]);
+      setAgentes(dataAgentes);
+      setPeticiones(dataPeticiones);
+    } catch (error) {
+      console.error("Error al cargar datos en QueueMonitor:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   useEffect(() => {
     cargarDatos();
     
+    // Subscripciones (Idealmente filtradas por sedeId si la tabla lo soporta)
     const channelAgentes = supabase.channel('realtime-agentes-queue')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'agentes' }, () => cargarDatos())
       .subscribe();
@@ -47,16 +55,21 @@ export default function QueueMonitor() {
       supabase.removeChannel(channelAgentes);
       supabase.removeChannel(channelPeticiones);
     };
-  }, []);
+  }, [sedeActiva?.id]);
 
   const handleResolver = async (pet: Peticion, estado: 'APROBADO' | 'RECHAZADO') => {
-    await resolverPeticion(pet, estado);
-    
-    if (estado === 'APROBADO' && pet.config_peticiones?.estado_destino !== 'INACTIVO') {
-      await supabase.from('agentes').update({ badge: pet.config_peticiones?.nombre }).eq('id', pet.agente_id);
+    try {
+      await resolverPeticion(pet, estado);
+      
+      if (estado === 'APROBADO' && pet.config_peticiones?.estado_destino !== 'INACTIVO') {
+        const { error } = await supabase.from('agentes').update({ badge: pet.config_peticiones?.nombre }).eq('id', pet.agente_id);
+        if (error) console.error("Error actualizando badge:", error);
+      }
+    } catch (error) {
+      console.error("Error al resolver peticion:", error);
+    } finally {
+      cargarDatos();
     }
-
-    cargarDatos();
   };
 
   const handleCambiarEstadoManual = async (id: string, estado: string) => {
@@ -70,8 +83,14 @@ export default function QueueMonitor() {
   };
 
   const handleClearBadge = async (id: string) => {
-    await supabase.from('agentes').update({ badge: null }).eq('id', id);
-    cargarDatos();
+    try {
+      const { error } = await supabase.from('agentes').update({ badge: null }).eq('id', id);
+      if (error) console.error("Error al limpiar badge:", error);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      cargarDatos();
+    }
   };
 
   const handleCerrarDia = async () => {
@@ -83,14 +102,25 @@ export default function QueueMonitor() {
   };
 
   const handleForzarCierre = async () => {
-    if (confirm('¿Forzar el cierre? Esto vaciará la cola y cancelará atenciones colgadas.')) {
+    if (confirm('¿Forzar el cierre de esta sede? Esto vaciará la cola y cancelará atenciones colgadas solo para los operarios de esta sucursal.')) {
       setIsRefreshing(true);
-      const { error } = await supabase.from('agentes').update({ estado: 'INACTIVO', badge: null }).neq('estado', 'INACTIVO');
-      if (error) {
+      try {
+        const ids = agentes.map(a => a.id);
+        if (ids.length > 0) {
+          const { error } = await supabase
+            .from('agentes')
+            .update({ estado: 'INACTIVO', badge: null })
+            .in('id', ids)
+            .neq('estado', 'INACTIVO');
+            
+          if (error) throw error;
+        }
+        setShowAuditModal(false);
+      } catch (error: any) {
         alert('Error forzando cierre: ' + error.message);
+      } finally {
+        cargarDatos();
       }
-      setShowAuditModal(false);
-      cargarDatos();
     }
   };
 
