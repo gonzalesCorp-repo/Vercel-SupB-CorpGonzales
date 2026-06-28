@@ -5,6 +5,7 @@ import { Scissors, Beaker, X } from 'lucide-react';
 import ClientSearch from './ClientSearch';
 import CatalogModal from './CatalogModal';
 import { Cliente, Bien, Agente, obtenerAgentesDisponibles, crearOatc } from '@/services/recepcion';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function NuevaOATC() {
   const [cliente, setCliente] = useState<Cliente | null>(null);
@@ -20,9 +21,13 @@ export default function NuevaOATC() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
+  const { sedeActiva } = useAppStore();
+
   useEffect(() => {
-    cargarAgentes();
-  }, []);
+    if (sedeActiva) {
+      cargarAgentes();
+    }
+  }, [sedeActiva]);
 
   const cargarAgentes = async () => {
     const data = await obtenerAgentesDisponibles();
