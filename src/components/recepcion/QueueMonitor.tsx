@@ -221,14 +221,15 @@ export default function QueueMonitor() {
                         <span className="bg-white text-slate-800 text-xs font-black w-5 h-5 flex items-center justify-center rounded-full shadow-sm border border-slate-100">
                           {numTurno}
                         </span>
-                      <div className="flex flex-col">
-                        <h4 className="font-bold text-slate-800 text-sm">{agente.nombre}</h4>
-                        <span className="text-xs font-medium text-slate-500">{agente.badge || 'Sin especialidad'}</span>
+                      <div className="flex flex-col min-w-0">
+                        <h4 className="font-bold text-slate-800 text-sm truncate pr-2">{agente.nombre}</h4>
+                        {(agente as any).especialidad && (
+                          <span className="text-[10px] font-medium text-slate-500 leading-tight pr-2 line-clamp-2" title={(agente as any).especialidad}>
+                            {(agente as any).especialidad}
+                          </span>
+                        )}
                       </div>
                       </div>
-                      {(agente as any).especialidad && (
-                        <span className="text-xs text-slate-500 ml-7">{(agente as any).especialidad}</span>
-                      )}
                     </div>
                     
                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${colors.badgeBg} ${colors.badgeTxt}`}>
