@@ -48,7 +48,6 @@ export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
   // Insertar petición
   const { error } = await supabase.from('cola_peticiones').insert([{
     agente_id: agente.id,
-    sede_id: sedeActiva.id,
     tipo_id,
     estado: 'PENDIENTE'
   }]);
@@ -81,7 +80,6 @@ export async function obtenerMiPeticionPendiente(): Promise<Peticion | null> {
     .select('*, config_peticiones(*)')
     .eq('agente_id', agente.id)
     .eq('estado', 'PENDIENTE')
-    .eq('sede_id', sedeActiva.id)
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
@@ -103,7 +101,6 @@ export async function obtenerPeticionesPendientesPorSede(): Promise<Peticion[]> 
       config_peticiones(nombre, estado_destino, actualiza_timestamp, penaliza_cola)
     `)
     .eq('estado', 'PENDIENTE')
-    .eq('sede_id', sedeActiva.id)
     .order('created_at', { ascending: true });
 
   if (error) {
