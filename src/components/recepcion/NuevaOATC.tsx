@@ -7,7 +7,7 @@ import CatalogModal from './CatalogModal';
 import { Cliente, Bien, Agente, obtenerAgentesDisponibles, crearOatc } from '@/services/recepcion';
 import { useAppStore } from '@/store/useAppStore';
 
-export default function NuevaOATC() {
+export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [puntoPartida, setPuntoPartida] = useState<Bien[]>([]);
   
@@ -71,8 +71,9 @@ export default function NuevaOATC() {
         setPuntoPartida([]);
         setAgenteId('');
         setMessage('');
+        if (onClose) onClose();
         // Here we could trigger a refresh of the queue list (to be implemented later)
-      }, 2000);
+      }, 1500);
       
     } catch (err) {
       setMessage('Error al generar la atención. Revisa la consola.');

@@ -5,6 +5,7 @@ import NuevaOATC from '@/components/recepcion/NuevaOATC';
 import QueueMonitor from '@/components/recepcion/QueueMonitor';
 import ActiveOATCsTable from '@/components/recepcion/ActiveOATCsTable';
 import { Modal } from '@/components/ui/Modal';
+import { FloatingWindow } from '@/components/ui/FloatingWindow';
 import { Plus } from 'lucide-react';
 
 export default function RecepcionPage() {
@@ -48,15 +49,14 @@ export default function RecepcionPage() {
         </div>
       </div>
 
-      {/* Modal del Formulario */}
-      <Modal 
+      {/* Modal del Formulario Flotante */}
+      <FloatingWindow 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         title="Crear Nueva Orden (OATC)"
-        maxWidth="max-w-md"
       >
-        <NuevaOATC />
-      </Modal>
+        <NuevaOATC onClose={() => setIsModalOpen(false)} />
+      </FloatingWindow>
     </div>
   );
 }

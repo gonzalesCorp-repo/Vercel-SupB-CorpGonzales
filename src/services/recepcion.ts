@@ -96,18 +96,21 @@ export async function obtenerAgentesDisponibles(): Promise<Agente[]> {
   const sedeId = useAppStore.getState().sedeActiva?.id;
   if (!sedeId) return [];
 
-  // Hacer join con sedes_usuarios para filtrar
+  // Hacer fetch normal y filtrar en cliente para evitar problemas de inner join con RLS
   const { data, error } = await supabase
     .from('agentes')
-    .select('id, nombre, estado, rol, especialidad, sedes_usuarios!inner(sede_id)')
-    .eq('sedes_usuarios.sede_id', sedeId);
+    .select('id, nombre, estado, rol, especialidad, sedes_usuarios(sede_id)');
     
   if (error) {
     console.error("Error obteniendo agentes:", error);
     return [];
   }
   
-  return data as Agente[];
+  const filtered = data.filter(agente => 
+    agente.sedes_usuarios && agente.sedes_usuarios.some((su: any) => su.sede_id === sedeId)
+  );
+  
+  return filtered as Agente[];
 }
 
 export async function crearOatc(
