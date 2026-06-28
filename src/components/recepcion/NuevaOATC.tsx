@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Scissors, Beaker, X } from 'lucide-react';
-import ClientSearch from './ClientSearch';
 import CatalogModal from './CatalogModal';
+import AgentSearch from './AgentSearch';
 import { Cliente, Bien, Agente, obtenerAgentesDisponibles, crearOatc } from '@/services/recepcion';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -31,7 +31,18 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
 
   const cargarAgentes = async () => {
     const data = await obtenerAgentesDisponibles();
-    setAgentes(data);
+    
+    // Filtrar solo operativos (STAFF) que NO esten INACTIVOS (tienen asistencia)
+    const operativosActivos = data.filter(a => a.rol === 'STAFF' && a.estado !== 'INACTIVO');
+    
+    // Ordenar por ultimo_cambio_estado (los mas antiguos primero, igual que la cola)
+    const ordenados = operativosActivos.sort((a, b) => {
+      const timeA = new Date((a as any).ultimo_cambio_estado || a.created_at).getTime();
+      const timeB = new Date((b as any).ultimo_cambio_estado || b.created_at).getTime();
+      return timeA - timeB;
+    });
+    
+    setAgentes(ordenados);
   };
 
   const handleAddBien = (bien: Bien) => {
@@ -163,19 +174,14 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
 
         {/* Asignar Agente */}
         <div className="mb-5">
-          <label className="block text-xs font-semibold text-gray-700 mb-1">Asignar a Agente</label>
-          <select 
-            value={agenteId}
-            onChange={(e) => setAgenteId(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          >
-            <option value="">A Lista de Espera General</option>
-            {agentes.filter(a => a.rol === 'STAFF').map(ag => (
-              <option key={ag.id} value={ag.id} disabled={ag.estado !== 'DISPONIBLE'}>
-                {ag.nombre} ({ag.estado}) {ag.especialidad ? `- ${ag.especialidad}` : ''}
-              </option>
-            ))}
-          </select>
+          <label className="block text-xs font-bold text-slate-500 mb-1">
+            Asignar a Agente
+          </label>
+          <AgentSearch 
+            agentes={agentes} 
+            selectedAgenteId={agenteId} 
+            onSelectAgente={setAgenteId} 
+          />
         </div>
 
         {/* Botón Generar */}
