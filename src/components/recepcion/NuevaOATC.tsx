@@ -40,7 +40,7 @@ export default function NuevaOATC() {
   };
 
   const handleGenerar = async () => {
-    if (!cliente || puntoPartida.length === 0) return;
+    if (puntoPartida.length === 0) return;
     
     setIsSubmitting(true);
     setMessage('');
@@ -50,8 +50,8 @@ export default function NuevaOATC() {
       const agenteNombre = agenteSeleccionado ? agenteSeleccionado.nombre : 'POR ASIGNAR';
       
       await crearOatc(
-        cliente.id, 
-        cliente.nombre, 
+        cliente?.id || null, 
+        cliente?.nombre || 'Público General', 
         agenteId || null, 
         agenteNombre, 
         puntoPartida,
@@ -164,9 +164,9 @@ export default function NuevaOATC() {
             className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 transition-colors"
           >
             <option value="">A Lista de Espera General</option>
-            {agentes.map(ag => (
+            {agentes.filter(a => a.rol === 'STAFF').map(ag => (
               <option key={ag.id} value={ag.id} disabled={ag.estado !== 'DISPONIBLE'}>
-                {ag.nombre} ({ag.estado})
+                {ag.nombre} ({ag.estado}) {ag.especialidad ? `- ${ag.especialidad}` : ''}
               </option>
             ))}
           </select>

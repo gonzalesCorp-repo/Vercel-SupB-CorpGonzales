@@ -99,7 +99,7 @@ export async function obtenerAgentesDisponibles(): Promise<Agente[]> {
   // Hacer join con sedes_usuarios para filtrar
   const { data, error } = await supabase
     .from('agentes')
-    .select('id, nombre, estado, sedes_usuarios!inner(sede_id)')
+    .select('id, nombre, estado, rol, especialidad, sedes_usuarios!inner(sede_id)')
     .eq('sedes_usuarios.sede_id', sedeId);
     
   if (error) {
@@ -129,7 +129,7 @@ export async function crearOatc(
       agente_nombre: agenteNombre,
       punto_partida: puntoPartida,
       tipo_demanda: tipoDemanda,
-      estado_proceso: 'ESPERA',
+      estado_proceso: 'ASESORIA',
       sede_id: sedeId
     }])
     .select();

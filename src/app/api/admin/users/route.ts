@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     );
 
     const body = await request.json();
-    const { nombre, email, password, rol, sedes_ids } = body;
+    const { nombre, email, password, rol, especialidad, sedes_ids } = body;
 
     if (!email || !password || !nombre) {
       return NextResponse.json({ error: 'Faltan campos obligatorios (nombre, email, password)' }, { status: 400 });
@@ -42,6 +42,7 @@ export async function POST(request: Request) {
         nombre: nombre.trim(),
         email: email.trim(),
         rol,
+        especialidad: especialidad?.trim() || null,
         estado: 'DISPONIBLE'
       }]);
 

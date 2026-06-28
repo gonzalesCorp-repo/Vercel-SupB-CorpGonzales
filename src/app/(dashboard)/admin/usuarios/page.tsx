@@ -7,11 +7,11 @@ import { Agente } from '@/services/recepcion';
 import { Modal } from '@/components/ui/Modal';
 import { useAppStore } from '@/store/useAppStore';
 
-// Extendemos Agente base con campos extra para admin
 interface AgenteAdmin extends Agente {
   email?: string;
   password?: string;
   rol?: string;
+  especialidad?: string;
   sedes_ids?: string[];
 }
 
@@ -22,12 +22,12 @@ export default function UsuariosPage() {
   const [roleFilter, setRoleFilter] = useState('ALL');
   const { sedeActiva, userRol } = useAppStore();
   
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<AgenteAdmin>>({
     nombre: '',
     email: '',
     password: '',
     rol: 'STAFF',
+    especialidad: '',
     estado: 'DISPONIBLE',
     sedes_ids: []
   });
@@ -88,6 +88,7 @@ export default function UsuariosPage() {
       nombre: user.nombre,
       email: user.email || '',
       rol: user.rol || 'STAFF',
+      especialidad: user.especialidad || '',
       estado: user.estado,
       sedes_ids: user.sedes_ids || []
     });
@@ -97,7 +98,7 @@ export default function UsuariosPage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditId(null);
-    setFormData({ nombre: '', email: '', password: '', rol: 'STAFF', estado: 'DISPONIBLE', sedes_ids: [] });
+    setFormData({ nombre: '', email: '', password: '', rol: 'STAFF', especialidad: '', estado: 'DISPONIBLE', sedes_ids: [] });
   };
 
   return (
@@ -191,6 +192,9 @@ export default function UsuariosPage() {
                       <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${u.rol === 'ADMIN' ? 'bg-purple-100 text-purple-700' : u.rol === 'RECEPCION' ? 'bg-teal-100 text-teal-700' : 'bg-blue-100 text-blue-700'}`}>
                         {u.rol || 'STAFF'}
                       </span>
+                      {u.rol === 'STAFF' && u.especialidad && (
+                        <div className="text-[10px] font-semibold text-slate-500 mt-1 uppercase tracking-wider">{u.especialidad}</div>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       {u.estado === 'INACTIVO' ? (
@@ -253,6 +257,19 @@ export default function UsuariosPage() {
                 placeholder="Ej. temporal123"
               />
               <p className="text-[10px] text-slate-500 mt-1">El usuario usará esta contraseña para su primer ingreso.</p>
+            </div>
+          )}
+
+          {formData.rol === 'STAFF' && (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Especialidad (Opcional)</label>
+              <input 
+                type="text" 
+                value={formData.especialidad}
+                onChange={e => setFormData({...formData, especialidad: e.target.value})}
+                className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                placeholder="Ej. Corte Clásico, Colorimetría..."
+              />
             </div>
           )}
           

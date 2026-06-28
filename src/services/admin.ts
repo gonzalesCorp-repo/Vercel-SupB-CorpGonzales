@@ -89,6 +89,7 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
         nombre: agente.nombre,
         email: agente.email,
         rol: agente.rol,
+        especialidad: agente.especialidad,
         estado: agente.estado
       })
       .eq('id', agenteId);
@@ -108,6 +109,7 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
           email: agente.email,
           password: agente.password,
           rol: agente.rol,
+          especialidad: agente.especialidad,
           sedes_ids: sedes_ids
         })
       });

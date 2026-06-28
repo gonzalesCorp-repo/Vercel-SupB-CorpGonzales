@@ -96,9 +96,13 @@ export default function ActiveOATCsTable() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${
-                      oatc.estado_proceso === 'ESPERA' ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-700'
+                      (oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-700'
                     }`}>
-                      {oatc.agente_nombre || 'En Espera'}
+                      {(oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? (
+                        <><Clock className="w-3.5 h-3.5"/> {oatc.estado_proceso === 'ASESORIA' ? 'Asesoría' : 'En Espera'}</>
+                      ) : (
+                        <><CheckCircle2 className="w-3.5 h-3.5"/> {oatc.estado_proceso}</>
+                      )}
                     </span>
                   </td>
                   <td className="px-6 py-4">
