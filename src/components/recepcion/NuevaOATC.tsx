@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Scissors, Beaker, X } from 'lucide-react';
+import ClientSearch from './ClientSearch';
 import CatalogModal from './CatalogModal';
 import AgentSearch from './AgentSearch';
 import { Cliente, Bien, Agente, obtenerAgentesDisponibles, crearOatc } from '@/services/recepcion';
