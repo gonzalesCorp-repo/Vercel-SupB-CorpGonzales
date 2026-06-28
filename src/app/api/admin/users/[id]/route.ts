@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,7 +10,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const body = await request.json();
     const { nombre, email, rol, especialidad, estado, sedes_ids } = body;
-    const userId = params.id;
+    const { id } = await params;
+    const userId = id;
 
     if (!userId) {
       return NextResponse.json({ error: 'Falta el ID de usuario' }, { status: 400 });
