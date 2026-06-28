@@ -115,7 +115,8 @@ export async function crearOatc(
   clienteNombre: string,
   agenteId: string | null,
   agenteNombre: string,
-  puntoPartida: any[]
+  puntoPartida: any[],
+  tipoDemanda: string = 'cliente'
 ) {
   const sedeId = useAppStore.getState().sedeActiva?.id;
   
@@ -127,6 +128,7 @@ export async function crearOatc(
       agente_id: agenteId,
       agente_nombre: agenteNombre,
       punto_partida: puntoPartida,
+      tipo_demanda: tipoDemanda,
       estado_proceso: 'ESPERA',
       sede_id: sedeId
     }])

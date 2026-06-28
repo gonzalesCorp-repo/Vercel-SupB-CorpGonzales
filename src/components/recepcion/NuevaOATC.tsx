@@ -13,6 +13,8 @@ export default function NuevaOATC() {
   const [agentes, setAgentes] = useState<Agente[]>([]);
   const [agenteId, setAgenteId] = useState<string>('');
   
+  const [tipoDemanda, setTipoDemanda] = useState<string>('cliente');
+  
   const [modalTipo, setModalTipo] = useState<'servicio' | 'producto' | null>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,7 +54,8 @@ export default function NuevaOATC() {
         cliente.nombre, 
         agenteId || null, 
         agenteNombre, 
-        puntoPartida
+        puntoPartida,
+        tipoDemanda
       );
       
       setMessage('¡Atención generada exitosamente!');
@@ -135,6 +138,21 @@ export default function NuevaOATC() {
               </ul>
             )}
           </div>
+        </div>
+
+        {/* Tipo de Demanda */}
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Tipo de Demanda</label>
+          <select 
+            value={tipoDemanda}
+            onChange={(e) => setTipoDemanda(e.target.value)}
+            className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          >
+            <option value="cliente">Atención a Cliente</option>
+            <option value="turno">Turno Especial</option>
+            <option value="apoyo">Apoyo Interno</option>
+            <option value="garantia">Garantía / Corrección</option>
+          </select>
         </div>
 
         {/* Asignar Agente */}
