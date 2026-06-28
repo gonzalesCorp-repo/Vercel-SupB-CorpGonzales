@@ -98,7 +98,7 @@ export async function obtenerPeticionesPendientesPorSede(): Promise<Peticion[]> 
   const { data, error } = await supabase
     .from('cola_peticiones')
     .select(`
-      id, created_at, agente_id, estado, config_id, oatc_id,
+      id, created_at, agente_id, estado, tipo_id, oatc_id,
       agente:agentes!cola_peticiones_agente_id_fkey(nombre, rol),
       config_peticiones(nombre, estado_destino, actualiza_timestamp, penaliza_cola)
     `)
