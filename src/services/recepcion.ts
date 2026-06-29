@@ -1,6 +1,8 @@
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { registrarLog } from './logger';
+
+const supabase = createClient();
 
 export interface Cliente {
   id: string;
@@ -122,7 +124,7 @@ export async function obtenerAgentesDisponibles(): Promise<Agente[]> {
     return [];
   }
   
-  const filtered = data.filter(agente => 
+  const filtered = data.filter((agente: any) => 
     agente.sedes_usuarios && agente.sedes_usuarios.some((su: any) => su.sede_id === sedeId)
   );
   
