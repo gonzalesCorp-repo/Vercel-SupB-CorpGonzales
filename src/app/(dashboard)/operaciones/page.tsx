@@ -363,7 +363,7 @@ export default function WorkspaceOperativoPage() {
                <div key={bien.id} className="flex justify-between items-center p-3 border border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
                  <div>
                    <p className="font-bold text-gray-800">{bien.nombre}</p>
-                   <p className="text-xs text-gray-500">Precio Ref: ${bien.precio}</p>
+                   <p className="text-xs text-gray-500">Precio Ref: ${bien.precio_venta}</p>
                  </div>
                  <button onClick={() => confirmarNuevoServicio(bien)} className="bg-indigo-100 text-indigo-700 p-2 rounded-lg hover:bg-indigo-200 transition-colors">
                    <Plus className="w-5 h-5" />

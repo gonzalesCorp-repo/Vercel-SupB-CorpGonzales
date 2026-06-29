@@ -150,7 +150,7 @@ export async function agregarServicioOatc(oatcId: string, nuevoBien: Bien): Prom
       servicio_id: nuevoBien.id,
       servicio: nuevoBien.nombre,
       cantidad: 1,
-      precio: nuevoBien.precio
+      precio: nuevoBien.precio_venta
     });
   }
 
