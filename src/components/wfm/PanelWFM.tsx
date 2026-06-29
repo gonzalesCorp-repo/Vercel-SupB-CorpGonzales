@@ -14,7 +14,12 @@ export const CORE_WFM = {
   SALIDA: '33333333-3333-3333-3333-333333333333'
 };
 
-export default function PanelWFM() {
+interface PanelWFMProps {
+  isPersonalMode?: boolean;
+  miAgenteId?: string;
+}
+
+export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: PanelWFMProps) {
   const [configs, setConfigs] = useState<ConfigPeticion[]>([]);
   const [agentes, setAgentes] = useState<Agente[]>([]);
   
@@ -39,13 +44,15 @@ export default function PanelWFM() {
     // We listen to changes to cola and agentes to update UI if a user has selected their profile
     const channelCola = supabase.channel('realtime-cola-wfm')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'cola_peticiones' }, () => {
-        if (selectedAgenteId) checkAgenteStatus(selectedAgenteId);
+        if (isPersonalMode && miAgenteId) checkAgenteStatus(miAgenteId);
+        else if (selectedAgenteId) checkAgenteStatus(selectedAgenteId);
       })
       .subscribe();
       
     const channelAgentes = supabase.channel('realtime-agentes-wfm')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'agentes' }, () => {
-        if (selectedAgenteId) checkAgenteStatus(selectedAgenteId);
+        if (isPersonalMode && miAgenteId) checkAgenteStatus(miAgenteId);
+        else if (selectedAgenteId) checkAgenteStatus(selectedAgenteId);
       })
       .subscribe();
 
@@ -53,7 +60,13 @@ export default function PanelWFM() {
       supabase.removeChannel(channelCola);
       supabase.removeChannel(channelAgentes);
     };
-  }, [selectedAgenteId]);
+  }, [selectedAgenteId, isPersonalMode, miAgenteId]);
+
+  useEffect(() => {
+    if (isPersonalMode && miAgenteId) {
+      checkAgenteStatus(miAgenteId);
+    }
+  }, [isPersonalMode, miAgenteId]);
 
   const cargarDatosGenerales = async () => {
     const [confData, ags] = await Promise.all([
@@ -76,11 +89,27 @@ export default function PanelWFM() {
     }
   };
 
-  const handleActionClick = (actionId: string | null) => {
+  const handleActionClick = async (actionId: string | null) => {
     if (actionId === 'OTRAS') {
       setIsOtrasOpen(true);
       return;
     }
+
+    if (isPersonalMode && miAgenteId && actionId) {
+      // Direct execution without PIN
+      setIsLoading(true);
+      try {
+        await solicitarAsistenciaKiosko(actionId, miAgenteId);
+        alert("Solicitud enviada a Recepción.");
+        checkAgenteStatus(miAgenteId);
+      } catch (err: any) {
+        alert(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     setSelectedAction(actionId);
     setSelectedAgenteId('');
     setPin('');

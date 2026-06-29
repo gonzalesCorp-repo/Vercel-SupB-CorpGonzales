@@ -20,6 +20,8 @@ type PendingAction = 'ADD_SERVICE' | 'LAB_REQUEST' | null;
 export default function WorkspaceOperativoPage() {
   const [tickets, setTickets] = useState<OATCExtended[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPersonalMode, setIsPersonalMode] = useState(false);
+  const [miAgenteId, setMiAgenteId] = useState('');
   const supabase = createClient();
   
   // Modales
@@ -46,6 +48,21 @@ export default function WorkspaceOperativoPage() {
   const cargarTickets = async () => {
     setIsLoading(true);
     
+    const { data: { user } } = await supabase.auth.getUser();
+    let isPersonal = false;
+    let personalId = '';
+    
+    if (user?.email) {
+      const { data: agente } = await supabase.from('agentes').select('id, rol').eq('email', user.email).single();
+      if (agente && agente.rol === 'STAFF') {
+        isPersonal = true;
+        personalId = agente.id;
+      }
+    }
+    
+    setIsPersonalMode(isPersonal);
+    setMiAgenteId(personalId);
+
     // Traer tickets y catálogo en paralelo
     const [dataTickets, dataCatalogo] = await Promise.all([
       obtenerTicketsAsignados('ALL'),
@@ -53,7 +70,7 @@ export default function WorkspaceOperativoPage() {
     ]);
 
     setCatalogo(dataCatalogo);
-    setTickets(dataTickets);
+    setTickets(isPersonal ? dataTickets.filter(t => t.agente_id === personalId) : dataTickets);
     setIsLoading(false);
   };
 
@@ -88,6 +105,14 @@ export default function WorkspaceOperativoPage() {
   const requerirPinParaAccion = (action: PendingAction, oatc: OATCExtended | null = null) => {
     setPendingAction(action);
     setSelectedOatc(oatc);
+    
+    if (isPersonalMode) {
+      // Saltar PIN en modo personal
+      if (action === 'ADD_SERVICE') setShowAddServiceModal(true);
+      else if (action === 'LAB_REQUEST') setShowLabModal(true);
+      return;
+    }
+
     setPin('');
     setPinError(false);
     setShowPinModal(true);
@@ -162,7 +187,7 @@ export default function WorkspaceOperativoPage() {
         
         <div className="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto">
           <div className="w-full md:w-auto">
-            <PanelWFM />
+            <PanelWFM isPersonalMode={isPersonalMode} miAgenteId={miAgenteId} />
           </div>
           <button 
             onClick={() => requerirPinParaAccion('LAB_REQUEST')}
