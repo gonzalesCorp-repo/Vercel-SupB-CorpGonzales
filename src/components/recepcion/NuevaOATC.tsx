@@ -120,46 +120,38 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
       {/* Constructor Principal Único */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
         <h2 className="text-lg font-bold mb-4 text-gray-800">Nueva OATC</h2>
-        
-        {/* Fila 1: Cliente y Catálogo */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-4">
-          
-          {/* Cliente */}
-          <div className="flex-1">
-            <ClientSearch 
-              onSelect={setCliente} 
-              selectedClientName={cliente?.nombre} 
-            />
-          </div>
-
-          {/* Botones Catálogo Modal */}
-          <div className="w-auto flex flex-col justify-end shrink-0">
-            <label className="block text-xs font-semibold text-gray-700 mb-1">Catálogo</label>
-            <div className="flex gap-2 h-[42px]">
-              <button 
-                onClick={() => setModalTipo('servicio')} 
-                className="w-12 flex items-center justify-center bg-blue-50 text-blue-700 text-xl border border-blue-200 rounded-lg hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm" 
-                title="Agregar Servicio"
-              >
-                <Scissors className="w-5 h-5" />
-              </button>
-              <button 
-                onClick={() => setModalTipo('producto')} 
-                className="w-12 flex items-center justify-center bg-green-50 text-green-700 text-xl border border-green-200 rounded-lg hover:bg-green-600 hover:text-white hover:border-green-600 transition-all shadow-sm" 
-                title="Agregar Producto Retail"
-              >
-                <Beaker className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+        {/* Fila 1: Cliente */}
+        <div className="mb-4">
+          <ClientSearch 
+            onSelect={setCliente} 
+            selectedClientName={cliente?.nombre} 
+          />
         </div>
 
         {/* Punto de Partida */}
         <div className="mb-4">
-          <label className="block text-xs font-semibold text-gray-700 mb-1">Punto de Partida (Seleccionados)</label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-semibold text-gray-700">Punto de Partida (Seleccionados)</label>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setModalTipo('servicio')} 
+                className="w-8 h-8 flex items-center justify-center bg-blue-50 text-blue-700 text-sm border border-blue-200 rounded hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm" 
+                title="Agregar Servicio"
+              >
+                <Scissors className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setModalTipo('producto')} 
+                className="w-8 h-8 flex items-center justify-center bg-green-50 text-green-700 text-sm border border-green-200 rounded hover:bg-green-600 hover:text-white hover:border-green-600 transition-all shadow-sm" 
+                title="Agregar Producto Retail"
+              >
+                <Beaker className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
           <div className="bg-gray-50 min-h-[60px] border border-gray-200 rounded p-2">
             {puntoPartida.length === 0 ? (
-              <div className="text-xs text-gray-400 text-center mt-2">Busca en el catálogo y agrégalos aquí ➔</div>
+              <div className="text-xs text-gray-400 text-center mt-2">Agrega servicios o productos con los botones de arriba ➔</div>
             ) : (
               <ul className="space-y-1">
                 {puntoPartida.map((item, index) => (
