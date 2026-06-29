@@ -213,7 +213,7 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
     isLocked: boolean,
     lockedLabel: string
   ) => {
-    const isPending = peticionPendiente?.tipo_id === id;
+    const isPending = peticionPendiente?.tipo_id === id && (timeLeft === null || timeLeft > 0);
     
     if (isPending) {
       return (

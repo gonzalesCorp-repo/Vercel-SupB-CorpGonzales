@@ -115,7 +115,7 @@ export async function obtenerAgentesDisponibles(): Promise<Agente[]> {
   // Hacer fetch normal y filtrar en cliente
   const { data, error } = await supabase
     .from('agentes')
-    .select('id, nombre, estado, rol, especialidad, sedes_usuarios(sede_id)');
+    .select('id, nombre, estado, rol, especialidad, ultimo_cambio_estado, created_at, sedes_usuarios(sede_id)');
     
   if (error) {
     console.error("Error obteniendo agentes:", error);
