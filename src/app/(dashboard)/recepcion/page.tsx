@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import NuevaOATC from '@/components/recepcion/NuevaOATC';
 import QueueMonitor from '@/components/recepcion/QueueMonitor';
 import ActiveOATCsTable from '@/components/recepcion/ActiveOATCsTable';
+import BuzonAutorizaciones from '@/components/recepcion/BuzonAutorizaciones';
 import { Modal } from '@/components/ui/Modal';
 import { FloatingWindow } from '@/components/ui/FloatingWindow';
 import { Plus } from 'lucide-react';
@@ -43,6 +44,9 @@ export default function RecepcionPage() {
               Generar Nueva OATC
             </button>
           </div>
+
+          {/* Buzón de Autorizaciones y Alertas */}
+          <BuzonAutorizaciones />
 
           {/* Tabla de Atenciones */}
           <ActiveOATCsTable />

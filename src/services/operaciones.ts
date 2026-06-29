@@ -23,7 +23,8 @@ export async function obtenerTicketsAsignados(agenteNombre: string): Promise<OAT
     .from('oatc')
     .select('*')
     .eq('agente_nombre', agenteNombre)
-    .in('estado_proceso', ['ASESORANDO', 'PRE_COBRADO'])
+    .neq('estado_proceso', 'FINALIZADO')
+    .neq('estado_proceso', 'CANCELADO')
     .eq('sede_id', sedeId);
 
   if (error) {
@@ -126,44 +127,57 @@ export async function pedirInsumo(pedido: PedidoInsumo): Promise<boolean> {
   return true;
 }
 
-// 4. Agregar servicio (Venta Cruzada / Upsell) a una OATC
-export async function agregarServicioOatc(oatcId: string, nuevoBien: Bien): Promise<boolean> {
+// 4. Solicitar adición de servicio (Gatekeeping - Upsell) a una OATC
+export async function solicitarCambiosOatc(oatcId: string, nuevoBien: Bien, nuevaDemandaId?: string): Promise<boolean> {
   const { data: oatc, error: errOatc } = await supabase
     .from('oatc')
-    .select('punto_partida')
+    .select('*')
     .eq('id', oatcId)
     .single();
 
   if (errOatc || !oatc) {
-    console.error("Error obteniendo OATC para upsell:", errOatc);
+    console.error("Error obteniendo OATC para solicitud de upsell:", errOatc);
     return false;
   }
 
-  const currentPunto = oatc.punto_partida || [];
-  
-  // Buscar si ya existe para incrementar cantidad, o agregar nuevo
-  const existingIndex = currentPunto.findIndex((p: any) => p.servicio_id === nuevoBien.id);
-  if (existingIndex >= 0) {
-    currentPunto[existingIndex].cantidad = (currentPunto[existingIndex].cantidad || 1) + 1;
-  } else {
-    currentPunto.push({
-      servicio_id: nuevoBien.id,
-      servicio: nuevoBien.nombre,
-      cantidad: 1,
-      precio: nuevoBien.precio_venta
-    });
+  // Si envían una demanda nueva, obtenemos su nombre
+  let nuevoTipoDemanda = oatc.tipo_demanda;
+  if (nuevaDemandaId) {
+    const { data: dem } = await supabase.from('config_demandas').select('nombre').eq('id', nuevaDemandaId).single();
+    if (dem) nuevoTipoDemanda = dem.nombre;
   }
+
+  const solicitud = {
+    nuevos_servicios: [
+      {
+        servicio_id: nuevoBien.id,
+        nombre: nuevoBien.nombre,
+        precio: nuevoBien.precio_venta,
+        cantidad: 1,
+        categoria: nuevoBien.categoria,
+        tipo_bien: nuevoBien.tipo_bien
+      }
+    ],
+    nuevo_tipo_demanda: nuevoTipoDemanda,
+    solicitado_en: new Date().toISOString()
+  };
+
+  // Agregar a cambios_pendientes (combinando si ya había uno, aunque normalmente se sobrescribe)
+  const cambiosPendientes = oatc.cambios_pendientes ? { ...oatc.cambios_pendientes, ...solicitud } : solicitud;
 
   const { error } = await supabase
     .from('oatc')
-    .update({ punto_partida: currentPunto })
+    .update({ 
+      cambios_pendientes: cambiosPendientes,
+      estado_proceso: 'PENDIENTE_CONFIRMACION' 
+    })
     .eq('id', oatcId);
 
   if (error) {
-    console.error("Error agregando servicio:", error);
+    console.error("Error guardando solicitud de cambios:", error);
     return false;
   }
-  
-  await registrarLog('OATC', 'UPSELL_SERVICIO_AGREGADO', { oatc_id: oatcId, servicio_id: nuevoBien.id });
+
+  await registrarLog('OPERACIONES', `Solicitó agregar servicio a OATC`, { oatc_id: oatcId, servicio: nuevoBien.nombre });
   return true;
 }

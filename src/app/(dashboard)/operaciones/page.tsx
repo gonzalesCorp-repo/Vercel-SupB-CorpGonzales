@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus } from 'lucide-react';
-import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo, agregarServicioOatc } from '@/services/operaciones';
+import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo, solicitarCambiosOatc } from '@/services/operaciones';
 import { OATC, Bien, obtenerCatalogo } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
@@ -114,13 +114,14 @@ export default function WorkspaceOperativoPage() {
 
   const confirmarNuevoServicio = async (bien: Bien) => {
     if (selectedOatc?.id) {
-      const ok = await agregarServicioOatc(selectedOatc.id, bien);
+      const ok = await solicitarCambiosOatc(selectedOatc.id, bien);
       if (ok) {
         setShowAddServiceModal(false);
         setSearchCat('');
-        cargarTickets(); // recargar para ver el cambio
+        alert("Solicitud enviada a Recepción para su autorización.");
+        cargarTickets(); // recargar para ver el cambio de estado
       } else {
-        alert("Error agregando el servicio extra.");
+        alert("Error solicitando el servicio extra.");
       }
     }
   };
@@ -203,8 +204,12 @@ export default function WorkspaceOperativoPage() {
                       <h3 className="text-xl font-black text-gray-800 mt-0.5">{ticket.cliente_nombre}</h3>
                       <p className="text-sm text-gray-600 mt-1"><span className="font-semibold text-gray-400">Atendido por:</span> {ticket.agente_nombre}</p>
                     </div>
-                    <div>
-                       {isEnCurso ? (
+                     <div>
+                       {ticket.estado_proceso === 'PENDIENTE_CONFIRMACION' ? (
+                         <span className="px-3 py-1 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest flex items-center gap-1">
+                           <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span> Autorización Pndte
+                         </span>
+                       ) : isEnCurso ? (
                          <span className="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold text-xs rounded-full uppercase tracking-widest flex items-center gap-1">
                            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> En Curso
                          </span>
@@ -213,7 +218,7 @@ export default function WorkspaceOperativoPage() {
                            En Espera
                          </span>
                        )}
-                    </div>
+                     </div>
                   </div>
 
                   {/* Servicios */}
@@ -231,7 +236,7 @@ export default function WorkspaceOperativoPage() {
                     {/* Panel de Botones Táctiles */}
                     <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
                       
-                      {!isEnCurso && (
+                      {!isEnCurso && ticket.estado_proceso !== 'PENDIENTE_CONFIRMACION' && (
                         <button 
                           onClick={() => ticket.id && handleIniciarAtencion(ticket.id)}
                           className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
@@ -240,7 +245,7 @@ export default function WorkspaceOperativoPage() {
                         </button>
                       )}
 
-                      {isEnCurso && (
+                      {isEnCurso && ticket.estado_proceso !== 'PENDIENTE_CONFIRMACION' && (
                         <>
                           <button 
                             onClick={() => requerirPinParaAccion('ADD_SERVICE', ticket)}
@@ -255,6 +260,12 @@ export default function WorkspaceOperativoPage() {
                             <CheckCircle className="w-5 h-5" /> Terminar
                           </button>
                         </>
+                      )}
+                      
+                      {ticket.estado_proceso === 'PENDIENTE_CONFIRMACION' && (
+                         <div className="w-full text-center text-sm font-bold text-orange-600 bg-orange-50 py-3 rounded-xl border border-orange-200">
+                           ⏳ Recepción debe autorizar los servicios extra añadidos.
+                         </div>
                       )}
                     </div>
                   </div>

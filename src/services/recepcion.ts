@@ -40,6 +40,7 @@ export interface OATC {
   estado_proceso?: string;
   estado_pago?: string;
   tipo_demanda?: string;
+  cambios_pendientes?: any;
   created_at?: string;
 }
 
@@ -175,4 +176,88 @@ export async function obtenerOatcsActivosDelDia(): Promise<OATC[]> {
   }
 
   return data as OATC[];
+}
+
+export async function obtenerAutorizacionesPendientes(): Promise<OATC[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) return [];
+
+  const { data, error } = await supabase
+    .from('oatc')
+    .select('*')
+    .eq('sede_id', sedeId)
+    .eq('estado_proceso', 'PENDIENTE_CONFIRMACION')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error("Error obteniendo autorizaciones pendientes:", error);
+    return [];
+  }
+  return data as OATC[];
+}
+
+export async function resolverAutorizacion(oatcId: string, aprobar: boolean): Promise<boolean> {
+  // Obtener la OATC actual
+  const { data: oatc, error: errOatc } = await supabase
+    .from('oatc')
+    .select('*')
+    .eq('id', oatcId)
+    .single();
+
+  if (errOatc || !oatc || !oatc.cambios_pendientes) return false;
+
+  let updatePayload: any = {};
+
+  if (aprobar) {
+    const cambios = oatc.cambios_pendientes;
+    const puntoPartidaActual = oatc.punto_partida || [];
+    
+    // Agregar nuevos servicios
+    if (cambios.nuevos_servicios && cambios.nuevos_servicios.length > 0) {
+      for (const nuevo of cambios.nuevos_servicios) {
+        const existingIndex = puntoPartidaActual.findIndex((p: any) => p.servicio_id === nuevo.servicio_id);
+        if (existingIndex >= 0) {
+          puntoPartidaActual[existingIndex].cantidad = (puntoPartidaActual[existingIndex].cantidad || 1) + (nuevo.cantidad || 1);
+        } else {
+          puntoPartidaActual.push(nuevo);
+        }
+      }
+    }
+    
+    updatePayload = {
+      punto_partida: puntoPartidaActual,
+      cambios_pendientes: null,
+      tipo_demanda: cambios.nuevo_tipo_demanda || oatc.tipo_demanda,
+      estado_proceso: 'PRE_COBRADO' // O el estado disparador, pero usar 'PRE_COBRADO' o 'TRABAJANDO' (por ahora hardcodeado o sacado de la config)
+    };
+
+    // Actualizar estado del agente
+    const { data: dem } = await supabase.from('config_demandas').select('estado_disparador').eq('nombre', updatePayload.tipo_demanda).single();
+    if (dem && oatc.agente_id) {
+       updatePayload.estado_proceso = dem.estado_disparador;
+       await supabase.from('agentes').update({ estado: dem.estado_disparador }).eq('id', oatc.agente_id);
+    } else {
+       updatePayload.estado_proceso = 'TRABAJANDO';
+    }
+
+  } else {
+    // Rechazar
+    updatePayload = {
+      cambios_pendientes: null,
+      estado_proceso: oatc.cambios_pendientes.estado_anterior || 'ASESORANDO'
+    };
+  }
+
+  const { error } = await supabase
+    .from('oatc')
+    .update(updatePayload)
+    .eq('id', oatcId);
+
+  if (error) {
+    console.error("Error resolviendo autorización:", error);
+    return false;
+  }
+  
+  await registrarLog('RECEPCION', aprobar ? `Autorizó upselling OATC` : `Rechazó upselling OATC`, { oatc_id: oatcId });
+  return true;
 }
