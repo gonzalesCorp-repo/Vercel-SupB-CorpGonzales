@@ -94,7 +94,22 @@ export async function obtenerCatalogo(tipo: 'servicio' | 'producto'): Promise<Bi
 }
 
 export async function obtenerAgentesDisponibles(): Promise<Agente[]> {
-  const sedeId = useAppStore.getState().sedeActiva?.id;
+  let sedeId = useAppStore.getState().sedeActiva?.id;
+  
+  if (!sedeId) {
+    // Si no hay sede en el store (ej. entrando directo a Operaciones), buscar la sede del usuario logeado
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      const { data: agente } = await supabase.from('agentes').select('id').eq('email', user.email).single();
+      if (agente) {
+        const { data: su } = await supabase.from('sedes_usuarios').select('sede_id').eq('agente_id', agente.id).limit(1);
+        if (su && su.length > 0) {
+          sedeId = su[0].sede_id;
+        }
+      }
+    }
+  }
+
   if (!sedeId) return [];
 
   // Hacer fetch normal y filtrar en cliente
