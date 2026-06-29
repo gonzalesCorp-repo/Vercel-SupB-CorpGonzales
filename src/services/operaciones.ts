@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
-import { OATC } from './recepcion';
+import { OATC, Bien } from './recepcion';
 import { registrarLog } from './logger';
 
 const supabase = createClient();
@@ -123,5 +123,47 @@ export async function pedirInsumo(pedido: PedidoInsumo): Promise<boolean> {
   }
   
   await registrarLog('OPERACIONES', `Pidió insumo a laboratorio`, { insumo: pedido.insumo_solicitado });
+  return true;
+}
+
+// 4. Agregar servicio (Venta Cruzada / Upsell) a una OATC
+export async function agregarServicioOatc(oatcId: string, nuevoBien: Bien): Promise<boolean> {
+  const { data: oatc, error: errOatc } = await supabase
+    .from('oatc')
+    .select('punto_partida')
+    .eq('id', oatcId)
+    .single();
+
+  if (errOatc || !oatc) {
+    console.error("Error obteniendo OATC para upsell:", errOatc);
+    return false;
+  }
+
+  const currentPunto = oatc.punto_partida || [];
+  
+  // Buscar si ya existe para incrementar cantidad, o agregar nuevo
+  const existingIndex = currentPunto.findIndex((p: any) => p.servicio_id === nuevoBien.id);
+  if (existingIndex >= 0) {
+    currentPunto[existingIndex].cantidad = (currentPunto[existingIndex].cantidad || 1) + 1;
+  } else {
+    currentPunto.push({
+      servicio_id: nuevoBien.id,
+      servicio: nuevoBien.nombre,
+      cantidad: 1,
+      precio: nuevoBien.precio
+    });
+  }
+
+  const { error } = await supabase
+    .from('oatc')
+    .update({ punto_partida: currentPunto })
+    .eq('id', oatcId);
+
+  if (error) {
+    console.error("Error agregando servicio:", error);
+    return false;
+  }
+  
+  await registrarLog('OATC', 'UPSELL_SERVICIO_AGREGADO', { oatc_id: oatcId, servicio_id: nuevoBien.id });
   return true;
 }

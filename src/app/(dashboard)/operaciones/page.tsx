@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus } from 'lucide-react';
-import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo } from '@/services/operaciones';
-import { OATC } from '@/services/recepcion';
+import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo, agregarServicioOatc } from '@/services/operaciones';
+import { OATC, Bien, obtenerCatalogo } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
 import BotonAsistencia from '@/components/wfm/BotonAsistencia';
@@ -33,6 +33,10 @@ export default function WorkspaceOperativoPage() {
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [selectedOatc, setSelectedOatc] = useState<OATCExtended | null>(null);
 
+  // Catálogo Real
+  const [catalogo, setCatalogo] = useState<Bien[]>([]);
+  const [searchCat, setSearchCat] = useState('');
+
   // Estados para Lab
   const [insumo, setInsumo] = useState('');
   const [cabinaSolicitante, setCabinaSolicitante] = useState('');
@@ -41,12 +45,15 @@ export default function WorkspaceOperativoPage() {
 
   const cargarTickets = async () => {
     setIsLoading(true);
-    // Para modo Quiosco, traemos todos los tickets activos de la sede (usaremos un mock si la DB está vacía)
-    let data = await obtenerTicketsAsignados('ALL');
     
-    // Eliminamos MOCK DATA SI ESTA VACIO
+    // Traer tickets y catálogo en paralelo
+    const [dataTickets, dataCatalogo] = await Promise.all([
+      obtenerTicketsAsignados('ALL'),
+      obtenerCatalogo('servicio')
+    ]);
 
-    setTickets(data);
+    setCatalogo(dataCatalogo);
+    setTickets(dataTickets);
     setIsLoading(false);
   };
 
@@ -105,11 +112,17 @@ export default function WorkspaceOperativoPage() {
     }
   };
 
-  const confirmarNuevoServicio = () => {
-    alert(`Servicio extra añadido a la orden de ${selectedOatc?.cliente_nombre}.`);
-    setShowAddServiceModal(false);
-    setSelectedOatc(null);
-    setPendingAction(null);
+  const confirmarNuevoServicio = async (bien: Bien) => {
+    if (selectedOatc?.id) {
+      const ok = await agregarServicioOatc(selectedOatc.id, bien);
+      if (ok) {
+        setShowAddServiceModal(false);
+        setSearchCat('');
+        cargarTickets(); // recargar para ver el cambio
+      } else {
+        alert("Error agregando el servicio extra.");
+      }
+    }
   };
 
   const handlePedirInsumo = async (e: React.FormEvent) => {
@@ -329,26 +342,37 @@ export default function WorkspaceOperativoPage() {
         </form>
       </Modal>
 
-      {/* MODAL: Añadir Servicio (Mockup Catálogo) */}
+      {/* MODAL: Añadir Servicio (Catálogo Real) */}
       <Modal isOpen={showAddServiceModal} onClose={() => setShowAddServiceModal(false)} title={`Añadir a: ${selectedOatc?.cliente_nombre}`} maxWidth="max-w-xl">
         <div className="space-y-4 mt-2">
            <div className="relative mb-4">
-              <input type="text" placeholder="Buscar servicio..." className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 bg-gray-50" />
+              <input 
+                type="text" 
+                value={searchCat}
+                onChange={(e) => setSearchCat(e.target.value)}
+                placeholder="Buscar servicio extra..." 
+                className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 bg-gray-50" 
+              />
               <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
            </div>
            
            <div className="space-y-2 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
-             {['Tratamiento Capilar Profundo', 'Peinado Especial', 'Decoloración Extra'].map((s, i) => (
-               <div key={i} className="flex justify-between items-center p-3 border border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
+             {catalogo
+               .filter(b => b.nombre.toLowerCase().includes(searchCat.toLowerCase()))
+               .map((bien) => (
+               <div key={bien.id} className="flex justify-between items-center p-3 border border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
                  <div>
-                   <p className="font-bold text-gray-800">{s}</p>
-                   <p className="text-xs text-gray-500">Adicional</p>
+                   <p className="font-bold text-gray-800">{bien.nombre}</p>
+                   <p className="text-xs text-gray-500">Precio Ref: ${bien.precio}</p>
                  </div>
-                 <button onClick={confirmarNuevoServicio} className="bg-indigo-100 text-indigo-700 p-2 rounded-lg hover:bg-indigo-200 transition-colors">
+                 <button onClick={() => confirmarNuevoServicio(bien)} className="bg-indigo-100 text-indigo-700 p-2 rounded-lg hover:bg-indigo-200 transition-colors">
                    <Plus className="w-5 h-5" />
                  </button>
                </div>
              ))}
+             {catalogo.length === 0 && (
+               <p className="text-center text-gray-500 py-4">No hay servicios disponibles.</p>
+             )}
            </div>
         </div>
       </Modal>
