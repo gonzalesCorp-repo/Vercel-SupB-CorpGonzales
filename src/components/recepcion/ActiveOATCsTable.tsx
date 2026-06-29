@@ -4,12 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle2, UserCircle2, ArrowRight, Edit2, XCircle, CheckSquare } from 'lucide-react';
 import { obtenerOatcsActivosDelDia, OATC } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNowStrict } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function ActiveOATCsTable() {
   const [oatcs, setOatcs] = useState<OATC[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [now, setNow] = useState(new Date());
   const supabase = createClient();
 
   const cargarDatos = async () => {
@@ -39,14 +40,20 @@ export default function ActiveOATCsTable() {
       })
       .subscribe();
 
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, []);
 
   const getTiempoTranscurrido = (dateStr: string) => {
     try {
-      return formatDistanceToNow(new Date(dateStr), { locale: es });
+      // Usar formatDistanceToNowStrict con 'now' para forzar re-render
+      return formatDistanceToNowStrict(new Date(dateStr), { locale: es, addSuffix: false });
     } catch (e) {
       return '...';
     }
@@ -76,6 +83,7 @@ export default function ActiveOATCsTable() {
                 <th className="px-6 py-3">Cliente</th>
                 <th className="px-6 py-3">Servicio</th>
                 <th className="px-6 py-3">Agente Asignado</th>
+                <th className="px-6 py-3">Estado</th>
                 <th className="px-6 py-3">Tiempo</th>
                 <th className="px-6 py-3 text-right">Acción</th>
               </tr>
@@ -94,6 +102,9 @@ export default function ActiveOATCsTable() {
                   <td className="px-6 py-4 text-slate-600">
                     {getServicios(oatc.punto_partida)}
                   </td>
+                  <td className="px-6 py-4 font-medium text-slate-700">
+                    {oatc.agente_nombre || 'POR ASIGNAR'}
+                  </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${
                       (oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-700'
@@ -106,7 +117,7 @@ export default function ActiveOATCsTable() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-slate-500 text-xs">
+                    <div className="flex items-center gap-1.5 text-slate-500 text-xs font-mono font-medium">
                       <Clock className="w-3.5 h-3.5" />
                       {oatc.created_at ? getTiempoTranscurrido(oatc.created_at) : '-'}
                     </div>

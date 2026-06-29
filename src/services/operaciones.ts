@@ -19,13 +19,18 @@ export async function obtenerTicketsAsignados(agenteNombre: string): Promise<OAT
   const sedeId = useAppStore.getState().sedeActiva?.id;
   if (!sedeId) return [];
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('oatc')
     .select('*')
-    .eq('agente_nombre', agenteNombre)
     .neq('estado_proceso', 'FINALIZADO')
     .neq('estado_proceso', 'CANCELADO')
     .eq('sede_id', sedeId);
+
+  if (agenteNombre !== 'ALL') {
+    query = query.eq('agente_nombre', agenteNombre);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Error obteniendo tickets asignados:", error);

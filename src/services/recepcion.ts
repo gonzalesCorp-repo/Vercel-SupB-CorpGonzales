@@ -160,6 +160,22 @@ export async function crearOatc(
     console.error("Error creando OATC:", error);
     throw new Error(error.message);
   }
+
+  // Actualizar estado del agente
+  if (agenteId) {
+    const { error: errorAgente } = await supabase
+      .from('agentes')
+      .update({ 
+        estado: 'TRABAJANDO',
+        ultimo_cambio_estado: new Date().toISOString()
+      })
+      .eq('id', agenteId);
+      
+    if (errorAgente) {
+      console.warn("No se pudo actualizar el estado del agente:", errorAgente);
+      // We don't throw here to not break the OATC creation if RLS blocks it temporarily
+    }
+  }
   
   // Registrar en Logs
   await registrarLog('RECEPCION', `Generó orden para el cliente ${clienteNombre}`, { 
