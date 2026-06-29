@@ -29,7 +29,7 @@ export async function obtenerConfigPeticiones(): Promise<ConfigPeticion[]> {
   
   // RLS might return for multiple sedes if user has multiple sedes, 
   // so we filter by current sede (or global)
-  const filtered = data.filter(d => !d.sede_id || d.sede_id === sedeId);
+  const filtered = data.filter((d: any) => !d.sede_id || d.sede_id === sedeId);
   return filtered as ConfigPeticion[];
 }
 
@@ -102,7 +102,7 @@ export async function obtenerConfigDemandas(): Promise<ConfigDemanda[]> {
     return [];
   }
   
-  const filtered = data.filter(d => !d.sede_id || d.sede_id === sedeId);
+  const filtered = data.filter((d: any) => !d.sede_id || d.sede_id === sedeId);
   return filtered as ConfigDemanda[];
 }
 
