@@ -9,6 +9,7 @@ export interface Peticion {
   tipo_id: string;
   estado: string;
   created_at: string;
+  resolved_at?: string;
   config_peticiones?: {
     nombre: string;
     color: string;
@@ -196,4 +197,26 @@ export async function resolverPeticion(pet: Peticion, estado: 'APROBADO' | 'RECH
 
   await registrarLog('WFM', 'PETICION_RESUELTA', { peticion_id: pet.id, resolucion: estado, agente_id: pet.agente_id });
   return true;
+}
+
+export async function obtenerHistorialWFMDelDia(agenteId: string): Promise<Peticion[]> {
+  const supabase = createClient();
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  const { data, error } = await supabase
+    .from('cola_peticiones')
+    .select(`
+      id, created_at, resolved_at, estado, tipo_id,
+      config_peticiones(nombre)
+    `)
+    .eq('agente_id', agenteId)
+    .gte('created_at', hoy.toISOString())
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error("Error obteniendo historial WFM:", error);
+    return [];
+  }
+  return data as any[];
 }
