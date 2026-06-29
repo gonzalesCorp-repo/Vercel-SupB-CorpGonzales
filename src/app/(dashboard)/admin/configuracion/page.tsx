@@ -7,25 +7,28 @@ import {
   obtenerConfigDemandas, guardarConfigDemanda, eliminarConfigDemanda, ConfigDemanda 
 } from '@/services/wfmConfig';
 import { Modal } from '@/components/ui/Modal';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function WFMConfigPage() {
   const [activeTab, setActiveTab] = useState<'PETICIONES' | 'DEMANDAS'>('PETICIONES');
   const [isLoading, setIsLoading] = useState(true);
+  
+  const { sedeActiva } = useAppStore();
 
   // States for Peticiones
   const [peticiones, setPeticiones] = useState<ConfigPeticion[]>([]);
   const [isPetModalOpen, setIsPetModalOpen] = useState(false);
   const [editPetId, setEditPetId] = useState<string | null>(null);
-  const [petFormData, setPetFormData] = useState<Partial<ConfigPeticion>>({
-    nombre: '', estado_destino: 'DISPONIBLE', actualiza_timestamp: false, penaliza_cola: false, color: 'bg-slate-100 text-slate-700'
+  const [petFormData, setPetFormData] = useState<Partial<ConfigPeticion> & { isGlobal?: boolean }>({
+    nombre: '', estado_destino: 'DISPONIBLE', actualiza_timestamp: false, penaliza_cola: false, color: 'bg-slate-100 text-slate-700', isGlobal: true
   });
 
   // States for Demandas
   const [demandas, setDemandas] = useState<ConfigDemanda[]>([]);
   const [isDemModalOpen, setIsDemModalOpen] = useState(false);
   const [editDemId, setEditDemId] = useState<string | null>(null);
-  const [demFormData, setDemFormData] = useState<Partial<ConfigDemanda>>({
-    nombre: '', estado_disparador: 'ASESORANDO'
+  const [demFormData, setDemFormData] = useState<Partial<ConfigDemanda> & { isGlobal?: boolean }>({
+    nombre: '', estado_disparador: 'ASESORANDO', isGlobal: true
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -43,17 +46,17 @@ export default function WFMConfigPage() {
 
   useEffect(() => {
     cargarDatos();
-  }, []);
+  }, [sedeActiva?.id]);
 
   // Handlers Peticiones
   const openNewPetModal = () => {
     setEditPetId(null);
-    setPetFormData({ nombre: '', estado_destino: 'DISPONIBLE', actualiza_timestamp: false, penaliza_cola: false, color: 'bg-slate-100 text-slate-700' });
+    setPetFormData({ nombre: '', estado_destino: 'DISPONIBLE', actualiza_timestamp: false, penaliza_cola: false, color: 'bg-slate-100 text-slate-700', isGlobal: true });
     setIsPetModalOpen(true);
   };
   const openEditPetModal = (conf: ConfigPeticion) => {
     setEditPetId(conf.id);
-    setPetFormData(conf);
+    setPetFormData({ ...conf, isGlobal: !conf.sede_id });
     setIsPetModalOpen(true);
   };
   const handleDeletePet = async (conf: ConfigPeticion) => {
@@ -65,7 +68,11 @@ export default function WFMConfigPage() {
   const handleSubmitPet = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    const ok = await guardarConfigPeticion({ ...petFormData, id: editPetId || undefined });
+    
+    const payload = { ...petFormData, id: editPetId || undefined, sede_id: petFormData.isGlobal ? null : sedeActiva?.id };
+    delete payload.isGlobal;
+    
+    const ok = await guardarConfigPeticion(payload);
     if (ok) {
       setIsPetModalOpen(false);
       cargarDatos();
@@ -76,12 +83,12 @@ export default function WFMConfigPage() {
   // Handlers Demandas
   const openNewDemModal = () => {
     setEditDemId(null);
-    setDemFormData({ nombre: '', estado_disparador: 'ASESORANDO' });
+    setDemFormData({ nombre: '', estado_disparador: 'ASESORANDO', isGlobal: true });
     setIsDemModalOpen(true);
   };
   const openEditDemModal = (conf: ConfigDemanda) => {
     setEditDemId(conf.id);
-    setDemFormData(conf);
+    setDemFormData({ ...conf, isGlobal: !conf.sede_id });
     setIsDemModalOpen(true);
   };
   const handleDeleteDem = async (conf: ConfigDemanda) => {
@@ -93,7 +100,11 @@ export default function WFMConfigPage() {
   const handleSubmitDem = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    const ok = await guardarConfigDemanda({ ...demFormData, id: editDemId || undefined });
+    
+    const payload = { ...demFormData, id: editDemId || undefined, sede_id: demFormData.isGlobal ? null : sedeActiva?.id };
+    delete payload.isGlobal;
+    
+    const ok = await guardarConfigDemanda(payload);
     if (ok) {
       setIsDemModalOpen(false);
       cargarDatos();
@@ -154,6 +165,7 @@ export default function WFMConfigPage() {
               <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
                 <tr>
                   <th className="px-6 py-4">Petición</th>
+                  <th className="px-6 py-4">Alcance</th>
                   <th className="px-6 py-4">Badge</th>
                   <th className="px-6 py-4">Estado Destino</th>
                   <th className="px-6 py-4">Reinicio Turno</th>
@@ -164,6 +176,13 @@ export default function WFMConfigPage() {
                 {peticiones.map(conf => (
                   <tr key={conf.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-900">{conf.nombre}</td>
+                    <td className="px-6 py-4">
+                      {conf.sede_id ? (
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Local</span>
+                      ) : (
+                        <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-bold">Global</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${conf.color}`}>{conf.nombre}</span>
                     </td>
@@ -184,6 +203,7 @@ export default function WFMConfigPage() {
               <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
                 <tr>
                   <th className="px-6 py-4">Tipo de Demanda (OATC)</th>
+                  <th className="px-6 py-4">Alcance</th>
                   <th className="px-6 py-4">Estado Operativo (Disparador)</th>
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
@@ -192,6 +212,13 @@ export default function WFMConfigPage() {
                 {demandas.map(conf => (
                   <tr key={conf.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-900">{conf.nombre}</td>
+                    <td className="px-6 py-4">
+                      {conf.sede_id ? (
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Local</span>
+                      ) : (
+                        <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-bold">Global</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4">
                       <span className="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold text-xs rounded-full">{conf.estado_disparador}</span>
                     </td>
@@ -203,7 +230,7 @@ export default function WFMConfigPage() {
                 ))}
                 {demandas.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-6 py-10 text-center text-slate-500">No hay demandas configuradas.</td>
+                    <td colSpan={4} className="px-6 py-10 text-center text-slate-500">No hay demandas configuradas.</td>
                   </tr>
                 )}
               </tbody>
@@ -216,6 +243,15 @@ export default function WFMConfigPage() {
       <Modal isOpen={isPetModalOpen} onClose={() => setIsPetModalOpen(false)} title={editPetId ? "Editar Petición WFM" : "Nueva Petición WFM"}>
         <form onSubmit={handleSubmitPet} className="space-y-4">
           <div><label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label><input required type="text" className="w-full px-4 py-2 border rounded-xl" value={petFormData.nombre} onChange={e => setPetFormData({...petFormData, nombre: e.target.value})} /></div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Alcance de la Configuración</label>
+            <select className="w-full px-4 py-2 border rounded-xl" value={petFormData.isGlobal ? 'global' : 'local'} onChange={e => setPetFormData({...petFormData, isGlobal: e.target.value === 'global'})}>
+              <option value="global">Global (Todas las Sedes)</option>
+              <option value="local">Local (Solo esta Sede)</option>
+            </select>
+          </div>
+
           <div><label className="block text-sm font-medium text-slate-700 mb-1">Color del Badge</label><select className="w-full px-4 py-2 border rounded-xl" value={petFormData.color} onChange={e => setPetFormData({...petFormData, color: e.target.value})}>{colorOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
           <div><label className="block text-sm font-medium text-slate-700 mb-1">Estado de Sistema (Destino)</label><select className="w-full px-4 py-2 border rounded-xl" value={petFormData.estado_destino} onChange={e => setPetFormData({...petFormData, estado_destino: e.target.value})}><option value="DISPONIBLE">DISPONIBLE</option><option value="OCUPADO">OCUPADO</option><option value="INACTIVO">INACTIVO</option></select></div>
           <div className="pt-2"><label className="flex items-center gap-3 cursor-pointer p-4 border rounded-xl hover:bg-slate-50"><input type="checkbox" className="w-5 h-5 text-indigo-600" checked={petFormData.actualiza_timestamp} onChange={e => setPetFormData({...petFormData, actualiza_timestamp: e.target.checked})} /><div><div className="font-bold text-slate-800 text-sm">Actualiza Timestamp</div><div className="text-xs text-slate-500">Reinicia antigüedad al regresar a disponible.</div></div></label></div>
@@ -227,6 +263,15 @@ export default function WFMConfigPage() {
       <Modal isOpen={isDemModalOpen} onClose={() => setIsDemModalOpen(false)} title={editDemId ? "Editar Tipo Demanda" : "Nuevo Tipo Demanda"}>
         <form onSubmit={handleSubmitDem} className="space-y-4">
           <div><label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Demanda (Ej. Apoyo Interno)</label><input required type="text" className="w-full px-4 py-2 border rounded-xl" value={demFormData.nombre} onChange={e => setDemFormData({...demFormData, nombre: e.target.value})} /></div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Alcance de la Configuración</label>
+            <select className="w-full px-4 py-2 border rounded-xl" value={demFormData.isGlobal ? 'global' : 'local'} onChange={e => setDemFormData({...demFormData, isGlobal: e.target.value === 'global'})}>
+              <option value="global">Global (Todas las Sedes)</option>
+              <option value="local">Local (Solo esta Sede)</option>
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Estado Operativo (Disparador)</label>
             <p className="text-xs text-slate-500 mb-2">Estado que tomará la OATC y el agente al iniciar esta demanda.</p>

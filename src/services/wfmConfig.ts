@@ -8,9 +8,14 @@ export interface ConfigPeticion {
   actualiza_timestamp: boolean;
   penaliza_cola: boolean;
   color: string;
+  sede_id?: string | null;
 }
 
+import { useAppStore } from '@/store/useAppStore';
+
 export async function obtenerConfigPeticiones(): Promise<ConfigPeticion[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  
   const { data, error } = await supabase
     .from('config_peticiones')
     .select('*')
@@ -20,19 +25,27 @@ export async function obtenerConfigPeticiones(): Promise<ConfigPeticion[]> {
     console.error("Error obteniendo configuraciones WFM:", error);
     return [];
   }
-  return data as ConfigPeticion[];
+  
+  // RLS might return for multiple sedes if user has multiple sedes, 
+  // so we filter by current sede (or global)
+  const filtered = data.filter(d => !d.sede_id || d.sede_id === sedeId);
+  return filtered as ConfigPeticion[];
 }
 
 export async function guardarConfigPeticion(config: Partial<ConfigPeticion>): Promise<boolean> {
   const isNew = !config.id;
   
-  const payload = {
+  const payload: any = {
     nombre: config.nombre,
     estado_destino: config.estado_destino || 'DISPONIBLE',
     actualiza_timestamp: config.actualiza_timestamp || false,
     penaliza_cola: config.penaliza_cola || false,
     color: config.color || 'bg-slate-100 text-slate-700'
   };
+  
+  if (config.sede_id !== undefined) {
+    payload.sede_id = config.sede_id;
+  }
 
   let errorResult = null;
 
@@ -72,9 +85,12 @@ export interface ConfigDemanda {
   id: string;
   nombre: string;
   estado_disparador: string;
+  sede_id?: string | null;
 }
 
 export async function obtenerConfigDemandas(): Promise<ConfigDemanda[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  
   const { data, error } = await supabase
     .from('config_demandas')
     .select('*')
@@ -84,16 +100,22 @@ export async function obtenerConfigDemandas(): Promise<ConfigDemanda[]> {
     console.error("Error obteniendo tipos de demanda:", error);
     return [];
   }
-  return data as ConfigDemanda[];
+  
+  const filtered = data.filter(d => !d.sede_id || d.sede_id === sedeId);
+  return filtered as ConfigDemanda[];
 }
 
 export async function guardarConfigDemanda(config: Partial<ConfigDemanda>): Promise<boolean> {
   const isNew = !config.id;
   
-  const payload = {
+  const payload: any = {
     nombre: config.nombre,
     estado_disparador: config.estado_disparador || 'ASESORANDO'
   };
+  
+  if (config.sede_id !== undefined) {
+    payload.sede_id = config.sede_id;
+  }
 
   let errorResult = null;
 
