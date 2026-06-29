@@ -60,6 +60,26 @@ export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
   return true;
 }
 
+export async function solicitarAsistenciaKiosko(tipo_id: string, agente_id: string): Promise<boolean> {
+  const supabase = createClient();
+  const { sedeActiva } = useAppStore.getState();
+  
+  if (!sedeActiva) throw new Error("No hay una sede seleccionada en el Workspace");
+
+  const { error } = await supabase.from('cola_peticiones').insert([{
+    agente_id,
+    sede_id: sedeActiva.id,
+    tipo_id,
+    estado: 'PENDIENTE'
+  }]);
+
+  if (error) {
+    console.error("Error solicitando asistencia kiosko:", error);
+    throw new Error("Error de base de datos al solicitar asistencia: " + error.message);
+  }
+  return true;
+}
+
 export async function obtenerMiPeticionPendiente(): Promise<Peticion | null> {
   const supabase = createClient();
   const { sedeActiva } = useAppStore.getState();
@@ -80,6 +100,25 @@ export async function obtenerMiPeticionPendiente(): Promise<Peticion | null> {
     .from('cola_peticiones')
     .select('*, config_peticiones(*)')
     .eq('agente_id', agente.id)
+    .eq('estado', 'PENDIENTE')
+    .eq('sede_id', sedeActiva.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !data) return null;
+  return data as Peticion;
+}
+
+export async function obtenerPeticionPendientePorAgente(agente_id: string): Promise<Peticion | null> {
+  const supabase = createClient();
+  const { sedeActiva } = useAppStore.getState();
+  if (!sedeActiva || !agente_id) return null;
+
+  const { data, error } = await supabase
+    .from('cola_peticiones')
+    .select('*, config_peticiones(*)')
+    .eq('agente_id', agente_id)
     .eq('estado', 'PENDIENTE')
     .eq('sede_id', sedeActiva.id)
     .order('created_at', { ascending: false })

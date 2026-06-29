@@ -6,7 +6,7 @@ import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo, s
 import { OATC, Bien, obtenerCatalogo } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
-import BotonAsistencia from '@/components/wfm/BotonAsistencia';
+import PanelWFM from '@/components/wfm/PanelWFM';
 
 // Extendemos OATC localmente para la demo
 interface OATCExtended extends OATC {
@@ -162,7 +162,7 @@ export default function WorkspaceOperativoPage() {
         
         <div className="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto">
           <div className="w-full md:w-auto">
-            <BotonAsistencia />
+            <PanelWFM />
           </div>
           <button 
             onClick={() => requerirPinParaAccion('LAB_REQUEST')}
