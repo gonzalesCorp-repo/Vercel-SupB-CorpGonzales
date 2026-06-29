@@ -72,10 +72,6 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
   };
 
   const handleGenerar = async () => {
-    if (!cliente) {
-      setMessage('Error: Debes seleccionar un cliente primero.');
-      return;
-    }
     if (puntoPartida.length === 0) {
       setMessage('Error: Debes agregar al menos un servicio o producto.');
       return;
@@ -91,7 +87,7 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
       
       await crearOatc(
         cliente?.id || null, 
-        cliente?.nombre || 'Público General', 
+        cliente?.nombre || 'POR ASIGNAR', 
         agenteId || null, 
         agenteNombre, 
         puntoPartida,
