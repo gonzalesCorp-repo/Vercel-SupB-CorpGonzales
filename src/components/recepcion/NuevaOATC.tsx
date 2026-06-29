@@ -6,6 +6,7 @@ import ClientSearch from './ClientSearch';
 import CatalogModal from './CatalogModal';
 import AgentSearch from './AgentSearch';
 import { Cliente, Bien, Agente, obtenerAgentesDisponibles, crearOatc } from '@/services/recepcion';
+import { obtenerConfigDemandas, ConfigDemanda } from '@/services/wfmConfig';
 import { useAppStore } from '@/store/useAppStore';
 
 export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
@@ -15,7 +16,8 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
   const [agentes, setAgentes] = useState<Agente[]>([]);
   const [agenteId, setAgenteId] = useState<string>('');
   
-  const [tipoDemanda, setTipoDemanda] = useState<string>('cliente');
+  const [demandas, setDemandas] = useState<ConfigDemanda[]>([]);
+  const [tipoDemandaId, setTipoDemandaId] = useState<string>('');
   
   const [modalTipo, setModalTipo] = useState<'servicio' | 'producto' | null>(null);
   
@@ -26,7 +28,7 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
 
   useEffect(() => {
     if (sedeActiva) {
-      cargarAgentes();
+      cargarDatosIniciales();
     }
   }, [sedeActiva]);
   
@@ -35,11 +37,14 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
     setAgenteId('');
   }, [sedeActiva?.id]);
 
-  const cargarAgentes = async () => {
+  const cargarDatosIniciales = async () => {
     try {
-      const data = await obtenerAgentesDisponibles();
+      const [dataAgentes, dataDemandas] = await Promise.all([
+        obtenerAgentesDisponibles(),
+        obtenerConfigDemandas()
+      ]);
       
-      const operativosActivos = data.filter(a => a.rol === 'STAFF' && a.estado !== 'INACTIVO');
+      const operativosActivos = dataAgentes.filter(a => a.rol === 'STAFF' && a.estado !== 'INACTIVO');
       const ordenados = operativosActivos.sort((a, b) => {
         const timeA = new Date((a as any).ultimo_cambio_estado || a.created_at).getTime();
         const timeB = new Date((b as any).ultimo_cambio_estado || b.created_at).getTime();
@@ -47,8 +52,12 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
       });
       
       setAgentes(ordenados);
+      setDemandas(dataDemandas);
+      if (dataDemandas.length > 0) {
+        setTipoDemandaId(dataDemandas[0].id);
+      }
     } catch (error) {
-      console.error("Error al cargar agentes en NuevaOATC:", error);
+      console.error("Error al cargar datos en NuevaOATC:", error);
     }
   };
 
@@ -71,6 +80,7 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
     try {
       const agenteSeleccionado = agentes.find(a => a.id === agenteId);
       const agenteNombre = agenteSeleccionado ? agenteSeleccionado.nombre : 'POR ASIGNAR';
+      const demanda = demandas.find(d => d.id === tipoDemandaId);
       
       await crearOatc(
         cliente?.id || null, 
@@ -78,7 +88,8 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
         agenteId || null, 
         agenteNombre, 
         puntoPartida,
-        tipoDemanda
+        demanda ? demanda.nombre : 'Cliente',
+        demanda ? demanda.estado_disparador : 'ASESORIA'
       );
       
       setMessage('¡Atención generada exitosamente!');
@@ -169,14 +180,14 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
         <div className="mb-4">
           <label className="block text-xs font-semibold text-gray-700 mb-1">Tipo de Demanda</label>
           <select 
-            value={tipoDemanda}
-            onChange={(e) => setTipoDemanda(e.target.value)}
+            value={tipoDemandaId}
+            onChange={(e) => setTipoDemandaId(e.target.value)}
             className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500 transition-colors"
           >
-            <option value="cliente">Atención a Cliente</option>
-            <option value="turno">Turno</option>
-            <option value="apoyo">Apoyo Interno</option>
-            <option value="garantia">Garantía / Corrección</option>
+            {demandas.map(d => (
+              <option key={d.id} value={d.id}>{d.nombre}</option>
+            ))}
+            {demandas.length === 0 && <option value="">Sin Configurar</option>}
           </select>
         </div>
 
