@@ -72,7 +72,14 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
   };
 
   const handleGenerar = async () => {
-    if (puntoPartida.length === 0) return;
+    if (!cliente) {
+      setMessage('Error: Debes seleccionar un cliente primero.');
+      return;
+    }
+    if (puntoPartida.length === 0) {
+      setMessage('Error: Debes agregar al menos un servicio o producto.');
+      return;
+    }
     
     setIsSubmitting(true);
     setMessage('');
@@ -101,7 +108,6 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
         setAgenteId('');
         setMessage('');
         if (onClose) onClose();
-        // Here we could trigger a refresh of the queue list (to be implemented later)
       }, 1500);
       
     } catch (err) {
@@ -206,12 +212,12 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
         {/* Botón Generar */}
         <button 
           onClick={handleGenerar} 
-          disabled={!cliente || puntoPartida.length === 0 || isSubmitting}
+          disabled={isSubmitting}
           className={`w-full text-white font-bold rounded-lg text-sm px-4 py-3 shadow-md transition-all ${
-            (!cliente || puntoPartida.length === 0 || isSubmitting) ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'
+            isSubmitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'
           }`}
         >
-          {isSubmitting ? 'Procesando...' : 'Generar OATC'}
+          {isSubmitting ? 'Procesando...' : 'Generar Orden de Atención'}
         </button>
         {message && (
           <p className={`mt-2 text-xs text-center font-medium ${message.includes('Error') ? 'text-red-600' : 'text-green-600'}`}>

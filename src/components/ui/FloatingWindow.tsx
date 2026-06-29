@@ -63,8 +63,8 @@ export function FloatingWindow({ isOpen, onClose, title, children }: FloatingWin
 
   return (
     <div 
-      style={{ left: position.x, top: position.y }}
-      className={`fixed z-50 bg-white rounded-xl shadow-2xl shadow-indigo-900/10 border border-slate-300 flex flex-col w-[90vw] max-w-[500px] transition-shadow ${isDragging ? 'shadow-3xl opacity-95' : ''}`}
+      style={{ left: position.x, top: position.y, minWidth: '320px', minHeight: '400px' }}
+      className={`fixed z-50 bg-white rounded-xl shadow-2xl shadow-indigo-900/10 border border-slate-300 flex flex-col w-[90vw] max-w-[500px] transition-shadow ${isDragging ? 'shadow-3xl opacity-95' : ''} resize overflow-hidden`}
     >
       <div 
         className="px-4 py-3 border-b border-slate-200 flex items-center justify-between cursor-move bg-slate-100 rounded-t-xl select-none group"
@@ -82,7 +82,7 @@ export function FloatingWindow({ isOpen, onClose, title, children }: FloatingWin
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className="p-1 max-h-[80vh] overflow-y-auto bg-slate-50 rounded-b-xl">
+      <div className="p-1 flex-1 min-h-0 overflow-y-auto bg-slate-50 rounded-b-xl">
         {children}
       </div>
     </div>
