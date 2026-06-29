@@ -1,220 +1,212 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Briefcase, FileText, CheckCircle2, DollarSign, CreditCard, Wallet, Search, ArrowRight } from 'lucide-react';
-import { obtenerTicketsAbiertos, procesarPago, Factura } from '@/services/caja';
+import { CreditCard, DollarSign, Search, CheckCircle, Clock } from 'lucide-react';
 import { OATC } from '@/services/recepcion';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { createClient } from '@/lib/supabase/client';
+import { useAppStore } from '@/store/useAppStore';
 import { Modal } from '@/components/ui/Modal';
-import BotonAsistencia from '@/components/wfm/BotonAsistencia';
 
-export default function CajaPage() {
-  const [tickets, setTickets] = useState<OATC[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<OATC | null>(null);
+const supabase = createClient();
+
+interface OatcCaja extends OATC {
+  total_calculado?: number;
+}
+
+export default function WorkspaceCajaPage() {
+  const [tickets, setTickets] = useState<OatcCaja[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [metodoPago, setMetodoPago] = useState('Efectivo');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [pagoExitoso, setPagoExitoso] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<OatcCaja | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  const supabase = createClient();
-  
-  const cargarTickets = async () => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { sedeActiva } = useAppStore();
+
+  const cargarTicketsCaja = async () => {
+    if (!sedeActiva) return;
     setIsLoading(true);
-    const data = await obtenerTicketsAbiertos();
-    setTickets(data);
+    
+    // Traemos las OATC finalizadas que están listas para cobro
+    const { data, error } = await supabase
+      .from('oatc')
+      .select('*')
+      .eq('sede_id', sedeActiva.id)
+      .eq('estado_proceso', 'FINALIZADO')
+      .neq('estado_pago', 'Pagado');
+      
+    if (error) {
+      console.error('Error cargando caja:', error);
+    } else {
+      // Calcular totales
+      const mapped = (data as OATC[]).map(t => {
+        const total = (t.punto_partida || []).reduce((acc: number, item: any) => {
+          return acc + ((item.precio || 0) * (item.cantidad || 1));
+        }, 0);
+        return { ...t, total_calculado: total };
+      });
+      setTickets(mapped);
+    }
     setIsLoading(false);
   };
 
   useEffect(() => {
-    cargarTickets();
+    cargarTicketsCaja();
     
-    // Realtime Suscripción
+    // Realtime Suscripción para Caja
     const channel = supabase.channel('realtime-caja')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarTickets())
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'oatc', filter: `estado_proceso=eq.FINALIZADO` }, () => cargarTicketsCaja())
       .subscribe();
       
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [sedeActiva]);
 
-  // Calcular total de los bienes (punto de partida)
-  const calcularTotal = (puntoPartida: any[]): number => {
-    if (!puntoPartida) return 0;
-    return puntoPartida.reduce((sum, item) => sum + (Number(item.precio_venta) || 0), 0);
-  };
-
-  const handlePagar = async () => {
-    if (!selectedTicket) return;
-    setIsProcessing(true);
-    
-    const total = calcularTotal(selectedTicket.punto_partida);
-    
-    const factura: Factura = {
-      oatc_id: selectedTicket.id!,
-      cliente_nombre: selectedTicket.cliente_nombre,
-      total: total,
-      metodo_pago: metodoPago,
-      detalles: selectedTicket.punto_partida
-    };
-
-    const exito = await procesarPago(factura);
-    
-    if (exito) {
-      setPagoExitoso(true);
-      setTimeout(() => {
-        setPagoExitoso(false);
-        setIsModalOpen(false);
-        setSelectedTicket(null);
-        cargarTickets();
-      }, 3000);
-    }
-    
-    setIsProcessing(false);
-  };
-
-  const openPaymentModal = (ticket: OATC) => {
+  const openCobroModal = (ticket: OatcCaja) => {
     setSelectedTicket(ticket);
     setIsModalOpen(true);
   };
 
+  const handleProcesarPago = async () => {
+    if (!selectedTicket) return;
+    setIsProcessing(true);
+    
+    // 1. Marcar OATC como Pagada
+    const { error } = await supabase
+      .from('oatc')
+      .update({ estado_pago: 'Pagado' })
+      .eq('id', selectedTicket.id);
+
+    // 2. Liberar al Agente (Fast-pass directo a DISPONIBLE)
+    if (!error && selectedTicket.agente_id) {
+      await supabase
+        .from('agentes')
+        .update({ estado: 'DISPONIBLE' })
+        .eq('id', selectedTicket.agente_id);
+    }
+    
+    setIsProcessing(false);
+    setIsModalOpen(false);
+    setSelectedTicket(null);
+    cargarTicketsCaja();
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6 p-6 min-h-[calc(100vh-4rem)] bg-slate-50">
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className="p-4 md:p-8 h-full bg-slate-50/50 min-h-[calc(100vh-4rem)]">
+      
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Punto de Venta (Caja)</h1>
-          <p className="text-sm text-slate-500 mt-1">Cobra los tickets OATC pendientes y genera la facturación.</p>
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+            <DollarSign className="w-8 h-8 text-emerald-600 bg-emerald-100 rounded-lg p-1" />
+            Workspace de Caja (POS)
+          </h1>
+          <p className="text-slate-500 mt-2">Liquidación y cobro de atenciones finalizadas.</p>
         </div>
-        <div className="flex gap-3 flex-wrap sm:flex-nowrap">
-          <BotonAsistencia />
-          <div className="bg-orange-50 text-orange-700 px-4 py-2 rounded-xl border border-orange-200 font-semibold shadow-sm whitespace-nowrap">
-            {tickets.length} Pendientes
-          </div>
+        
+        <div className="relative w-full sm:w-auto">
+          <input 
+            type="text" 
+            placeholder="Buscar por cliente o ticket..." 
+            className="w-full sm:w-64 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white shadow-sm"
+          />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-40">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-          </div>
-        ) : tickets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center text-slate-500">
-            <CheckCircle2 className="w-16 h-16 text-slate-300 mb-3" />
-            <p className="font-bold text-xl text-slate-700">Todo limpio</p>
-            <p className="text-sm mt-1">No hay tickets OATC pendientes de pago en este momento.</p>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {tickets.map(ticket => (
-              <div 
-                key={ticket.id} 
-                onClick={() => openPaymentModal(ticket)}
-                className="cursor-pointer bg-white p-5 rounded-2xl border border-slate-200 hover:border-orange-400 hover:shadow-lg transition-all group"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-xs font-bold text-slate-400">#{ticket.id?.split('-')[0]}</span>
-                  <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full uppercase border border-slate-200">
-                    {ticket.estado_proceso}
-                  </span>
-                </div>
-                <h4 className="font-bold text-slate-900 truncate mb-1 text-lg group-hover:text-orange-600 transition-colors">{ticket.cliente_nombre}</h4>
-                <p className="text-xs text-slate-500 mb-4 flex items-center gap-1.5 font-medium">
-                  <Briefcase className="w-3.5 h-3.5"/> {ticket.agente_nombre || 'Sin Agente Asignado'}
-                </p>
-                
-                <div className="pt-4 border-t border-slate-100 flex justify-between items-end">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total a cobrar</span>
-                    <span className="font-bold text-xl text-slate-800">
-                      S/ {calcularTotal(ticket.punto_partida).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="bg-orange-50 text-orange-600 p-2 rounded-lg group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        title="Procesar Pago"
-        maxWidth="max-w-lg"
-      >
-        {selectedTicket && (
-          <div className="space-y-6">
-            <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex justify-between items-center">
-              <div>
-                <p className="text-xs font-bold text-blue-600 uppercase mb-1 tracking-wider">Cliente a Cobrar</p>
-                <p className="font-bold text-slate-900 text-xl">{selectedTicket.cliente_nombre}</p>
-                <p className="text-sm text-slate-600 mt-0.5 font-medium">Ticket: #{selectedTicket.id?.split('-')[0]}</p>
-              </div>
-              <DollarSign className="w-8 h-8 text-blue-300 opacity-50" />
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          {isLoading ? (
+            <div className="p-12 text-center text-slate-500 flex flex-col items-center gap-3">
+               <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+               <p className="font-medium text-slate-600">Buscando atenciones pendientes de cobro...</p>
             </div>
+          ) : tickets.length === 0 ? (
+            <div className="p-16 text-center">
+              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                <CheckCircle className="w-8 h-8 text-slate-300" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800">Caja al día</h3>
+              <p className="text-slate-500 mt-1 max-w-sm mx-auto text-sm">No hay clientes esperando para pagar. Todas las atenciones finalizadas han sido procesadas.</p>
+            </div>
+          ) : (
+            <table className="w-full text-sm text-left text-slate-600">
+              <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="px-6 py-4">Cliente / Ticket</th>
+                  <th className="px-6 py-4">Agente Responsable</th>
+                  <th className="px-6 py-4">Servicios (Incl. Upsell)</th>
+                  <th className="px-6 py-4 text-right">Total a Cobrar</th>
+                  <th className="px-6 py-4 text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {tickets.map(ticket => (
+                  <tr key={ticket.id} className="hover:bg-emerald-50/30 transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-slate-900">{ticket.cliente_nombre}</div>
+                      <div className="text-xs text-slate-400 font-mono mt-1">
+                        <Clock className="w-3 h-3 inline-block mr-1" />
+                        {new Date(ticket.created_at || '').toLocaleTimeString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">{ticket.agente_nombre}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {(ticket.punto_partida || []).map((item: any, i: number) => (
+                          <span key={i} className="text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-1 rounded-md">
+                            {item.servicio} (x{item.cantidad || 1})
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right font-black text-emerald-600 text-lg">
+                      ${ticket.total_calculado?.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button 
+                        onClick={() => openCobroModal(ticket)}
+                        className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm text-xs uppercase tracking-wider"
+                      >
+                        Cobrar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
 
-            <div>
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 border-b border-slate-100 pb-2">Servicios y Productos</h4>
-              <ul className="space-y-3">
-                {selectedTicket.punto_partida?.map((item: any, i: number) => (
-                  <li key={i} className="flex justify-between items-start bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <div>
-                      <p className="text-sm font-bold text-slate-800">{item.nombre}</p>
-                      <p className="text-xs text-slate-500 font-medium uppercase mt-0.5">{item.tipo_bien}</p>
-                    </div>
-                    <span className="text-sm font-bold text-slate-900 shrink-0 mt-0.5">S/ {Number(item.precio_venta).toFixed(2)}</span>
+      {/* Modal de Cobro */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Liquidación de Orden`} maxWidth="max-w-md">
+        {selectedTicket && (
+          <div className="mt-4">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Detalle de Consumo</h4>
+              <ul className="space-y-2 mb-4">
+                {(selectedTicket.punto_partida || []).map((item: any, i: number) => (
+                  <li key={i} className="flex justify-between text-sm text-slate-700 font-medium">
+                    <span>{item.cantidad || 1}x {item.servicio}</span>
+                    <span>${((item.precio || 0) * (item.cantidad || 1)).toFixed(2)}</span>
                   </li>
                 ))}
-                {(!selectedTicket.punto_partida || selectedTicket.punto_partida.length === 0) && (
-                  <li className="text-sm text-slate-500 italic p-3 text-center">No hay ítems registrados.</li>
-                )}
               </ul>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 border-b border-slate-100 pb-2">Método de Pago</h4>
-              <div className="grid grid-cols-2 gap-3">
-                {['Efectivo', 'Tarjeta', 'Yape', 'Plin'].map(m => (
-                  <button
-                    key={m}
-                    onClick={() => setMetodoPago(m)}
-                    className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-sm font-bold transition-all border-2 ${metodoPago === m ? 'bg-green-50 border-green-500 text-green-700 shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}
-                  >
-                    {m === 'Tarjeta' ? <CreditCard className="w-4 h-4" /> : <Wallet className="w-4 h-4" />}
-                    {m}
-                  </button>
-                ))}
+              <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
+                <span className="font-bold text-slate-800">TOTAL</span>
+                <span className="text-3xl font-black text-emerald-600">${selectedTicket.total_calculado?.toFixed(2)}</span>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100">
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-slate-500 font-bold uppercase tracking-wider">Total a Pagar</span>
-                <span className="text-3xl font-black text-green-600 tracking-tight">S/ {calcularTotal(selectedTicket.punto_partida).toFixed(2)}</span>
-              </div>
-              
-              {pagoExitoso ? (
-                <div className="bg-green-100 text-green-800 p-4 rounded-xl flex items-center justify-center gap-2 font-bold shadow-inner">
-                  <CheckCircle2 className="w-5 h-5" />
-                  ¡Pago procesado exitosamente!
-                </div>
-              ) : (
-                <button
-                  onClick={handlePagar}
-                  disabled={isProcessing}
-                  className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-700 disabled:opacity-50 transition-colors shadow-lg shadow-green-600/20 flex items-center justify-center gap-2"
-                >
-                  {isProcessing ? 'Procesando...' : `Cobrar S/ ${calcularTotal(selectedTicket.punto_partida).toFixed(2)}`}
-                </button>
-              )}
-            </div>
+            <button 
+              onClick={handleProcesarPago}
+              disabled={isProcessing}
+              className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white font-bold py-4 rounded-xl hover:bg-emerald-700 transition-colors shadow-md disabled:opacity-50 text-lg"
+            >
+              <CreditCard className="w-6 h-6" />
+              {isProcessing ? 'Procesando pago...' : 'Confirmar Pago Recibido'}
+            </button>
           </div>
         )}
       </Modal>
