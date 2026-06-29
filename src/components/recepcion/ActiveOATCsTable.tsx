@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle2, UserCircle2, ArrowRight, Edit2, XCircle, CheckSquare, ShieldAlert } from 'lucide-react';
-import { obtenerOatcsActivosDelDia, OATC, MotivoCancelacion, obtenerMotivosCancelacion } from '@/services/recepcion';
+import { obtenerOatcsActivosDelDia, OATC, MotivoCancelacion, obtenerMotivosCancelacion, agregarMotivoCancelacion } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -18,6 +18,9 @@ export default function ActiveOATCsTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [motivos, setMotivos] = useState<MotivoCancelacion[]>([]);
   const [selectedMotivoId, setSelectedMotivoId] = useState<string>('');
+  const [isAddingMotivo, setIsAddingMotivo] = useState(false);
+  const [nuevoMotivoText, setNuevoMotivoText] = useState('');
+  const [isCanceling, setIsCanceling] = useState(false);
   
   const supabase = createClient();
 
@@ -45,13 +48,28 @@ export default function ActiveOATCsTable() {
   };
   
   const handleCancelar = async (oatcId: string) => {
-    if (!selectedMotivoId) {
+    if (isAddingMotivo && !nuevoMotivoText.trim()) {
+      alert('Por favor, escribe un motivo de cancelación.');
+      return;
+    }
+    if (!isAddingMotivo && !selectedMotivoId) {
       alert('Por favor, selecciona un motivo de cancelación.');
       return;
     }
     
     if (!confirm('¿Estás seguro de que deseas cancelar esta atención?')) return;
     
+    setIsCanceling(true);
+
+    let motivoFinalId = selectedMotivoId;
+
+    if (isAddingMotivo && nuevoMotivoText.trim()) {
+      const nuevoMotivo = await agregarMotivoCancelacion(nuevoMotivoText.trim());
+      if (nuevoMotivo) {
+        motivoFinalId = nuevoMotivo.id;
+      }
+    }
+
     // Primero, liberar al agente si hay uno asignado
     const oatc = oatcs.find(o => o.id === oatcId);
     if (oatc?.agente_id) {
@@ -64,7 +82,7 @@ export default function ActiveOATCsTable() {
       .update({ 
         estado_proceso: 'CANCELADO', 
         hora_fin_atencion: new Date().toISOString(),
-        motivo_cancelacion_id: selectedMotivoId
+        motivo_cancelacion_id: motivoFinalId
       })
       .eq('id', oatcId);
       
@@ -72,7 +90,10 @@ export default function ActiveOATCsTable() {
       cargarDatos();
       setIsModalOpen(false);
       setSelectedMotivoId('');
+      setNuevoMotivoText('');
+      setIsAddingMotivo(false);
     }
+    setIsCanceling(false);
   };
   
   const openDetails = (oatc: OATC) => {
@@ -267,25 +288,52 @@ export default function ActiveOATCsTable() {
 
             <div className="pt-4 border-t border-slate-100">
               <h4 className="text-sm text-slate-500 font-medium mb-2">Opciones de Cancelación</h4>
-              <select
-                value={selectedMotivoId}
-                onChange={(e) => setSelectedMotivoId(e.target.value)}
-                className="w-full text-sm rounded-lg border border-slate-300 p-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 mb-3"
-              >
-                <option value="">Selecciona un motivo...</option>
-                {motivos.map(m => (
-                  <option key={m.id} value={m.id}>{m.motivo}</option>
-                ))}
-              </select>
+              
+              {!isAddingMotivo ? (
+                <>
+                  <select
+                    value={selectedMotivoId}
+                    onChange={(e) => setSelectedMotivoId(e.target.value)}
+                    className="w-full text-sm rounded-lg border border-slate-300 p-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 mb-3"
+                  >
+                    <option value="">Selecciona un motivo...</option>
+                    {motivos.map(m => (
+                      <option key={m.id} value={m.id}>{m.motivo}</option>
+                    ))}
+                  </select>
+                  <button 
+                    onClick={() => setIsAddingMotivo(true)}
+                    className="text-xs text-indigo-600 font-medium hover:text-indigo-800"
+                  >
+                    + Escribir nuevo motivo
+                  </button>
+                </>
+              ) : (
+                <div className="space-y-2 mb-3">
+                  <input
+                    type="text"
+                    value={nuevoMotivoText}
+                    onChange={(e) => setNuevoMotivoText(e.target.value)}
+                    placeholder="Escribe el motivo aquí..."
+                    className="w-full text-sm rounded-lg border border-slate-300 p-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  />
+                  <button 
+                    onClick={() => setIsAddingMotivo(false)}
+                    className="text-xs text-slate-500 font-medium hover:text-slate-700"
+                  >
+                    Cancelar y volver a la lista
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3">
               <button 
                 onClick={() => handleCancelar(selectedOatc.id!)}
                 className="flex-1 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-medium rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!selectedMotivoId}
+                disabled={isCanceling || (!isAddingMotivo && !selectedMotivoId) || (isAddingMotivo && !nuevoMotivoText.trim())}
               >
-                <XCircle className="w-4 h-4" /> Cancelar Atención
+                {isCanceling ? 'Cancelando...' : <><XCircle className="w-4 h-4" /> Cancelar Atención</>}
               </button>
               
               {(selectedOatc.estado_proceso === 'ASESORANDO' || selectedOatc.estado_proceso === 'ASESORIA') && (

@@ -84,6 +84,20 @@ export async function obtenerMotivosCancelacion(): Promise<MotivoCancelacion[]> 
   return data || [];
 }
 
+export async function agregarMotivoCancelacion(motivo: string): Promise<MotivoCancelacion | null> {
+  const { data, error } = await supabase
+    .from('motivos_cancelacion')
+    .insert([{ motivo, activo: true }])
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error("Error agregando motivo de cancelación:", error);
+    return null;
+  }
+  return data;
+}
+
 export async function obtenerCatalogo(tipo: 'servicio' | 'producto'): Promise<Bien[]> {
   const { data, error } = await supabase
     .from('bienes')
