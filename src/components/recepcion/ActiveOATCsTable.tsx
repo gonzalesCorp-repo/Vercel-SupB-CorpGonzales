@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle2, UserCircle2, ArrowRight, Edit2, XCircle, CheckSquare, ShieldAlert } from 'lucide-react';
-import { obtenerOatcsActivosDelDia, OATC } from '@/services/recepcion';
+import { obtenerOatcsActivosDelDia, OATC, MotivoCancelacion, obtenerMotivosCancelacion } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -16,13 +16,19 @@ export default function ActiveOATCsTable() {
   // Modal states
   const [selectedOatc, setSelectedOatc] = useState<OATC | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [motivos, setMotivos] = useState<MotivoCancelacion[]>([]);
+  const [selectedMotivoId, setSelectedMotivoId] = useState<string>('');
   
   const supabase = createClient();
 
   const cargarDatos = async () => {
     setIsLoading(true);
-    const data = await obtenerOatcsActivosDelDia();
-    setOatcs(data);
+    const [dataOatcs, dataMotivos] = await Promise.all([
+      obtenerOatcsActivosDelDia(),
+      obtenerMotivosCancelacion()
+    ]);
+    setOatcs(dataOatcs);
+    setMotivos(dataMotivos);
     setIsLoading(false);
   };
 
@@ -39,6 +45,11 @@ export default function ActiveOATCsTable() {
   };
   
   const handleCancelar = async (oatcId: string) => {
+    if (!selectedMotivoId) {
+      alert('Por favor, selecciona un motivo de cancelación.');
+      return;
+    }
+    
     if (!confirm('¿Estás seguro de que deseas cancelar esta atención?')) return;
     
     // Primero, liberar al agente si hay uno asignado
@@ -50,12 +61,17 @@ export default function ActiveOATCsTable() {
     // Luego cancelar la OATC
     const { error } = await supabase
       .from('oatc')
-      .update({ estado_proceso: 'CANCELADO', hora_fin_atencion: new Date().toISOString() })
+      .update({ 
+        estado_proceso: 'CANCELADO', 
+        hora_fin_atencion: new Date().toISOString(),
+        motivo_cancelacion_id: selectedMotivoId
+      })
       .eq('id', oatcId);
       
     if (!error) {
       cargarDatos();
       setIsModalOpen(false);
+      setSelectedMotivoId('');
     }
   };
   
@@ -181,7 +197,7 @@ export default function ActiveOATCsTable() {
                           <ArrowRight className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => handleCancelar(oatc.id!)}
+                          onClick={() => openDetails(oatc)}
                           title="Cancelar" 
                           className="text-slate-400 hover:text-red-600 p-1.5 rounded-md hover:bg-red-50 transition-colors"
                         >
@@ -249,10 +265,25 @@ export default function ActiveOATCsTable() {
               </div>
             </div>
 
-            <div className="pt-4 flex gap-3">
+            <div className="pt-4 border-t border-slate-100">
+              <h4 className="text-sm text-slate-500 font-medium mb-2">Opciones de Cancelación</h4>
+              <select
+                value={selectedMotivoId}
+                onChange={(e) => setSelectedMotivoId(e.target.value)}
+                className="w-full text-sm rounded-lg border border-slate-300 p-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 mb-3"
+              >
+                <option value="">Selecciona un motivo...</option>
+                {motivos.map(m => (
+                  <option key={m.id} value={m.id}>{m.motivo}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-3">
               <button 
                 onClick={() => handleCancelar(selectedOatc.id!)}
-                className="flex-1 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-medium rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!selectedMotivoId}
               >
                 <XCircle className="w-4 h-4" /> Cancelar Atención
               </button>

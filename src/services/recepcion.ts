@@ -43,24 +43,45 @@ export interface OATC {
   estado_pago?: string;
   tipo_demanda?: string;
   cambios_pendientes?: any;
+  motivo_cancelacion_id?: string;
   created_at?: string;
+}
+
+export interface MotivoCancelacion {
+  id: string;
+  motivo: string;
+  activo: boolean;
 }
 
 export async function buscarCliente(query: string): Promise<Cliente[]> {
   if (query.length < 3) return [];
-  
+
   const { data, error } = await supabase
     .from('clientes')
     .select('id, nombre, dni, celular')
     .or(`nombre.ilike.%${query}%,dni.ilike.%${query}%,celular.ilike.%${query}%`)
     .limit(10);
-    
+
   if (error) {
     console.error("Error buscando cliente:", error);
     return [];
   }
   
-  return data as Cliente[];
+  return data || [];
+}
+
+export async function obtenerMotivosCancelacion(): Promise<MotivoCancelacion[]> {
+  const { data, error } = await supabase
+    .from('motivos_cancelacion')
+    .select('*')
+    .eq('activo', true)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error("Error obteniendo motivos de cancelación:", error);
+    return [];
+  }
+  return data || [];
 }
 
 export async function obtenerCatalogo(tipo: 'servicio' | 'producto'): Promise<Bien[]> {
