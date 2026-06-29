@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { obtenerConfigPeticiones, ConfigPeticion } from '@/services/wfmConfig';
 import { solicitarAsistencia, obtenerMiPeticionPendiente, Peticion } from '@/services/peticiones';
 import { createClient } from '@/lib/supabase/client';
+import { useUIStore } from '@/store/useUIStore';
 
 export default function BotonAsistencia() {
   const [configs, setConfigs] = useState<ConfigPeticion[]>([]);
@@ -51,14 +52,17 @@ export default function BotonAsistencia() {
     };
   }, []);
 
+  const { showAlert } = useUIStore();
+
   const handleSolicitar = async (tipo_id: string) => {
     setIsLoading(true);
     try {
       await solicitarAsistencia(tipo_id);
       setIsModalOpen(false);
       await cargarDatos();
+      showAlert("Asistencia solicitada", "success");
     } catch (err: any) {
-      alert(err.message);
+      showAlert(err.message, "error");
     } finally {
       setIsLoading(false);
     }

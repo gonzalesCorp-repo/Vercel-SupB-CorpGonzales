@@ -8,12 +8,14 @@ import {
 } from '@/services/wfmConfig';
 import { Modal } from '@/components/ui/Modal';
 import { useAppStore } from '@/store/useAppStore';
+import { useUIStore } from '@/store/useUIStore';
 
 export default function WFMConfigPage() {
   const [activeTab, setActiveTab] = useState<'PETICIONES' | 'DEMANDAS'>('PETICIONES');
   const [isLoading, setIsLoading] = useState(true);
   
   const { sedeActiva } = useAppStore();
+  const { showConfirm, showAlert } = useUIStore();
 
   // States for Peticiones
   const [peticiones, setPeticiones] = useState<ConfigPeticion[]>([]);
@@ -59,11 +61,20 @@ export default function WFMConfigPage() {
     setPetFormData({ ...conf, isGlobal: !conf.sede_id });
     setIsPetModalOpen(true);
   };
-  const handleDeletePet = async (conf: ConfigPeticion) => {
-    if (confirm(`¿Eliminar petición "${conf.nombre}"?`)) {
-      const ok = await eliminarConfigPeticion(conf.id, conf.nombre);
-      if (ok) cargarDatos();
-    }
+  const handleDeletePet = (conf: ConfigPeticion) => {
+    showConfirm(
+      'Eliminar Petición',
+      `¿Eliminar petición "${conf.nombre}"?`,
+      async () => {
+        const ok = await eliminarConfigPeticion(conf.id, conf.nombre);
+        if (ok) {
+          showAlert('Petición eliminada', 'success');
+          cargarDatos();
+        } else {
+          showAlert('Error al eliminar', 'error');
+        }
+      }
+    );
   };
   const handleSubmitPet = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,11 +102,20 @@ export default function WFMConfigPage() {
     setDemFormData({ ...conf, isGlobal: !conf.sede_id });
     setIsDemModalOpen(true);
   };
-  const handleDeleteDem = async (conf: ConfigDemanda) => {
-    if (confirm(`¿Eliminar demanda "${conf.nombre}"?`)) {
-      const ok = await eliminarConfigDemanda(conf.id, conf.nombre);
-      if (ok) cargarDatos();
-    }
+  const handleDeleteDem = (conf: ConfigDemanda) => {
+    showConfirm(
+      'Eliminar Demanda',
+      `¿Eliminar demanda "${conf.nombre}"?`,
+      async () => {
+        const ok = await eliminarConfigDemanda(conf.id, conf.nombre);
+        if (ok) {
+          showAlert('Demanda eliminada', 'success');
+          cargarDatos();
+        } else {
+          showAlert('Error al eliminar', 'error');
+        }
+      }
+    );
   };
   const handleSubmitDem = async (e: React.FormEvent) => {
     e.preventDefault();

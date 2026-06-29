@@ -7,6 +7,7 @@ import { OATC, Bien, obtenerCatalogo } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
 import PanelWFM from '@/components/wfm/PanelWFM';
+import { useUIStore } from '@/store/useUIStore';
 
 // Extendemos OATC localmente para la demo
 interface OATCExtended extends OATC {
@@ -23,6 +24,7 @@ export default function WorkspaceOperativoPage() {
   const [isPersonalMode, setIsPersonalMode] = useState(false);
   const [miAgenteId, setMiAgenteId] = useState('');
   const supabase = createClient();
+  const { showAlert, showConfirm } = useUIStore();
   
   // Modales
   const [showLabModal, setShowLabModal] = useState(false);
@@ -93,11 +95,15 @@ export default function WorkspaceOperativoPage() {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, estado_ui: 'En Curso' } : t));
   };
 
-  const handleEnviarCaja = async (id: string) => {
-    if (confirm("¿Enviar esta orden a Caja para finalizar la cobranza?")) {
-      setTickets(prev => prev.filter(t => t.id !== id));
-      // En producción: await terminarAtencion(id);
-    }
+  const handleEnviarCaja = (id: string) => {
+    showConfirm(
+      "Finalizar Orden",
+      "¿Enviar esta orden a Caja para finalizar la cobranza?",
+      () => {
+        setTickets(prev => prev.filter(t => t.id !== id));
+        // En producción: await terminarAtencion(id);
+      }
+    );
   };
 
   // --- Flujo Centralizado de PIN (Seguridad) ---
@@ -143,10 +149,10 @@ export default function WorkspaceOperativoPage() {
       if (ok) {
         setShowAddServiceModal(false);
         setSearchCat('');
-        alert("Solicitud enviada a Recepción para su autorización.");
+        showAlert("Solicitud enviada a Recepción para su autorización.", "success");
         cargarTickets(); // recargar para ver el cambio de estado
       } else {
-        alert("Error solicitando el servicio extra.");
+        showAlert("Error solicitando el servicio extra.", "error");
       }
     }
   };

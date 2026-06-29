@@ -9,6 +9,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { obtenerSedesUsuario, Sede } from '@/services/sedes';
 import { NotificationTicker } from './NotificationTicker';
 import { registrarLog } from '@/services/logger';
+import { GlobalUI } from '@/components/ui/GlobalUI';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -163,7 +164,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative min-h-screen bg-gray-50 dark:bg-slate-950">
-      
+      <GlobalUI />
       {/* Navbar Superior */}
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm dark:bg-slate-900 dark:border-slate-800">
         <div className="px-3 py-3 lg:px-5 lg:pl-3">

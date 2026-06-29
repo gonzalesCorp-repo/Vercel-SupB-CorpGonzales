@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { obtenerAutorizacionesPendientes, resolverAutorizacion, OATC } from '@/services/recepcion';
 import { ShieldAlert, Check, X, Bell } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useUIStore } from '@/store/useUIStore';
 
 export default function BuzonAutorizaciones() {
   const [pendientes, setPendientes] = useState<OATC[]>([]);
@@ -24,12 +25,24 @@ export default function BuzonAutorizaciones() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const handleResolver = async (id: string, aprobar: boolean) => {
-    if (confirm(`¿${aprobar ? 'Aprobar' : 'Rechazar'} la solicitud de adición de servicios?`)) {
-      setLoading(true);
-      await resolverAutorizacion(id, aprobar);
-      cargarPendientes();
-    }
+  const { showConfirm, showAlert } = useUIStore();
+
+  const handleResolver = (id: string, aprobar: boolean) => {
+    showConfirm(
+      aprobar ? 'Aprobar Solicitud' : 'Rechazar Solicitud',
+      `¿${aprobar ? 'Aprobar' : 'Rechazar'} la solicitud de adición de servicios?`,
+      async () => {
+        setLoading(true);
+        try {
+          await resolverAutorizacion(id, aprobar);
+          showAlert(aprobar ? 'Solicitud aprobada' : 'Solicitud rechazada', 'success');
+          cargarPendientes();
+        } catch (error: any) {
+          showAlert(error.message, 'error');
+          setLoading(false);
+        }
+      }
+    );
   };
 
   if (loading && pendientes.length === 0) return null;

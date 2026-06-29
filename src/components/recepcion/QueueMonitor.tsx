@@ -11,6 +11,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Modal } from '@/components/ui/Modal';
 import { OATC, obtenerOatcsActivosDelDia } from '@/services/recepcion';
+import { useUIStore } from '@/store/useUIStore';
 
 export default function QueueMonitor() {
   const [agentes, setAgentes] = useState<Agente[]>([]);
@@ -21,6 +22,7 @@ export default function QueueMonitor() {
   const [activeOATCs, setActiveOATCs] = useState<OATC[]>([]);
   
   const { sedeActiva } = useAppStore();
+  const { showAlert, showConfirm } = useUIStore();
   const supabase = createClient();
 
   const cargarDatos = async () => {
@@ -101,27 +103,31 @@ export default function QueueMonitor() {
     setShowAuditModal(true);
   };
 
-  const handleForzarCierre = async () => {
-    if (confirm('¿Forzar el cierre de esta sede? Esto vaciará la cola y cancelará atenciones colgadas solo para los operarios de esta sucursal.')) {
-      setIsRefreshing(true);
-      try {
-        const ids = agentes.map(a => a.id);
-        if (ids.length > 0) {
-          const { error } = await supabase
-            .from('agentes')
-            .update({ estado: 'INACTIVO', badge: null })
-            .in('id', ids)
-            .neq('estado', 'INACTIVO');
-            
-          if (error) throw error;
+  const handleForzarCierre = () => {
+    showConfirm(
+      '¿Forzar Cierre de Sede?',
+      'Esto vaciará la cola y cancelará atenciones colgadas solo para los operarios de esta sucursal.',
+      async () => {
+        setIsRefreshing(true);
+        try {
+          const ids = agentes.map(a => a.id);
+          if (ids.length > 0) {
+            const { error } = await supabase
+              .from('agentes')
+              .update({ estado: 'INACTIVO', badge: null })
+              .in('id', ids)
+              .neq('estado', 'INACTIVO');
+              
+            if (error) throw error;
+          }
+          setShowAuditModal(false);
+        } catch (error: any) {
+          showAlert('Error forzando cierre: ' + error.message, 'error');
+        } finally {
+          cargarDatos();
         }
-        setShowAuditModal(false);
-      } catch (error: any) {
-        alert('Error forzando cierre: ' + error.message);
-      } finally {
-        cargarDatos();
       }
-    }
+    );
   };
 
   const agentesEnCola = agentes

@@ -9,6 +9,7 @@ import { obtenerAgentesDisponibles, Agente } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useUIStore } from '@/store/useUIStore';
 
 export const CORE_WFM = {
   ASISTENCIA: '11111111-1111-1111-1111-111111111111',
@@ -43,6 +44,7 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
   const [isLoading, setIsLoading] = useState(false);
   const [isOtrasOpen, setIsOtrasOpen] = useState(false);
   const supabase = createClient();
+  const { showAlert } = useUIStore();
 
   useEffect(() => {
     cargarDatosGenerales();
@@ -138,10 +140,10 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
       setIsLoading(true);
       try {
         await solicitarAsistenciaKiosko(actionId, miAgenteId);
-        alert("Solicitud enviada a Recepción.");
+        showAlert("Solicitud enviada a Recepción.", "success");
         checkAgenteStatus(miAgenteId);
       } catch (err: any) {
-        alert(err.message);
+        showAlert(err.message, "error");
       } finally {
         setIsLoading(false);
       }
@@ -158,7 +160,7 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
   const confirmarAccion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedAgenteId) {
-      alert("Selecciona tu nombre");
+      showAlert("Selecciona tu nombre", "warning");
       return;
     }
     if (pin.length < 4 || pin === '0000') {
@@ -172,11 +174,11 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
         await solicitarAsistenciaKiosko(selectedAction, selectedAgenteId);
         setIsModalOpen(false);
         setIsOtrasOpen(false);
-        alert("Solicitud enviada a Recepción.");
+        showAlert("Solicitud enviada a Recepción.", "success");
         checkAgenteStatus(selectedAgenteId);
       }
     } catch (err: any) {
-      alert(err.message);
+      showAlert(err.message, "error");
     } finally {
       setIsLoading(false);
     }

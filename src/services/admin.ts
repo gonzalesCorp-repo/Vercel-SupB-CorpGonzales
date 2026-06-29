@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { Agente } from './recepcion';
 import { registrarLog } from './logger';
+import { useUIStore } from '@/store/useUIStore';
 
 const supabase = createClient();
 
@@ -98,7 +99,7 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
       const result = await response.json();
       if (!response.ok) {
         console.error("Error desde API:", result.error);
-        alert(`Error al actualizar usuario: ${result.error}`);
+        useUIStore.getState().showAlert(`Error al actualizar usuario: ${result.error}`, 'error');
         return false;
       }
     } catch (err) {
@@ -123,7 +124,7 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
       const result = await response.json();
       if (!response.ok) {
         console.error("Error desde API:", result.error);
-        alert(`Error al crear usuario: ${result.error}`);
+        useUIStore.getState().showAlert(`Error al crear usuario: ${result.error}`, 'error');
         return false;
       }
       agenteId = result.userId;
