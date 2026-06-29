@@ -236,10 +236,48 @@ export async function obtenerOatcsActivosDelDia(): Promise<OATC[]> {
     .eq('sede_id', sedeId)
     .gte('created_at', startOfDay.toISOString())
     .neq('estado_proceso', 'FINALIZADO')
+    .neq('estado_proceso', 'CANCELADO')
     .order('created_at', { ascending: false });
 
   if (error) {
     console.error("Error obteniendo OATCs del día:", error);
+    return [];
+  }
+  
+  return data as OATC[];
+}
+
+export async function obtenerHistorialOatcs(fechaInicio?: string, fechaFin?: string): Promise<OATC[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) return [];
+
+  let query = supabase
+    .from('oatc')
+    .select(`
+      *,
+      motivos_cancelacion (
+        motivo
+      )
+    `)
+    .eq('sede_id', sedeId)
+    .order('created_at', { ascending: false });
+
+  if (fechaInicio) {
+    query = query.gte('created_at', fechaInicio);
+  }
+  if (fechaFin) {
+    query = query.lte('created_at', fechaFin);
+  } else if (!fechaInicio) {
+    // Por defecto cargar solo las de hoy si no hay filtros
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    query = query.gte('created_at', startOfDay.toISOString());
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error obteniendo el historial de OATCs:", error);
     return [];
   }
 

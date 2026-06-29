@@ -29,27 +29,11 @@ export default function RecepcionPage() {
         
         {/* Columna Derecha (70%): Gestión de Atenciones */}
         <div className="w-full lg:w-[70%] flex flex-col gap-6">
-          {/* Header de Gestión y Botón Principal */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">Panel de Control de Sala</h2>
-              <p className="text-xs text-slate-500">Visualiza y coordina las atenciones en curso.</p>
-            </div>
-            
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-md shadow-blue-600/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-            >
-              <Plus className="w-5 h-5" />
-              Generar Orden de Atención
-            </button>
-          </div>
-
           {/* Buzón de Autorizaciones y Alertas */}
           <BuzonAutorizaciones />
 
           {/* Tabla de Atenciones */}
-          <ActiveOATCsTable />
+          <ActiveOATCsTable onGenerarOrden={() => setIsModalOpen(true)} />
         </div>
       </div>
 

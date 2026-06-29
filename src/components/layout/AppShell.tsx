@@ -251,6 +251,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     </Link>
                   </li>
                   <li>
+                    <Link href="/recepcion/historial" className={navItemClass('/recepcion/historial')}>
+                      <FileText className="w-5 h-5 mr-3" />
+                      Historial de OATC
+                    </Link>
+                  </li>
+                  <li>
                     <Link href="/recepcion/agenda" className={navItemClass('/recepcion/agenda')}>
                       <UserCircle className="w-5 h-5 mr-3" />
                       Agenda CRM

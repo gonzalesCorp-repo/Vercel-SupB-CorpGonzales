@@ -7,8 +7,13 @@ import { createClient } from '@/lib/supabase/client';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Modal } from '@/components/ui/Modal';
+import { Plus } from 'lucide-react';
 
-export default function ActiveOATCsTable() {
+interface ActiveOATCsTableProps {
+  onGenerarOrden?: () => void;
+}
+
+export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTableProps) {
   const [oatcs, setOatcs] = useState<OATC[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [now, setNow] = useState(new Date());
@@ -137,10 +142,22 @@ export default function ActiveOATCsTable() {
     <>
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="font-bold text-slate-800 text-lg">Atenciones Activas</h3>
-          <span className="bg-blue-50 text-blue-600 text-xs font-bold px-2.5 py-1 rounded-full">
-            {oatcs.length} en sala
-          </span>
+          <div className="flex items-center gap-3">
+            <h3 className="font-bold text-slate-800 text-lg">Atenciones Activas</h3>
+            <span className="bg-blue-50 text-blue-600 text-xs font-bold px-2.5 py-1 rounded-full">
+              {oatcs.length} en sala
+            </span>
+          </div>
+          {onGenerarOrden && (
+            <button 
+              onClick={onGenerarOrden}
+              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Generar Orden de Atención</span>
+              <span className="sm:hidden">Nueva</span>
+            </button>
+          )}
         </div>
         
         <div className="overflow-x-auto">
