@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus, Trash2, XCircle, CreditCard } from 'lucide-react';
+import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus, Trash2, XCircle, CreditCard, Clock, Calendar } from 'lucide-react';
 import { obtenerTicketsAsignados, pedirInsumo, PedidoInsumo, solicitarInicioAtencion, solicitarFinAtencion, actualizarServiciosOatc, validarPin, solicitarPreCobro } from '@/services/operaciones';
 import { OATC, Bien, obtenerCatalogo } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
@@ -48,6 +48,13 @@ export default function WorkspaceOperativoPage() {
   const [cabinaSolicitante, setCabinaSolicitante] = useState('');
   const [isEnviando, setIsEnviando] = useState(false);
   const [mensajeOk, setMensajeOk] = useState('');
+
+  // Estados para Historial
+  const [activeTab, setActiveTab] = useState<'piso' | 'historial'>('piso');
+  const [historialTickets, setHistorialTickets] = useState<any[]>([]);
+  const [fechaInicio, setFechaInicio] = useState(new Date().toISOString().split('T')[0]);
+  const [fechaFin, setFechaFin] = useState(new Date().toISOString().split('T')[0]);
+  const [isLoadingHistorial, setIsLoadingHistorial] = useState(false);
 
   const cargarTickets = async () => {
     setIsLoading(true);
@@ -97,6 +104,31 @@ export default function WorkspaceOperativoPage() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'historial' && miAgenteId) {
+      cargarHistorial();
+    }
+  }, [activeTab, fechaInicio, fechaFin, miAgenteId]);
+
+  const cargarHistorial = async () => {
+    if (!miAgenteId) return;
+    setIsLoadingHistorial(true);
+    
+    let query = supabase.from('oatc').select('*')
+      .eq('agente_id', miAgenteId)
+      .eq('estado_proceso', 'FINALIZADO')
+      .order('created_at', { ascending: false });
+
+    if (fechaInicio) query = query.gte('created_at', `${fechaInicio}T00:00:00.000Z`);
+    if (fechaFin) query = query.lte('created_at', `${fechaFin}T23:59:59.999Z`);
+
+    const { data, error } = await query;
+    if (!error && data) {
+      setHistorialTickets(data);
+    }
+    setIsLoadingHistorial(false);
+  };
 
   // --- Handlers de Acciones de Tarjeta ---
 
@@ -229,7 +261,7 @@ export default function WorkspaceOperativoPage() {
             <PanelWFM isPersonalMode={isPersonalMode} miAgenteId={miAgenteId} />
           </div>
           <button 
-            onClick={() => showAlert("Funcionalidad en desarrollo", "warning")}
+            onClick={() => setShowLabModal(true)}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-orange-100 hover:bg-orange-200 text-orange-700 px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
           >
             <Beaker className="w-5 h-5" />
@@ -241,11 +273,31 @@ export default function WorkspaceOperativoPage() {
         </div>
       </div>
 
-      {/* Grid de Atenciones Activas */}
-      <div className="space-y-4">
-        <h2 className="font-bold text-gray-800 text-lg flex items-center gap-2">
-          Atenciones en Piso
-        </h2>
+      {/* Tabs para modo personal */}
+      {isPersonalMode && (
+        <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mb-6">
+          <button
+            onClick={() => setActiveTab('piso')}
+            className={`flex-1 py-3 text-sm font-bold rounded-lg transition-colors ${activeTab === 'piso' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-gray-50'}`}
+          >
+            Atenciones en Piso
+          </button>
+          <button
+            onClick={() => setActiveTab('historial')}
+            className={`flex-1 py-3 text-sm font-bold rounded-lg transition-colors ${activeTab === 'historial' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-gray-50'}`}
+          >
+            Mi Historial
+          </button>
+        </div>
+      )}
+
+      {/* Contenido Atenciones en Piso */}
+      {activeTab === 'piso' && (
+        <>
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-xl font-bold text-gray-800">Atenciones en Piso</h2>
+            <div className="h-px bg-gray-200 flex-1"></div>
+          </div>
         
         {isLoading ? (
           <div className="text-center p-12 bg-white rounded-2xl border border-gray-200">Cargando...</div>
@@ -369,7 +421,82 @@ export default function WorkspaceOperativoPage() {
             })}
           </div>
         )}
-      </div>
+        </>
+      )}
+
+      {/* Contenido Historial */}
+      {activeTab === 'historial' && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row md:items-center gap-4 justify-between">
+            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-indigo-600" /> Historial de Atenciones
+            </h2>
+            <div className="flex gap-2 items-center">
+              <div className="flex items-center bg-white border border-gray-200 rounded-lg px-2 shadow-sm">
+                <Calendar className="w-4 h-4 text-gray-400" />
+                <input 
+                  type="date" 
+                  value={fechaInicio} 
+                  onChange={(e) => setFechaInicio(e.target.value)}
+                  className="px-2 py-1.5 text-sm outline-none border-none text-gray-600 font-medium"
+                />
+              </div>
+              <span className="text-gray-400 font-medium">-</span>
+              <div className="flex items-center bg-white border border-gray-200 rounded-lg px-2 shadow-sm">
+                <input 
+                  type="date" 
+                  value={fechaFin} 
+                  onChange={(e) => setFechaFin(e.target.value)}
+                  className="px-2 py-1.5 text-sm outline-none border-none text-gray-600 font-medium"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-4">
+            {isLoadingHistorial ? (
+              <div className="text-center p-8 text-gray-500 font-medium">Cargando historial...</div>
+            ) : historialTickets.length === 0 ? (
+              <div className="text-center p-8 text-gray-500 font-medium">
+                No hay atenciones finalizadas en este periodo.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 text-slate-500 border-b border-slate-200">
+                      <th className="font-bold py-3 px-4 rounded-tl-lg">Fecha</th>
+                      <th className="font-bold py-3 px-4">Cliente</th>
+                      <th className="font-bold py-3 px-4">Servicios</th>
+                      <th className="font-bold py-3 px-4 rounded-tr-lg">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historialTickets.map(ticket => (
+                      <tr key={ticket.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <td className="py-3 px-4 text-slate-600 whitespace-nowrap">
+                          {new Date(ticket.created_at).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}
+                        </td>
+                        <td className="py-3 px-4 font-bold text-slate-800">
+                          {ticket.cliente_nombre}
+                        </td>
+                        <td className="py-3 px-4 text-slate-600">
+                          {(ticket.punto_partida || []).map((s: any) => s.nombre).join(', ')}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-md">
+                            FINALIZADO
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* MODAL GLOBAL DE SEGURIDAD: Solicitar PIN */}
       <Modal isOpen={showPinModal} onClose={() => setShowPinModal(false)} title="Autorización Requerida" maxWidth="max-w-sm">

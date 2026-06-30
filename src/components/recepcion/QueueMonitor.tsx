@@ -21,6 +21,8 @@ export default function QueueMonitor() {
   const [showAllAgents, setShowAllAgents] = useState(false);
   const [activeOATCs, setActiveOATCs] = useState<OATC[]>([]);
   
+  const [tick, setTick] = useState(0);
+  
   const { sedeActiva } = useAppStore();
   const { showAlert, showConfirm } = useUIStore();
   const supabase = createClient();
@@ -44,6 +46,9 @@ export default function QueueMonitor() {
   useEffect(() => {
     cargarDatos();
     
+    // Intervalo para forzar re-renderizado cada minuto (para timestamps visuales)
+    const timer = setInterval(() => setTick(t => t + 1), 60000);
+    
     // Subscripciones (Idealmente filtradas por sedeId si la tabla lo soporta)
     const channelAgentes = supabase.channel('realtime-agentes-queue')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'agentes' }, () => cargarDatos())
@@ -54,6 +59,7 @@ export default function QueueMonitor() {
       .subscribe();
       
     return () => {
+      clearInterval(timer);
       supabase.removeChannel(channelAgentes);
       supabase.removeChannel(channelPeticiones);
     };

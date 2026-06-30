@@ -25,12 +25,12 @@ export default function WorkspaceCajaPage() {
     if (!sedeActiva) return;
     setIsLoading(true);
     
-    // Traemos las OATC finalizadas que están listas para cobro
+    // Traemos las OATC listas para cobro
     const { data, error } = await supabase
       .from('oatc')
       .select('*')
       .eq('sede_id', sedeActiva.id)
-      .eq('estado_proceso', 'FINALIZADO')
+      .in('estado_proceso', ['POR_COBRAR', 'PRE_COBRADO'])
       .neq('estado_pago', 'Pagado');
       
     if (error) {
@@ -53,7 +53,11 @@ export default function WorkspaceCajaPage() {
     
     // Realtime Suscripción para Caja
     const channel = supabase.channel('realtime-caja')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'oatc', filter: `estado_proceso=eq.FINALIZADO` }, () => cargarTicketsCaja())
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'oatc' }, (payload) => {
+        if (['POR_COBRAR', 'PRE_COBRADO'].includes(payload.new.estado_proceso)) {
+          cargarTicketsCaja();
+        }
+      })
       .subscribe();
       
     return () => {
