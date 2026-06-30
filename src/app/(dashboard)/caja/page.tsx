@@ -53,7 +53,7 @@ export default function WorkspaceCajaPage() {
     
     // Realtime Suscripción para Caja
     const channel = supabase.channel('realtime-caja')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'oatc' }, (payload) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'oatc' }, (payload: any) => {
         if (['POR_COBRAR', 'PRE_COBRADO'].includes(payload.new.estado_proceso)) {
           cargarTicketsCaja();
         }
