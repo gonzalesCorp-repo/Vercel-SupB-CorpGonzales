@@ -56,12 +56,16 @@ export async function terminarAtencion(oatcId: string): Promise<boolean> {
     .eq('nombre', oatc.agente_nombre)
     .single();
 
+  let nuevoEstadoOatc = 'FINALIZADO';
+
   if (agente) {
     if (oatc.estado_pago === 'Pagado') {
       // FAST-PASS: Si ya está pagado (Pre-cobro o cobrado), reingresa directo a DISPONIBLE
       await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', agente.id);
     } else {
       // No está pagado: Va al Inbox de Recepción
+      nuevoEstadoOatc = 'ASESORANDO'; // Esto alerta a recepción en la pizarra
+
       // Buscar o crear la configuración de "Retorno de Servicio"
       let { data: configRetorno } = await supabase
         .from('config_peticiones')
@@ -90,12 +94,12 @@ export async function terminarAtencion(oatcId: string): Promise<boolean> {
     }
   }
 
-  // 3. Finalizar OATC
+  // 3. Finalizar o Actualizar OATC
   const { error } = await supabase
     .from('oatc')
     .update({ 
-      estado_proceso: 'FINALIZADO',
-      hora_fin_atencion: new Date().toISOString()
+      estado_proceso: nuevoEstadoOatc,
+      ...(nuevoEstadoOatc === 'FINALIZADO' ? { hora_fin_atencion: new Date().toISOString() } : {})
     })
     .eq('id', oatcId);
 

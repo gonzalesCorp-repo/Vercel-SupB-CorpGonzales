@@ -99,9 +99,9 @@ export default function WorkspaceOperativoPage() {
     showConfirm(
       "Finalizar Orden",
       "¿Enviar esta orden a Caja para finalizar la cobranza?",
-      () => {
+      async () => {
         setTickets(prev => prev.filter(t => t.id !== id));
-        // En producción: await terminarAtencion(id);
+        await terminarAtencion(id);
       }
     );
   };
