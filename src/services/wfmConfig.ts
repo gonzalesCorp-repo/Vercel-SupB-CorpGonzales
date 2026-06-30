@@ -146,3 +146,55 @@ export async function eliminarConfigDemanda(id: string, nombre: string): Promise
   await registrarLog('SISTEMA', `Eliminó tipo de demanda: ${nombre}`);
   return true;
 }
+
+// ----------------------------------------------------
+// MOTIVOS DE CANCELACIÓN (NUEVO)
+// ----------------------------------------------------
+
+export interface MotivoCancelacion {
+  id: string;
+  motivo: string;
+  activo: boolean;
+  created_at?: string;
+}
+
+export async function obtenerTodosMotivosCancelacion(): Promise<MotivoCancelacion[]> {
+  const { data, error } = await supabase
+    .from('motivos_cancelacion')
+    .select('*')
+    .order('created_at', { ascending: true });
+    
+  if (error) {
+    console.error("Error obteniendo motivos de cancelación (todos):", error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function crearMotivoCancelacion(motivo: string): Promise<boolean> {
+  const { error } = await supabase.from('motivos_cancelacion').insert([{
+    motivo,
+    activo: true
+  }]);
+
+  if (error) {
+    console.error("Error creando motivo de cancelación:", error);
+    return false;
+  }
+  await registrarLog('SISTEMA', `Creó motivo de cancelación: ${motivo}`);
+  return true;
+}
+
+export async function actualizarMotivoCancelacion(id: string, motivo: string, activo: boolean): Promise<boolean> {
+  const { error } = await supabase.from('motivos_cancelacion').update({
+    motivo,
+    activo
+  }).eq('id', id);
+
+  if (error) {
+    console.error("Error actualizando motivo de cancelación:", error);
+    return false;
+  }
+  await registrarLog('SISTEMA', `Actualizó motivo de cancelación (ID: ${id}) - Activo: ${activo}`);
+  return true;
+}

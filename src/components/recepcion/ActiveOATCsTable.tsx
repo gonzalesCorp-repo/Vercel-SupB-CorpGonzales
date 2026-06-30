@@ -23,8 +23,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [motivos, setMotivos] = useState<MotivoCancelacion[]>([]);
   const [selectedMotivoId, setSelectedMotivoId] = useState<string>('');
-  const [isAddingMotivo, setIsAddingMotivo] = useState(false);
-  const [nuevoMotivoText, setNuevoMotivoText] = useState('');
+  const [detalleCancelacion, setDetalleCancelacion] = useState('');
   const [isCanceling, setIsCanceling] = useState(false);
   
   const supabase = createClient();
@@ -53,11 +52,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
   };
   
   const handleCancelar = async (oatcId: string) => {
-    if (isAddingMotivo && !nuevoMotivoText.trim()) {
-      alert('Por favor, escribe un motivo de cancelación.');
-      return;
-    }
-    if (!isAddingMotivo && !selectedMotivoId) {
+    if (!selectedMotivoId) {
       alert('Por favor, selecciona un motivo de cancelación.');
       return;
     }
@@ -65,15 +60,6 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
     if (!confirm('¿Estás seguro de que deseas cancelar esta atención?')) return;
     
     setIsCanceling(true);
-
-    let motivoFinalId = selectedMotivoId;
-
-    if (isAddingMotivo && nuevoMotivoText.trim()) {
-      const nuevoMotivo = await agregarMotivoCancelacion(nuevoMotivoText.trim());
-      if (nuevoMotivo) {
-        motivoFinalId = nuevoMotivo.id;
-      }
-    }
 
     // Primero, liberar al agente si hay uno asignado
     const oatc = oatcs.find(o => o.id === oatcId);
@@ -87,7 +73,8 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
       .update({ 
         estado_proceso: 'CANCELADO', 
         hora_fin_atencion: new Date().toISOString(),
-        motivo_cancelacion_id: motivoFinalId
+        motivo_cancelacion_id: selectedMotivoId,
+        detalle_cancelacion: detalleCancelacion.trim() || null
       })
       .eq('id', oatcId);
       
@@ -95,8 +82,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
       cargarDatos();
       setIsModalOpen(false);
       setSelectedMotivoId('');
-      setNuevoMotivoText('');
-      setIsAddingMotivo(false);
+      setDetalleCancelacion('');
     }
     setIsCanceling(false);
   };
@@ -306,49 +292,31 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
             <div className="pt-4 border-t border-slate-100">
               <h4 className="text-sm text-slate-500 font-medium mb-2">Opciones de Cancelación</h4>
               
-              {!isAddingMotivo ? (
-                <>
-                  <select
-                    value={selectedMotivoId}
-                    onChange={(e) => setSelectedMotivoId(e.target.value)}
-                    className="w-full text-sm rounded-lg border border-slate-300 p-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 mb-3"
-                  >
-                    <option value="">Selecciona un motivo...</option>
-                    {motivos.map(m => (
-                      <option key={m.id} value={m.id}>{m.motivo}</option>
-                    ))}
-                  </select>
-                  <button 
-                    onClick={() => setIsAddingMotivo(true)}
-                    className="text-xs text-indigo-600 font-medium hover:text-indigo-800"
-                  >
-                    + Escribir nuevo motivo
-                  </button>
-                </>
-              ) : (
-                <div className="space-y-2 mb-3">
-                  <input
-                    type="text"
-                    value={nuevoMotivoText}
-                    onChange={(e) => setNuevoMotivoText(e.target.value)}
-                    placeholder="Escribe el motivo aquí..."
-                    className="w-full text-sm rounded-lg border border-slate-300 p-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  />
-                  <button 
-                    onClick={() => setIsAddingMotivo(false)}
-                    className="text-xs text-slate-500 font-medium hover:text-slate-700"
-                  >
-                    Cancelar y volver a la lista
-                  </button>
-                </div>
-              )}
+              <select
+                value={selectedMotivoId}
+                onChange={(e) => setSelectedMotivoId(e.target.value)}
+                className="w-full text-sm rounded-lg border border-slate-300 p-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 mb-3"
+              >
+                <option value="">Selecciona un motivo...</option>
+                {motivos.map(m => (
+                  <option key={m.id} value={m.id}>{m.motivo}</option>
+                ))}
+              </select>
+
+              <h4 className="text-sm text-slate-500 font-medium mb-2">Detalle adicional (opcional)</h4>
+              <textarea
+                value={detalleCancelacion}
+                onChange={(e) => setDetalleCancelacion(e.target.value)}
+                placeholder="Escribe más detalles sobre la cancelación aquí..."
+                className="w-full text-sm rounded-lg border border-slate-300 p-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 min-h-[80px]"
+              />
             </div>
 
             <div className="flex gap-3">
               <button 
                 onClick={() => handleCancelar(selectedOatc.id!)}
                 className="flex-1 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-medium rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isCanceling || (!isAddingMotivo && !selectedMotivoId) || (isAddingMotivo && !nuevoMotivoText.trim())}
+                disabled={isCanceling || !selectedMotivoId}
               >
                 {isCanceling ? 'Cancelando...' : <><XCircle className="w-4 h-4" /> Cancelar Atención</>}
               </button>

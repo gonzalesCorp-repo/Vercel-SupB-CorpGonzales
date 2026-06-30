@@ -227,9 +227,14 @@ export default function HistorialOATCsTable() {
               {selectedOatc.estado_proceso === 'CANCELADO' && selectedOatc.motivos_cancelacion && (
                 <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg">
                   <span className="text-xs font-bold text-red-600 uppercase tracking-wider block mb-1">Motivo de Cancelación:</span>
-                  <span className="text-sm text-red-800">
+                  <span className="text-sm text-red-800 font-medium block">
                     {(selectedOatc.motivos_cancelacion as any).motivo}
                   </span>
+                  {selectedOatc.detalle_cancelacion && (
+                    <span className="text-xs text-red-700 mt-2 block border-t border-red-200 pt-2">
+                      <span className="font-bold">Detalle:</span> {selectedOatc.detalle_cancelacion}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
