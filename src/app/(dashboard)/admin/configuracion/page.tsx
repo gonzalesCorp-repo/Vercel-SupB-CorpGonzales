@@ -143,6 +143,34 @@ export default function WFMConfigPage() {
     setIsSaving(false);
   };
 
+  // Handlers Motivos
+  const openNewMotModal = () => {
+    setEditMotId(null);
+    setMotFormData({ motivo: '', activo: true });
+    setIsMotModalOpen(true);
+  };
+  const openEditMotModal = (conf: MotivoCancelacion) => {
+    setEditMotId(conf.id);
+    setMotFormData({ motivo: conf.motivo, activo: conf.activo });
+    setIsMotModalOpen(true);
+  };
+  const handleSubmitMot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    let ok = false;
+    if (editMotId) {
+      ok = await actualizarMotivoCancelacion(editMotId, motFormData.motivo, motFormData.activo);
+    } else {
+      ok = await crearMotivoCancelacion(motFormData.motivo);
+    }
+    
+    if (ok) {
+      setIsMotModalOpen(false);
+      cargarDatos();
+    }
+    setIsSaving(false);
+  };
+
   const colorOptions = [
     { label: 'Gris (Default)', value: 'bg-slate-100 text-slate-700' },
     { label: 'Verde', value: 'bg-emerald-100 text-emerald-700' },
