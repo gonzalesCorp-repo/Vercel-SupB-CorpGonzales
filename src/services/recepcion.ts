@@ -179,6 +179,23 @@ export async function crearOatc(
 ) {
   const sedeId = useAppStore.getState().sedeActiva?.id;
   
+  // Calcular y congelar comisiones
+  const idsBienes = puntoPartida.map(p => p.id);
+  const { data: bienesCatalog } = await supabase.from('bienes').select('id, comision_porcentaje').in('id', idsBienes);
+  
+  let excepciones: any[] = [];
+  if (agenteId) {
+     const { data } = await supabase.from('agentes_comisiones').select('bien_id, comision_porcentaje').eq('agente_id', agenteId).in('bien_id', idsBienes);
+     excepciones = data || [];
+  }
+
+  const puntoPartidaConComision = puntoPartida.map(p => {
+     const excepcion = excepciones.find(e => e.bien_id === p.id);
+     const base = bienesCatalog?.find(b => b.id === p.id);
+     const comision = excepcion ? excepcion.comision_porcentaje : (base ? base.comision_porcentaje : 0);
+     return { ...p, comision_porcentaje: Number(comision) };
+  });
+  
   const { data, error } = await supabase
     .from('oatc')
     .insert([{
@@ -186,7 +203,7 @@ export async function crearOatc(
       cliente_nombre: clienteNombre,
       agente_id: agenteId,
       agente_nombre: agenteNombre,
-      punto_partida: puntoPartida,
+      punto_partida: puntoPartidaConComision,
       tipo_demanda: tipoDemanda,
       estado_proceso: estadoProceso,
       sede_id: sedeId
