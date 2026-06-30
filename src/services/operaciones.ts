@@ -136,57 +136,44 @@ export async function pedirInsumo(pedido: PedidoInsumo): Promise<boolean> {
   return true;
 }
 
-// 4. Solicitar adición de servicio (Gatekeeping - Upsell) a una OATC
-export async function solicitarCambiosOatc(oatcId: string, nuevoBien: Bien, nuevaDemandaId?: string): Promise<boolean> {
-  const { data: oatc, error: errOatc } = await supabase
-    .from('oatc')
-    .select('*')
-    .eq('id', oatcId)
-    .single();
-
-  if (errOatc || !oatc) {
-    console.error("Error obteniendo OATC para solicitud de upsell:", errOatc);
-    return false;
-  }
-
-  // Si envían una demanda nueva, obtenemos su nombre
-  let nuevoTipoDemanda = oatc.tipo_demanda;
-  if (nuevaDemandaId) {
-    const { data: dem } = await supabase.from('config_demandas').select('nombre').eq('id', nuevaDemandaId).single();
-    if (dem) nuevoTipoDemanda = dem.nombre;
-  }
-
-  const solicitud = {
-    nuevos_servicios: [
-      {
-        servicio_id: nuevoBien.id,
-        nombre: nuevoBien.nombre,
-        precio: nuevoBien.precio_venta,
-        cantidad: 1,
-        categoria: nuevoBien.categoria,
-        tipo_bien: nuevoBien.tipo_bien
-      }
-    ],
-    nuevo_tipo_demanda: nuevoTipoDemanda,
-    solicitado_en: new Date().toISOString()
-  };
-
-  // Agregar a cambios_pendientes (combinando si ya había uno, aunque normalmente se sobrescribe)
-  const cambiosPendientes = oatc.cambios_pendientes ? { ...oatc.cambios_pendientes, ...solicitud } : solicitud;
-
+// 4. Actualizar servicios directamente en la OATC
+export async function actualizarServiciosOatc(oatcId: string, nuevosServicios: any[]): Promise<boolean> {
   const { error } = await supabase
     .from('oatc')
     .update({ 
-      cambios_pendientes: cambiosPendientes,
-      estado_proceso: 'PENDIENTE_CONFIRMACION' 
+      punto_partida: nuevosServicios
     })
     .eq('id', oatcId);
 
   if (error) {
-    console.error("Error guardando solicitud de cambios:", error);
+    console.error("Error actualizando servicios:", error);
     return false;
   }
 
-  await registrarLog('OPERACIONES', `Solicitó agregar servicio a OATC`, { oatc_id: oatcId, servicio: nuevoBien.nombre });
+  await registrarLog('OPERACIONES', `Servicios actualizados por staff`, { oatc_id: oatcId });
+  return true;
+}
+
+// 5. Solicitar inicio de atención
+export async function solicitarInicioAtencion(oatcId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('oatc')
+    .update({ estado_proceso: 'PENDIENTE_INICIO' })
+    .eq('id', oatcId);
+    
+  if (error) return false;
+  await registrarLog('OPERACIONES', `Solicitud de inicio de atención`, { oatc_id: oatcId });
+  return true;
+}
+
+// 6. Solicitar fin de atención
+export async function solicitarFinAtencion(oatcId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('oatc')
+    .update({ estado_proceso: 'PENDIENTE_TERMINO' })
+    .eq('id', oatcId);
+    
+  if (error) return false;
+  await registrarLog('OPERACIONES', `Solicitud de fin de atención`, { oatc_id: oatcId });
   return true;
 }

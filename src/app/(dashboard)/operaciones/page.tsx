@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus } from 'lucide-react';
-import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo, solicitarCambiosOatc } from '@/services/operaciones';
+import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus, Trash2 } from 'lucide-react';
+import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo, solicitarInicioAtencion, solicitarFinAtencion, actualizarServiciosOatc } from '@/services/operaciones';
 import { OATC, Bien, obtenerCatalogo } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
@@ -91,17 +91,19 @@ export default function WorkspaceOperativoPage() {
 
   // --- Handlers de Acciones de Tarjeta ---
 
-  const handleIniciarAtencion = (id: string) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, estado_ui: 'En Curso' } : t));
+  const handleIniciarAtencion = async (id: string) => {
+    // Alert Reception instead of changing UI state directly
+    await solicitarInicioAtencion(id);
+    cargarTickets();
   };
 
   const handleEnviarCaja = (id: string) => {
     showConfirm(
       "Finalizar Orden",
-      "¿Enviar esta orden a Caja para finalizar la cobranza?",
+      "¿Enviar esta orden a Recepción para finalizar la atención?",
       async () => {
-        setTickets(prev => prev.filter(t => t.id !== id));
-        await terminarAtencion(id);
+        await solicitarFinAtencion(id);
+        cargarTickets();
       }
     );
   };
@@ -145,14 +147,40 @@ export default function WorkspaceOperativoPage() {
 
   const confirmarNuevoServicio = async (bien: Bien) => {
     if (selectedOatc?.id) {
-      const ok = await solicitarCambiosOatc(selectedOatc.id, bien);
+      const currentServicios = selectedOatc.punto_partida || [];
+      const newServicio = {
+        servicio_id: bien.id,
+        nombre: bien.nombre,
+        precio: bien.precio_venta,
+        cantidad: 1,
+        categoria: bien.categoria,
+        tipo_bien: bien.tipo_bien
+      };
+      
+      const nuevosServicios = [...currentServicios, newServicio];
+      const ok = await actualizarServiciosOatc(selectedOatc.id, nuevosServicios);
       if (ok) {
-        setShowAddServiceModal(false);
         setSearchCat('');
-        showAlert("Solicitud enviada a Recepción para su autorización.", "success");
-        cargarTickets(); // recargar para ver el cambio de estado
+        showAlert("Servicio añadido correctamente.", "success");
+        cargarTickets(); // recargar para ver los cambios
+        
+        // Update local selectedOatc so modal stays up-to-date while open
+        setSelectedOatc({...selectedOatc, punto_partida: nuevosServicios});
       } else {
-        showAlert("Error solicitando el servicio extra.", "error");
+        showAlert("Error añadiendo el servicio.", "error");
+      }
+    }
+  };
+
+  const removerServicio = async (index: number) => {
+    if (selectedOatc?.id) {
+      const currentServicios = [...(selectedOatc.punto_partida || [])];
+      currentServicios.splice(index, 1);
+      const ok = await actualizarServiciosOatc(selectedOatc.id, currentServicios);
+      if (ok) {
+        showAlert("Servicio eliminado correctamente.", "success");
+        cargarTickets();
+        setSelectedOatc({...selectedOatc, punto_partida: currentServicios});
       }
     }
   };
@@ -271,7 +299,7 @@ export default function WorkspaceOperativoPage() {
                     {/* Panel de Botones Táctiles */}
                     <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
                       
-                      {!isEnCurso && ticket.estado_proceso !== 'PENDIENTE_CONFIRMACION' && (
+                      {!isEnCurso && ticket.estado_proceso !== 'PENDIENTE_INICIO' && ticket.estado_proceso !== 'PENDIENTE_CONFIRMACION' && (
                         <button 
                           onClick={() => ticket.id && handleIniciarAtencion(ticket.id)}
                           className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
@@ -280,13 +308,13 @@ export default function WorkspaceOperativoPage() {
                         </button>
                       )}
 
-                      {isEnCurso && ticket.estado_proceso !== 'PENDIENTE_CONFIRMACION' && (
+                      {isEnCurso && ticket.estado_proceso !== 'PENDIENTE_TERMINO' && ticket.estado_proceso !== 'PENDIENTE_CONFIRMACION' && (
                         <>
                           <button 
                             onClick={() => requerirPinParaAccion('ADD_SERVICE', ticket)}
                             className="flex-1 bg-white hover:bg-gray-50 border-2 border-dashed border-gray-300 text-gray-600 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
                           >
-                            <PlusCircle className="w-5 h-5" /> Extra
+                            <PlusCircle className="w-5 h-5" /> Extra / Editar
                           </button>
                           <button 
                             onClick={() => ticket.id && handleEnviarCaja(ticket.id)}
@@ -297,10 +325,22 @@ export default function WorkspaceOperativoPage() {
                         </>
                       )}
                       
-                      {ticket.estado_proceso === 'PENDIENTE_CONFIRMACION' && (
-                         <div className="w-full text-center text-sm font-bold text-orange-600 bg-orange-50 py-3 rounded-xl border border-orange-200">
-                           ⏳ Recepción debe autorizar los servicios extra añadidos.
+                      {ticket.estado_proceso === 'PENDIENTE_INICIO' && (
+                         <div className="w-full text-center text-sm font-bold text-indigo-600 bg-indigo-50 py-3 rounded-xl border border-indigo-200 animate-pulse">
+                           ⏳ Esperando autorización de Recepción para iniciar...
                          </div>
+                      )}
+                      {ticket.estado_proceso === 'PENDIENTE_TERMINO' && (
+                         <div className="w-full text-center text-sm font-bold text-orange-600 bg-orange-50 py-3 rounded-xl border border-orange-200 animate-pulse">
+                           ⏳ Esperando autorización de Recepción para finalizar...
+                         </div>
+                      )}
+                      
+                      {ticket.cambios_pendientes?.motivo_rechazo && (
+                        <div className="w-full mt-2 text-sm font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-200">
+                          <p className="flex items-center gap-1"><XCircle className="w-4 h-4" /> Solicitud Rechazada</p>
+                          <p className="font-normal mt-1">{ticket.cambios_pendientes.motivo_rechazo}</p>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -388,21 +428,43 @@ export default function WorkspaceOperativoPage() {
         </form>
       </Modal>
 
-      {/* MODAL: Añadir Servicio (Catálogo Real) */}
-      <Modal isOpen={showAddServiceModal} onClose={() => setShowAddServiceModal(false)} title={`Añadir a: ${selectedOatc?.cliente_nombre}`} maxWidth="max-w-xl">
+      {/* MODAL: Añadir/Editar Servicio */}
+      <Modal isOpen={showAddServiceModal} onClose={() => setShowAddServiceModal(false)} title={`Servicios de: ${selectedOatc?.cliente_nombre}`} maxWidth="max-w-xl">
         <div className="space-y-4 mt-2">
+           
+           <h3 className="font-bold text-gray-700">Servicios Actuales</h3>
+           <div className="space-y-2 mb-6">
+             {selectedOatc?.punto_partida?.map((srv: any, idx: number) => (
+               <div key={idx} className="flex justify-between items-center p-3 border border-gray-200 rounded-xl bg-gray-50">
+                 <div>
+                   <p className="font-bold text-gray-800">{srv.nombre}</p>
+                   <p className="text-xs text-gray-500">Precio: ${srv.precio}</p>
+                 </div>
+                 <button onClick={() => removerServicio(idx)} className="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors" title="Eliminar servicio">
+                   <Trash2 className="w-5 h-5" />
+                 </button>
+               </div>
+             ))}
+             {(!selectedOatc?.punto_partida || selectedOatc.punto_partida.length === 0) && (
+               <p className="text-sm text-gray-500 italic">No hay servicios asociados.</p>
+             )}
+           </div>
+
+           <hr className="border-gray-200" />
+           <h3 className="font-bold text-gray-700 mt-4">Añadir Nuevo Servicio</h3>
+
            <div className="relative mb-4">
               <input 
                 type="text" 
                 value={searchCat}
                 onChange={(e) => setSearchCat(e.target.value)}
-                placeholder="Buscar servicio extra..." 
+                placeholder="Buscar en catálogo..." 
                 className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 bg-gray-50" 
               />
               <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
            </div>
            
-           <div className="space-y-2 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
+           <div className="space-y-2 max-h-[30vh] overflow-y-auto custom-scrollbar pr-2">
              {catalogo
                .filter(b => b.nombre.toLowerCase().includes(searchCat.toLowerCase()))
                .map((bien) => (
@@ -411,7 +473,7 @@ export default function WorkspaceOperativoPage() {
                    <p className="font-bold text-gray-800">{bien.nombre}</p>
                    <p className="text-xs text-gray-500">Precio Ref: ${bien.precio_venta}</p>
                  </div>
-                 <button onClick={() => confirmarNuevoServicio(bien)} className="bg-indigo-100 text-indigo-700 p-2 rounded-lg hover:bg-indigo-200 transition-colors">
+                 <button onClick={() => confirmarNuevoServicio(bien)} className="bg-indigo-100 text-indigo-700 p-2 rounded-lg hover:bg-indigo-200 transition-colors" title="Añadir">
                    <Plus className="w-5 h-5" />
                  </button>
                </div>

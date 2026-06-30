@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle2, UserCircle2, ArrowRight, Edit2, XCircle, CheckSquare, ShieldAlert } from 'lucide-react';
+import { Clock, CheckCircle2, UserCircle2, ArrowRight, Edit2, XCircle, CheckSquare, ShieldAlert, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import { obtenerOatcsActivosDelDia, OATC, MotivoCancelacion, obtenerMotivosCancelacion, agregarMotivoCancelacion } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { formatDistanceToNowStrict } from 'date-fns';
@@ -25,6 +25,12 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
   const [selectedMotivoId, setSelectedMotivoId] = useState<string>('');
   const [detalleCancelacion, setDetalleCancelacion] = useState('');
   const [isCanceling, setIsCanceling] = useState(false);
+
+  // Alertas / Approvals
+  const [isAlertsMinimized, setIsAlertsMinimized] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [oatcToReject, setOatcToReject] = useState<OATC | null>(null);
   
   const supabase = createClient();
 
@@ -48,6 +54,47 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
     if (!error) {
       cargarDatos();
       setIsModalOpen(false);
+    }
+  };
+
+  const handleApprove = async (oatc: OATC) => {
+    const nuevoEstado = oatc.estado_proceso === 'PENDIENTE_INICIO' ? 'EN_CURSO' : 'ASESORANDO';
+    
+    const { error } = await supabase
+      .from('oatc')
+      .update({ 
+        estado_proceso: nuevoEstado,
+        cambios_pendientes: null // Clear any pending rejections
+      })
+      .eq('id', oatc.id);
+      
+    if (!error) cargarDatos();
+  };
+
+  const handleRejectClick = (oatc: OATC) => {
+    setOatcToReject(oatc);
+    setRejectReason('');
+    setIsRejectModalOpen(true);
+  };
+
+  const submitReject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!oatcToReject || !rejectReason.trim()) return;
+
+    const estadoAnterior = oatcToReject.estado_proceso === 'PENDIENTE_INICIO' ? 'ASESORIA' : 'EN_CURSO';
+    
+    const { error } = await supabase
+      .from('oatc')
+      .update({ 
+        estado_proceso: estadoAnterior,
+        cambios_pendientes: { motivo_rechazo: rejectReason }
+      })
+      .eq('id', oatcToReject.id);
+
+    if (!error) {
+      setIsRejectModalOpen(false);
+      setOatcToReject(null);
+      cargarDatos();
     }
   };
   
@@ -123,6 +170,8 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
     if (!puntoPartida || !Array.isArray(puntoPartida)) return 'Sin servicios';
     return puntoPartida.map(p => p.nombre).join(', ');
   };
+
+  const pendingAlerts = oatcs.filter(o => o.estado_proceso === 'PENDIENTE_INICIO' || o.estado_proceso === 'PENDIENTE_TERMINO');
 
   return (
     <>
@@ -243,6 +292,56 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
         )}
       </div>
 
+      {/* FLOATING ALERTS WIDGET */}
+      {pendingAlerts.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+          
+          {/* Minimized Badge */}
+          {isAlertsMinimized ? (
+            <button 
+              onClick={() => setIsAlertsMinimized(false)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-2xl flex items-center justify-center relative transition-transform hover:scale-105"
+            >
+              <Bell className="w-6 h-6 animate-pulse" />
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                {pendingAlerts.length}
+              </span>
+            </button>
+          ) : (
+            /* Expanded Popup */
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-80 sm:w-96 overflow-hidden flex flex-col max-h-[80vh] transition-all">
+              <div className="bg-indigo-600 text-white px-4 py-3 flex justify-between items-center">
+                <div className="flex items-center gap-2 font-bold">
+                  <Bell className="w-5 h-5 animate-pulse" />
+                  Alertas del Staff ({pendingAlerts.length})
+                </div>
+                <button onClick={() => setIsAlertsMinimized(true)} className="hover:bg-indigo-700 p-1 rounded-lg transition-colors">
+                  <ChevronDown className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="overflow-y-auto p-4 space-y-3 bg-slate-50 flex-1">
+                {pendingAlerts.map(alert => (
+                  <div key={alert.id} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">
+                      {alert.estado_proceso === 'PENDIENTE_INICIO' ? 'Solicitud de Inicio' : 'Solicitud de Término'}
+                    </p>
+                    <p className="font-bold text-slate-800 mb-2">
+                      <span className="text-slate-500 font-medium">Agente: </span>{alert.agente_nombre} <br/>
+                      <span className="text-slate-500 font-medium">Cliente: </span>{alert.cliente_nombre}
+                    </p>
+                    <div className="flex gap-2 mt-3">
+                      <button onClick={() => handleApprove(alert)} className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-bold py-1.5 rounded-lg text-sm transition-colors">Aprobar</button>
+                      <button onClick={() => handleRejectClick(alert)} className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-1.5 rounded-lg text-sm transition-colors">Rechazar</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -333,6 +432,44 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
           </div>
         )}
       </Modal>
+      <Modal
+        isOpen={isRejectModalOpen}
+        onClose={() => setIsRejectModalOpen(false)}
+        title="Rechazar Solicitud"
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={submitReject} className="space-y-4 mt-2">
+          <div className="bg-red-50 p-4 rounded-xl border border-red-100">
+            <h4 className="font-bold text-red-800 mb-1">Motivo del rechazo</h4>
+            <p className="text-sm text-red-600 mb-3">Este mensaje será enviado al workspace del staff y bloqueará la solicitud.</p>
+            <textarea
+              className="w-full border-red-200 rounded-lg p-3 text-sm focus:ring-red-500 focus:border-red-500"
+              rows={3}
+              placeholder="Ej: Faltan productos, debe agregar el servicio extra primero..."
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsRejectModalOpen(false)}
+              className="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+            >
+              Enviar Rechazo
+            </button>
+          </div>
+        </form>
+      </Modal>
+
     </>
   );
 }
