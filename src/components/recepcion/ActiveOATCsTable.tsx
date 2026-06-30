@@ -45,20 +45,13 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
     setIsLoading(false);
   };
 
-  const handlePreCobro = async (oatcId: string) => {
-    const { error } = await supabase
-      .from('oatc')
-      .update({ estado_proceso: 'PRE_COBRADO' })
-      .eq('id', oatcId);
-    
-    if (!error) {
-      cargarDatos();
-      setIsModalOpen(false);
-    }
-  };
+
 
   const handleApprove = async (oatc: OATC) => {
-    const nuevoEstado = oatc.estado_proceso === 'PENDIENTE_INICIO' ? 'EN_CURSO' : 'ASESORANDO';
+    let nuevoEstado = oatc.estado_proceso === 'PENDIENTE_INICIO' ? 'EN_CURSO' : 'POR_COBRAR';
+    if (oatc.estado_proceso === 'PENDIENTE_PRE_COBRO') {
+      nuevoEstado = 'PRE_COBRADO';
+    }
     
     const { error } = await supabase
       .from('oatc')
@@ -81,7 +74,10 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
     e.preventDefault();
     if (!oatcToReject || !rejectReason.trim()) return;
 
-    const estadoAnterior = oatcToReject.estado_proceso === 'PENDIENTE_INICIO' ? 'ASESORIA' : 'EN_CURSO';
+    let estadoAnterior = oatcToReject.estado_proceso === 'PENDIENTE_INICIO' ? 'ASESORIA' : 'EN_CURSO';
+    if (oatcToReject.estado_proceso === 'PENDIENTE_PRE_COBRO') {
+      estadoAnterior = 'EN_CURSO';
+    }
     
     const { error } = await supabase
       .from('oatc')
@@ -171,7 +167,11 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
     return puntoPartida.map(p => p.nombre).join(', ');
   };
 
-  const pendingAlerts = oatcs.filter(o => o.estado_proceso === 'PENDIENTE_INICIO' || o.estado_proceso === 'PENDIENTE_TERMINO');
+  const pendingAlerts = oatcs.filter(o => 
+    o.estado_proceso === 'PENDIENTE_INICIO' || 
+    o.estado_proceso === 'PENDIENTE_TERMINO' || 
+    o.estado_proceso === 'PENDIENTE_PRE_COBRO'
+  );
 
   return (
     <>
@@ -246,18 +246,8 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {oatc.estado_proceso === 'ASESORANDO' && (
-                          <button 
-                            onClick={() => handlePreCobro(oatc.id!)}
-                            className="p-1.5 text-orange-500 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors border border-orange-100 bg-orange-50/50 shadow-sm flex items-center gap-1 text-xs font-bold"
-                            title="Enviar a Pre-Cobro"
-                          >
-                            <CheckSquare className="w-4 h-4" />
-                            <span className="hidden sm:inline">Pre-Cobrar</span>
-                          </button>
-                        )}
                         {oatc.estado_proceso === 'PRE_COBRADO' && (
-                          <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded-md">
+                          <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded-md mr-1">
                             EN CAJA
                           </span>
                         )}
@@ -324,7 +314,11 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
                 {pendingAlerts.map(alert => (
                   <div key={alert.id} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                     <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">
-                      {alert.estado_proceso === 'PENDIENTE_INICIO' ? 'Solicitud de Inicio' : 'Solicitud de Término'}
+                      {alert.estado_proceso === 'PENDIENTE_INICIO' 
+                        ? 'Solicitud de Inicio' 
+                        : alert.estado_proceso === 'PENDIENTE_PRE_COBRO' 
+                          ? 'Solicitud de Pre-Cobro' 
+                          : 'Solicitud de Término'}
                     </p>
                     <p className="font-bold text-slate-800 mb-2">
                       <span className="text-slate-500 font-medium">Agente: </span>{alert.agente_nombre} <br/>
@@ -420,14 +414,6 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
                 {isCanceling ? 'Cancelando...' : <><XCircle className="w-4 h-4" /> Cancelar Atención</>}
               </button>
               
-              {(selectedOatc.estado_proceso === 'ASESORANDO' || selectedOatc.estado_proceso === 'ASESORIA') && (
-                <button 
-                  onClick={() => handlePreCobro(selectedOatc.id!)}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-                >
-                  <CheckSquare className="w-4 h-4" /> Enviar a Caja
-                </button>
-              )}
             </div>
           </div>
         )}

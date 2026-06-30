@@ -24,6 +24,7 @@ export async function obtenerTicketsAsignados(agenteNombre: string): Promise<OAT
     .select('*')
     .neq('estado_proceso', 'FINALIZADO')
     .neq('estado_proceso', 'CANCELADO')
+    .neq('estado_proceso', 'POR_COBRAR')
     .eq('sede_id', sedeId);
 
   if (agenteNombre !== 'ALL') {
@@ -154,26 +155,74 @@ export async function actualizarServiciosOatc(oatcId: string, nuevosServicios: a
   return true;
 }
 
-// 5. Solicitar inicio de atención
-export async function solicitarInicioAtencion(oatcId: string): Promise<boolean> {
+// 5. Solicitar inicio de atencin
+export async function solicitarInicioAtencion(oatcId: string, userRol?: string): Promise<boolean> {
+  const isAutoApproved = userRol === 'ADMIN' || userRol === 'RECEPCION';
+  const newState = isAutoApproved ? 'EN_CURSO' : 'PENDIENTE_INICIO';
+
   const { error } = await supabase
     .from('oatc')
-    .update({ estado_proceso: 'PENDIENTE_INICIO' })
+    .update({ estado_proceso: newState })
     .eq('id', oatcId);
     
   if (error) return false;
-  await registrarLog('OPERACIONES', `Solicitud de inicio de atención`, { oatc_id: oatcId });
+  await registrarLog('OPERACIONES', isAutoApproved ? `Inicio de atencin auto-aprobado` : `Solicitud de inicio de atencin`, { oatc_id: oatcId });
   return true;
 }
 
-// 6. Solicitar fin de atención
-export async function solicitarFinAtencion(oatcId: string): Promise<boolean> {
+// 6. Solicitar fin de atencin
+export async function solicitarFinAtencion(oatc: any, userRol?: string): Promise<boolean> {
+  const isPrepaid = oatc.estado_pago === 'Pagado' || oatc.estado_pago === 'COBRADO';
+  const isAutoApproved = userRol === 'ADMIN' || userRol === 'RECEPCION';
+
+  let newState = 'PENDIENTE_TERMINO';
+  if (isPrepaid) {
+    newState = 'FINALIZADO';
+  } else if (isAutoApproved) {
+    newState = 'POR_COBRAR';
+  }
+
   const { error } = await supabase
     .from('oatc')
-    .update({ estado_proceso: 'PENDIENTE_TERMINO' })
+    .update({ 
+      estado_proceso: newState,
+      ...(newState === 'FINALIZADO' ? { hora_fin_atencion: new Date().toISOString() } : {})
+    })
+    .eq('id', oatc.id);
+    
+  if (error) return false;
+  await registrarLog('OPERACIONES', `Fin de atencin procesado`, { oatc_id: oatc.id, estado: newState });
+
+  if (newState === 'FINALIZADO') {
+    const { data: agente } = await supabase.from('agentes').select('id').eq('nombre', oatc.agente_nombre).single();
+    if (agente) {
+      await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', agente.id);
+    }
+  }
+
+  return true;
+}
+
+// 7. Solicitar Pre-Cobro (Staff lo pide antes de terminar)
+export async function solicitarPreCobro(oatcId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('oatc')
+    .update({ estado_proceso: 'PENDIENTE_PRE_COBRO' })
     .eq('id', oatcId);
     
   if (error) return false;
-  await registrarLog('OPERACIONES', `Solicitud de fin de atención`, { oatc_id: oatcId });
+  await registrarLog('OPERACIONES', `Solicitud de Pre-Cobro`, { oatc_id: oatcId });
   return true;
+}
+
+// 8. Validar PIN Operativo
+export async function validarPin(pin: string): Promise<{id: string, rol: string, nombre: string} | null> {
+  const { data, error } = await supabase
+    .from('agentes')
+    .select('id, rol, nombre')
+    .eq('pin', pin)
+    .single();
+    
+  if (error || !data) return null;
+  return data;
 }

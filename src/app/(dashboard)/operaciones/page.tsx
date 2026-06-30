@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus, Trash2, XCircle } from 'lucide-react';
-import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo, solicitarInicioAtencion, solicitarFinAtencion, actualizarServiciosOatc } from '@/services/operaciones';
+import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus, Trash2, XCircle, CreditCard } from 'lucide-react';
+import { obtenerTicketsAsignados, pedirInsumo, PedidoInsumo, solicitarInicioAtencion, solicitarFinAtencion, actualizarServiciosOatc, validarPin, solicitarPreCobro } from '@/services/operaciones';
 import { OATC, Bien, obtenerCatalogo } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
@@ -16,7 +16,7 @@ interface OATCExtended extends OATC {
 }
 
 // Tipo de acción pendiente tras el PIN
-type PendingAction = 'ADD_SERVICE' | 'LAB_REQUEST' | null;
+type PendingAction = 'START_ATTENTION' | 'END_ATTENTION' | 'PRE_COBRO' | null;
 
 export default function WorkspaceOperativoPage() {
   const [tickets, setTickets] = useState<OATCExtended[]>([]);
@@ -91,33 +91,22 @@ export default function WorkspaceOperativoPage() {
 
   // --- Handlers de Acciones de Tarjeta ---
 
-  const handleIniciarAtencion = async (id: string) => {
-    // Alert Reception instead of changing UI state directly
-    await solicitarInicioAtencion(id);
-    cargarTickets();
-  };
-
-  const handleEnviarCaja = (id: string) => {
-    showConfirm(
-      "Finalizar Orden",
-      "¿Enviar esta orden a Recepción para finalizar la atención?",
-      async () => {
-        await solicitarFinAtencion(id);
-        cargarTickets();
-      }
-    );
-  };
-
   // --- Flujo Centralizado de PIN (Seguridad) ---
 
-  const requerirPinParaAccion = (action: PendingAction, oatc: OATCExtended | null = null) => {
+  const requerirPinParaAccion = async (action: PendingAction, oatc: OATCExtended | null = null) => {
     setPendingAction(action);
     setSelectedOatc(oatc);
     
     if (isPersonalMode) {
-      // Saltar PIN en modo personal
-      if (action === 'ADD_SERVICE') setShowAddServiceModal(true);
-      else if (action === 'LAB_REQUEST') setShowLabModal(true);
+      // Saltar PIN en modo personal y ejecutar directo como STAFF
+      if (action === 'START_ATTENTION' && oatc?.id) {
+         await solicitarInicioAtencion(oatc.id, 'STAFF');
+      } else if (action === 'END_ATTENTION' && oatc?.id) {
+         await solicitarFinAtencion(oatc, 'STAFF');
+      } else if (action === 'PRE_COBRO' && oatc?.id) {
+         await solicitarPreCobro(oatc.id);
+      }
+      cargarTickets();
       return;
     }
 
@@ -126,23 +115,30 @@ export default function WorkspaceOperativoPage() {
     setShowPinModal(true);
   };
 
-  const verificarPin = (e: React.FormEvent) => {
+  const verificarPin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validar PIN (Mock: cualquier PIN de 4 dígitos es válido, menos 0000)
-    if (pin.length >= 4 && pin !== '0000') {
-      setShowPinModal(false);
-      setPinError(false);
-      
-      // Enrutar a la acción correspondiente tras validar seguridad
-      if (pendingAction === 'ADD_SERVICE') {
-        setShowAddServiceModal(true);
-      } else if (pendingAction === 'LAB_REQUEST') {
-        setShowLabModal(true);
-      }
-      
-    } else {
+    if (pin.length < 4) {
       setPinError(true);
+      return;
     }
+
+    const agent = await validarPin(pin);
+    if (!agent) {
+      setPinError(true);
+      return;
+    }
+
+    setShowPinModal(false);
+    setPinError(false);
+    
+    if (pendingAction === 'START_ATTENTION' && selectedOatc?.id) {
+       await solicitarInicioAtencion(selectedOatc.id, agent.rol);
+    } else if (pendingAction === 'END_ATTENTION' && selectedOatc?.id) {
+       await solicitarFinAtencion(selectedOatc, agent.rol);
+    } else if (pendingAction === 'PRE_COBRO' && selectedOatc?.id) {
+       await solicitarPreCobro(selectedOatc.id);
+    }
+    cargarTickets();
   };
 
   const confirmarNuevoServicio = async (bien: Bien) => {
@@ -224,7 +220,7 @@ export default function WorkspaceOperativoPage() {
             <PanelWFM isPersonalMode={isPersonalMode} miAgenteId={miAgenteId} />
           </div>
           <button 
-            onClick={() => requerirPinParaAccion('LAB_REQUEST')}
+            onClick={() => showAlert("Funcionalidad en desarrollo", "warning")}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-orange-100 hover:bg-orange-200 text-orange-700 px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
           >
             <Beaker className="w-5 h-5" />
@@ -274,7 +270,7 @@ export default function WorkspaceOperativoPage() {
                          </span>
                        ) : isEnCurso ? (
                          <span className="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold text-xs rounded-full uppercase tracking-widest flex items-center gap-1">
-                           <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> En Curso
+                           <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> {ticket.estado_proceso === 'PRE_COBRADO' ? 'Pagado y En Curso' : 'En Curso'}
                          </span>
                         ) : (
                           <span className="px-3 py-1 bg-yellow-100 text-yellow-700 font-bold text-xs rounded-full uppercase tracking-widest">
@@ -299,25 +295,35 @@ export default function WorkspaceOperativoPage() {
                     {/* Panel de Botones Táctiles */}
                     <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
                       
-                      {!isEnCurso && ticket.estado_proceso !== 'PENDIENTE_INICIO' && ticket.estado_proceso !== 'PENDIENTE_CONFIRMACION' && (
+                      {!isEnCurso && ticket.estado_proceso !== 'PENDIENTE_INICIO' && (
                         <button 
-                          onClick={() => ticket.id && handleIniciarAtencion(ticket.id)}
+                          onClick={() => requerirPinParaAccion('START_ATTENTION', ticket)}
                           className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
                         >
                           <PlayCircle className="w-5 h-5" /> Iniciar
                         </button>
                       )}
 
-                      {isEnCurso && ticket.estado_proceso !== 'PENDIENTE_TERMINO' && ticket.estado_proceso !== 'PENDIENTE_CONFIRMACION' && (
+                      {isEnCurso && ticket.estado_proceso !== 'PENDIENTE_TERMINO' && (
                         <>
                           <button 
-                            onClick={() => requerirPinParaAccion('ADD_SERVICE', ticket)}
+                            onClick={() => { setSelectedOatc(ticket); setShowAddServiceModal(true); }}
                             className="flex-1 bg-white hover:bg-gray-50 border-2 border-dashed border-gray-300 text-gray-600 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
                           >
                             <PlusCircle className="w-5 h-5" /> Extra / Editar
                           </button>
+                          
+                          {ticket.estado_pago !== 'Pagado' && ticket.estado_pago !== 'COBRADO' && ticket.estado_proceso !== 'PENDIENTE_PRE_COBRO' && ticket.estado_proceso !== 'PRE_COBRADO' && (
+                            <button 
+                              onClick={() => requerirPinParaAccion('PRE_COBRO', ticket)}
+                              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                            >
+                              <CreditCard className="w-5 h-5" /> Pre-Cobrar
+                            </button>
+                          )}
+                          
                           <button 
-                            onClick={() => ticket.id && handleEnviarCaja(ticket.id)}
+                            onClick={() => requerirPinParaAccion('END_ATTENTION', ticket)}
                             className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
                           >
                             <CheckCircle className="w-5 h-5" /> Terminar
@@ -327,12 +333,17 @@ export default function WorkspaceOperativoPage() {
                       
                       {ticket.estado_proceso === 'PENDIENTE_INICIO' && (
                          <div className="w-full text-center text-sm font-bold text-indigo-600 bg-indigo-50 py-3 rounded-xl border border-indigo-200 animate-pulse">
-                           ⏳ Esperando autorización de Recepción para iniciar...
+                           ⏳ Esperando autorización para Iniciar...
+                         </div>
+                      )}
+                      {ticket.estado_proceso === 'PENDIENTE_PRE_COBRO' && (
+                         <div className="w-full text-center text-sm font-bold text-orange-600 bg-orange-50 py-3 rounded-xl border border-orange-200 animate-pulse">
+                           ⏳ Esperando autorización de Pre-Cobro...
                          </div>
                       )}
                       {ticket.estado_proceso === 'PENDIENTE_TERMINO' && (
-                         <div className="w-full text-center text-sm font-bold text-orange-600 bg-orange-50 py-3 rounded-xl border border-orange-200 animate-pulse">
-                           ⏳ Esperando autorización de Recepción para finalizar...
+                         <div className="w-full text-center text-sm font-bold text-emerald-600 bg-emerald-50 py-3 rounded-xl border border-emerald-200 animate-pulse">
+                           ⏳ Esperando autorización para Terminar...
                          </div>
                       )}
                       
@@ -361,9 +372,13 @@ export default function WorkspaceOperativoPage() {
           </div>
           <h3 className="font-bold text-gray-800 text-lg">Ingrese su PIN Operativo</h3>
           <p className="text-sm text-gray-500">
-            {pendingAction === 'ADD_SERVICE' 
-              ? `Para modificar la orden de ${selectedOatc?.cliente_nombre}, identifíquese.` 
-              : `Autorización requerida para solicitar insumos urgentes.`}
+            {pendingAction === 'START_ATTENTION' 
+              ? `Autorización para INICIAR el servicio de ${selectedOatc?.cliente_nombre}.`
+              : pendingAction === 'END_ATTENTION'
+              ? `Autorización para TERMINAR el servicio de ${selectedOatc?.cliente_nombre}.`
+              : pendingAction === 'PRE_COBRO'
+              ? `Autorización para PRE-COBRAR a ${selectedOatc?.cliente_nombre}.`
+              : `Autorización requerida.`}
           </p>
           
           <input 
