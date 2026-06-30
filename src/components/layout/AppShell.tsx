@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, Palette } from 'lucide-react';
+import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, Palette, User } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { obtenerSedesUsuario, Sede } from '@/services/sedes';
