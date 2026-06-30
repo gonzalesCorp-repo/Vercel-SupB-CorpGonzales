@@ -124,7 +124,7 @@ export default function WorkspaceCajaPage() {
           .select('id, estado')
           .eq('cajero_id', agente.id)
           .eq('estado', 'ABIERTA')
-          .single();
+          .maybeSingle();
         setActiveSession(openSession || null);
       }
     }
