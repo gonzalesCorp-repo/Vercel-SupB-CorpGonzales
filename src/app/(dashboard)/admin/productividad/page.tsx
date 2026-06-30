@@ -60,7 +60,7 @@ export default function AdminProductividadPage() {
     if (oatcs) {
       const prodMap = new Map<string, AgentProd>();
       
-      oatcs.forEach(oatc => {
+      oatcs.forEach((oatc: any) => {
         if (!oatc.agente_id) return;
         
         if (!prodMap.has(oatc.agente_id)) {
