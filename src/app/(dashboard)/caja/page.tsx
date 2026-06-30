@@ -151,7 +151,8 @@ export default function WorkspaceCajaPage() {
 
   const openCobroModal = (ticket: OatcCaja) => {
     setSelectedTicket(ticket);
-    setPagosMixtos([{ metodo: 'Efectivo', monto: ticket.total_calculado || 0 }]);
+    const m = ticket.total_calculado === 0 ? 'Obsequio' : 'Efectivo';
+    setPagosMixtos([{ metodo: m, monto: ticket.total_calculado || 0 }]);
     
     if (emisores.length > 0) {
       const defaultEmisor = emisores[0].id;
@@ -214,10 +215,16 @@ export default function WorkspaceCajaPage() {
       await supabase.from('pagos').insert(pagosToInsert);
     }
 
-    // 1. Marcar OATC como Pagada
+    // 1. Marcar OATC como Pagada (y FINALIZADA si correspondía cobrar al final)
+    const updatePayload: any = { estado_pago: 'Pagado' };
+    if (selectedTicket.estado_proceso === 'POR_COBRAR') {
+      updatePayload.estado_proceso = 'FINALIZADO';
+      updatePayload.hora_fin_atencion = new Date().toISOString();
+    }
+
     const { error } = await supabase
       .from('oatc')
-      .update({ estado_pago: 'Pagado' })
+      .update(updatePayload)
       .eq('id', selectedTicket.id);
 
     // 2. Liberar al Agente
