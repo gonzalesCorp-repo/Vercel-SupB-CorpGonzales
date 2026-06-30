@@ -5,7 +5,7 @@ import { Search, UserPlus, Users, Phone, CreditCard, CheckCircle2, Plus } from '
 import { Cliente, obtenerTodosLosClientes, buscarClientes, crearCliente } from '@/services/clientes';
 import { Modal } from '@/components/ui/Modal';
 
-export default function DirectorioPage() {
+export function DirectorioCRM() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);

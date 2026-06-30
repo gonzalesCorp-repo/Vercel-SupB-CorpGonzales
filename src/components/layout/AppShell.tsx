@@ -263,12 +263,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/recepcion/directorio" className={navItemClass('/recepcion/directorio')}>
-                      <UserCircle className="w-5 h-5 mr-3" />
-                      Directorio Clientes
-                    </Link>
-                  </li>
-                  <li>
                     <Link href="/recepcion/reportes" className={navItemClass('/recepcion/reportes')}>
                       <FileText className="w-5 h-5 mr-3" />
                       Reportes Recepción
