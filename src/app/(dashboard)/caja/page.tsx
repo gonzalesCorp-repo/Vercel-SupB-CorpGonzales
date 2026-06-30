@@ -41,6 +41,7 @@ export default function WorkspaceCajaPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [fechaFiltro, setFechaFiltro] = useState(new Date().toISOString().split('T')[0]);
   const [pagosMixtos, setPagosMixtos] = useState<PagoMixto[]>([]);
+  const [activeSession, setActiveSession] = useState<any | null>(null);
   
   const [emisores, setEmisores] = useState<Emisor[]>([]);
   const [series, setSeries] = useState<SerieComprobante[]>([]);
@@ -113,9 +114,26 @@ export default function WorkspaceCajaPage() {
     }
   };
 
+  const cargarSesionActiva = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: agente } = await supabase.from('agentes').select('id').eq('email', user.email).single();
+      if (agente) {
+        const { data: openSession } = await supabase
+          .from('caja_sesiones')
+          .select('id, estado')
+          .eq('cajero_id', agente.id)
+          .eq('estado', 'ABIERTA')
+          .single();
+        setActiveSession(openSession || null);
+      }
+    }
+  };
+
   useEffect(() => {
     cargarTicketsCaja();
     cargarEmisoresYSeries();
+    cargarSesionActiva();
     
     // Realtime Suscripción para Caja
     const channel = supabase.channel('realtime-caja')
@@ -187,6 +205,7 @@ export default function WorkspaceCajaPage() {
     if (comp && !compErr) {
       const pagosToInsert = pagosMixtos.map(p => ({
         comprobante_id: comp.id,
+        caja_sesion_id: activeSession?.id,
         oatc_id: selectedTicket.id,
         sede_id: sedeActiva?.id,
         metodo_pago: p.metodo,
@@ -230,6 +249,18 @@ export default function WorkspaceCajaPage() {
   return (
     <div className="p-4 md:p-8 h-full bg-slate-50/50 min-h-[calc(100vh-4rem)]">
       
+      {!activeSession && !isLoading ? (
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-6 rounded-xl mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-sm gap-4">
+          <div>
+            <h2 className="text-lg font-bold flex items-center gap-2">Caja Cerrada</h2>
+            <p className="text-sm opacity-90 mt-1">Por seguridad, debes abrir tu caja registradora en el módulo de arqueo para poder procesar cobros.</p>
+          </div>
+          <a href="/caja/arqueo" className="bg-rose-600 text-white font-bold px-6 py-3 rounded-lg shadow-sm hover:bg-rose-700 transition-colors whitespace-nowrap text-sm">
+            Ir a Abrir Caja
+          </a>
+        </div>
+      ) : null}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
@@ -312,8 +343,9 @@ export default function WorkspaceCajaPage() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button 
+                        disabled={!activeSession}
                         onClick={() => openCobroModal(ticket)}
-                        className="bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm text-xs uppercase tracking-wider"
+                        className={`font-bold px-4 py-2 rounded-lg transition-colors shadow-sm text-xs uppercase tracking-wider ${!activeSession ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
                       >
                         Cobrar
                       </button>
