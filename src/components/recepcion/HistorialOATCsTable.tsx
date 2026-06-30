@@ -20,15 +20,16 @@ export default function HistorialOATCsTable() {
   const cargarDatos = async () => {
     setIsLoading(true);
     
-    // Si hay fecha fin, le agregamos 23:59:59 para que incluya todo el día
     let fechaFinAjustada = fechaFin;
     if (fechaFin) {
-      fechaFinAjustada = `${fechaFin}T23:59:59.999Z`;
+      const d = new Date(`${fechaFin}T23:59:59.999`);
+      fechaFinAjustada = d.toISOString();
     }
     
     let fechaInicioAjustada = fechaInicio;
     if (fechaInicio) {
-      fechaInicioAjustada = `${fechaInicio}T00:00:00.000Z`;
+      const d = new Date(`${fechaInicio}T00:00:00.000`);
+      fechaInicioAjustada = d.toISOString();
     }
 
     const data = await obtenerHistorialOatcs(fechaInicioAjustada, fechaFinAjustada);
