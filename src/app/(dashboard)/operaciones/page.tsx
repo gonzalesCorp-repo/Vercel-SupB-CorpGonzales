@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus, Trash2, XCircle, CreditCard } from 'lucide-react';
 import { obtenerTicketsAsignados, pedirInsumo, PedidoInsumo, solicitarInicioAtencion, solicitarFinAtencion, actualizarServiciosOatc, validarPin, solicitarPreCobro } from '@/services/operaciones';
 import { OATC, Bien, obtenerCatalogo } from '@/services/recepcion';
@@ -24,6 +25,7 @@ export default function WorkspaceOperativoPage() {
   const [isPersonalMode, setIsPersonalMode] = useState(false);
   const [miAgenteId, setMiAgenteId] = useState('');
   const supabase = createClient();
+  const router = useRouter();
   const { showAlert, showConfirm } = useUIStore();
   
   // Modales
@@ -59,7 +61,9 @@ export default function WorkspaceOperativoPage() {
       if (agente && agente.rol === 'STAFF') {
         if (!agente.pin) {
           showAlert("Aún no has configurado tu PIN Operativo. Por favor créalo ahora.", "warning");
-          window.location.href = '/perfil';
+          setTimeout(() => {
+            router.push('/perfil');
+          }, 1500);
           return;
         }
         isPersonal = true;

@@ -90,8 +90,10 @@ export default function MiPerfilPage() {
 
           <form onSubmit={handleSavePin} className="max-w-xs space-y-4">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Nuevo PIN (4 dígitos)</label>
+              <label htmlFor="pinInput" className="block text-sm font-bold text-slate-700 mb-2">Nuevo PIN (4 dígitos)</label>
               <input
+                id="pinInput"
+                name="pinInput"
                 type="password"
                 maxLength={4}
                 value={pin}
