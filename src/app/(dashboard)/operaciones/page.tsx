@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus, Trash2 } from 'lucide-react';
+import { User, PlayCircle, PlusCircle, CheckCircle, RefreshCw, Beaker, Search, Lock, Plus, Trash2, XCircle } from 'lucide-react';
 import { obtenerTicketsAsignados, terminarAtencion, pedirInsumo, PedidoInsumo, solicitarInicioAtencion, solicitarFinAtencion, actualizarServiciosOatc } from '@/services/operaciones';
 import { OATC, Bien, obtenerCatalogo } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
