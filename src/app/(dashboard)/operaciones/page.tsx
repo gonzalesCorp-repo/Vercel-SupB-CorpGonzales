@@ -230,11 +230,15 @@ export default function WorkspaceOperativoPage() {
                   
                   {/* Info Header */}
                   <div className={`p-4 border-b ${isEnCurso ? 'bg-indigo-50' : 'bg-gray-50'} flex justify-between items-start`}>
-                    <div>
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{ticket.codigo_ticket || 'S/N'}</span>
-                      <h3 className="text-xl font-black text-gray-800 mt-0.5">{ticket.cliente_nombre}</h3>
-                      <p className="text-sm text-gray-600 mt-1"><span className="font-semibold text-gray-400">Atendido por:</span> {ticket.agente_nombre}</p>
-                    </div>
+                      <div>
+                        {ticket.codigo_ticket && (
+                          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                            {ticket.codigo_ticket}
+                          </span>
+                        )}
+                        <h3 className="text-xl font-black text-gray-800 mt-0.5">{ticket.cliente_nombre}</h3>
+                        <p className="text-sm text-gray-600 mt-1"><span className="font-semibold text-gray-400">Atendido por:</span> {ticket.agente_nombre}</p>
+                      </div>
                      <div>
                        {ticket.estado_proceso === 'PENDIENTE_CONFIRMACION' ? (
                          <span className="px-3 py-1 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest flex items-center gap-1">
@@ -244,11 +248,11 @@ export default function WorkspaceOperativoPage() {
                          <span className="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold text-xs rounded-full uppercase tracking-widest flex items-center gap-1">
                            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> En Curso
                          </span>
-                       ) : (
-                         <span className="px-3 py-1 bg-yellow-100 text-yellow-700 font-bold text-xs rounded-full uppercase tracking-widest">
-                           En Espera
-                         </span>
-                       )}
+                        ) : (
+                          <span className="px-3 py-1 bg-yellow-100 text-yellow-700 font-bold text-xs rounded-full uppercase tracking-widest">
+                            {ticket.estado_proceso === 'ASESORIA' ? 'Asesoría' : ticket.estado_proceso || 'En Espera'}
+                          </span>
+                        )}
                      </div>
                   </div>
 
@@ -256,12 +260,12 @@ export default function WorkspaceOperativoPage() {
                   <div className="p-4 bg-white">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Servicios Solicitados</p>
                     <ul className="space-y-1 mb-4">
-                      {ticket.punto_partida?.map((srv: any, i: number) => (
-                        <li key={i} className="flex justify-between items-center text-sm font-medium text-gray-700 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
-                          <span>{srv.servicio}</span>
-                          <span className="text-gray-400 font-bold">x{srv.cantidad || 1}</span>
-                        </li>
-                      ))}
+                        {ticket.punto_partida?.map((srv: any, i: number) => (
+                          <li key={i} className="flex justify-between items-center text-sm font-medium text-gray-700 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                            <span>{srv.nombre}</span>
+                            <span className="text-gray-400 font-bold">x{srv.cantidad || 1}</span>
+                          </li>
+                        ))}
                     </ul>
                     
                     {/* Panel de Botones Táctiles */}

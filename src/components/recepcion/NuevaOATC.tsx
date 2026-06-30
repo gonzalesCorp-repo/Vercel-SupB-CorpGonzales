@@ -92,7 +92,7 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
         agenteNombre, 
         puntoPartida,
         demanda ? demanda.nombre : 'Cliente',
-        demanda ? demanda.estado_disparador : 'ASESORIA'
+        'ASESORIA' // Siempre iniciar en ASESORIA
       );
       
       setMessage('¡Atención generada exitosamente!');
