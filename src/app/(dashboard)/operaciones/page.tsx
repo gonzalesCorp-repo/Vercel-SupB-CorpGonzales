@@ -256,7 +256,7 @@ export default function WorkspaceOperativoPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {tickets.map(ticket => {
-              const isEnCurso = ticket.estado_ui === 'En Curso';
+              const isEnCurso = ticket.estado_proceso === 'EN_CURSO' || ticket.estado_proceso === 'PRE_COBRADO';
               
               return (
                 <div key={ticket.id} className={`bg-white rounded-2xl border ${isEnCurso ? 'border-indigo-200 shadow-md' : 'border-gray-200 shadow-sm'} overflow-hidden transition-all`}>
