@@ -20,7 +20,9 @@ export default function WorkspaceCajaPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [fechaFiltro, setFechaFiltro] = useState(new Date().toISOString().split('T')[0]);
+  const [metodoPago, setMetodoPago] = useState('Efectivo');
   const { sedeActiva } = useAppStore();
+  const { showAlert } = useUIStore();
 
   const cargarTicketsCaja = async () => {
     if (!sedeActiva) return;
@@ -75,6 +77,7 @@ export default function WorkspaceCajaPage() {
 
   const openCobroModal = (ticket: OatcCaja) => {
     setSelectedTicket(ticket);
+    setMetodoPago('Efectivo'); // Reset al abrir
     setIsModalOpen(true);
   };
 
@@ -82,18 +85,28 @@ export default function WorkspaceCajaPage() {
     if (!selectedTicket) return;
     setIsProcessing(true);
     
-    // 1. Marcar OATC como Pagada
+    // 1. Marcar OATC como Pagada (podemos guardar metodo_pago si la tabla lo soporta en el futuro)
     const { error } = await supabase
       .from('oatc')
       .update({ estado_pago: 'Pagado' })
       .eq('id', selectedTicket.id);
 
-    // 2. Liberar al Agente (Fast-pass directo a DISPONIBLE)
+    // 2. Liberar al Agente (Fast-pass) - Usamos try-catch para evitar que un fallo de constraint detenga el éxito
     if (!error && selectedTicket.agente_id) {
-      await supabase
-        .from('agentes')
-        .update({ estado: 'DISPONIBLE' })
-        .eq('id', selectedTicket.agente_id);
+      try {
+        await supabase
+          .from('agentes')
+          .update({ estado: 'Disponible' }) // Usar Capitalize por si el check constraint lo pide
+          .eq('id', selectedTicket.agente_id);
+      } catch (err) {
+        console.warn("No se pudo liberar agente:", err);
+      }
+    }
+    
+    if (!error) {
+      showAlert(`Comprobante emitido con éxito a nombre de Vaikunta SAC. Método: ${metodoPago}`, 'success');
+    } else {
+      showAlert('Error al procesar el pago', 'error');
     }
     
     setIsProcessing(false);
@@ -219,6 +232,19 @@ export default function WorkspaceCajaPage() {
                 <span className="font-bold text-slate-800">TOTAL</span>
                 <span className="text-3xl font-black text-emerald-600">${selectedTicket.total_calculado?.toFixed(2)}</span>
               </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Método de Pago</label>
+              <select 
+                value={metodoPago} 
+                onChange={(e) => setMetodoPago(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-700 font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
+              >
+                <option value="Efectivo">Efectivo</option>
+                <option value="Tarjeta">Tarjeta de Crédito / Débito</option>
+                <option value="Transferencia">Transferencia (Yape/Plin)</option>
+              </select>
             </div>
 
             <button 

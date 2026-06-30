@@ -291,6 +291,36 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       Punto de Venta (POS)
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/caja/arqueo" className={navItemClass('/caja/arqueo')}>
+                      <FileText className="w-5 h-5 mr-3" />
+                      Arqueo de Caja
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/caja/productividad" className={navItemClass('/caja/productividad')}>
+                      <Activity className="w-5 h-5 mr-3" />
+                      Productividad
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/caja/comprobantes" className={navItemClass('/caja/comprobantes')}>
+                      <FileText className="w-5 h-5 mr-3" />
+                      Comprobantes Emitidos
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/caja/facturas" className={navItemClass('/caja/facturas')}>
+                      <FileText className="w-5 h-5 mr-3" />
+                      Gestión de Facturas
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/caja/cuentas" className={navItemClass('/caja/cuentas')}>
+                      <Briefcase className="w-5 h-5 mr-3" />
+                      Gestión de Cuentas
+                    </Link>
+                  </li>
                 </ul>
               </li>
             )}
@@ -346,6 +376,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <Link href="/admin/configuracion" className={navItemClass('/admin/configuracion')}>
                       <Settings className="w-5 h-5 mr-3" />
                       Configuración WFM
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/admin/caja-config" className={navItemClass('/admin/caja-config')}>
+                      <Settings className="w-5 h-5 mr-3" />
+                      Configuración Caja y Cobros
                     </Link>
                   </li>
                 </ul>
