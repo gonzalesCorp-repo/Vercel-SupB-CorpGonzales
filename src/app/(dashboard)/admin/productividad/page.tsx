@@ -76,7 +76,7 @@ export default function AdminProductividadPage() {
         const current = prodMap.get(oatc.agente_id)!;
         
         const items = Array.isArray(oatc.punto_partida) ? oatc.punto_partida : [];
-        items.forEach(item => {
+        items.forEach((item: any) => {
           const precio = Number(item.precio) || Number(item.precio_venta) || 0;
           const cantidad = Number(item.cantidad) || 1;
           const subtotalItem = precio * cantidad;
