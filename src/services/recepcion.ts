@@ -179,13 +179,18 @@ export async function crearOatc(
 ) {
   const sedeId = useAppStore.getState().sedeActiva?.id;
   
-  // Calcular y congelar comisiones
-  const idsBienes = puntoPartida.map(p => p.id);
-  const { data: bienesCatalog } = await supabase.from('bienes').select('id, comision_porcentaje').in('id', idsBienes);
+  // Calcular y congelar comisiones, filtrando IDs mockeados que no son UUID
+  const validUuids = puntoPartida.map(p => p.id).filter(id => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
+  
+  let bienesCatalog: any[] = [];
+  if (validUuids.length > 0) {
+    const { data } = await supabase.from('bienes').select('id, comision_porcentaje').in('id', validUuids);
+    bienesCatalog = data || [];
+  }
   
   let excepciones: any[] = [];
-  if (agenteId) {
-     const { data } = await supabase.from('agentes_comisiones').select('bien_id, comision_porcentaje').eq('agente_id', agenteId).in('bien_id', idsBienes);
+  if (agenteId && validUuids.length > 0) {
+     const { data } = await supabase.from('agentes_comisiones').select('bien_id, comision_porcentaje').eq('agente_id', agenteId).in('bien_id', validUuids);
      excepciones = data || [];
   }
 
@@ -220,7 +225,7 @@ export async function crearOatc(
     const { error: errorAgente } = await supabase
       .from('agentes')
       .update({ 
-        estado: 'TRABAJANDO',
+        estado: 'OCUPADO',
         ultimo_cambio_estado: new Date().toISOString()
       })
       .eq('id', agenteId);
