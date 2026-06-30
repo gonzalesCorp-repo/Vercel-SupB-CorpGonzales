@@ -189,9 +189,9 @@ export async function crearOatc(
      excepciones = data || [];
   }
 
-  const puntoPartidaConComision = puntoPartida.map(p => {
-     const excepcion = excepciones.find(e => e.bien_id === p.id);
-     const base = bienesCatalog?.find(b => b.id === p.id);
+  const puntoPartidaConComision = puntoPartida.map((p: any) => {
+     const excepcion = excepciones.find((e: any) => e.bien_id === p.id);
+     const base = bienesCatalog?.find((b: any) => b.id === p.id);
      const comision = excepcion ? excepcion.comision_porcentaje : (base ? base.comision_porcentaje : 0);
      return { ...p, comision_porcentaje: Number(comision) };
   });
