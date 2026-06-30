@@ -5,6 +5,7 @@ import { CreditCard, DollarSign, Search, CheckCircle, Clock, Calendar } from 'lu
 import { OATC } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
+import { useUIStore } from '@/store/useUIStore';
 import { Modal } from '@/components/ui/Modal';
 
 const supabase = createClient();
