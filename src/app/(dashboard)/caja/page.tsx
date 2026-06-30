@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CreditCard, DollarSign, Search, CheckCircle, Clock } from 'lucide-react';
+import { CreditCard, DollarSign, Search, CheckCircle, Clock, Calendar } from 'lucide-react';
 import { OATC } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
@@ -19,6 +19,7 @@ export default function WorkspaceCajaPage() {
   const [selectedTicket, setSelectedTicket] = useState<OatcCaja | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [fechaFiltro, setFechaFiltro] = useState(new Date().toISOString().split('T')[0]);
   const { sedeActiva } = useAppStore();
 
   const cargarTicketsCaja = async () => {
@@ -26,12 +27,19 @@ export default function WorkspaceCajaPage() {
     setIsLoading(true);
     
     // Traemos las OATC listas para cobro
-    const { data, error } = await supabase
+    let query = supabase
       .from('oatc')
       .select('*')
       .eq('sede_id', sedeActiva.id)
       .in('estado_proceso', ['POR_COBRAR', 'PRE_COBRADO'])
       .or('estado_pago.neq.Pagado,estado_pago.is.null');
+      
+    if (fechaFiltro) {
+      query = query.gte('created_at', `${fechaFiltro}T00:00:00.000Z`)
+                   .lte('created_at', `${fechaFiltro}T23:59:59.999Z`);
+    }
+
+    const { data, error } = await query;
       
     if (error) {
       console.error('Error cargando caja:', error);
@@ -63,7 +71,7 @@ export default function WorkspaceCajaPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [sedeActiva]);
+  }, [sedeActiva, fechaFiltro]);
 
   const openCobroModal = (ticket: OatcCaja) => {
     setSelectedTicket(ticket);
@@ -105,16 +113,25 @@ export default function WorkspaceCajaPage() {
           </h1>
           <p className="text-slate-500 mt-2">Liquidación y cobro de atenciones finalizadas.</p>
         </div>
-        
-        <div className="relative w-full sm:w-auto">
-          <input 
-            type="text" 
-            placeholder="Buscar por cliente o ticket..." 
-            className="w-full sm:w-64 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white shadow-sm"
-          />
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <div className="flex items-center bg-white border border-slate-200 rounded-xl px-3 shadow-sm h-[42px]">
+            <Calendar className="w-4 h-4 text-slate-400 mr-2" />
+            <input 
+              type="date" 
+              value={fechaFiltro} 
+              onChange={(e) => setFechaFiltro(e.target.value)}
+              className="px-1 text-sm outline-none border-none text-slate-600 font-medium bg-transparent"
+            />
+          </div>
+          <div className="relative w-full sm:w-auto">
+            <input 
+              type="text" 
+              placeholder="Buscar por cliente o ticket..." 
+              className="w-full sm:w-64 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-sm h-[42px] focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white shadow-sm"
+            />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          </div>
         </div>
-      </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
