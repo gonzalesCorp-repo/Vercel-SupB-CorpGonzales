@@ -19,7 +19,7 @@ interface ComprobanteExt {
   fecha_emision: string;
   estado: string;
   emisores: { id: string; razon_social: string; ruc: string } | null;
-  agentes: { id: string; nombres: string; apellidos: string } | null;
+  agentes: { id: string; nombre: string; } | null;
   oatc: { id: string; cliente_nombre: string; punto_partida: any[] } | null;
 }
 
@@ -38,7 +38,7 @@ export default function ComprobantesPage() {
 
   // Selectores para filtros
   const [emisoresList, setEmisoresList] = useState<{id: string, razon_social: string}[]>([]);
-  const [operativosList, setOperativosList] = useState<{id: string, nombres: string, apellidos: string}[]>([]);
+  const [operativosList, setOperativosList] = useState<{id: string, nombre: string}[]>([]);
 
   // Modales
   const [selectedComp, setSelectedComp] = useState<ComprobanteExt | null>(null);
@@ -55,14 +55,14 @@ export default function ComprobantesPage() {
     const { data: emisData } = await supabase.from('emisores').select('id, razon_social').eq('estado', 'ACTIVO');
     if (emisData) setEmisoresList(emisData);
 
-    const { data: agData } = await supabase.from('agentes').select('id, nombres, apellidos');
+    const { data: agData } = await supabase.from('agentes').select('id, nombre');
     if (agData) setOperativosList(agData);
 
     // Query principal
     let query = supabase.from('comprobantes').select(`
       *,
       emisores (id, razon_social, ruc),
-      agentes (id, nombres, apellidos),
+      agentes (id, nombre),
       oatc (id, cliente_nombre, punto_partida)
     `).eq('sede_id', sedeActiva.id).order('fecha_emision', { ascending: false });
 
@@ -167,7 +167,7 @@ export default function ComprobantesPage() {
             <label className="block text-xs font-bold text-slate-500 mb-1">Operativo / Cajero</label>
             <select value={filtroOperativo} onChange={e => setFiltroOperativo(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500">
               <option value="">Todos los Cajeros</option>
-              {operativosList.map(a => <option key={a.id} value={a.id}>{a.nombres} {a.apellidos}</option>)}
+              {operativosList.map(a => <option key={a.id} value={a.id}>{a.nombre}</option>)}
             </select>
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function ComprobantesPage() {
                       <p className="font-medium text-slate-800 truncate max-w-[200px]" title={comp.emisores?.razon_social}>{comp.emisores?.razon_social}</p>
                       <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-                        {comp.agentes?.nombres} {comp.agentes?.apellidos?.charAt(0)}.
+                        {comp.agentes?.nombre}
                       </p>
                     </td>
                     <td className="p-4 font-black text-slate-800 text-right">
@@ -280,7 +280,7 @@ export default function ComprobantesPage() {
                 </div>
                 <div>
                   <p className="text-slate-400 font-bold uppercase text-xs mb-1">Cajero / Operativo</p>
-                  <p className="font-medium text-slate-800">{selectedComp.agentes?.nombres} {selectedComp.agentes?.apellidos}</p>
+                  <p className="font-medium text-slate-800">{selectedComp.agentes?.nombre}</p>
                 </div>
               </div>
 
