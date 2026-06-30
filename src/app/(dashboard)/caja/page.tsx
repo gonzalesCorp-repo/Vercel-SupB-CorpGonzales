@@ -87,7 +87,14 @@ export default function WorkspaceCajaPage() {
 
   const cargarEmisoresYSeries = async () => {
     if (!sedeActiva) return;
-    const { data: emis } = await supabase.from('emisores').select('*').eq('sede_id', sedeActiva.id).eq('estado', 'ACTIVO');
+    let { data: emis } = await supabase.from('emisores').select('*').eq('sede_id', sedeActiva.id).eq('estado', 'ACTIVO');
+    
+    // Fallback para la demo: Si la sede actual no tiene emisores, traemos todos los disponibles
+    if (!emis || emis.length === 0) {
+      const { data: allEmis } = await supabase.from('emisores').select('*').eq('estado', 'ACTIVO');
+      if (allEmis) emis = allEmis;
+    }
+
     if (emis) setEmisores(emis);
     
     if (emis && emis.length > 0) {
@@ -313,23 +320,7 @@ export default function WorkspaceCajaPage() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Liquidación de Orden`} maxWidth="max-w-md">
         {selectedTicket && (
           <div className="mt-4">
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Detalle de Consumo</h4>
-              <ul className="space-y-2 mb-4">
-                {(selectedTicket.punto_partida || []).map((item: any, i: number) => (
-                  <li key={i} className="flex justify-between text-sm text-slate-700 font-medium">
-                    <span>{item.cantidad || 1}x {item.servicio}</span>
-                    <span>${((item.precio || 0) * (item.cantidad || 1)).toFixed(2)}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
-                <span className="font-bold text-slate-800">TOTAL</span>
-                <span className="text-3xl font-black text-emerald-600">${selectedTicket.total_calculado?.toFixed(2)}</span>
-              </div>
-            </div>
-
-            {/* Datos del Comprobante */}
+            {/* Datos del Comprobante (Reubicado arriba) */}
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Datos del Comprobante</h4>
               
@@ -383,6 +374,25 @@ export default function WorkspaceCajaPage() {
                 </div>
               </div>
             </div>
+
+            {/* Detalle de Consumo (Reubicado abajo) */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Detalle de Consumo</h4>
+              <ul className="space-y-2 mb-4">
+                {(selectedTicket.punto_partida || []).map((item: any, i: number) => (
+                  <li key={i} className="flex justify-between text-sm text-slate-700 font-medium">
+                    <span>{item.cantidad || 1}x {item.servicio}</span>
+                    <span>${((item.precio || 0) * (item.cantidad || 1)).toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
+                <span className="font-bold text-slate-800">TOTAL</span>
+                <span className="text-3xl font-black text-emerald-600">${selectedTicket.total_calculado?.toFixed(2)}</span>
+              </div>
+            </div>
+
+
 
             {/* Pagos Mixtos */}
             <div className="mb-6">
