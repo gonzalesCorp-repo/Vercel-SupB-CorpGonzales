@@ -206,7 +206,7 @@ export default function WorkspaceCajaPage() {
       try {
         await supabase
           .from('agentes')
-          .update({ estado: 'Disponible' })
+          .update({ estado: 'DISPONIBLE' })
           .eq('id', selectedTicket.agente_id);
       } catch (err) {
         console.warn("No se pudo liberar agente:", err);
