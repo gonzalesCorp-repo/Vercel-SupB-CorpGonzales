@@ -7,9 +7,9 @@ const supabase = createClient();
 
 export interface PedidoInsumo {
   id?: string;
+  oatc_id: string;
   agente_id: string;
-  agente_nombre: string;
-  insumo_solicitado: string;
+  insumos_solicitados: any;
   estado?: string;
   created_at?: string;
 }
@@ -118,12 +118,12 @@ export async function pedirInsumo(pedido: PedidoInsumo): Promise<boolean> {
   const sedeId = useAppStore.getState().sedeActiva?.id;
 
   const { error } = await supabase
-    .from('pedidos_insumos')
+    .from('lab_pedidos')
     .insert([
       {
+        oatc_id: pedido.oatc_id,
         agente_id: pedido.agente_id,
-        agente_nombre: pedido.agente_nombre,
-        insumo_solicitado: pedido.insumo_solicitado,
+        insumos_solicitados: pedido.insumos_solicitados,
         sede_id: sedeId
       }
     ]);
@@ -133,7 +133,7 @@ export async function pedirInsumo(pedido: PedidoInsumo): Promise<boolean> {
     return false;
   }
   
-  await registrarLog('OPERACIONES', `Pidió insumo a laboratorio`, { insumo: pedido.insumo_solicitado });
+  await registrarLog('OPERACIONES', `Pidió insumo a laboratorio`, { oatc_id: pedido.oatc_id });
   return true;
 }
 

@@ -232,21 +232,30 @@ export default function WorkspaceOperativoPage() {
 
   const handlePedirInsumo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!insumo || !cabinaSolicitante) return;
+    if (!insumo || !selectedOatc?.id || !selectedOatc?.agente_id) return;
     
     setIsEnviando(true);
-    // Mock envío
-    setTimeout(() => {
+    
+    const pedido = {
+      oatc_id: selectedOatc.id,
+      agente_id: selectedOatc.agente_id,
+      insumos_solicitados: [{ nombre: insumo, ubicacion: cabinaSolicitante }]
+    };
+    
+    const success = await pedirInsumo(pedido);
+    
+    if (success) {
       setMensajeOk('¡Pedido enviado a Laboratorio!');
       setInsumo('');
       setCabinaSolicitante('');
       setTimeout(() => {
         setMensajeOk('');
         setShowLabModal(false);
-        setPendingAction(null);
       }, 2000);
-      setIsEnviando(false);
-    }, 1000);
+    } else {
+      showAlert('Error enviando a Lab', 'error');
+    }
+    setIsEnviando(false);
   };
 
   return (
@@ -268,13 +277,6 @@ export default function WorkspaceOperativoPage() {
           <div className="w-full md:w-auto">
             <PanelWFM isPersonalMode={isPersonalMode} miAgenteId={miAgenteId} />
           </div>
-          <button 
-            onClick={() => setShowLabModal(true)}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-orange-100 hover:bg-orange-200 text-orange-700 px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
-          >
-            <Beaker className="w-5 h-5" />
-            Solicitud a Lab
-          </button>
           <button onClick={cargarTickets} className="p-2.5 text-gray-500 bg-gray-100 rounded-xl hover:text-indigo-600 hover:bg-indigo-50 transition shadow-sm">
             <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
@@ -378,6 +380,14 @@ export default function WorkspaceOperativoPage() {
                             className="flex-1 bg-white hover:bg-gray-50 border-2 border-dashed border-gray-300 text-gray-600 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"
                           >
                             <PlusCircle className="w-5 h-5" /> Extra / Editar
+                          </button>
+                          
+                          <button 
+                            onClick={() => { setSelectedOatc(ticket); setShowLabModal(true); }}
+                            className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                            title="Laboratorio"
+                          >
+                            <Beaker className="w-5 h-5" /> Lab
                           </button>
                           
                           {ticket.estado_pago !== 'Pagado' && ticket.estado_pago !== 'COBRADO' && ticket.estado_proceso !== 'PENDIENTE_PRE_COBRO' && ticket.estado_proceso !== 'PRE_COBRADO' && (
