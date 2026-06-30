@@ -44,6 +44,7 @@ export interface OATC {
   tipo_demanda?: string;
   cambios_pendientes?: any;
   motivo_cancelacion_id?: string;
+  motivos_cancelacion?: { motivo: string };
   created_at?: string;
 }
 
