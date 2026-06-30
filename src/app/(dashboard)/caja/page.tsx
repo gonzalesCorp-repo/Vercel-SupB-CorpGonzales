@@ -91,7 +91,7 @@ export default function WorkspaceCajaPage() {
     if (emis) setEmisores(emis);
     
     if (emis && emis.length > 0) {
-      const { data: sers } = await supabase.from('emisores_series').select('*').in('emisor_id', emis.map(e => e.id)).eq('estado', 'ACTIVO');
+      const { data: sers } = await supabase.from('emisores_series').select('*').in('emisor_id', emis.map((e: Emisor) => e.id)).eq('estado', 'ACTIVO');
       if (sers) setSeries(sers);
     }
   };
