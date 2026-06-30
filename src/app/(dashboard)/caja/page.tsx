@@ -87,19 +87,29 @@ export default function WorkspaceCajaPage() {
 
   const cargarEmisoresYSeries = async () => {
     if (!sedeActiva) return;
-    let { data: emis } = await supabase.from('emisores').select('*').eq('sede_id', sedeActiva.id).eq('estado', 'ACTIVO');
+    
+    // Obtener relaciones emisores_sedes para la sede activa
+    const { data: rels } = await supabase.from('emisores_sedes').select('emisor_id').eq('sede_id', sedeActiva.id).eq('estado', 'ACTIVO');
+    let emis: Emisor[] = [];
+    
+    if (rels && rels.length > 0) {
+      const { data: emisData } = await supabase.from('emisores').select('*').in('id', rels.map(r => r.emisor_id)).eq('estado', 'ACTIVO');
+      if (emisData) emis = emisData;
+    }
     
     // Fallback para la demo: Si la sede actual no tiene emisores, traemos todos los disponibles
-    if (!emis || emis.length === 0) {
+    if (emis.length === 0) {
       const { data: allEmis } = await supabase.from('emisores').select('*').eq('estado', 'ACTIVO');
       if (allEmis) emis = allEmis;
     }
 
-    if (emis) setEmisores(emis);
-    
-    if (emis && emis.length > 0) {
+    if (emis.length > 0) {
+      setEmisores(emis);
       const { data: sers } = await supabase.from('emisores_series').select('*').in('emisor_id', emis.map((e: Emisor) => e.id)).eq('estado', 'ACTIVO');
       if (sers) setSeries(sers);
+    } else {
+      setEmisores([]);
+      setSeries([]);
     }
   };
 
@@ -367,7 +377,7 @@ export default function WorkspaceCajaPage() {
                       className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-medium outline-none"
                     >
                       {series.filter(s => s.emisor_id === selectedEmisorId && s.tipo_comprobante === selectedTipo).map(ser => (
-                        <option key={ser.id} value={ser.id}>{ser.serie}</option>
+                        <option key={ser.id} value={ser.id}>{ser.serie} (Sig: {(ser.correlativo_actual + 1).toString().padStart(6, '0')})</option>
                       ))}
                     </select>
                   </div>
