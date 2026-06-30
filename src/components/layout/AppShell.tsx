@@ -75,6 +75,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       case 'wfm': return roles.includes('WFM') || roles.includes('RECEPCION');
       case 'admin': return false; // Administradores ya cubiertos
       case 'dev': return false; // Devs ya cubiertos
+      case 'perfil': return true; // Acceso global
+      case 'configuracion': return true; // Acceso global
       default: return false;
     }
   };
