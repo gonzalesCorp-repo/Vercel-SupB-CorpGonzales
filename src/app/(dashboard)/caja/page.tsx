@@ -31,7 +31,7 @@ export default function WorkspaceCajaPage() {
       .select('*')
       .eq('sede_id', sedeActiva.id)
       .in('estado_proceso', ['POR_COBRAR', 'PRE_COBRADO'])
-      .neq('estado_pago', 'Pagado');
+      .or('estado_pago.neq.Pagado,estado_pago.is.null');
       
     if (error) {
       console.error('Error cargando caja:', error);
