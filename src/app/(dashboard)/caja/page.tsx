@@ -132,6 +132,7 @@ export default function WorkspaceCajaPage() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           </div>
         </div>
+      </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
