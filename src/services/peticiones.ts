@@ -105,7 +105,7 @@ export async function obtenerMiPeticionPendiente(): Promise<Peticion | null> {
     .eq('sede_id', sedeActiva.id)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
   return data as Peticion;
@@ -124,7 +124,7 @@ export async function obtenerPeticionPendientePorAgente(agente_id: string): Prom
     .eq('sede_id', sedeActiva.id)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
   return data as Peticion;

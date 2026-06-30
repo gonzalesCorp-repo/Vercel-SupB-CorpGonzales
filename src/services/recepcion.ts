@@ -236,7 +236,6 @@ export async function obtenerOatcsActivosDelDia(): Promise<OATC[]> {
     .from('oatc')
     .select('*')
     .eq('sede_id', sedeId)
-    .gte('created_at', startOfDay.toISOString())
     .neq('estado_proceso', 'FINALIZADO')
     .neq('estado_proceso', 'CANCELADO')
     .order('created_at', { ascending: false });
