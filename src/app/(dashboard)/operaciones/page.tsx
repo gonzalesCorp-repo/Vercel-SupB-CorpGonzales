@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
 import PanelWFM from '@/components/wfm/PanelWFM';
 import { useUIStore } from '@/store/useUIStore';
+import { useAppStore } from '@/store/useAppStore';
 
 // Extendemos OATC localmente para la demo
 interface OATCExtended extends OATC {
@@ -27,6 +28,7 @@ export default function WorkspaceOperativoPage() {
   const supabase = createClient();
   const router = useRouter();
   const { showAlert, showConfirm } = useUIStore();
+  const { sedeActiva } = useAppStore();
   
   // Modales
   const [showLabModal, setShowLabModal] = useState(false);
@@ -109,7 +111,7 @@ export default function WorkspaceOperativoPage() {
     if (activeTab === 'historial') {
       cargarHistorial();
     }
-  }, [activeTab, fechaInicio, fechaFin, miAgenteId]);
+  }, [activeTab, fechaInicio, fechaFin, miAgenteId, sedeActiva]);
 
   const cargarHistorial = async () => {
     setIsLoadingHistorial(true);
@@ -121,9 +123,8 @@ export default function WorkspaceOperativoPage() {
     if (isPersonalMode && miAgenteId) {
       query = query.eq('agente_id', miAgenteId);
     } else {
-      const sedeId = useAppStore.getState().sedeActiva?.id;
-      if (sedeId) {
-        query = query.eq('sede_id', sedeId);
+      if (sedeActiva?.id) {
+        query = query.eq('sede_id', sedeActiva.id);
       }
     }
 
