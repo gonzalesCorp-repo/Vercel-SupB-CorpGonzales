@@ -157,7 +157,8 @@ export async function actualizarServiciosOatc(oatcId: string, nuevosServicios: a
 
 // 5. Solicitar inicio de atencin
 export async function solicitarInicioAtencion(oatcId: string, userRol?: string): Promise<boolean> {
-  const isAutoApproved = userRol === 'ADMIN' || userRol === 'RECEPCION';
+  const rolUpper = userRol ? userRol.toUpperCase() : '';
+  const isAutoApproved = rolUpper === 'ADMIN' || rolUpper === 'RECEPCION' || rolUpper === 'SUPERADMIN';
   const newState = isAutoApproved ? 'EN_CURSO' : 'PENDIENTE_INICIO';
 
   const { error } = await supabase
@@ -166,14 +167,15 @@ export async function solicitarInicioAtencion(oatcId: string, userRol?: string):
     .eq('id', oatcId);
     
   if (error) return false;
-  await registrarLog('OPERACIONES', isAutoApproved ? `Inicio de atencin auto-aprobado` : `Solicitud de inicio de atencin`, { oatc_id: oatcId });
+  await registrarLog('OPERACIONES', isAutoApproved ? `Inicio de atención auto-aprobado` : `Solicitud de inicio de atención`, { oatc_id: oatcId });
   return true;
 }
 
 // 6. Solicitar fin de atencin
 export async function solicitarFinAtencion(oatc: any, userRol?: string): Promise<boolean> {
-  const isPrepaid = oatc.estado_pago === 'Pagado' || oatc.estado_pago === 'COBRADO';
-  const isAutoApproved = userRol === 'ADMIN' || userRol === 'RECEPCION';
+  const isPrepaid = oatc.estado_pago === 'Pagado' || oatc.estado_pago === 'COBRADO' || oatc.estado_pago === 'PRE_COBRADO';
+  const rolUpper = userRol ? userRol.toUpperCase() : '';
+  const isAutoApproved = rolUpper === 'ADMIN' || rolUpper === 'RECEPCION' || rolUpper === 'SUPERADMIN';
 
   let newState = 'PENDIENTE_TERMINO';
   if (isPrepaid) {
