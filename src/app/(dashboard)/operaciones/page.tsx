@@ -106,19 +106,26 @@ export default function WorkspaceOperativoPage() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'historial' && miAgenteId) {
+    if (activeTab === 'historial') {
       cargarHistorial();
     }
   }, [activeTab, fechaInicio, fechaFin, miAgenteId]);
 
   const cargarHistorial = async () => {
-    if (!miAgenteId) return;
     setIsLoadingHistorial(true);
     
     let query = supabase.from('oatc').select('*')
-      .eq('agente_id', miAgenteId)
-      .eq('estado_proceso', 'FINALIZADO')
+      .in('estado_proceso', ['FINALIZADO', 'POR_COBRAR', 'PRE_COBRADO', 'CANCELADO'])
       .order('created_at', { ascending: false });
+      
+    if (isPersonalMode && miAgenteId) {
+      query = query.eq('agente_id', miAgenteId);
+    } else {
+      const sedeId = useAppStore.getState().sedeActiva?.id;
+      if (sedeId) {
+        query = query.eq('sede_id', sedeId);
+      }
+    }
 
     if (fechaInicio) query = query.gte('created_at', `${fechaInicio}T00:00:00.000Z`);
     if (fechaFin) query = query.lte('created_at', `${fechaFin}T23:59:59.999Z`);
@@ -273,23 +280,21 @@ export default function WorkspaceOperativoPage() {
         </div>
       </div>
 
-      {/* Tabs para modo personal */}
-      {isPersonalMode && (
-        <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mb-6">
-          <button
-            onClick={() => setActiveTab('piso')}
-            className={`flex-1 py-3 text-sm font-bold rounded-lg transition-colors ${activeTab === 'piso' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-gray-50'}`}
-          >
-            Atenciones en Piso
-          </button>
-          <button
-            onClick={() => setActiveTab('historial')}
-            className={`flex-1 py-3 text-sm font-bold rounded-lg transition-colors ${activeTab === 'historial' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-gray-50'}`}
-          >
-            Mi Historial
-          </button>
-        </div>
-      )}
+      {/* Tabs de navegación */}
+      <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mb-6">
+        <button
+          onClick={() => setActiveTab('piso')}
+          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-colors ${activeTab === 'piso' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-gray-50'}`}
+        >
+          Atenciones en Piso
+        </button>
+        <button
+          onClick={() => setActiveTab('historial')}
+          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-colors ${activeTab === 'historial' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-gray-50'}`}
+        >
+          Mi Historial
+        </button>
+      </div>
 
       {/* Contenido Atenciones en Piso */}
       {activeTab === 'piso' && (
@@ -484,8 +489,14 @@ export default function WorkspaceOperativoPage() {
                           {(ticket.punto_partida || []).map((s: any) => s.nombre).join(', ')}
                         </td>
                         <td className="py-3 px-4">
-                          <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-md">
-                            FINALIZADO
+                          <span className={`px-2 py-1 text-xs font-bold rounded-md ${
+                            ticket.estado_proceso === 'CANCELADO' 
+                              ? 'bg-red-100 text-red-700' 
+                              : ticket.estado_proceso === 'POR_COBRAR' || ticket.estado_proceso === 'PRE_COBRADO'
+                                ? 'bg-orange-100 text-orange-700'
+                                : 'bg-emerald-100 text-emerald-700'
+                          }`}>
+                            {ticket.estado_proceso}
                           </span>
                         </td>
                       </tr>
