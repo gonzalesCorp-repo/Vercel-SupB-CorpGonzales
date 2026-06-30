@@ -55,8 +55,13 @@ export default function WorkspaceOperativoPage() {
     let personalId = '';
     
     if (user?.email) {
-      const { data: agente } = await supabase.from('agentes').select('id, rol').eq('email', user.email).single();
+      const { data: agente } = await supabase.from('agentes').select('id, rol, pin').eq('email', user.email).single();
       if (agente && agente.rol === 'STAFF') {
+        if (!agente.pin) {
+          showAlert("Aún no has configurado tu PIN Operativo. Por favor créalo ahora.", "warning");
+          window.location.href = '/perfil';
+          return;
+        }
         isPersonal = true;
         personalId = agente.id;
       }

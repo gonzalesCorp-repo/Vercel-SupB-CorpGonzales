@@ -370,6 +370,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Mi Cuenta</span>
               <ul className="mt-2 space-y-1">
                 <li>
+                  <Link href="/perfil" className={navItemClass('/perfil')}>
+                    <User className="w-5 h-5 mr-3" />
+                    Mi Perfil (PIN)
+                  </Link>
+                </li>
+                <li>
                   <Link href="/configuracion" className={navItemClass('/configuracion')}>
                     <Palette className="w-5 h-5 mr-3" />
                     Configuración Visual
