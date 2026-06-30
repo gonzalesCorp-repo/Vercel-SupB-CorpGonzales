@@ -93,7 +93,7 @@ export default function WorkspaceCajaPage() {
     let emis: Emisor[] = [];
     
     if (rels && rels.length > 0) {
-      const { data: emisData } = await supabase.from('emisores').select('*').in('id', rels.map(r => r.emisor_id)).eq('estado', 'ACTIVO');
+      const { data: emisData } = await supabase.from('emisores').select('*').in('id', rels.map((r: any) => r.emisor_id)).eq('estado', 'ACTIVO');
       if (emisData) emis = emisData;
     }
     
