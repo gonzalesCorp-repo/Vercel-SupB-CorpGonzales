@@ -19,6 +19,20 @@ interface PagoMixto {
   monto: number;
 }
 
+interface Emisor {
+  id: string;
+  razon_social: string;
+  ruc: string;
+}
+
+interface SerieComprobante {
+  id: string;
+  emisor_id: string;
+  tipo_comprobante: string;
+  serie: string;
+  correlativo_actual: number;
+}
+
 export default function WorkspaceCajaPage() {
   const [tickets, setTickets] = useState<OatcCaja[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +41,13 @@ export default function WorkspaceCajaPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [fechaFiltro, setFechaFiltro] = useState(new Date().toISOString().split('T')[0]);
   const [pagosMixtos, setPagosMixtos] = useState<PagoMixto[]>([]);
+  
+  const [emisores, setEmisores] = useState<Emisor[]>([]);
+  const [series, setSeries] = useState<SerieComprobante[]>([]);
+  const [selectedEmisorId, setSelectedEmisorId] = useState<string>('');
+  const [selectedTipo, setSelectedTipo] = useState<string>('BOLETA');
+  const [selectedSerieId, setSelectedSerieId] = useState<string>('');
+
   const { sedeActiva } = useAppStore();
   const { showAlert } = useUIStore();
 
@@ -64,8 +85,20 @@ export default function WorkspaceCajaPage() {
     setIsLoading(false);
   };
 
+  const cargarEmisoresYSeries = async () => {
+    if (!sedeActiva) return;
+    const { data: emis } = await supabase.from('emisores').select('*').eq('sede_id', sedeActiva.id).eq('estado', 'ACTIVO');
+    if (emis) setEmisores(emis);
+    
+    if (emis && emis.length > 0) {
+      const { data: sers } = await supabase.from('emisores_series').select('*').in('emisor_id', emis.map(e => e.id)).eq('estado', 'ACTIVO');
+      if (sers) setSeries(sers);
+    }
+  };
+
   useEffect(() => {
     cargarTicketsCaja();
+    cargarEmisoresYSeries();
     
     // Realtime Suscripción para Caja
     const channel = supabase.channel('realtime-caja')
@@ -84,6 +117,16 @@ export default function WorkspaceCajaPage() {
   const openCobroModal = (ticket: OatcCaja) => {
     setSelectedTicket(ticket);
     setPagosMixtos([{ metodo: 'Efectivo', monto: ticket.total_calculado || 0 }]);
+    
+    if (emisores.length > 0) {
+      const defaultEmisor = emisores[0].id;
+      setSelectedEmisorId(defaultEmisor);
+      setSelectedTipo('BOLETA');
+      const defaultSerie = series.find(s => s.emisor_id === defaultEmisor && s.tipo_comprobante === 'BOLETA');
+      if (defaultSerie) setSelectedSerieId(defaultSerie.id);
+      else setSelectedSerieId('');
+    }
+    
     setIsModalOpen(true);
   };
 
@@ -91,29 +134,73 @@ export default function WorkspaceCajaPage() {
     if (!selectedTicket) return;
     setIsProcessing(true);
     
-    // 1. Marcar OATC como Pagada (podemos guardar metodo_pago si la tabla lo soporta en el futuro)
+    const { data: { user } } = await supabase.auth.getUser();
+    let cajero_id = null;
+    if (user) {
+      const { data: agente } = await supabase.from('agentes').select('id').eq('email', user.email).single();
+      if (agente) cajero_id = agente.id;
+    }
+    
+    const serieObj = series.find(s => s.id === selectedSerieId);
+    if (!serieObj) {
+      showAlert('Seleccione una serie válida', 'error');
+      setIsProcessing(false);
+      return;
+    }
+    
+    const nextCorrelativo = serieObj.correlativo_actual + 1;
+    const totalCalc = selectedTicket.total_calculado || 0;
+    
+    // Iniciar el registro de comprobante
+    await supabase.from('emisores_series').update({ correlativo_actual: nextCorrelativo }).eq('id', serieObj.id);
+
+    const { data: comp, error: compErr } = await supabase.from('comprobantes').insert({
+      oatc_id: selectedTicket.id,
+      sede_id: sedeActiva?.id,
+      cajero_id: cajero_id,
+      emisor_id: selectedEmisorId,
+      tipo_comprobante: selectedTipo,
+      serie: serieObj.serie,
+      correlativo: nextCorrelativo,
+      subtotal: totalCalc / 1.18,
+      igv: totalCalc - (totalCalc / 1.18),
+      total: totalCalc
+    }).select().single();
+    
+    if (comp && !compErr) {
+      const pagosToInsert = pagosMixtos.map(p => ({
+        comprobante_id: comp.id,
+        oatc_id: selectedTicket.id,
+        sede_id: sedeActiva?.id,
+        metodo_pago: p.metodo,
+        monto: p.monto
+      }));
+      await supabase.from('pagos').insert(pagosToInsert);
+    }
+
+    // 1. Marcar OATC como Pagada
     const { error } = await supabase
       .from('oatc')
       .update({ estado_pago: 'Pagado' })
       .eq('id', selectedTicket.id);
 
-    // 2. Liberar al Agente (Fast-pass) - Usamos try-catch para evitar que un fallo de constraint detenga el éxito
+    // 2. Liberar al Agente
     if (!error && selectedTicket.agente_id) {
       try {
         await supabase
           .from('agentes')
-          .update({ estado: 'Disponible' }) // Usar Capitalize por si el check constraint lo pide
+          .update({ estado: 'Disponible' })
           .eq('id', selectedTicket.agente_id);
       } catch (err) {
         console.warn("No se pudo liberar agente:", err);
       }
     }
     
-    if (!error) {
+    if (!error && !compErr) {
       const metodosDetalle = pagosMixtos.map(p => `${p.metodo} ($${p.monto.toFixed(2)})`).join(', ');
-      showAlert(`Comprobante emitido con éxito a nombre de Vaikunta SAC. Pagos: ${metodosDetalle}`, 'success');
+      showAlert(`Comprobante ${serieObj.serie}-${nextCorrelativo.toString().padStart(6, '0')} emitido con éxito. Pagos: ${metodosDetalle}`, 'success');
     } else {
-      showAlert('Error al procesar el pago', 'error');
+      showAlert('Error al procesar el pago o comprobante', 'error');
     }
     
     setIsProcessing(false);
@@ -239,6 +326,61 @@ export default function WorkspaceCajaPage() {
               <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
                 <span className="font-bold text-slate-800">TOTAL</span>
                 <span className="text-3xl font-black text-emerald-600">${selectedTicket.total_calculado?.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Datos del Comprobante */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Datos del Comprobante</h4>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Emisor (Razón Social)</label>
+                  <select 
+                    value={selectedEmisorId} 
+                    onChange={(e) => {
+                      setSelectedEmisorId(e.target.value);
+                      const defSerie = series.find(s => s.emisor_id === e.target.value && s.tipo_comprobante === selectedTipo);
+                      setSelectedSerieId(defSerie ? defSerie.id : '');
+                    }}
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-medium outline-none"
+                  >
+                    {emisores.map(emi => (
+                      <option key={emi.id} value={emi.id}>{emi.razon_social} (RUC: {emi.ruc})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Tipo</label>
+                    <select 
+                      value={selectedTipo} 
+                      onChange={(e) => {
+                        setSelectedTipo(e.target.value);
+                        const defSerie = series.find(s => s.emisor_id === selectedEmisorId && s.tipo_comprobante === e.target.value);
+                        setSelectedSerieId(defSerie ? defSerie.id : '');
+                      }}
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-medium outline-none"
+                    >
+                      <option value="BOLETA">Boleta</option>
+                      <option value="FACTURA">Factura</option>
+                      <option value="TICKET">Ticket Interno</option>
+                    </select>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Serie</label>
+                    <select 
+                      value={selectedSerieId} 
+                      onChange={(e) => setSelectedSerieId(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-medium outline-none"
+                    >
+                      {series.filter(s => s.emisor_id === selectedEmisorId && s.tipo_comprobante === selectedTipo).map(ser => (
+                        <option key={ser.id} value={ser.id}>{ser.serie}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
 
