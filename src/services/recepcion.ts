@@ -254,12 +254,7 @@ export async function obtenerHistorialOatcs(fechaInicio?: string, fechaFin?: str
 
   let query = supabase
     .from('oatc')
-    .select(`
-      *,
-      motivos_cancelacion (
-        motivo
-      )
-    `)
+    .select('*')
     .eq('sede_id', sedeId)
     .order('created_at', { ascending: false });
 
@@ -275,14 +270,30 @@ export async function obtenerHistorialOatcs(fechaInicio?: string, fechaFin?: str
     query = query.gte('created_at', startOfDay.toISOString());
   }
 
-  const { data, error } = await query;
+  const { data: oatcsData, error } = await query;
 
   if (error) {
     console.error("Error obteniendo el historial de OATCs:", error);
     return [];
   }
 
-  return data as OATC[];
+  // Fetch motivos to join manually (avoids foreign key issues if not configured in DB)
+  const { data: motivosData } = await supabase.from('motivos_cancelacion').select('*');
+  
+  if (oatcsData && motivosData) {
+    const motivosMap = motivosData.reduce((acc: Record<string, string>, motivo: MotivoCancelacion) => {
+      acc[motivo.id] = motivo.motivo;
+      return acc;
+    }, {});
+
+    oatcsData.forEach((oatc: OATC) => {
+      if (oatc.motivo_cancelacion_id && motivosMap[oatc.motivo_cancelacion_id]) {
+        oatc.motivos_cancelacion = { motivo: motivosMap[oatc.motivo_cancelacion_id] };
+      }
+    });
+  }
+
+  return (oatcsData || []) as OATC[];
 }
 
 export async function obtenerAutorizacionesPendientes(): Promise<OATC[]> {
