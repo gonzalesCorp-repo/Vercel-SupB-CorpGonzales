@@ -44,10 +44,20 @@ export async function getCatalogo(filtroTipo: string, mostrarInactivos: boolean 
   return data;
 }
 
+function getFirst3Letters(str: string) {
+  if (!str) return 'XXX';
+  return String(str).replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase().padEnd(3, 'X');
+}
+
 export async function guardarBien(bienId: string | null, payload: any, sedeId: string, isAdmin: boolean) {
   const { nombre, categoria, tipo_bien, precio_venta, atributos_producto, stockInicial } = payload;
   
   let id = bienId;
+
+  // Handles Generics
+  if (!atributos_producto.marca) atributos_producto.marca = 'Marca_Generica';
+  if (!atributos_producto.linea) atributos_producto.linea = 'Linea_Generica';
+  if (!atributos_producto.presentacion) atributos_producto.presentacion = 'Pres_Generica';
 
   if (id) {
     // UPDATE
@@ -107,5 +117,47 @@ export async function inactivarBien(id: string, inactivar: boolean) {
   const { error } = await supabaseAdmin.from('bienes').update({ atributos_producto: atributos }).eq('id', id);
   if (error) throw new Error(error.message);
   
+  return { success: true };
+}
+
+export async function actualizarJerarquia(tipo: 'marca' | 'linea', valorAntiguo: string, valorNuevo: string) {
+  if (!valorNuevo || !valorAntiguo) throw new Error("Valores inválidos");
+  const { data: items, error: fetchError } = await supabaseAdmin.from('bienes').select('id, nombre, atributos_producto').eq(`atributos_producto->>${tipo}`, valorAntiguo);
+  if (fetchError) throw new Error(fetchError.message);
+  
+  if (!items || items.length === 0) return { success: true };
+
+  for (const item of items) {
+    const attr = item.atributos_producto || {};
+    attr[tipo] = valorNuevo;
+    
+    // Recalculate SKU
+    const tipoSku = attr.tipo_catalogo === 'insumo' ? 'INS' : 'RET';
+    attr.sku = `${getFirst3Letters(attr.marca)}-${getFirst3Letters(attr.linea)}-${getFirst3Letters(item.nombre)}-${tipoSku}-${getFirst3Letters(attr.presentacion)}`;
+    
+    // Keep in sync the main category if it's the line
+    const updatePayload: any = { atributos_producto: attr };
+    if (tipo === 'linea' && item.categoria === valorAntiguo) {
+      updatePayload.categoria = valorNuevo;
+    }
+
+    await supabaseAdmin.from('bienes').update(updatePayload).eq('id', item.id);
+  }
+  return { success: true };
+}
+
+export async function inactivarJerarquia(tipo: 'marca' | 'linea', valor: string, inactivar: boolean) {
+  const { data: items, error: fetchError } = await supabaseAdmin.from('bienes').select('id, atributos_producto').eq(`atributos_producto->>${tipo}`, valor);
+  if (fetchError) throw new Error(fetchError.message);
+  
+  if (!items || items.length === 0) return { success: true };
+
+  for (const item of items) {
+    const attr = item.atributos_producto || {};
+    if (inactivar) attr.estado = 'inactivo';
+    else delete attr.estado;
+    
+    await supabaseAdmin.from('bienes').update({ atributos_producto: attr }).eq('id', item.id);
+  }
   return { success: true };
 }

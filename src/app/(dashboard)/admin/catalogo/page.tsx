@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Package, Search, Plus, RefreshCw, Box, Tag, DollarSign, Database, ChevronDown, ChevronRight, Edit2, Archive, ArchiveRestore } from 'lucide-react';
-import { getCatalogo, guardarBien, inactivarBien } from './actions';
+import { Package, Search, Plus, RefreshCw, Box, Tag, DollarSign, Database, ChevronDown, ChevronRight, Edit2, Archive, ArchiveRestore, Edit3 } from 'lucide-react';
+import { getCatalogo, guardarBien, inactivarBien, actualizarJerarquia, inactivarJerarquia } from './actions';
 import { useAppStore } from '@/store/useAppStore';
 
 function getFirst3Letters(str: string) {
@@ -57,8 +57,8 @@ export default function CatalogoMasterPage() {
   const groupedData = useMemo(() => {
     const groups: Record<string, Record<string, any[]>> = {};
     bienesFiltrados.forEach(bien => {
-      const marca = bien.atributos_producto?.marca || 'Sin Marca';
-      const linea = bien.atributos_producto?.linea || bien.categoria || 'Sin Línea';
+      const marca = bien.atributos_producto?.marca || 'Marca_Generica';
+      const linea = bien.atributos_producto?.linea || bien.categoria || 'Linea_Generica';
       if (!groups[marca]) groups[marca] = {};
       if (!groups[marca][linea]) groups[marca][linea] = [];
       groups[marca][linea].push(bien);
@@ -99,7 +99,10 @@ export default function CatalogoMasterPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const tipoSku = formData.tipo_catalogo === 'insumo' ? 'INS' : 'RET';
-    const sku = `${getFirst3Letters(formData.marca)}-${getFirst3Letters(formData.linea)}-${getFirst3Letters(formData.nombre)}-${tipoSku}-${getFirst3Letters(formData.presentacion)}`;
+    const skuMarca = formData.marca || 'Marca_Generica';
+    const skuLinea = formData.linea || 'Linea_Generica';
+    const skuPres = formData.presentacion || 'Pres_Generica';
+    const sku = `${getFirst3Letters(skuMarca)}-${getFirst3Letters(skuLinea)}-${getFirst3Letters(formData.nombre)}-${tipoSku}-${getFirst3Letters(skuPres)}`;
     
     const payload = {
       nombre: formData.nombre,
@@ -136,6 +139,32 @@ export default function CatalogoMasterPage() {
     } catch (err: any) {
       alert("Error: " + err.message);
     }
+  };
+
+  const handleRenameHierarchy = async (tipo: 'marca' | 'linea', valorAntiguo: string) => {
+    const nuevo = prompt(`Ingresa el nuevo nombre para la ${tipo} '${valorAntiguo}':\n(Esto recalculará todos los SKUs asociados)`, valorAntiguo);
+    if (!nuevo || nuevo === valorAntiguo) return;
+    
+    setIsLoading(true);
+    try {
+      await actualizarJerarquia(tipo, valorAntiguo, nuevo);
+      cargarBienes();
+    } catch (e: any) {
+      alert("Error renombrando: " + e.message);
+    }
+    setIsLoading(false);
+  };
+
+  const handleDisableHierarchy = async (tipo: 'marca' | 'linea', valor: string, activar: boolean = false) => {
+    if (!confirm(`¿Estás seguro de que deseas ${activar ? 'REACTIVAR' : 'INACTIVAR'} todos los productos de la ${tipo} '${valor}'?`)) return;
+    setIsLoading(true);
+    try {
+      await inactivarJerarquia(tipo, valor, !activar);
+      cargarBienes();
+    } catch (e: any) {
+      alert("Error cambiando estado masivo: " + e.message);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -219,18 +248,24 @@ export default function CatalogoMasterPage() {
             <div className="space-y-4">
               {Object.entries(groupedData).map(([marca, lineas]) => (
                 <div key={marca} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                  <button 
-                    onClick={() => toggleMarca(marca)}
-                    className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors group">
+                    <button 
+                      onClick={() => toggleMarca(marca)}
+                      className="flex items-center gap-3 flex-1 text-left"
+                    >
                       {expandedMarcas[marca] ? <ChevronDown className="w-5 h-5 text-gray-500" /> : <ChevronRight className="w-5 h-5 text-gray-500" />}
                       <span className="font-black text-gray-800 text-lg">{marca}</span>
+                    </button>
+                    <div className="flex items-center gap-3">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                        <button onClick={() => handleRenameHierarchy('marca', marca)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Renombrar Marca (Afecta SKUs)"><Edit3 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDisableHierarchy('marca', marca, false)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Inactivar toda la Marca"><Archive className="w-4 h-4" /></button>
+                      </div>
+                      <span className="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded-md">
+                        {Object.values(lineas).flat().length} ítems
+                      </span>
                     </div>
-                    <span className="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded-md">
-                      {Object.values(lineas).flat().length} ítems
-                    </span>
-                  </button>
+                  </div>
                   
                   {expandedMarcas[marca] && (
                     <div className="p-2 space-y-2 bg-white">
@@ -238,15 +273,21 @@ export default function CatalogoMasterPage() {
                         const lineaKey = `${marca}-${linea}`;
                         return (
                           <div key={lineaKey} className="border border-indigo-50 rounded-lg overflow-hidden">
-                            <button 
-                              onClick={() => toggleLinea(lineaKey)}
-                              className="w-full flex items-center justify-between p-3 bg-indigo-50/50 hover:bg-indigo-50 transition-colors"
-                            >
-                              <div className="flex items-center gap-2 pl-6">
+                            <div className="flex items-center justify-between p-3 bg-indigo-50/50 hover:bg-indigo-50 transition-colors group/linea">
+                              <button 
+                                onClick={() => toggleLinea(lineaKey)}
+                                className="flex items-center gap-2 pl-6 flex-1 text-left"
+                              >
                                 {expandedLineas[lineaKey] ? <ChevronDown className="w-4 h-4 text-indigo-500" /> : <ChevronRight className="w-4 h-4 text-indigo-500" />}
                                 <span className="font-bold text-indigo-900">{linea}</span>
+                              </button>
+                              <div className="flex items-center gap-2 pr-2">
+                                <div className="opacity-0 group-hover/linea:opacity-100 transition-opacity flex items-center gap-1">
+                                  <button onClick={() => handleRenameHierarchy('linea', linea)} className="p-1 text-indigo-400 hover:text-blue-600 hover:bg-blue-100 rounded-md transition-colors" title="Renombrar Línea (Afecta SKUs)"><Edit3 className="w-3 h-3" /></button>
+                                  <button onClick={() => handleDisableHierarchy('linea', linea, false)} className="p-1 text-indigo-400 hover:text-red-600 hover:bg-red-100 rounded-md transition-colors" title="Inactivar toda la Línea"><Archive className="w-3 h-3" /></button>
+                                </div>
                               </div>
-                            </button>
+                            </div>
                             
                             {expandedLineas[lineaKey] && (
                               <div className="p-0 overflow-x-auto">
@@ -264,7 +305,7 @@ export default function CatalogoMasterPage() {
                                     {items.map(bien => {
                                       const isInactive = bien.atributos_producto?.estado === 'inactivo';
                                       return (
-                                        <tr key={bien.id} className={`hover:bg-gray-50/50 transition-colors group ${isInactive ? 'opacity-50 grayscale' : ''}`}>
+                                        <tr key={bien.id} className={`hover:bg-gray-50/50 transition-colors group/item ${isInactive ? 'opacity-50 grayscale' : ''}`}>
                                           <td className="py-2 px-4">
                                             <span className={`font-mono text-xs font-bold px-2 py-1 rounded-md ${isInactive ? 'bg-gray-100 text-gray-500' : 'bg-indigo-50 text-indigo-600'}`}>
                                               {bien.atributos_producto?.sku || '---'}
@@ -272,7 +313,7 @@ export default function CatalogoMasterPage() {
                                             {isInactive && <span className="ml-2 text-[10px] bg-red-100 text-red-600 px-1 rounded font-bold">INACTIVO</span>}
                                           </td>
                                           <td className="py-2 px-4">
-                                            <div className="font-bold text-gray-900 group-hover:text-indigo-700">{bien.nombre}</div>
+                                            <div className="font-bold text-gray-900 group-hover/item:text-indigo-700">{bien.nombre}</div>
                                             <div className="text-xs text-gray-500 flex items-center gap-1"><Box className="w-3 h-3" /> {bien.atributos_producto?.presentacion || 'Unidad'}</div>
                                           </td>
                                           <td className="py-2 px-4">
@@ -299,7 +340,7 @@ export default function CatalogoMasterPage() {
                                             </div>
                                           </td>
                                           <td className="py-2 px-4 text-center">
-                                            <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex justify-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
                                               <button onClick={() => openModal(bien)} className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Editar">
                                                 <Edit2 className="w-4 h-4" />
                                               </button>
@@ -345,16 +386,16 @@ export default function CatalogoMasterPage() {
                 
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-gray-700">Marca</label>
-                  <input required type="text" value={formData.marca} onChange={e => setFormData({...formData, marca: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <input type="text" placeholder="Ej. Kerastase" value={formData.marca} onChange={e => setFormData({...formData, marca: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-gray-700">Línea / Categoría</label>
-                  <input required type="text" value={formData.linea} onChange={e => setFormData({...formData, linea: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <input type="text" placeholder="Ej. Densifique" value={formData.linea} onChange={e => setFormData({...formData, linea: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-gray-700">Presentación</label>
-                  <input required type="text" placeholder="Ej. 500ml, Unidad, Caja" value={formData.presentacion} onChange={e => setFormData({...formData, presentacion: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <input type="text" placeholder="Ej. 500ml, Unidad, Caja" value={formData.presentacion} onChange={e => setFormData({...formData, presentacion: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-gray-700">Proveedor Principal</label>
@@ -392,7 +433,7 @@ export default function CatalogoMasterPage() {
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">SKU Generado Automáticamente</p>
                   <p className="text-sm font-mono text-gray-800 mt-1 bg-white px-2 py-1 border border-gray-200 rounded-md inline-block">
-                    {`${getFirst3Letters(formData.marca)}-${getFirst3Letters(formData.linea)}-${getFirst3Letters(formData.nombre)}-${formData.tipo_catalogo === 'insumo' ? 'INS' : 'RET'}-${getFirst3Letters(formData.presentacion)}`}
+                    {`${getFirst3Letters(formData.marca || 'Marca_Generica')}-${getFirst3Letters(formData.linea || 'Linea_Generica')}-${getFirst3Letters(formData.nombre)}-${formData.tipo_catalogo === 'insumo' ? 'INS' : 'RET'}-${getFirst3Letters(formData.presentacion || 'Pres_Generica')}`}
                   </p>
                 </div>
               </div>
