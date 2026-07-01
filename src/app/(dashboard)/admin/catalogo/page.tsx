@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Package, Search, Filter, RefreshCw, Box, Tag, DollarSign, Database } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { getCatalogo } from './actions';
 
 export default function CatalogoMasterPage() {
   const [bienes, setBienes] = useState<any[]>([]);
@@ -10,23 +10,16 @@ export default function CatalogoMasterPage() {
   const [filtroTexto, setFiltroTexto] = useState('');
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'insumo' | 'producto' | 'servicio'>('todos');
 
-  const supabase = createClient();
-
   const cargarBienes = async () => {
     setIsLoading(true);
-    let query = supabase.from('bienes').select('*').order('created_at', { ascending: false }).limit(500);
-    
-    if (filtroTipo === 'servicio') {
-      query = query.eq('tipo_bien', 'servicio');
-    } else if (filtroTipo === 'insumo') {
-      query = query.eq('tipo_bien', 'producto').eq('atributos_producto->>tipo_catalogo', 'insumo');
-    } else if (filtroTipo === 'producto') {
-      query = query.eq('tipo_bien', 'producto').eq('atributos_producto->>tipo_catalogo', 'retail');
-    }
-    
-    const { data, error } = await query;
-    if (!error && data) {
-      setBienes(data);
+    try {
+      const data = await getCatalogo(filtroTipo);
+      if (data) {
+        setBienes(data);
+      }
+    } catch (error: any) {
+      console.error("Error fetching bienes:", error);
+      alert("Error cargando catálogo: " + error.message);
     }
     setIsLoading(false);
   };
