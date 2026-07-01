@@ -5,7 +5,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
 import { createClient } from '@/lib/supabase/client';
 import { registrarIngresoCentral } from '@/services/lab';
-import { Download, Search, Plus, Trash2, FileText, CheckCircle2 } from 'lucide-react';
+import { Download, Search, Plus, Trash2, FileText, CheckCircle2, PackageSearch } from 'lucide-react';
 
 const supabase = createClient();
 
