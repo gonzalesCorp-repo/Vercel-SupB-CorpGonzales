@@ -1,24 +1,41 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Package, Search, Filter, RefreshCw, Box, Tag, DollarSign, Database } from 'lucide-react';
-import { getCatalogo } from './actions';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Package, Search, Plus, RefreshCw, Box, Tag, DollarSign, Database, ChevronDown, ChevronRight, Edit2, Archive, ArchiveRestore } from 'lucide-react';
+import { getCatalogo, guardarBien, inactivarBien } from './actions';
+import { useAppStore } from '@/store/useAppStore';
+
+function getFirst3Letters(str: string) {
+  if (!str) return 'XXX';
+  return String(str).replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase().padEnd(3, 'X');
+}
 
 export default function CatalogoMasterPage() {
   const [bienes, setBienes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filtroTexto, setFiltroTexto] = useState('');
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'insumo' | 'producto' | 'servicio'>('todos');
+  const [mostrarInactivos, setMostrarInactivos] = useState(false);
+  const { currentSede } = useAppStore();
+
+  const [expandedMarcas, setExpandedMarcas] = useState<Record<string, boolean>>({});
+  const [expandedLineas, setExpandedLineas] = useState<Record<string, boolean>>({});
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
+  const [formData, setFormData] = useState<any>({
+    nombre: '', categoria: '', tipo_bien: 'producto', precio_venta: 0,
+    marca: '', linea: '', presentacion: '', proveedor: '', costo_unitario: 0,
+    tipo_catalogo: 'retail', stockInicial: 0
+  });
 
   const cargarBienes = async () => {
     setIsLoading(true);
     try {
-      const data = await getCatalogo(filtroTipo);
-      if (data) {
-        setBienes(data);
-      }
+      const data = await getCatalogo(filtroTipo, mostrarInactivos);
+      if (data) setBienes(data);
     } catch (error: any) {
-      console.error("Error fetching bienes:", error);
       alert("Error cargando catálogo: " + error.message);
     }
     setIsLoading(false);
@@ -26,13 +43,100 @@ export default function CatalogoMasterPage() {
 
   useEffect(() => {
     cargarBienes();
-  }, [filtroTipo]);
+  }, [filtroTipo, mostrarInactivos]);
 
-  const bienesFiltrados = bienes.filter(b => 
-    b.nombre?.toLowerCase().includes(filtroTexto.toLowerCase()) || 
-    b.atributos_producto?.sku?.toLowerCase().includes(filtroTexto.toLowerCase()) ||
-    b.categoria?.toLowerCase().includes(filtroTexto.toLowerCase())
-  );
+  const bienesFiltrados = useMemo(() => {
+    return bienes.filter(b => 
+      b.nombre?.toLowerCase().includes(filtroTexto.toLowerCase()) || 
+      b.atributos_producto?.sku?.toLowerCase().includes(filtroTexto.toLowerCase()) ||
+      b.categoria?.toLowerCase().includes(filtroTexto.toLowerCase()) ||
+      b.atributos_producto?.marca?.toLowerCase().includes(filtroTexto.toLowerCase())
+    );
+  }, [bienes, filtroTexto]);
+
+  const groupedData = useMemo(() => {
+    const groups: Record<string, Record<string, any[]>> = {};
+    bienesFiltrados.forEach(bien => {
+      const marca = bien.atributos_producto?.marca || 'Sin Marca';
+      const linea = bien.atributos_producto?.linea || bien.categoria || 'Sin Línea';
+      if (!groups[marca]) groups[marca] = {};
+      if (!groups[marca][linea]) groups[marca][linea] = [];
+      groups[marca][linea].push(bien);
+    });
+    return groups;
+  }, [bienesFiltrados]);
+
+  const toggleMarca = (marca: string) => setExpandedMarcas(prev => ({...prev, [marca]: !prev[marca]}));
+  const toggleLinea = (lineaKey: string) => setExpandedLineas(prev => ({...prev, [lineaKey]: !prev[lineaKey]}));
+
+  const openModal = (item?: any) => {
+    if (item) {
+      setEditItem(item);
+      setFormData({
+        nombre: item.nombre,
+        categoria: item.categoria,
+        tipo_bien: item.tipo_bien,
+        precio_venta: item.precio_venta || 0,
+        marca: item.atributos_producto?.marca || '',
+        linea: item.atributos_producto?.linea || '',
+        presentacion: item.atributos_producto?.presentacion || '',
+        proveedor: item.atributos_producto?.proveedor || '',
+        costo_unitario: item.atributos_producto?.costo_unitario || 0,
+        tipo_catalogo: item.atributos_producto?.tipo_catalogo || 'retail',
+        stockInicial: 0
+      });
+    } else {
+      setEditItem(null);
+      setFormData({
+        nombre: '', categoria: '', tipo_bien: 'producto', precio_venta: 0,
+        marca: '', linea: '', presentacion: '', proveedor: '', costo_unitario: 0,
+        tipo_catalogo: filtroTipo === 'insumo' ? 'insumo' : 'retail', stockInicial: 0
+      });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const tipoSku = formData.tipo_catalogo === 'insumo' ? 'INS' : 'RET';
+    const sku = `${getFirst3Letters(formData.marca)}-${getFirst3Letters(formData.linea)}-${getFirst3Letters(formData.nombre)}-${tipoSku}-${getFirst3Letters(formData.presentacion)}`;
+    
+    const payload = {
+      nombre: formData.nombre,
+      categoria: formData.linea || formData.categoria,
+      tipo_bien: formData.tipo_bien,
+      precio_venta: parseFloat(formData.precio_venta),
+      stockInicial: parseInt(formData.stockInicial),
+      atributos_producto: {
+        sku,
+        marca: formData.marca,
+        linea: formData.linea,
+        presentacion: formData.presentacion,
+        proveedor: formData.proveedor,
+        costo_unitario: parseFloat(formData.costo_unitario),
+        tipo_catalogo: formData.tipo_catalogo,
+        estado: editItem?.atributos_producto?.estado // preserve state
+      }
+    };
+
+    try {
+      await guardarBien(editItem?.id || null, payload, currentSede?.id || '', true); // assuming admin
+      setIsModalOpen(false);
+      cargarBienes();
+    } catch (err: any) {
+      alert("Error al guardar: " + err.message);
+    }
+  };
+
+  const toggleStatus = async (id: string, currentlyInactive: boolean) => {
+    if (!confirm(`¿Deseas ${currentlyInactive ? 'reactivar' : 'inactivar'} este ítem?`)) return;
+    try {
+      await inactivarBien(id, !currentlyInactive);
+      cargarBienes();
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
@@ -44,13 +148,30 @@ export default function CatalogoMasterPage() {
           </h1>
           <p className="text-gray-500 font-medium mt-1">Gestión centralizada de insumos, retail y servicios.</p>
         </div>
-        <button 
-          onClick={cargarBienes}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl font-bold hover:bg-indigo-100 transition-colors"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Actualizar
-        </button>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100">
+            <input 
+              type="checkbox" 
+              checked={mostrarInactivos} 
+              onChange={e => setMostrarInactivos(e.target.checked)} 
+              className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            Ver Inactivos
+          </label>
+          <button 
+            onClick={cargarBienes}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl font-bold hover:bg-indigo-100 transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+          <button 
+            onClick={() => openModal()}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo Ítem
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -75,7 +196,7 @@ export default function CatalogoMasterPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Buscar por nombre, SKU o línea..." 
+              placeholder="Buscar por nombre, SKU o marca..." 
               value={filtroTexto}
               onChange={e => setFiltroTexto(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
@@ -83,98 +204,209 @@ export default function CatalogoMasterPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="bg-white text-gray-500 border-b border-gray-100">
-                <th className="py-4 px-6 font-bold">SKU</th>
-                <th className="py-4 px-6 font-bold">Ítem / Presentación</th>
-                <th className="py-4 px-6 font-bold">Marca / Línea</th>
-                <th className="py-4 px-6 font-bold text-center">Tipo</th>
-                <th className="py-4 px-6 font-bold text-right">Precios</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-gray-400 font-medium">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-indigo-400" />
-                    Cargando catálogo...
-                  </td>
-                </tr>
-              ) : bienesFiltrados.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-gray-500 font-medium flex flex-col items-center">
-                    <Package className="w-12 h-12 text-gray-300 mb-3" />
-                    No se encontraron resultados en el catálogo.
-                  </td>
-                </tr>
-              ) : (
-                bienesFiltrados.map(bien => (
-                  <tr key={bien.id} className="hover:bg-indigo-50/30 transition-colors group">
-                    <td className="py-3 px-6">
-                      <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
-                        {bien.atributos_producto?.sku || '---'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-6">
-                      <div className="font-bold text-gray-900 group-hover:text-indigo-700 transition-colors">
-                        {bien.nombre}
-                      </div>
-                      <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                        <Box className="w-3 h-3" />
-                        {bien.atributos_producto?.presentacion || 'Unidad'}
-                      </div>
-                    </td>
-                    <td className="py-3 px-6">
-                      <div className="font-bold text-gray-700">
-                        {bien.atributos_producto?.marca || 'N/A'}
-                      </div>
-                      <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                        <Tag className="w-3 h-3" />
-                        {bien.categoria || bien.atributos_producto?.linea || 'N/A'}
-                      </div>
-                    </td>
-                    <td className="py-3 px-6 text-center">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
-                        bien.tipo_bien === 'insumo' ? 'bg-amber-100 text-amber-700' :
-                        bien.tipo_bien === 'producto' ? 'bg-emerald-100 text-emerald-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
-                        {bien.tipo_bien}
-                      </span>
-                    </td>
-                    <td className="py-3 px-6 text-right">
-                      <div className="flex flex-col items-end gap-1">
-                        {bien.precio_venta != null && (
-                          <div className="flex items-center gap-1 text-emerald-600 font-black">
-                            <DollarSign className="w-3 h-3" />
-                            {bien.precio_venta.toFixed(2)}
-                            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-50 px-1 rounded">PVP</span>
+        <div className="p-4 bg-white min-h-[50vh] max-h-[65vh] overflow-y-auto">
+          {isLoading ? (
+            <div className="py-12 text-center text-gray-400 font-medium">
+              <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3 text-indigo-400" />
+              Cargando catálogo agrupado...
+            </div>
+          ) : Object.keys(groupedData).length === 0 ? (
+            <div className="py-12 text-center text-gray-500 font-medium flex flex-col items-center">
+              <Package className="w-12 h-12 text-gray-300 mb-3" />
+              No se encontraron resultados en el catálogo.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {Object.entries(groupedData).map(([marca, lineas]) => (
+                <div key={marca} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                  <button 
+                    onClick={() => toggleMarca(marca)}
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {expandedMarcas[marca] ? <ChevronDown className="w-5 h-5 text-gray-500" /> : <ChevronRight className="w-5 h-5 text-gray-500" />}
+                      <span className="font-black text-gray-800 text-lg">{marca}</span>
+                    </div>
+                    <span className="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded-md">
+                      {Object.values(lineas).flat().length} ítems
+                    </span>
+                  </button>
+                  
+                  {expandedMarcas[marca] && (
+                    <div className="p-2 space-y-2 bg-white">
+                      {Object.entries(lineas).map(([linea, items]) => {
+                        const lineaKey = `${marca}-${linea}`;
+                        return (
+                          <div key={lineaKey} className="border border-indigo-50 rounded-lg overflow-hidden">
+                            <button 
+                              onClick={() => toggleLinea(lineaKey)}
+                              className="w-full flex items-center justify-between p-3 bg-indigo-50/50 hover:bg-indigo-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-2 pl-6">
+                                {expandedLineas[lineaKey] ? <ChevronDown className="w-4 h-4 text-indigo-500" /> : <ChevronRight className="w-4 h-4 text-indigo-500" />}
+                                <span className="font-bold text-indigo-900">{linea}</span>
+                              </div>
+                            </button>
+                            
+                            {expandedLineas[lineaKey] && (
+                              <div className="p-0 overflow-x-auto">
+                                <table className="w-full text-left text-sm">
+                                  <thead className="bg-gray-50 text-gray-500 border-y border-gray-100 text-xs uppercase">
+                                    <tr>
+                                      <th className="py-2 px-4">SKU</th>
+                                      <th className="py-2 px-4">Nombre / Presentación</th>
+                                      <th className="py-2 px-4">Clasificación</th>
+                                      <th className="py-2 px-4 text-right">Precios</th>
+                                      <th className="py-2 px-4 text-center">Acciones</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-gray-50">
+                                    {items.map(bien => {
+                                      const isInactive = bien.atributos_producto?.estado === 'inactivo';
+                                      return (
+                                        <tr key={bien.id} className={`hover:bg-gray-50/50 transition-colors group ${isInactive ? 'opacity-50 grayscale' : ''}`}>
+                                          <td className="py-2 px-4">
+                                            <span className={`font-mono text-xs font-bold px-2 py-1 rounded-md ${isInactive ? 'bg-gray-100 text-gray-500' : 'bg-indigo-50 text-indigo-600'}`}>
+                                              {bien.atributos_producto?.sku || '---'}
+                                            </span>
+                                            {isInactive && <span className="ml-2 text-[10px] bg-red-100 text-red-600 px-1 rounded font-bold">INACTIVO</span>}
+                                          </td>
+                                          <td className="py-2 px-4">
+                                            <div className="font-bold text-gray-900 group-hover:text-indigo-700">{bien.nombre}</div>
+                                            <div className="text-xs text-gray-500 flex items-center gap-1"><Box className="w-3 h-3" /> {bien.atributos_producto?.presentacion || 'Unidad'}</div>
+                                          </td>
+                                          <td className="py-2 px-4">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                                              bien.atributos_producto?.tipo_catalogo === 'insumo' ? 'bg-amber-100 text-amber-700' :
+                                              bien.atributos_producto?.tipo_catalogo === 'retail' ? 'bg-emerald-100 text-emerald-700' :
+                                              'bg-blue-100 text-blue-700'
+                                            }`}>
+                                              {bien.atributos_producto?.tipo_catalogo || bien.tipo_bien}
+                                            </span>
+                                          </td>
+                                          <td className="py-2 px-4 text-right">
+                                            <div className="flex flex-col items-end gap-0.5">
+                                              {bien.precio_venta != null && bien.precio_venta > 0 && (
+                                                <div className="flex items-center gap-1 text-emerald-600 font-bold text-xs">
+                                                  <DollarSign className="w-3 h-3" />{bien.precio_venta.toFixed(2)}
+                                                </div>
+                                              )}
+                                              {bien.atributos_producto?.costo_unitario != null && (
+                                                <div className="flex items-center gap-1 text-gray-400 font-medium text-[10px]">
+                                                  Costo: ${parseFloat(bien.atributos_producto.costo_unitario).toFixed(2)}
+                                                </div>
+                                              )}
+                                            </div>
+                                          </td>
+                                          <td className="py-2 px-4 text-center">
+                                            <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                              <button onClick={() => openModal(bien)} className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Editar">
+                                                <Edit2 className="w-4 h-4" />
+                                              </button>
+                                              <button onClick={() => toggleStatus(bien.id, isInactive)} className={`p-1.5 rounded-lg transition-colors ${isInactive ? 'bg-green-50 text-green-600 hover:bg-green-100' : 'bg-red-50 text-red-600 hover:bg-red-100'}`} title={isInactive ? 'Reactivar' : 'Inactivar'}>
+                                                {isInactive ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
+                                              </button>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
                           </div>
-                        )}
-                        {bien.atributos_producto?.costo_unitario != null && (
-                          <div className="flex items-center gap-1 text-gray-500 font-bold text-xs">
-                            <DollarSign className="w-3 h-3" />
-                            {parseFloat(bien.atributos_producto.costo_unitario).toFixed(2)}
-                            <span className="text-[10px] bg-gray-100 px-1 rounded">COSTO</span>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        
-        {!isLoading && bienesFiltrados.length > 0 && (
-          <div className="p-4 border-t border-gray-100 bg-gray-50 text-xs font-bold text-gray-500 text-right">
-            Mostrando {bienesFiltrados.length} ítems.
-          </div>
-        )}
       </div>
+
+      {/* Modal CRUD */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-black text-gray-800">{editItem ? 'Editar Ítem del Catálogo' : 'Nuevo Ítem de Catálogo'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            
+            <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-sm font-bold text-gray-700">Nombre del Ítem</label>
+                  <input required type="text" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                </div>
+                
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-gray-700">Marca</label>
+                  <input required type="text" value={formData.marca} onChange={e => setFormData({...formData, marca: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-gray-700">Línea / Categoría</label>
+                  <input required type="text" value={formData.linea} onChange={e => setFormData({...formData, linea: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-gray-700">Presentación</label>
+                  <input required type="text" placeholder="Ej. 500ml, Unidad, Caja" value={formData.presentacion} onChange={e => setFormData({...formData, presentacion: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-gray-700">Proveedor Principal</label>
+                  <input type="text" value={formData.proveedor} onChange={e => setFormData({...formData, proveedor: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-gray-700">Clasificación</label>
+                  <select value={formData.tipo_catalogo} onChange={e => setFormData({...formData, tipo_catalogo: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                    <option value="retail">Producto Final (Retail)</option>
+                    <option value="insumo">Insumo / Consumible</option>
+                    <option value="servicio">Servicio (No inventariable)</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-gray-700">Precio Venta (PVP)</label>
+                  <input type="number" step="0.01" value={formData.precio_venta} onChange={e => setFormData({...formData, precio_venta: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-gray-700">Costo Unitario Ref.</label>
+                  <input type="number" step="0.01" value={formData.costo_unitario} onChange={e => setFormData({...formData, costo_unitario: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                </div>
+                
+                {!editItem && (
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-indigo-700">Stock Inicial (Admin)</label>
+                    <input type="number" min="0" value={formData.stockInicial} onChange={e => setFormData({...formData, stockInicial: e.target.value})} className="w-full px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-indigo-900 font-bold" />
+                    <p className="text-[10px] text-indigo-500 leading-tight">Solo llenar si se desea inicializar inventario en esta Sede inmediatamente.</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">SKU Generado Automáticamente</p>
+                  <p className="text-sm font-mono text-gray-800 mt-1 bg-white px-2 py-1 border border-gray-200 rounded-md inline-block">
+                    {`${getFirst3Letters(formData.marca)}-${getFirst3Letters(formData.linea)}-${getFirst3Letters(formData.nombre)}-${formData.tipo_catalogo === 'insumo' ? 'INS' : 'RET'}-${getFirst3Letters(formData.presentacion)}`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Cancelar</button>
+                <button type="submit" className="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+                  {editItem ? 'Guardar Cambios' : 'Crear Ítem'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
