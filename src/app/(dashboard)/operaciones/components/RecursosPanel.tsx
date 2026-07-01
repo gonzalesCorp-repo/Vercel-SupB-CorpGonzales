@@ -95,7 +95,7 @@ export default function RecursosPanel() {
   const renderHerramienta = () => {
     switch (herramientaActiva) {
       case 'historial':
-        return <VistaHistorial agenteId={agenteAutenticado.id} sedeId={sedeActiva?.id} />;
+        return <VistaHistorial agenteId={agenteAutenticado.id} sedeId={sedeActiva?.id || ''} />;
       case 'clientes':
         return <VistaPlaceholder titulo="Mis Clientes" icono={<Users className="w-12 h-12 text-slate-300" />} desc="Aquí podrás ver tu cartera de clientes y notas." />;
       case 'citas':
