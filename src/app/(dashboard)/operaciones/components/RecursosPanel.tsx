@@ -67,7 +67,6 @@ export default function RecursosPanel() {
         .from('agentes')
         .select('*')
         .eq('pin', pin)
-        .eq('sede_id', sedeActiva?.id)
         .eq('rol', 'STAFF')
         .single();
         
