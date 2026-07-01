@@ -25,7 +25,7 @@ export default function TransferenciaPanel() {
         .gt('stock', 0);
         
       if (data) {
-        setStockCentral(data.map(d => ({
+        setStockCentral(data.map((d: any) => ({
           ...d,
           cantidad_mover: 0
         })));
