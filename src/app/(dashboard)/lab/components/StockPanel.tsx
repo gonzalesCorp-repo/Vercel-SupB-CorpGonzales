@@ -14,7 +14,7 @@ export default function StockPanel() {
     const loadStock = async () => {
       if (!sedeActiva) return;
       setLoading(true);
-      const data = await obtenerStockUbicacion(sedeActiva.id);
+      const data = await obtenerStockUbicacion();
       setStock(data);
       setLoading(false);
     };
