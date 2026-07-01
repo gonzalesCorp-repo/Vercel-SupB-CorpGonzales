@@ -60,17 +60,30 @@ export default function RecursosPanel() {
     try {
       // Para la validación necesitamos saber a qué agente pertenece el PIN.
       // Como estamos en un entorno compartido (Sede), el PIN por sí solo debería identificar al agente.
-      // Ojo: validarPin(agenteId, pin) requiere agenteId.
-      // Si no tenemos el agente, buscaremos el agente por PIN en la sede activa.
-      
-      const { data: agente, error } = await supabase
+      // Buscar el agente por su PIN
+      const { data: agente, error: errAgente } = await supabase
         .from('agentes')
         .select('*')
         .eq('pin', pin)
         .eq('rol', 'STAFF')
         .single();
         
-      if (error || !agente) {
+      if (errAgente || !agente) {
+        setPinError(true);
+        setPin('');
+        setIsVerifying(false);
+        return;
+      }
+      
+      // Validar que el agente pertenezca a la sede activa
+      const { data: relacion, error: errRelacion } = await supabase
+        .from('sedes_usuarios')
+        .select('id')
+        .eq('agente_id', agente.id)
+        .eq('sede_id', sedeActiva?.id)
+        .maybeSingle();
+
+      if (errRelacion || !relacion) {
         setPinError(true);
         setPin('');
       } else {
