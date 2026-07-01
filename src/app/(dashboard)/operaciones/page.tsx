@@ -448,30 +448,8 @@ export default function WorkspaceOperativoPage() {
         </>
       )}
 
-      {/* Contenido Historial */}
+      {/* Contenido Recursos (Portal de Empleados) */}
       {activeTab === 'historial' && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row md:items-center gap-4 justify-between">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-indigo-600" /> Historial de Atenciones
-            </h2>
-            <div className="flex gap-2 items-center">
-              <div className="flex items-center bg-white border border-gray-200 rounded-lg px-2 shadow-sm">
-                <Calendar className="w-4 h-4 text-gray-400" />
-                <input 
-                  type="date" 
-                  value={fechaInicio} 
-                  onChange={(e) => setFechaInicio(e.target.value)}
-                  className="px-2 py-1.5 text-sm outline-none border-none text-gray-600 font-medium"
-                />
-              </div>
-              <span className="text-gray-400 font-medium">-</span>
-              <div className="flex items-center bg-white border border-gray-200 rounded-lg px-2 shadow-sm">
-                <input 
-                  type="date" 
-                  value={fechaFin} 
-                  onChange={(e) => setFechaFin(e.target.value)}
-                  className="px-2 py-1.5 text-sm outline-none border-none text-gray-600 font-medium"
         <div className="h-full">
           <RecursosPanel />
         </div>
