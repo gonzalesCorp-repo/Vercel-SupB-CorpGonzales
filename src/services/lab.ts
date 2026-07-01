@@ -51,32 +51,44 @@ export async function obtenerPedidosPendientesLab() {
   return data;
 }
 
-// 2. Obtener Stock del Almacén Principal
-export async function obtenerStockPrincipal() {
+// 2. Obtener Stock Completo (Principal + Lab combinados para la vista Stock & Ubicación)
+export async function obtenerStockUbicacion() {
   const sedeId = useAppStore.getState().sedeActiva?.id;
   if (!sedeId) return [];
 
-  const { data, error } = await supabase
+  // Traemos Principal
+  const { data: principalData, error: principalErr } = await supabase
     .from('almacen_principal')
     .select('*, bienes(nombre, categoria)')
     .eq('sede_id', sedeId);
 
-  if (error) console.error("Error stock principal:", error);
-  return data || [];
-}
-
-// 3. Obtener Stock del Laboratorio
-export async function obtenerStockLaboratorio() {
-  const sedeId = useAppStore.getState().sedeActiva?.id;
-  if (!sedeId) return [];
-
-  const { data, error } = await supabase
+  // Traemos Lab
+  const { data: labData, error: labErr } = await supabase
     .from('almacen_laboratorio')
-    .select('*, almacen_principal(*, bienes(nombre))')
+    .select('*')
     .eq('sede_id', sedeId);
 
-  if (error) console.error("Error stock lab:", error);
-  return data || [];
+  if (principalErr || labErr) {
+    console.error("Error obteniendo stock combinado:", principalErr || labErr);
+    return [];
+  }
+
+  // Mapeamos y combinamos
+  const combinado = (principalData || []).map((p: any) => {
+    const labItem = (labData || []).find((l: any) => l.bien_id === p.bien_id);
+    return {
+      bien_id: p.bien_id,
+      producto: p.bienes?.nombre || 'Desconocido',
+      marca: p.marca || '',
+      sku: p.sku || '',
+      ubicacion: p.ubicacion || 'RACK SIN NOMBRE',
+      stock_central: p.stock || 0,
+      stock_lab: labItem ? labItem.stock_actual : 0,
+      stock_minimo: p.stock_minimo || 0
+    };
+  });
+
+  return combinado;
 }
 
 // 4. Obtener Kardex
@@ -94,3 +106,100 @@ export async function obtenerKardex(limite: number = 100) {
   if (error) console.error("Error kardex:", error);
   return data || [];
 }
+
+// 5. Ingreso Central
+export async function registrarIngresoCentral(items: any[], referenciaDocumento: string, usuarioId: string) {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) throw new Error("No hay sede activa");
+
+  for (const item of items) {
+    // Check if exists in almacen_principal
+    const { data: exists } = await supabase
+      .from('almacen_principal')
+      .select('id, stock')
+      .eq('sede_id', sedeId)
+      .eq('bien_id', item.bien_id)
+      .maybeSingle();
+
+    if (exists) {
+      await supabase.from('almacen_principal').update({ 
+        stock: Number(exists.stock) + Number(item.cantidad),
+        costo_unitario: item.costo_unitario,
+        updated_at: new Date().toISOString()
+      }).eq('id', exists.id);
+    } else {
+      await supabase.from('almacen_principal').insert([{
+        sede_id: sedeId,
+        bien_id: item.bien_id,
+        proveedor: 'Ingreso Directo',
+        marca: item.marca || '',
+        linea: item.linea || '',
+        presentacion: item.presentacion || 'Unidad',
+        stock: Number(item.cantidad),
+        costo_unitario: item.costo_unitario,
+        ubicacion: 'RACK PRINCIPAL'
+      }]);
+    }
+
+    // Kardex
+    await supabase.from('inventario_movimientos').insert([{
+      sede_id: sedeId,
+      tipo_movimiento: 'INGRESO',
+      bien_id: item.bien_id,
+      descripcion: `Doc: ${referenciaDocumento}`,
+      cantidad: Number(item.cantidad),
+      origen: 'EXTERNO',
+      destino: 'ALMACEN CENTRAL',
+      costo_unitario: item.costo_unitario,
+      agente_id: usuarioId
+    }]);
+  }
+}
+
+// 6. Transferencia Masiva a Lab
+export async function transferirAlmacen(items: any[], usuarioId: string) {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) throw new Error("No hay sede activa");
+
+  for (const item of items) {
+    const cantMover = Number(item.cantidad_mover);
+    if (cantMover <= 0) continue;
+
+    // 1. Restar de principal
+    const { data: princ } = await supabase.from('almacen_principal').select('id, stock, costo_unitario').eq('sede_id', sedeId).eq('bien_id', item.bien_id).single();
+    if (princ) {
+      await supabase.from('almacen_principal').update({
+        stock: Number(princ.stock) - cantMover
+      }).eq('id', princ.id);
+    }
+
+    // 2. Sumar a Lab
+    const { data: labExists } = await supabase.from('almacen_laboratorio').select('id, stock_actual').eq('sede_id', sedeId).eq('bien_id', item.bien_id).maybeSingle();
+    if (labExists) {
+      await supabase.from('almacen_laboratorio').update({
+        stock_actual: Number(labExists.stock_actual) + cantMover
+      }).eq('id', labExists.id);
+    } else {
+      await supabase.from('almacen_laboratorio').insert([{
+        sede_id: sedeId,
+        bien_id: item.bien_id,
+        stock_actual: cantMover,
+        stock_en_uso: 0
+      }]);
+    }
+
+    // 3. Kardex
+    await supabase.from('inventario_movimientos').insert([{
+      sede_id: sedeId,
+      tipo_movimiento: 'TRANSFERENCIA',
+      bien_id: item.bien_id,
+      descripcion: 'Traslado interno a Laboratorio',
+      cantidad: cantMover,
+      origen: 'ALMACEN CENTRAL',
+      destino: 'LABORATORIO',
+      costo_unitario: princ?.costo_unitario || 0,
+      agente_id: usuarioId
+    }]);
+  }
+}
+
