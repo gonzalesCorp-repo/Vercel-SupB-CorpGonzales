@@ -331,7 +331,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Despacho e Insumos</span>
                 <ul className="mt-2 space-y-1">
                   <li>
-                    <Link href="/despacho" className={navItemClass('/despacho')}>
+                    <Link href="/lab" className={navItemClass('/lab')}>
                       <Beaker className="w-5 h-5 mr-3" />
                       Laboratorio Central
                     </Link>
