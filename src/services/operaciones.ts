@@ -219,12 +219,26 @@ export async function solicitarPreCobro(oatcId: string): Promise<boolean> {
 
 // 8. Validar PIN Operativo
 export async function validarPin(pin: string): Promise<{id: string, rol: string, nombre: string} | null> {
-  const { data, error } = await supabase
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  if (!sedeId) return null;
+
+  const { data: agente, error } = await supabase
     .from('agentes')
     .select('id, rol, nombre')
     .eq('pin', pin)
     .single();
     
-  if (error || !data) return null;
-  return data;
+  if (error || !agente) return null;
+
+  // Verify headquarters (sede)
+  const { data: relacion } = await supabase
+    .from('sedes_usuarios')
+    .select('id')
+    .eq('agente_id', agente.id)
+    .eq('sede_id', sedeId)
+    .maybeSingle();
+
+  if (!relacion) return null;
+
+  return agente;
 }

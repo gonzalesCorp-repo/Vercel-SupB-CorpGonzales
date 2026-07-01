@@ -1,14 +1,18 @@
 import { createClient } from '@/lib/supabase/client';
 import { Agente } from './recepcion';
 import { registrarLog } from './logger';
+import { useAppStore } from '@/store/useAppStore';
 
 const supabase = createClient();
 
 // Obtiene todos los agentes para el buscador de ingreso
 export async function obtenerTodosLosAgentes(): Promise<Agente[]> {
+  const sedeId = useAppStore.getState().sedeActiva?.id;
+  
   const { data, error } = await supabase
     .from('agentes')
-    .select('*')
+    .select('*, sedes_usuarios!inner(sede_id)')
+    .eq('sedes_usuarios.sede_id', sedeId)
     .order('nombre');
     
   if (error) {
