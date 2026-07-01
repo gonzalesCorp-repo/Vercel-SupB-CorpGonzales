@@ -7,9 +7,10 @@ import KardexPanel from './components/KardexPanel';
 import TransferenciaPanel from './components/TransferenciaPanel';
 import StockPanel from './components/StockPanel';
 import IngresoPanel from './components/IngresoPanel';
+import MetricasPanel from './components/MetricasPanel';
 
 export default function LabWorkspacePage() {
-  const [activeTab, setActiveTab] = useState<'despacho'|'kardex'|'transferencia'|'stock'|'ingreso'>('despacho');
+  const [activeTab, setActiveTab] = useState<'despacho'|'kardex'|'transferencia'|'stock'|'ingreso'|'metricas'>('despacho');
 
   return (
     <div className="flex flex-col h-full bg-slate-50 min-h-[calc(100vh-4rem)]">
@@ -57,6 +58,12 @@ export default function LabWorkspacePage() {
             >
               Ingreso Central
             </button>
+            <button 
+              onClick={() => setActiveTab('metricas')}
+              className={`flex items-center gap-2 transition-colors ${activeTab === 'metricas' ? 'text-indigo-400' : 'text-slate-400 hover:text-slate-200'}`}
+            >
+              Métricas
+            </button>
           </div>
         </div>
       </div>
@@ -72,6 +79,7 @@ export default function LabWorkspacePage() {
             {activeTab === 'transferencia' && <TransferenciaPanel />}
             {activeTab === 'stock' && <StockPanel />}
             {activeTab === 'ingreso' && <IngresoPanel />}
+            {activeTab === 'metricas' && <MetricasPanel />}
           </div>
         </div>
       </div>
