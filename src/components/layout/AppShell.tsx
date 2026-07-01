@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, Palette, User, PackageSearch, ArrowRightLeft, Layers, Download, BarChart3 } from 'lucide-react';
+import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, Palette, User, PackageSearch, ArrowRightLeft, Layers, Download, BarChart3, Database } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { obtenerSedesUsuario, Sede } from '@/services/sedes';
@@ -394,6 +394,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <Link href="/admin/reportes" className={navItemClass('/admin/reportes')}>
                       <Activity className="w-5 h-5 mr-3" />
                       Dashboard Global
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/admin/catalogo" className={navItemClass('/admin/catalogo')}>
+                      <Database className="w-5 h-5 mr-3" />
+                      Catálogo Maestro
                     </Link>
                   </li>
                   <li>
