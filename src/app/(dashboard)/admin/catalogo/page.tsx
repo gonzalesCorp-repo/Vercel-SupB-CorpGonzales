@@ -16,8 +16,12 @@ export default function CatalogoMasterPage() {
     setIsLoading(true);
     let query = supabase.from('bienes').select('*').order('created_at', { ascending: false }).limit(500);
     
-    if (filtroTipo !== 'todos') {
-      query = query.eq('tipo_bien', filtroTipo);
+    if (filtroTipo === 'servicio') {
+      query = query.eq('tipo_bien', 'servicio');
+    } else if (filtroTipo === 'insumo') {
+      query = query.eq('tipo_bien', 'producto').eq('atributos_producto->>tipo_catalogo', 'insumo');
+    } else if (filtroTipo === 'producto') {
+      query = query.eq('tipo_bien', 'producto').eq('atributos_producto->>tipo_catalogo', 'retail');
     }
     
     const { data, error } = await query;

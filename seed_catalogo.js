@@ -61,9 +61,9 @@ async function runSeed() {
     const { data: bien, error } = await supabase.from('bienes').insert([{
       nombre: nombre,
       categoria: linea,
-      tipo_bien: 'insumo',
+      tipo_bien: 'producto', // Forced to 'producto' to pass DB check constraint
       atributos_producto: {
-        sku, marca, linea, presentacion, proveedor, costo_unitario: costo
+        sku, marca, linea, presentacion, proveedor, costo_unitario: costo, tipo_catalogo: 'insumo'
       }
     }]).select('id').single();
 
@@ -105,7 +105,7 @@ async function runSeed() {
       tipo_bien: 'producto',
       precio_venta: precio,
       atributos_producto: {
-        sku, marca, linea, presentacion, proveedor, costo_unitario: costo, precio_min: precioMin
+        sku, marca, linea, presentacion, proveedor, costo_unitario: costo, precio_min: precioMin, tipo_catalogo: 'retail'
       }
     }]).select('id').single();
 
