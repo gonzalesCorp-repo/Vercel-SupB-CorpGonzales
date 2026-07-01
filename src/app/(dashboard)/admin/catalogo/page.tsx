@@ -16,7 +16,7 @@ export default function CatalogoMasterPage() {
   const [filtroTexto, setFiltroTexto] = useState('');
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'insumo' | 'producto' | 'servicio'>('todos');
   const [mostrarInactivos, setMostrarInactivos] = useState(false);
-  const { currentSede } = useAppStore();
+  const { sedeActiva } = useAppStore();
 
   const [expandedMarcas, setExpandedMarcas] = useState<Record<string, boolean>>({});
   const [expandedLineas, setExpandedLineas] = useState<Record<string, boolean>>({});
@@ -120,7 +120,7 @@ export default function CatalogoMasterPage() {
     };
 
     try {
-      await guardarBien(editItem?.id || null, payload, currentSede?.id || '', true); // assuming admin
+      await guardarBien(editItem?.id || null, payload, sedeActiva?.id || '', true); // assuming admin
       setIsModalOpen(false);
       cargarBienes();
     } catch (err: any) {
