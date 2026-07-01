@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/Modal';
 import PanelWFM from '@/components/wfm/PanelWFM';
 import { useUIStore } from '@/store/useUIStore';
 import { useAppStore } from '@/store/useAppStore';
+import RecursosPanel from './components/RecursosPanel';
 
 // Extendemos OATC localmente para la demo
 interface OATCExtended extends OATC {
@@ -287,16 +288,23 @@ export default function WorkspaceOperativoPage() {
       <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mb-6">
         <button
           onClick={() => setActiveTab('piso')}
-          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-colors ${activeTab === 'piso' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-gray-50'}`}
+          className={`px-6 py-2 rounded-md text-sm font-semibold transition-colors ${
+            activeTab === 'piso' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
         >
-          Atenciones en Piso
+          Workspace Operativo
         </button>
-        <button
-          onClick={() => setActiveTab('historial')}
-          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-colors ${activeTab === 'historial' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:bg-gray-50'}`}
-        >
-          Mi Historial
-        </button>
+        
+        {!isPersonalMode && (
+          <button 
+            onClick={() => setActiveTab('historial')}
+            className={`px-6 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2 ${
+              activeTab === 'historial' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <User className="w-4 h-4" /> Recursos
+          </button>
+        )}
       </div>
 
       {/* Contenido Atenciones en Piso */}
@@ -464,59 +472,8 @@ export default function WorkspaceOperativoPage() {
                   value={fechaFin} 
                   onChange={(e) => setFechaFin(e.target.value)}
                   className="px-2 py-1.5 text-sm outline-none border-none text-gray-600 font-medium"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-4">
-            {isLoadingHistorial ? (
-              <div className="text-center p-8 text-gray-500 font-medium">Cargando historial...</div>
-            ) : historialTickets.length === 0 ? (
-              <div className="text-center p-8 text-gray-500 font-medium">
-                No hay atenciones finalizadas en este periodo.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="bg-slate-50 text-slate-500 border-b border-slate-200">
-                      <th className="font-bold py-3 px-4 rounded-tl-lg">Fecha</th>
-                      <th className="font-bold py-3 px-4">Cliente</th>
-                      <th className="font-bold py-3 px-4">Servicios</th>
-                      <th className="font-bold py-3 px-4 rounded-tr-lg">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {historialTickets.map(ticket => (
-                      <tr key={ticket.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 text-slate-600 whitespace-nowrap">
-                          {new Date(ticket.created_at).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}
-                        </td>
-                        <td className="py-3 px-4 font-bold text-slate-800">
-                          {ticket.cliente_nombre}
-                        </td>
-                        <td className="py-3 px-4 text-slate-600">
-                          {(ticket.punto_partida || []).map((s: any) => s.nombre).join(', ')}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-1 text-xs font-bold rounded-md ${
-                            ticket.estado_proceso === 'CANCELADO' 
-                              ? 'bg-red-100 text-red-700' 
-                              : ticket.estado_proceso === 'POR_COBRAR' || ticket.estado_proceso === 'PRE_COBRADO'
-                                ? 'bg-orange-100 text-orange-700'
-                                : 'bg-emerald-100 text-emerald-700'
-                          }`}>
-                            {ticket.estado_proceso}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+        <div className="h-full">
+          <RecursosPanel />
         </div>
       )}
 
