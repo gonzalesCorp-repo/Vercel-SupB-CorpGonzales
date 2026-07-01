@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
-import { obtenerStockUnificado } from '@/services/lab';
+import { obtenerStockUbicacion } from '@/services/lab';
 import { Layers, AlertTriangle, CheckCircle2, Box } from 'lucide-react';
 
 export default function StockPanel() {
@@ -14,7 +14,7 @@ export default function StockPanel() {
     const loadStock = async () => {
       if (!sedeActiva) return;
       setLoading(true);
-      const data = await obtenerStockUnificado(sedeActiva.id);
+      const data = await obtenerStockUbicacion(sedeActiva.id);
       setStock(data);
       setLoading(false);
     };
