@@ -64,7 +64,7 @@ function getFirst3Letters(str: string) {
 export async function guardarBien(bienId: string | null, rawPayload: any, sedeId: string, isAdmin: boolean) {
   const parseResult = BienSchema.safeParse(rawPayload);
   if (!parseResult.success) {
-    throw new Error(parseResult.error.errors.map(e => e.message).join(', '));
+    throw new Error(parseResult.error.issues.map((e: any) => e.message).join(', '));
   }
   
   const payload = parseResult.data;
