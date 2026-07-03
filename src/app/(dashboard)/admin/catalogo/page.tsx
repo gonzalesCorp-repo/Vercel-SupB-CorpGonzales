@@ -5,6 +5,8 @@ import { Package, Search, Plus, RefreshCw, Box, Tag, DollarSign, Database, Chevr
 import { getCatalogo, guardarBien, inactivarBien, actualizarJerarquia, inactivarJerarquia } from './actions';
 import { useAppStore } from '@/store/useAppStore';
 
+import { ConfirmDialog, PromptDialog } from '@/components/ui/PremiumDialog';
+
 function getFirst3Letters(str: string) {
   if (!str) return 'XXX';
   return String(str).replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase().padEnd(3, 'X');
@@ -20,6 +22,10 @@ export default function CatalogoMasterPage() {
 
   const [expandedMarcas, setExpandedMarcas] = useState<Record<string, boolean>>({});
   const [expandedLineas, setExpandedLineas] = useState<Record<string, boolean>>({});
+
+  // Dialogs State
+  const [promptConfig, setPromptConfig] = useState<any>({ isOpen: false });
+  const [confirmConfig, setConfirmConfig] = useState<any>({ isOpen: false });
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -132,39 +138,65 @@ export default function CatalogoMasterPage() {
   };
 
   const toggleStatus = async (id: string, currentlyInactive: boolean) => {
-    if (!confirm(`¿Deseas ${currentlyInactive ? 'reactivar' : 'inactivar'} este ítem?`)) return;
-    try {
-      await inactivarBien(id, !currentlyInactive);
-      cargarBienes();
-    } catch (err: any) {
-      alert("Error: " + err.message);
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: currentlyInactive ? 'Reactivar Ítem' : 'Inactivar Ítem',
+      message: `¿Deseas ${currentlyInactive ? 'reactivar' : 'inactivar'} este ítem del catálogo?`,
+      confirmColor: currentlyInactive ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700',
+      onCancel: () => setConfirmConfig({ isOpen: false }),
+      onConfirm: async () => {
+        setConfirmConfig({ isOpen: false });
+        try {
+          await inactivarBien(id, !currentlyInactive);
+          cargarBienes();
+        } catch (err: any) {
+          alert("Error: " + err.message);
+        }
+      }
+    });
   };
 
   const handleRenameHierarchy = async (tipo: 'marca' | 'linea', valorAntiguo: string) => {
-    const nuevo = prompt(`Ingresa el nuevo nombre para la ${tipo} '${valorAntiguo}':\n(Esto recalculará todos los SKUs asociados)`, valorAntiguo);
-    if (!nuevo || nuevo === valorAntiguo) return;
-    
-    setIsLoading(true);
-    try {
-      await actualizarJerarquia(tipo, valorAntiguo, nuevo);
-      cargarBienes();
-    } catch (e: any) {
-      alert("Error renombrando: " + e.message);
-    }
-    setIsLoading(false);
+    setPromptConfig({
+      isOpen: true,
+      title: `Renombrar ${tipo}`,
+      message: `Ingresa el nuevo nombre para '${valorAntiguo}'. Esto recalculará todos los SKUs asociados.`,
+      defaultValue: valorAntiguo,
+      onCancel: () => setPromptConfig({ isOpen: false }),
+      onConfirm: async (nuevo: string) => {
+        setPromptConfig({ isOpen: false });
+        if (!nuevo || nuevo === valorAntiguo) return;
+        setIsLoading(true);
+        try {
+          await actualizarJerarquia(tipo, valorAntiguo, nuevo);
+          cargarBienes();
+        } catch (e: any) {
+          alert("Error renombrando: " + e.message);
+        }
+        setIsLoading(false);
+      }
+    });
   };
 
   const handleDisableHierarchy = async (tipo: 'marca' | 'linea', valor: string, activar: boolean = false) => {
-    if (!confirm(`¿Estás seguro de que deseas ${activar ? 'REACTIVAR' : 'INACTIVAR'} todos los productos de la ${tipo} '${valor}'?`)) return;
-    setIsLoading(true);
-    try {
-      await inactivarJerarquia(tipo, valor, !activar);
-      cargarBienes();
-    } catch (e: any) {
-      alert("Error cambiando estado masivo: " + e.message);
-    }
-    setIsLoading(false);
+    setConfirmConfig({
+      isOpen: true,
+      title: activar ? `Reactivar ${tipo}` : `Inactivar ${tipo}`,
+      message: `¿Estás seguro de que deseas ${activar ? 'REACTIVAR' : 'INACTIVAR'} todos los productos de la ${tipo} '${valor}'?`,
+      confirmColor: activar ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700',
+      onCancel: () => setConfirmConfig({ isOpen: false }),
+      onConfirm: async () => {
+        setConfirmConfig({ isOpen: false });
+        setIsLoading(true);
+        try {
+          await inactivarJerarquia(tipo, valor, !activar);
+          cargarBienes();
+        } catch (e: any) {
+          alert("Error cambiando estado masivo: " + e.message);
+        }
+        setIsLoading(false);
+      }
+    });
   };
 
   return (
@@ -448,6 +480,9 @@ export default function CatalogoMasterPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog {...confirmConfig} />
+      <PromptDialog {...promptConfig} />
     </div>
   );
 }

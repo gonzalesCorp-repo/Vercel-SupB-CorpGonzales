@@ -1,11 +1,30 @@
 'use server';
 
 import { createClient } from '@supabase/supabase-js';
+import { z } from 'zod';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+
+const BienSchema = z.object({
+  nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  categoria: z.string().min(1, "La categoría o línea es obligatoria"),
+  tipo_bien: z.enum(['producto', 'insumo', 'servicio']),
+  precio_venta: z.number().min(0, "El precio de venta no puede ser negativo"),
+  stockInicial: z.number().min(0, "El stock no puede ser negativo").default(0),
+  atributos_producto: z.object({
+    marca: z.string().optional(),
+    linea: z.string().optional(),
+    presentacion: z.string().optional(),
+    proveedor: z.string().optional(),
+    costo_unitario: z.number().min(0).optional(),
+    tipo_catalogo: z.string().optional(),
+    estado: z.string().optional(),
+    sku: z.string().optional()
+  }).passthrough()
+});
 
 export async function getCatalogo(filtroTipo: string, mostrarInactivos: boolean = false) {
   let query = supabaseAdmin.from('bienes').select('*').order('created_at', { ascending: false }).limit(2000);
@@ -21,14 +40,7 @@ export async function getCatalogo(filtroTipo: string, mostrarInactivos: boolean 
   // Filter inactives
   if (mostrarInactivos) {
     query = query.eq('atributos_producto->>estado', 'inactivo');
-  } else {
-    // PostgREST doesn't natively support "is missing OR not eq" perfectly in simple builder for JSONB,
-    // so we can either fetch all and filter in JS, or use a negative filter.
-    // For simplicity with JSONB, we'll fetch all matching type and filter in JS if needed,
-    // or use neq. Let's use neq since most active items won't have 'estado' or will have 'activo'.
-    // Actually, 'neq' drops rows where the key doesn't exist. So we better fetch and filter in JS,
-    // or set 'activo' explicitly.
-  }
+  } 
   
   const { data, error } = await query;
   
@@ -49,7 +61,13 @@ function getFirst3Letters(str: string) {
   return String(str).replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase().padEnd(3, 'X');
 }
 
-export async function guardarBien(bienId: string | null, payload: any, sedeId: string, isAdmin: boolean) {
+export async function guardarBien(bienId: string | null, rawPayload: any, sedeId: string, isAdmin: boolean) {
+  const parseResult = BienSchema.safeParse(rawPayload);
+  if (!parseResult.success) {
+    throw new Error(parseResult.error.errors.map(e => e.message).join(', '));
+  }
+  
+  const payload = parseResult.data;
   const { nombre, categoria, tipo_bien, precio_venta, atributos_producto, stockInicial } = payload;
   
   let id = bienId;
