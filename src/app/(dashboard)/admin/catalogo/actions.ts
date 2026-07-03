@@ -122,7 +122,7 @@ export async function inactivarBien(id: string, inactivar: boolean) {
 
 export async function actualizarJerarquia(tipo: 'marca' | 'linea', valorAntiguo: string, valorNuevo: string) {
   if (!valorNuevo || !valorAntiguo) throw new Error("Valores inválidos");
-  const { data: items, error: fetchError } = await supabaseAdmin.from('bienes').select('id, nombre, atributos_producto').eq(`atributos_producto->>${tipo}`, valorAntiguo);
+  const { data: items, error: fetchError } = await supabaseAdmin.from('bienes').select('id, nombre, categoria, atributos_producto').eq(`atributos_producto->>${tipo}`, valorAntiguo);
   if (fetchError) throw new Error(fetchError.message);
   
   if (!items || items.length === 0) return { success: true };
