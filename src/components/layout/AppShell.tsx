@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, Palette, User, PackageSearch, ArrowRightLeft, Layers, Download, BarChart3, Database } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
@@ -12,8 +13,8 @@ import { registrarLog } from '@/services/logger';
 import { GlobalUI } from '@/components/ui/GlobalUI';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('Cargando...');
   const pathname = usePathname();
   const router = useRouter();
@@ -106,379 +107,220 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     router.refresh();
   };
 
-  const navItemClass = (path: string) => `flex items-center p-2 rounded-lg text-sm transition-colors ${
-    pathname.startsWith(path) 
-      ? 'bg-primary-50 text-primary-700 font-semibold dark:bg-primary-900/30 dark:text-primary-400' 
-      : 'text-gray-600 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-800'
-  }`;
+  const isExpanded = mobileMenuOpen || isHovered;
 
-  // Si no se encontró el rol del usuario (No está en la tabla agentes)
-  if (!loadingSedes && !userRol && userEmail !== 'Cargando...') {
+  const NavItem = ({ href, icon: Icon, label, disabled = false }: any) => {
+    const isActive = pathname.startsWith(href);
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-red-100 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Shield className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Acceso Denegado</h1>
-          <p className="text-gray-500 mb-6">Tu cuenta de acceso <b>({userEmail})</b> existe, pero no ha sido vinculada al ERP. No tienes ningún rol asignado en la base de datos.</p>
-          <div className="bg-orange-50 text-orange-800 text-sm p-4 rounded-lg mb-6 text-left border border-orange-200">
-            <strong>Solución:</strong><br/>
-            Ve a tu SQL Editor en Supabase y asegúrate de ejecutar exitosamente el script <code>supabase_fase8_sync_final.sql</code>.
-          </div>
-          <button onClick={handleLogout} className="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors">
-            Cerrar Sesión e Intentar de Nuevo
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // PANTALLA DE SELECCIÓN OBLIGATORIA DE SEDE (Si no ha elegido y tiene múltiples)
-  if (!loadingSedes && !sedeActiva && misSedes.length > 1) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <MapPin className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Bienvenido</h1>
-          <p className="text-gray-500 mb-6">Por favor, selecciona la unidad de negocio a la que deseas ingresar hoy.</p>
-          
-          <div className="space-y-3">
-            {misSedes.map(sede => (
-              <button
-                key={sede.id}
-                onClick={() => setSedeActiva(sede)}
-                className="w-full bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-gray-200 text-gray-800 font-semibold py-4 px-6 rounded-xl transition-all flex items-center justify-between"
+      <li>
+        <Link href={disabled ? '#' : href} className={`relative flex items-center p-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-indigo-600/10 text-indigo-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+          {isActive && (
+            <motion.div layoutId="activeNavIndicator" className="absolute left-0 w-1 h-8 bg-indigo-600 rounded-r-full" />
+          )}
+          <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-900'}`} />
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.span 
+                initial={{ opacity: 0, width: 0, marginLeft: 0 }}
+                animate={{ opacity: 1, width: 'auto', marginLeft: 12 }}
+                exit={{ opacity: 0, width: 0, marginLeft: 0 }}
+                className="font-semibold text-sm whitespace-nowrap overflow-hidden"
               >
-                <span>{sede.nombre}</span>
-              </button>
-            ))}
-          </div>
-          <button onClick={handleLogout} className="mt-8 text-sm text-gray-400 hover:text-red-500 transition-colors">
-            Cerrar Sesión
-          </button>
-        </div>
-      </div>
+                {label}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </Link>
+      </li>
     );
-  }
+  };
+
+  const NavSection = ({ title, children }: any) => (
+    <div className="mb-6">
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="px-4 mb-2"
+          >
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{title}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <ul className="space-y-1 px-2">
+        {children}
+      </ul>
+    </div>
+  );
 
   return (
-    <div className="relative min-h-screen bg-gray-50 dark:bg-slate-950">
+    <div className="relative min-h-screen bg-[#fafafa] dark:bg-slate-950 font-sans selection:bg-indigo-500/30">
       <GlobalUI />
-      {/* Navbar Superior */}
-      <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm dark:bg-slate-900 dark:border-slate-800">
-        <div className="px-3 py-3 lg:px-5 lg:pl-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center justify-start">
-              <button 
-                onClick={() => { setSidebarOpen(!sidebarOpen); setDesktopSidebarCollapsed(!desktopSidebarCollapsed); }} 
-                className="p-2 text-gray-500 rounded-lg hover:bg-gray-100 transition-colors"
-                title="Alternar Menú"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-              <div className="flex items-center gap-2 ms-2 md:me-24">
-                <img src="/vaikuntha-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
-                <span className="text-xl font-bold text-primary-700 tracking-tight whitespace-nowrap">
-                  {sedeActiva ? sedeActiva.nombre : 'Vaikuntha'} <span className="text-xs font-normal text-gray-500 ml-1">ERP</span>
-                </span>
-              </div>
-            </div>
-            
+      
+      {/* Floating Glass Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 h-16 mx-4 mt-4 lg:ml-24 lg:mr-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl transition-all duration-300">
+        <div className="h-full px-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+              className="lg:hidden p-2 text-gray-500 rounded-xl hover:bg-gray-100/50 transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <NotificationTicker />
+          </div>
 
-            <div className="flex items-center gap-4">
-                {/* Selector Dropdown de Sede Superior */}
-                {sedeActiva && misSedes.length > 1 && (
-                  <div className="relative">
-                    <button 
-                      onClick={() => setShowSedesDropdown(!showSedesDropdown)}
-                      className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors"
-                    >
-                      <MapPin className="w-4 h-4 text-indigo-600" />
-                      {sedeActiva.nombre}
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
-                    </button>
-                    
-                    {showSedesDropdown && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
-                        {misSedes.map(sede => (
-                          <button
-                            key={sede.id}
-                            onClick={() => {
-                              setSedeActiva(sede);
-                              setShowSedesDropdown(false);
-                            }}
-                            className={`w-full text-left px-4 py-3 text-sm transition-colors ${sede.id === sedeActiva.id ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
-                          >
-                            {sede.nombre}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
+          <div className="flex items-center gap-4">
+            {/* Sede Selector */}
+            {sedeActiva && misSedes.length > 1 && (
+              <div className="relative">
+                <button 
+                  onClick={() => setShowSedesDropdown(!showSedesDropdown)}
+                  className="flex items-center gap-2 bg-white/50 hover:bg-white border border-gray-100/50 text-gray-700 text-sm font-bold px-4 py-2 rounded-xl shadow-sm transition-all"
+                >
+                  <MapPin className="w-4 h-4 text-indigo-600" />
+                  {sedeActiva.nombre}
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </button>
                 
-                <div className="text-right hidden sm:block border-l border-gray-200 dark:border-slate-800 pl-4">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-slate-200">{userEmail}</p>
-                    <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
-                        Cerrar Sesión
-                    </button>
+                <AnimatePresence>
+                  {showSedesDropdown && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-3 w-56 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden z-50 p-2"
+                    >
+                      {misSedes.map(sede => (
+                        <button
+                          key={sede.id}
+                          onClick={() => { setSedeActiva(sede); setShowSedesDropdown(false); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm rounded-xl transition-colors flex items-center gap-2 ${sede.id === sedeActiva.id ? 'bg-indigo-600 text-white font-bold' : 'text-gray-700 hover:bg-gray-100/50'}`}
+                        >
+                          {sede.id === sedeActiva.id && <motion.div layoutId="activeSede" className="w-1.5 h-1.5 bg-white rounded-full" />}
+                          {sede.nombre}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+            
+            <div className="hidden sm:flex items-center gap-3 pl-4 border-l border-gray-200/50 dark:border-slate-800">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-[2px]">
+                <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
+                  <UserCircle className="w-5 h-5 text-indigo-600" />
                 </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-black text-gray-900 leading-none">{userEmail.split('@')[0]}</span>
+                <button onClick={handleLogout} className="text-[10px] font-bold text-gray-400 hover:text-red-500 text-left transition-colors mt-0.5">Logout</button>
+              </div>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Sidebar Lateral Izquierdo */}
-      <aside 
-        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 bg-white border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 transition-transform ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } ${desktopSidebarCollapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}`}
+      {/* Ultra-thin Sidebar (Aceternity Style) */}
+      <motion.aside 
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        animate={{ width: isExpanded ? 260 : 80 }}
+        className={`fixed top-0 left-0 z-[60] h-screen bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border-r border-white/20 shadow-[8px_0_30px_rgb(0,0,0,0.04)] transition-transform duration-300 ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
       >
-        <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-slate-900">
-          <ul className="space-y-4 font-medium">
-             
-            {/* MÓDULO: RECEPCIÓN */}
-            {tienePermiso('recepcion') && (
-              <li>
-                <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Recepción CRM</span>
-                <ul className="mt-2 space-y-1">
-                  <li>
-                    <Link href="/recepcion" className={navItemClass('/recepcion')}>
-                      <LayoutDashboard className="w-5 h-5 mr-3" />
-                      Workspace Recepción
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/recepcion/historial" className={navItemClass('/recepcion/historial')}>
-                      <FileText className="w-5 h-5 mr-3" />
-                      Historial de OATC
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/recepcion/agenda" className={navItemClass('/recepcion/agenda')}>
-                      <UserCircle className="w-5 h-5 mr-3" />
-                      Agenda CRM
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/recepcion/reportes" className={navItemClass('/recepcion/reportes')}>
-                      <FileText className="w-5 h-5 mr-3" />
-                      Reportes Recepción
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/wfm" className={navItemClass('/wfm')}>
-                      <LayoutDashboard className="w-5 h-5 mr-3" />
-                      Mapa WFM
-                    </Link>
-                  </li>
-                </ul>
-              </li>
-            )}
-
-            {/* MÓDULO: CAJA POS */}
-            {tienePermiso('caja') && (
-              <li>
-                <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Caja y Cobros</span>
-                <ul className="mt-2 space-y-1">
-                  <li>
-                    <Link href="/caja" className={navItemClass('/caja')}>
-                      <Briefcase className="w-5 h-5 mr-3" />
-                      Punto de Venta (POS)
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/caja/arqueo" className={navItemClass('/caja/arqueo')}>
-                      <FileText className="w-5 h-5 mr-3" />
-                      Arqueo de Caja
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/caja/productividad" className={navItemClass('/caja/productividad')}>
-                      <Activity className="w-5 h-5 mr-3" />
-                      Productividad
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/caja/comprobantes" className={navItemClass('/caja/comprobantes')}>
-                      <FileText className="w-5 h-5 mr-3" />
-                      Comprobantes Emitidos
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/caja/facturas" className={navItemClass('/caja/facturas')}>
-                      <FileText className="w-5 h-5 mr-3" />
-                      Gestión de Facturas
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/caja/cuentas" className={navItemClass('/caja/cuentas')}>
-                      <Briefcase className="w-5 h-5 mr-3" />
-                      Gestión de Cuentas
-                    </Link>
-                  </li>
-                </ul>
-              </li>
-            )}
-             
-            {/* MÓDULO: DESPACHO / LABORATORIO */}
-            {tienePermiso('despacho') && (
-              <li>
-                <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Despacho e Insumos</span>
-                <ul className="mt-2 space-y-1">
-                  <li>
-                    <Link href="/lab/despacho" className={navItemClass('/lab/despacho')}>
-                      <PackageSearch className="w-5 h-5 mr-3" />
-                      Despacho (ODI)
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/lab/kardex" className={navItemClass('/lab/kardex')}>
-                      <Activity className="w-5 h-5 mr-3" />
-                      Kardex
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/lab/transferencia" className={navItemClass('/lab/transferencia')}>
-                      <ArrowRightLeft className="w-5 h-5 mr-3" />
-                      Transferencia Lab
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/lab/stock" className={navItemClass('/lab/stock')}>
-                      <Layers className="w-5 h-5 mr-3" />
-                      Stock & Ubicación
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/lab/ingreso" className={navItemClass('/lab/ingreso')}>
-                      <Download className="w-5 h-5 mr-3" />
-                      Ingreso Central
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/lab/metricas" className={navItemClass('/lab/metricas')}>
-                      <BarChart3 className="w-5 h-5 mr-3" />
-                      Métricas
-                    </Link>
-                  </li>
-                </ul>
-              </li>
-            )}
-
-            {/* MÓDULO: OPERACIONES (Staff) */}
-            {tienePermiso('operaciones') && (
-              <li>
-                <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Operaciones de Piso</span>
-                <ul className="mt-2 space-y-1">
-                  <li>
-                    <Link href="/operaciones" className={navItemClass('/operaciones')}>
-                      <Briefcase className="w-5 h-5 mr-3" />
-                      Workspace Operativo
-                    </Link>
-                  </li>
-                </ul>
-              </li>
-            )}
-
-            {/* MÓDULO: ADMINISTRACIÓN */}
-            {tienePermiso('admin') && (
-              <li>
-                <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Administración</span>
-                <ul className="mt-2 space-y-1">
-                  <li>
-                    <Link href="/admin/reportes" className={navItemClass('/admin/reportes')}>
-                      <Activity className="w-5 h-5 mr-3" />
-                      Dashboard Global
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/admin/catalogo" className={navItemClass('/admin/catalogo')}>
-                      <Database className="w-5 h-5 mr-3" />
-                      Catálogo Maestro
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/admin/usuarios" className={navItemClass('/admin/usuarios')}>
-                      <Shield className="w-5 h-5 mr-3" />
-                      Gestión de Usuarios
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/admin/configuracion" className={navItemClass('/admin/configuracion')}>
-                      <Settings className="w-5 h-5 mr-3" />
-                      Configuración WFM
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/admin/caja-config" className={navItemClass('/admin/caja-config')}>
-                      <Settings className="w-5 h-5 mr-3" />
-                      Configuración Caja y Cobros
-                    </Link>
-                  </li>
-                </ul>
-              </li>
-            )}
-            
-            {/* MÓDULO: DEVELOPER */}
-            {tienePermiso('dev') && (
-              <li>
-                <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Desarrollador</span>
-                <ul className="mt-2 space-y-1">
-                  <li>
-                    <Link href="/dev" className={navItemClass('/dev')}>
-                      <Settings className="w-5 h-5 mr-3" />
-                      System Logs
-                    </Link>
-                  </li>
-                </ul>
-              </li>
-            )}
-
-            {/* MÓDULO: MI CUENTA (Para todos) */}
-            <li>
-              <span className="px-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Mi Cuenta</span>
-              <ul className="mt-2 space-y-1">
-                <li>
-                  <Link href="/perfil" className={navItemClass('/perfil')}>
-                    <User className="w-5 h-5 mr-3" />
-                    Mi Perfil (PIN)
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/configuracion" className={navItemClass('/configuracion')}>
-                    <Palette className="w-5 h-5 mr-3" />
-                    Configuración Visual
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-          </ul>
-          
-          {/* MÓVIL: Cerrar Sesión (Solo visible en pantallas pequeñas) */}
-          <div className="mt-8 border-t border-gray-100 pt-6 sm:hidden">
-            <p className="text-xs font-semibold text-gray-500 mb-2 px-2 text-center break-words">{userEmail}</p>
-            <button 
-              onClick={handleLogout} 
-              className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Cerrar Sesión
-            </button>
+        <div className="flex items-center gap-3 px-6 h-24 border-b border-gray-100/50">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
+            <span className="text-white font-black text-lg">V</span>
           </div>
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="flex flex-col overflow-hidden"
+              >
+                <span className="text-lg font-black text-gray-900 tracking-tight whitespace-nowrap">Vaikuntha</span>
+                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest whitespace-nowrap">Enterprise ERP</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </aside>
 
-      {/* Contenido Principal */}
-      <div className={`p-4 pt-20 min-h-screen transition-all ${desktopSidebarCollapsed ? 'lg:ml-0' : 'lg:ml-64'}`}>
-        {children}
-      </div>
+        <div className="h-[calc(100vh-6rem)] overflow-y-auto overflow-x-hidden py-6 scrollbar-hide">
+          {tienePermiso('recepcion') && (
+            <NavSection title="CRM & Front">
+              <NavItem href="/recepcion" icon={LayoutDashboard} label="Workspace Recepción" />
+              <NavItem href="/recepcion/agenda" icon={UserCircle} label="Agenda CRM" />
+              <NavItem href="/wfm" icon={Activity} label="Mapa WFM" />
+            </NavSection>
+          )}
 
+          {tienePermiso('caja') && (
+            <NavSection title="Finanzas">
+              <NavItem href="/caja" icon={Briefcase} label="Punto de Venta" />
+              <NavItem href="/caja/arqueo" icon={FileText} label="Arqueo" />
+              <NavItem href="/caja/facturas" icon={Layers} label="Facturas" />
+            </NavSection>
+          )}
+
+          {tienePermiso('despacho') && (
+            <NavSection title="Logística">
+              <NavItem href="/lab/despacho" icon={PackageSearch} label="Despacho (ODI)" />
+              <NavItem href="/lab/kardex" icon={Activity} label="Kardex" />
+              <NavItem href="/lab/stock" icon={Layers} label="Stock" />
+            </NavSection>
+          )}
+
+          {tienePermiso('operaciones') && (
+            <NavSection title="Operaciones">
+              <NavItem href="/operaciones" icon={Briefcase} label="Workspace" />
+            </NavSection>
+          )}
+
+          {tienePermiso('admin') && (
+            <NavSection title="Sistema">
+              <NavItem href="/admin/reportes" icon={BarChart3} label="Dashboard Global" />
+              <NavItem href="/admin/catalogo" icon={Database} label="Catálogo Maestro" />
+              <NavItem href="/admin/usuarios" icon={Shield} label="Usuarios" />
+            </NavSection>
+          )}
+
+          <NavSection title="Personal">
+            <NavItem href="/perfil" icon={User} label="Mi Perfil" />
+            <NavItem href="/configuracion" icon={Settings} label="Ajustes" />
+          </NavSection>
+        </div>
+      </motion.aside>
+
+      {/* Main Content Area */}
+      <main className={`transition-all duration-300 pt-28 pb-10 px-4 sm:px-6 lg:px-8 ${isExpanded ? 'lg:ml-[260px]' : 'lg:ml-20'}`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          {children}
+        </motion.div>
+      </main>
+      
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 z-50 bg-gray-900/20 backdrop-blur-sm lg:hidden" 
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
