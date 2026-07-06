@@ -256,7 +256,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           {tienePermiso('recepcion') && (
             <NavSection title="CRM & Front">
               <NavItem href="/recepcion" icon={LayoutDashboard} label="Workspace Recepción" />
+              <NavItem href="/recepcion/historial" icon={FileText} label="Historial de OATC" />
               <NavItem href="/recepcion/agenda" icon={UserCircle} label="Agenda CRM" />
+              <NavItem href="/recepcion/reportes" icon={FileText} label="Reportes Recepción" />
               <NavItem href="/wfm" icon={Activity} label="Mapa WFM" />
             </NavSection>
           )}
@@ -265,7 +267,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <NavSection title="Finanzas">
               <NavItem href="/caja" icon={Briefcase} label="Punto de Venta" />
               <NavItem href="/caja/arqueo" icon={FileText} label="Arqueo" />
+              <NavItem href="/caja/productividad" icon={Activity} label="Productividad" />
+              <NavItem href="/caja/comprobantes" icon={FileText} label="Comprobantes" />
               <NavItem href="/caja/facturas" icon={Layers} label="Facturas" />
+              <NavItem href="/caja/cuentas" icon={Briefcase} label="Gestión de Cuentas" />
             </NavSection>
           )}
 
@@ -273,27 +278,38 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <NavSection title="Logística">
               <NavItem href="/lab/despacho" icon={PackageSearch} label="Despacho (ODI)" />
               <NavItem href="/lab/kardex" icon={Activity} label="Kardex" />
+              <NavItem href="/lab/transferencia" icon={ArrowRightLeft} label="Transferencias" />
               <NavItem href="/lab/stock" icon={Layers} label="Stock" />
+              <NavItem href="/lab/ingreso" icon={Download} label="Ingreso Central" />
+              <NavItem href="/lab/metricas" icon={BarChart3} label="Métricas" />
             </NavSection>
           )}
 
           {tienePermiso('operaciones') && (
             <NavSection title="Operaciones">
-              <NavItem href="/operaciones" icon={Briefcase} label="Workspace" />
+              <NavItem href="/operaciones" icon={Briefcase} label="Workspace Operativo" />
             </NavSection>
           )}
 
           {tienePermiso('admin') && (
             <NavSection title="Sistema">
-              <NavItem href="/admin/reportes" icon={BarChart3} label="Dashboard Global" />
+              <NavItem href="/admin/reportes" icon={Activity} label="Dashboard Global" />
               <NavItem href="/admin/catalogo" icon={Database} label="Catálogo Maestro" />
               <NavItem href="/admin/usuarios" icon={Shield} label="Usuarios" />
+              <NavItem href="/admin/configuracion" icon={Settings} label="Configuración WFM" />
+              <NavItem href="/admin/caja-config" icon={Settings} label="Configuración Caja" />
+            </NavSection>
+          )}
+
+          {tienePermiso('dev') && (
+            <NavSection title="Desarrollador">
+              <NavItem href="/dev" icon={Settings} label="System Logs" />
             </NavSection>
           )}
 
           <NavSection title="Personal">
             <NavItem href="/perfil" icon={User} label="Mi Perfil" />
-            <NavItem href="/configuracion" icon={Settings} label="Ajustes" />
+            <NavItem href="/configuracion" icon={Palette} label="Configuración Visual" />
           </NavSection>
         </div>
       </motion.aside>
