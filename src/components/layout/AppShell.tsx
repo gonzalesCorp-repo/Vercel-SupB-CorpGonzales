@@ -63,7 +63,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   
   const tienePermiso = (modulo: string) => {
     if (!userRol) return false;
-    const roles = userRol.split(',');
+    const roles = userRol.split(',').map(r => r.trim());
     
     if (roles.includes('SUPERADMIN')) return true;
     if (roles.includes('ADMIN') && modulo !== 'dev') return true;

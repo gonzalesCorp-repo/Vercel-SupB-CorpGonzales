@@ -115,15 +115,15 @@ export default function CatalogoMasterPage() {
       nombre: formData.nombre,
       categoria: formData.linea || formData.categoria,
       tipo_bien: formData.tipo_bien,
-      precio_venta: parseFloat(formData.precio_venta),
-      stockInicial: parseInt(formData.stockInicial),
+      precio_venta: parseFloat(formData.precio_venta) || 0,
+      stockInicial: parseInt(formData.stockInicial) || 0,
       atributos_producto: {
         sku,
         marca: formData.marca,
         linea: formData.linea,
         presentacion: formData.presentacion,
         proveedor: formData.proveedor,
-        costo_unitario: parseFloat(formData.costo_unitario),
+        costo_unitario: parseFloat(formData.costo_unitario) || 0,
         tipo_catalogo: formData.tipo_catalogo,
         estado: editItem?.atributos_producto?.estado // preserve state
       }
