@@ -28,15 +28,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [showSedesDropdown, setShowSedesDropdown] = useState(false);
 
   useEffect(() => {
-    // Aplicar dark mode al HTML para que tailwind lo reconozca globalmente si no se envuelve el body
-    if (themeMode === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [themeMode]);
-
-  useEffect(() => {
     const fetchUserAndSedes = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user && user.email) {
@@ -123,7 +114,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     const isActive = pathname.startsWith(href);
     return (
       <li>
-        <Link href={disabled ? '#' : href} className={`relative flex items-center p-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-indigo-600/10 text-indigo-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+        <Link href={disabled ? '#' : href} className={`relative flex items-center p-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
           {isActive && (
             <motion.div layoutId="activeNavIndicator" className="absolute left-0 w-1 h-8 bg-indigo-600 rounded-r-full" />
           )}
@@ -166,7 +157,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className={`relative min-h-screen bg-[#fafafa] dark:bg-slate-950 font-sans selection:bg-indigo-500/30 ${themeMode === 'dark' ? 'dark' : ''}`}>
+    <div className="relative min-h-screen bg-[#fafafa] dark:bg-slate-950 font-sans selection:bg-indigo-500/30">
       <GlobalUI />
       
       {/* Floating Glass Navbar */}
@@ -255,8 +246,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 exit={{ opacity: 0, x: -10 }}
                 className="flex flex-col overflow-hidden"
               >
-                <span className="text-lg font-black text-gray-900 tracking-tight whitespace-nowrap">Vaikuntha</span>
-                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest whitespace-nowrap">Enterprise ERP</span>
+                <span className="text-lg font-black text-gray-900 dark:text-slate-100 tracking-tight whitespace-nowrap">Vaikuntha</span>
+                <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest whitespace-nowrap">Enterprise ERP</span>
               </motion.div>
             )}
           </AnimatePresence>
