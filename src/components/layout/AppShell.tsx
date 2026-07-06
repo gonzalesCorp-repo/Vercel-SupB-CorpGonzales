@@ -11,6 +11,7 @@ import { obtenerSedesUsuario, Sede } from '@/services/sedes';
 import { NotificationTicker } from './NotificationTicker';
 import { registrarLog } from '@/services/logger';
 import { GlobalUI } from '@/components/ui/GlobalUI';
+import { useThemeStore } from '@/store/useThemeStore';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,11 +21,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const supabase = createClient();
   const { sedeActiva, setSedeActiva, clearSede, userRol, setUserRol } = useAppStore();
-  
+  const { themeMode } = useThemeStore();
   
   const [misSedes, setMisSedes] = useState<Sede[]>([]);
   const [loadingSedes, setLoadingSedes] = useState(true);
   const [showSedesDropdown, setShowSedesDropdown] = useState(false);
+
+  useEffect(() => {
+    // Aplicar dark mode al HTML para que tailwind lo reconozca globalmente si no se envuelve el body
+    if (themeMode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [themeMode]);
 
   useEffect(() => {
     const fetchUserAndSedes = async () => {
@@ -156,7 +166,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="relative min-h-screen bg-[#fafafa] dark:bg-slate-950 font-sans selection:bg-indigo-500/30">
+    <div className={`relative min-h-screen bg-[#fafafa] dark:bg-slate-950 font-sans selection:bg-indigo-500/30 ${themeMode === 'dark' ? 'dark' : ''}`}>
       <GlobalUI />
       
       {/* Floating Glass Navbar */}
@@ -174,11 +184,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-4">
             {/* Sede Selector */}
-            {sedeActiva && misSedes.length > 1 && (
+            {sedeActiva && misSedes.length > 0 && (
               <div className="relative">
                 <button 
                   onClick={() => setShowSedesDropdown(!showSedesDropdown)}
-                  className="flex items-center gap-2 bg-white/50 hover:bg-white border border-gray-100/50 text-gray-700 text-sm font-bold px-4 py-2 rounded-xl shadow-sm transition-all"
+                  className="flex items-center gap-2 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-gray-100/50 dark:border-slate-700 text-gray-700 dark:text-slate-200 text-sm font-bold px-4 py-2 rounded-xl shadow-sm transition-all"
                 >
                   <MapPin className="w-4 h-4 text-indigo-600" />
                   {sedeActiva.nombre}
@@ -191,7 +201,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-3 w-56 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden z-50 p-2"
+                      className="absolute right-0 mt-3 w-56 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-slate-700 overflow-hidden z-50 p-2"
                     >
                       {misSedes.map(sede => (
                         <button
@@ -216,7 +226,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-black text-gray-900 leading-none">{userEmail.split('@')[0]}</span>
+                <span className="text-xs font-black text-gray-900 dark:text-slate-100 leading-none">{userEmail.split('@')[0]}</span>
                 <button onClick={handleLogout} className="text-[10px] font-bold text-gray-400 hover:text-red-500 text-left transition-colors mt-0.5">Logout</button>
               </div>
             </div>
