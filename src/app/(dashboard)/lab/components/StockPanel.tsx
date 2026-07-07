@@ -34,7 +34,7 @@ export default function StockPanel() {
         </div>
         <div className="flex gap-3 flex-wrap items-center">
           <BulkUploader 
-            tableName="inventario" 
+            tableName="almacen_principal" 
             title="Importar Stock" 
             injectSedeId={true}
             buttonClassName="flex items-center gap-2 text-sm text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl hover:bg-indigo-100 border border-indigo-100 transition-colors shadow-sm font-semibold"
