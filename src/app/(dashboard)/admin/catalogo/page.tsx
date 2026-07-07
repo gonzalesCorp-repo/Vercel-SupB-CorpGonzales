@@ -7,6 +7,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { ConfirmDialog, PromptDialog } from '@/components/ui/PremiumDialog';
+import { BulkUploader } from '@/components/ui/BulkUploader';
 
 function getFirst3Letters(str: string) {
   if (!str) return 'XXX';
@@ -233,6 +234,11 @@ export default function CatalogoMasterPage() {
             >
               <RefreshCw className={`w-5 h-5 group-hover:text-indigo-600 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
+            <BulkUploader 
+              tableName="bienes" 
+              title="Importar Excel" 
+              onSuccess={cargarBienes} 
+            />
             <button 
               onClick={() => openModal()}
               className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold shadow-xl shadow-gray-900/20 hover:bg-black hover:scale-[1.02] active:scale-95 transition-all"
