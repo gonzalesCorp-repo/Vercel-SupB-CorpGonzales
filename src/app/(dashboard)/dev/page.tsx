@@ -102,6 +102,24 @@ export default function DevPage() {
                 <span className="text-sm font-semibold text-gray-900 dark:text-slate-200">{logs.length} capturados</span>
               </div>
             </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm dark:bg-slate-800 dark:border-slate-700">
+            <div className="flex items-center gap-3 mb-4">
+              <Server className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <h3 className="font-bold text-gray-900 dark:text-white">Gestión de Entorno</h3>
+            </div>
+            <p className="text-xs text-gray-500 mb-4 dark:text-slate-400">
+              Carga inicial de sedes y estructura del sistema.
+            </p>
+            <div className="flex justify-start">
+              <BulkUploader 
+                tableName="sedes" 
+                title="Importar Sedes" 
+                expectedColumns={['nombre', 'direccion']}
+              />
+            </div>
           </div>
 
           <div className="bg-blue-50 p-5 rounded-xl border border-blue-100 dark:bg-blue-900/20 dark:border-blue-900/30">
