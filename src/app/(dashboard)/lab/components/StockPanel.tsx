@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { obtenerStockUbicacion } from '@/services/lab';
 import { Layers, AlertTriangle, CheckCircle2, Box } from 'lucide-react';
+import { BulkUploader } from '@/components/ui/BulkUploader';
 
 export default function StockPanel() {
   const [stock, setStock] = useState<any[]>([]);
@@ -31,12 +32,19 @@ export default function StockPanel() {
           </h1>
           <p className="text-slate-500 mt-2">Visión global del inventario distribuido entre Almacén Central y Laboratorio.</p>
         </div>
-        <div className="flex gap-2">
-          <div className="flex items-center gap-2 text-xs font-medium bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100">
-            <CheckCircle2 className="w-4 h-4" /> Óptimo
-          </div>
-          <div className="flex items-center gap-2 text-xs font-medium bg-rose-50 text-rose-700 px-3 py-1.5 rounded-lg border border-rose-100">
-            <AlertTriangle className="w-4 h-4" /> Crítico (&lt; 10)
+        <div className="flex gap-3 flex-wrap items-center">
+          <BulkUploader 
+            tableName="inventario" 
+            title="Importar Stock" 
+            buttonClassName="flex items-center gap-2 text-sm text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl hover:bg-indigo-100 border border-indigo-100 transition-colors shadow-sm font-semibold"
+          />
+          <div className="flex gap-2">
+            <div className="flex items-center gap-2 text-xs font-medium bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100">
+              <CheckCircle2 className="w-4 h-4" /> Óptimo
+            </div>
+            <div className="flex items-center gap-2 text-xs font-medium bg-rose-50 text-rose-700 px-3 py-1.5 rounded-lg border border-rose-100">
+              <AlertTriangle className="w-4 h-4" /> Crítico (&lt; 10)
+            </div>
           </div>
         </div>
       </div>

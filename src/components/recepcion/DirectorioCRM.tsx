@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Search, UserPlus, Users, Phone, CreditCard, CheckCircle2, Plus } from 'lucide-react';
 import { Cliente, obtenerTodosLosClientes, buscarClientes, crearCliente } from '@/services/clientes';
 import { Modal } from '@/components/ui/Modal';
+import { BulkUploader } from '@/components/ui/BulkUploader';
 
 export function DirectorioCRM() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -72,13 +73,22 @@ export function DirectorioCRM() {
             <p className="text-sm text-slate-500">Busca, administra y registra nuevos perfiles de clientes.</p>
           </div>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 text-sm text-white bg-indigo-600 px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-md font-semibold"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Nuevo Cliente</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <BulkUploader 
+            tableName="clientes" 
+            title="Importar Clientes" 
+            expectedColumns={['nombre', 'dni', 'celular']}
+            buttonClassName="flex items-center gap-2 text-sm text-indigo-600 bg-indigo-50 px-5 py-2.5 rounded-xl hover:bg-indigo-100 border border-indigo-100 transition-colors shadow-sm font-semibold"
+            onSuccess={cargarClientes} 
+          />
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 text-sm text-white bg-indigo-600 px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-md font-semibold"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Nuevo Cliente</span>
+          </button>
+        </div>
       </div>
 
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">

@@ -236,7 +236,9 @@ export default function CatalogoMasterPage() {
             </button>
             <BulkUploader 
               tableName="bienes" 
-              title="Importar Excel" 
+              title="Importar Catálogo" 
+              expectedColumns={['nombre', 'categoria', 'tipo_bien', 'precio_venta', 'marca', 'linea', 'presentacion', 'proveedor', 'costo_unitario']}
+              buttonClassName="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 transition-all"
               onSuccess={cargarBienes} 
             />
             <button 

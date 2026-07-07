@@ -5,6 +5,7 @@ import { Map, RefreshCw, Scissors, Droplet, User as UserIcon, HelpCircle, Grid, 
 import { obtenerMapaSalon, MapaSalonData, Ubicacion } from '@/services/wfm';
 import { differenceInMinutes } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
+import { BulkUploader } from '@/components/ui/BulkUploader';
 
 export default function WFMPage() {
   const [mapaOriginal, setMapaOriginal] = useState<MapaSalonData[]>([]);
@@ -143,7 +144,12 @@ export default function WFMPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          
+          <BulkUploader 
+            tableName="ubicaciones" 
+            title="Importar Mapa" 
+            buttonClassName="flex items-center gap-2 text-sm text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl hover:bg-indigo-100 border border-indigo-100 transition-colors shadow-sm font-semibold"
+            onSuccess={cargarMapa} 
+          />
           {!isEditMode && (
             <div className="flex bg-slate-100 p-1 rounded-xl shadow-inner border border-slate-200">
               <button 

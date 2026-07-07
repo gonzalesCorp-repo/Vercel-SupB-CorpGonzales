@@ -10,10 +10,17 @@ interface BulkUploaderProps {
   tableName: string;
   expectedColumns?: string[];
   title?: string;
+  buttonClassName?: string;
   onSuccess?: () => void;
 }
 
-export function BulkUploader({ tableName, expectedColumns, title = "Importar Excel", onSuccess }: BulkUploaderProps) {
+export function BulkUploader({ 
+  tableName, 
+  expectedColumns, 
+  title = "Importar Excel", 
+  buttonClassName = "flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm text-sm font-medium transition-colors",
+  onSuccess 
+}: BulkUploaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState<any[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
@@ -116,9 +123,9 @@ export function BulkUploader({ tableName, expectedColumns, title = "Importar Exc
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm text-sm font-medium transition-colors"
+        className={buttonClassName}
       >
-        <Upload className="w-4 h-4" />
+        <Upload className="w-5 h-5 shrink-0" />
         {title}
       </button>
 
