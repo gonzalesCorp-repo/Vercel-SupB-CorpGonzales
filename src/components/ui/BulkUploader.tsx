@@ -4,7 +4,7 @@ import React, { useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { Upload, X, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAppStore } from "@/store/useAppStore";
 
 interface BulkUploaderProps {
   tableName: string;
@@ -22,10 +22,10 @@ export function BulkUploader({ tableName, expectedColumns, title = "Importar Exc
   const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { role } = useAuthStore();
+  const { userRol } = useAppStore();
   
   // Solo ADMIN o SUPERADMIN pueden ver esto
-  if (role !== 'ADMIN' && role !== 'SUPERADMIN') return null;
+  if (userRol !== 'ADMIN' && userRol !== 'SUPERADMIN') return null;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
