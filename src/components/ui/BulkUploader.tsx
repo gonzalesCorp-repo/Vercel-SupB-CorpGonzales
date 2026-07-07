@@ -11,6 +11,7 @@ interface BulkUploaderProps {
   expectedColumns?: string[];
   title?: string;
   buttonClassName?: string;
+  injectSedeId?: boolean;
   onSuccess?: () => void;
 }
 
@@ -19,6 +20,7 @@ export function BulkUploader({
   expectedColumns, 
   title = "Importar Excel", 
   buttonClassName = "flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm text-sm font-medium transition-colors",
+  injectSedeId = false,
   onSuccess 
 }: BulkUploaderProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +31,7 @@ export function BulkUploader({
   const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { userRol } = useAppStore();
+  const { userRol, sedeActiva } = useAppStore();
   
   // Solo ADMIN o SUPERADMIN pueden ver esto
   if (userRol !== 'ADMIN' && userRol !== 'SUPERADMIN') return null;
@@ -96,7 +98,13 @@ export function BulkUploader({
       let inserted = 0;
       
       for (let i = 0; i < data.length; i += chunkSize) {
-        const chunk = data.slice(i, i + chunkSize);
+        let chunk = data.slice(i, i + chunkSize);
+        
+        // Inyección dinámica de sede para entornos multi-tenant
+        if (injectSedeId && sedeActiva?.id) {
+          chunk = chunk.map(row => ({ ...row, sede_id: sedeActiva.id }));
+        }
+
         const { error: insertError } = await supabase.from(tableName).insert(chunk);
         if (insertError) throw insertError;
         inserted += chunk.length;

@@ -36,6 +36,7 @@ export default function StockPanel() {
           <BulkUploader 
             tableName="inventario" 
             title="Importar Stock" 
+            injectSedeId={true}
             buttonClassName="flex items-center gap-2 text-sm text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl hover:bg-indigo-100 border border-indigo-100 transition-colors shadow-sm font-semibold"
           />
           <div className="flex gap-2">
