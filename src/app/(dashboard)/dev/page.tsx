@@ -102,7 +102,6 @@ export default function DevPage() {
                 <span className="text-sm font-semibold text-gray-900 dark:text-slate-200">{logs.length} capturados</span>
               </div>
             </div>
-            </div>
           </div>
 
           <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm dark:bg-slate-800 dark:border-slate-700">
