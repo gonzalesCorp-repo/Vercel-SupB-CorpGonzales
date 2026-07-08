@@ -5,6 +5,8 @@ import { Search, UserPlus, Users, Phone, CreditCard, CheckCircle2, Plus } from '
 import { Cliente, obtenerTodosLosClientes, buscarClientes, crearCliente } from '@/services/clientes';
 import { Modal } from '@/components/ui/Modal';
 import { BulkUploader } from '@/components/ui/BulkUploader';
+import { useAppStore } from '@/store/useAppStore';
+import { createClient } from '@/lib/supabase/client';
 
 export function DirectorioCRM() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -16,6 +18,8 @@ export function DirectorioCRM() {
   const [nuevoCliente, setNuevoCliente] = useState<Cliente>({ nombre: '', dni: '', celular: '' });
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const { sedeActiva } = useAppStore();
+  const supabase = createClient();
 
   const cargarClientes = async () => {
     setIsLoading(true);
@@ -46,7 +50,19 @@ export function DirectorioCRM() {
     if (!nuevoCliente.nombre) return;
     
     setIsSaving(true);
-    const res = await crearCliente(nuevoCliente);
+    
+    // Inyectar Sede y Agente
+    let agenteId = null;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) agenteId = user.id;
+
+    const clienteAInsertar: Cliente = {
+      ...nuevoCliente,
+      sede_id: sedeActiva?.id,
+      agente_id: agenteId
+    };
+
+    const res = await crearCliente(clienteAInsertar);
     if (res) {
       setSuccessMsg('¡Cliente registrado con éxito!');
       setNuevoCliente({ nombre: '', dni: '', celular: '' });
@@ -78,6 +94,8 @@ export function DirectorioCRM() {
             tableName="clientes" 
             title="Importar Clientes" 
             expectedColumns={['nombre', 'dni', 'celular']}
+            injectSedeId={true}
+            injectAgenteId={true}
             buttonClassName="flex items-center gap-2 text-sm text-indigo-600 bg-indigo-50 px-5 py-2.5 rounded-xl hover:bg-indigo-100 border border-indigo-100 transition-colors shadow-sm font-semibold"
             onSuccess={cargarClientes} 
           />
@@ -136,9 +154,10 @@ export function DirectorioCRM() {
             <table className="w-full text-sm text-left text-slate-600">
               <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4">Nombre Completo</th>
-                  <th className="px-6 py-4">Documento (DNI/RUC)</th>
-                  <th className="px-6 py-4">Celular / Teléfono</th>
+                  <th className="px-6 py-4">Cliente</th>
+                  <th className="px-6 py-4 text-center">DNI/Doc</th>
+                  <th className="px-6 py-4 text-center">Celular</th>
+                  <th className="px-6 py-4 text-center">Origen</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -148,16 +167,22 @@ export function DirectorioCRM() {
                       <div className="font-bold text-slate-900">{c.nombre}</div>
                       <div className="text-[10px] text-slate-400 uppercase mt-0.5 tracking-wider">Cliente Habitual</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-slate-700 font-medium">
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2 text-slate-700 font-medium">
                         <CreditCard className="w-4 h-4 text-slate-400" />
                         {c.dni || <span className="text-slate-400 italic font-normal">No registrado</span>}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-slate-700 font-medium">
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2 text-slate-700 font-medium">
                         <Phone className="w-4 h-4 text-slate-400" />
                         {c.celular || <span className="text-slate-400 italic font-normal">No registrado</span>}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center text-xs">
+                      <div className="flex flex-col items-center justify-center">
+                        <span className="font-semibold text-slate-700">{c.sedes?.nombre || 'Sede Global'}</span>
+                        <span className="text-slate-400">Por: {c.agentes?.nombre || 'Desconocido'}</span>
                       </div>
                     </td>
                   </tr>

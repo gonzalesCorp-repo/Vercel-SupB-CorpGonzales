@@ -12,6 +12,7 @@ interface BulkUploaderProps {
   title?: string;
   buttonClassName?: string;
   injectSedeId?: boolean;
+  injectAgenteId?: boolean;
   onSuccess?: () => void;
 }
 
@@ -21,6 +22,7 @@ export function BulkUploader({
   title = "Importar Excel", 
   buttonClassName = "flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm text-sm font-medium transition-colors",
   injectSedeId = false,
+  injectAgenteId = false,
   onSuccess 
 }: BulkUploaderProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -93,6 +95,12 @@ export function BulkUploader({
     const supabase = createClient();
     
     try {
+      let agenteId = null;
+      if (injectAgenteId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) agenteId = user.id;
+      }
+
       // Chunking if data is too large (e.g. 500 at a time)
       const chunkSize = 500;
       let inserted = 0;
@@ -103,6 +111,11 @@ export function BulkUploader({
         // Inyección dinámica de sede para entornos multi-tenant
         if (injectSedeId && sedeActiva?.id) {
           chunk = chunk.map(row => ({ ...row, sede_id: sedeActiva.id }));
+        }
+        
+        // Inyección dinámica de agente
+        if (injectAgenteId && agenteId) {
+          chunk = chunk.map(row => ({ ...row, agente_id: agenteId }));
         }
 
         const { error: insertError } = await supabase.from(tableName).insert(chunk);

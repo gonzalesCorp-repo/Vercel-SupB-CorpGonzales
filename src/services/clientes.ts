@@ -6,7 +6,10 @@ export interface Cliente {
   dni?: string;
   celular?: string;
   created_at?: string;
-  // origen_captacion?: string; (Depende si modificamos el schema o usamos metadata, por ahora usar tabla base)
+  sede_id?: string | null;
+  agente_id?: string | null;
+  sedes?: { nombre: string } | null;
+  agentes?: { nombre: string } | null;
 }
 
 const supabase = createClient();
@@ -14,7 +17,7 @@ const supabase = createClient();
 export async function buscarClientes(query: string): Promise<Cliente[]> {
   const { data, error } = await supabase
     .from('clientes')
-    .select('*')
+    .select('*, sedes(nombre), agentes(nombre)')
     .or(`nombre.ilike.%${query}%,dni.ilike.%${query}%,celular.ilike.%${query}%`)
     .limit(20);
 
@@ -32,7 +35,9 @@ export async function crearCliente(cliente: Cliente): Promise<Cliente | null> {
       {
         nombre: cliente.nombre,
         dni: cliente.dni || null,
-        celular: cliente.celular || null
+        celular: cliente.celular || null,
+        sede_id: cliente.sede_id || null,
+        agente_id: cliente.agente_id || null
       }
     ])
     .select()
@@ -49,7 +54,7 @@ export async function crearCliente(cliente: Cliente): Promise<Cliente | null> {
 export async function obtenerTodosLosClientes(): Promise<Cliente[]> {
   const { data, error } = await supabase
     .from('clientes')
-    .select('*')
+    .select('*, sedes(nombre), agentes(nombre)')
     .order('created_at', { ascending: false });
 
   if (error) {
