@@ -9,10 +9,34 @@ import {
   Activity,
   AlertCircle
 } from 'lucide-react';
+import { useAppStore } from '@/store/useAppStore';
+import { obtenerDatosReporteRecepcion, ReporteRecepcion } from '@/services/reportesRecepcion';
 
 export default function RecepcionReportesPage() {
-  const [fecha, setFecha] = useState('2026-06-24');
+  const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [reportData, setReportData] = useState<ReporteRecepcion | null>(null);
+  
+  const { sedeActiva } = useAppStore();
+
+  const loadData = async () => {
+    if (!sedeActiva?.id) return;
+    setIsLoading(true);
+    try {
+      const data = await obtenerDatosReporteRecepcion(sedeActiva.id, fecha);
+      setReportData(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fecha, sedeActiva?.id]);
   
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 bg-slate-50 min-h-screen">
@@ -59,11 +83,11 @@ export default function RecepcionReportesPage() {
           <div className="flex flex-col ml-2">
             <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 opacity-0">Sync</label>
             <button 
-              onClick={() => setIsRealtimeConnected(!isRealtimeConnected)}
+              onClick={() => { setIsRealtimeConnected(!isRealtimeConnected); loadData(); }}
               className="relative p-1.5 border border-slate-200 text-slate-500 rounded-md hover:bg-slate-50 hover:text-blue-600 transition-colors"
               title={isRealtimeConnected ? "Sincronizado en tiempo real" : "Conexión perdida. Clic para recargar."}
             >
-              <RefreshCcw className="w-4 h-4" />
+              <RefreshCcw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white ${isRealtimeConnected ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`}></span>
             </button>
           </div>
@@ -82,15 +106,15 @@ export default function RecepcionReportesPage() {
         <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 relative overflow-hidden">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">1. Balance de Atenciones</h3>
           <div className="flex items-baseline gap-2 mb-6">
-            <span className="text-3xl font-black text-slate-800">32</span>
+            <span className="text-3xl font-black text-slate-800">{reportData?.atencionesOk ?? '-'}</span>
             <span className="text-sm font-semibold text-emerald-500">Ok</span>
             <span className="text-slate-300 mx-1">/</span>
-            <span className="text-lg font-bold text-red-500">1</span>
+            <span className="text-lg font-bold text-red-500">{reportData?.atencionesFallas ?? '-'}</span>
             <span className="text-sm font-semibold text-red-500">Fallas</span>
           </div>
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-500">Efectividad de Resolución:</span>
-            <span className="font-bold text-slate-800">97%</span>
+            <span className="font-bold text-slate-800">{reportData?.efectividad ?? 0}%</span>
           </div>
           <div className="absolute top-5 right-5 text-emerald-100 bg-emerald-50 p-2 rounded-lg">
             <ShieldCheck className="w-6 h-6 text-emerald-500" />
@@ -103,18 +127,15 @@ export default function RecepcionReportesPage() {
           <p className="text-[10px] text-slate-400 mb-5">Especialidades validadas con la hoja Agentes</p>
           
           <div className="flex flex-wrap gap-2">
-            <span className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full border border-blue-100 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-              Estilismo: 10
-            </span>
-            <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full border border-indigo-100 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-              Cosmiatría: 3
-            </span>
-            <span className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-              Administración: 2
-            </span>
+            {reportData?.personalPorEspecialidad.map((p, idx) => {
+              const colorBase = idx === 0 ? 'blue' : idx === 1 ? 'indigo' : 'slate';
+              return (
+                <span key={p.especialidad} className={`px-3 py-1 bg-${colorBase}-50 text-${colorBase}-600 text-xs font-semibold rounded-full border border-${colorBase}-100 flex items-center gap-1`}>
+                  <span className={`w-1.5 h-1.5 rounded-full bg-${colorBase}-500`}></span>
+                  {p.especialidad}: {p.cantidad}
+                </span>
+              );
+            })}
           </div>
           <div className="absolute top-5 right-5 text-blue-100 bg-blue-50 p-2 rounded-lg">
             <Users className="w-5 h-5 text-blue-500" />
@@ -125,22 +146,22 @@ export default function RecepcionReportesPage() {
         <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 relative">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">3. Flujo Global / Turnos</h3>
           <div className="flex items-baseline gap-2 mb-4">
-            <span className="text-3xl font-black text-slate-800">33</span>
+            <span className="text-3xl font-black text-slate-800">{reportData?.flujoGlobal?.total ?? 0}</span>
             <span className="text-sm font-medium text-slate-500">movimientos</span>
           </div>
           
           <div className="grid grid-cols-2 gap-2 text-xs font-medium text-slate-600">
             <div className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              Clientes: 18
+              Clientes: {reportData?.flujoGlobal?.clientes ?? 0}
             </div>
             <div className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-              Turnos: 14
+              Turnos: {reportData?.flujoGlobal?.turnos ?? 0}
             </div>
             <div className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-              Asesorías: 1
+              Asesorías: {reportData?.flujoGlobal?.asesorias ?? 0}
             </div>
           </div>
           <div className="absolute top-5 right-5 text-indigo-100 bg-indigo-50 p-2 rounded-lg">
@@ -171,17 +192,23 @@ export default function RecepcionReportesPage() {
                 </tr>
               </thead>
               <tbody className="text-slate-600">
-                <tr className="border-b border-slate-50">
-                  <td className="py-3 pr-2">Solo preguntaba el precio</td>
-                  <td className="py-3 pr-2">Peinados y cepillados</td>
-                  <td className="py-3 pr-2">Ruperto Chuquizuta Inga</td>
-                  <td className="py-3 pr-2">
-                    <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">Asesoría</span>
-                  </td>
-                  <td className="py-3 text-center">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px]">1</span>
-                  </td>
-                </tr>
+                {reportData?.reclamos && reportData.reclamos.length > 0 ? (
+                  reportData.reclamos.map(r => (
+                    <tr key={r.id} className="border-b border-slate-50">
+                      <td className="py-3 pr-2">{r.detalle_cancelacion || '-'}</td>
+                      <td className="py-3 pr-2">{r.motivos_cancelacion?.motivo || '-'}</td>
+                      <td className="py-3 pr-2">{r.agente_nombre || 'Desconocido'}</td>
+                      <td className="py-3 pr-2">
+                        <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">{r.tipo_demanda || 'Reclamo'}</span>
+                      </td>
+                      <td className="py-3 text-center">
+                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px]">1</span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan={5} className="py-8 text-center text-slate-400 italic">No hay reclamos o fallas hoy.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -205,63 +232,34 @@ export default function RecepcionReportesPage() {
           </div>
 
           <div className="space-y-6">
-            {/* Rank 1 */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] font-bold">1</span>
-                  <span className="text-xs font-bold text-slate-700">Jessica Huaman</span>
-                </div>
-                <span className="text-xs font-bold text-slate-800">5 Atenciones</span>
-              </div>
-              <div className="w-full h-3 flex rounded-full overflow-hidden mb-1">
-                <div className="bg-emerald-500 h-full flex items-center justify-center text-[8px] text-white font-bold" style={{ width: '80%' }}>4</div>
-                <div className="bg-blue-600 h-full flex items-center justify-center text-[8px] text-white font-bold" style={{ width: '20%' }}>1</div>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 rounded border border-emerald-100">4 Cliente</span>
-                <span className="text-[9px] text-blue-600 bg-blue-50 px-1.5 rounded border border-blue-100">1 Turno</span>
-              </div>
-            </div>
-
-            {/* Rank 2 */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] font-bold">2</span>
-                  <span className="text-xs font-bold text-slate-700">Margot Lavado</span>
-                </div>
-                <span className="text-xs font-bold text-slate-800">4 Atenciones</span>
-              </div>
-              <div className="w-full h-3 flex rounded-full overflow-hidden mb-1">
-                <div className="bg-blue-500 h-full flex items-center justify-center text-[8px] text-white font-bold" style={{ width: '50%' }}>2</div>
-                <div className="bg-emerald-500 h-full flex items-center justify-center text-[8px] text-white font-bold" style={{ width: '50%' }}>2</div>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-[9px] text-blue-600 bg-blue-50 px-1.5 rounded border border-blue-100">2 Turno</span>
-                <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 rounded border border-emerald-100">2 Cliente</span>
-              </div>
-            </div>
-
-            {/* Rank 3 */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] font-bold">3</span>
-                  <span className="text-xs font-bold text-slate-700">Cocó Pacheco</span>
-                </div>
-                <span className="text-xs font-bold text-slate-800">4 Atenciones</span>
-              </div>
-              <div className="w-full h-3 flex rounded-full overflow-hidden mb-1">
-                <div className="bg-emerald-500 h-full flex items-center justify-center text-[8px] text-white font-bold" style={{ width: '50%' }}>2</div>
-                <div className="bg-blue-500 h-full flex items-center justify-center text-[8px] text-white font-bold" style={{ width: '50%' }}>2</div>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 rounded border border-emerald-100">2 Cliente</span>
-                <span className="text-[9px] text-blue-600 bg-blue-50 px-1.5 rounded border border-blue-100">2 Turno</span>
-              </div>
-            </div>
-
+            {reportData?.rankingAgentes && reportData.rankingAgentes.length > 0 ? (
+              reportData.rankingAgentes.map((agente, idx) => {
+                const total = agente.total || 1; // prevent divide by zero visually
+                const pctClientes = Math.round((agente.clientes / total) * 100);
+                const pctTurnos = 100 - pctClientes;
+                return (
+                  <div key={agente.agente_nombre}>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] font-bold">{idx + 1}</span>
+                        <span className="text-xs font-bold text-slate-700">{agente.agente_nombre}</span>
+                      </div>
+                      <span className="text-xs font-bold text-slate-800">{agente.total} Atenciones</span>
+                    </div>
+                    <div className="w-full h-3 flex rounded-full overflow-hidden mb-1">
+                      {agente.clientes > 0 && <div className="bg-emerald-500 h-full flex items-center justify-center text-[8px] text-white font-bold" style={{ width: `${pctClientes}%` }}>{agente.clientes}</div>}
+                      {agente.turnos > 0 && <div className="bg-blue-600 h-full flex items-center justify-center text-[8px] text-white font-bold" style={{ width: `${pctTurnos}%` }}>{agente.turnos}</div>}
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 rounded border border-emerald-100">{agente.clientes} Cliente</span>
+                      <span className="text-[9px] text-blue-600 bg-blue-50 px-1.5 rounded border border-blue-100">{agente.turnos} Turno</span>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-8 text-slate-400 italic">No hay atenciones registradas hoy para generar el ranking.</div>
+            )}
           </div>
         </div>
 
