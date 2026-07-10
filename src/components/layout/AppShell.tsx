@@ -313,8 +313,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           )}
 
           <NavSection title="Personal">
-            <NavItem href="/perfil" icon={User} label="Mi Perfil" />
-            <NavItem href="/configuracion" icon={Palette} label="Configuración Visual" />
+            <NavItem href="/perfil" icon={User} label="Mi Cuenta" />
           </NavSection>
         </div>
       </motion.aside>

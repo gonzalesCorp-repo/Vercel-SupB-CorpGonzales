@@ -19,6 +19,8 @@ export default function MiPerfilPage() {
   const setThemeMode = useThemeStore((state) => state.setThemeMode);
   const primaryColor = useThemeStore((state) => state.primaryColor);
   const setPrimaryColor = useThemeStore((state) => state.setPrimaryColor);
+  const fontSize = useThemeStore((state) => state.fontSize);
+  const setFontSize = useThemeStore((state) => state.setFontSize);
 
   const colors = [
     { name: 'Índigo', value: '#4f46e5' },
@@ -275,6 +277,28 @@ export default function MiPerfilPage() {
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+
+                {/* Text Size Selector */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Tamaño de Letra</label>
+                  <div className="flex gap-3">
+                    {['small', 'normal', 'large'].map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => setFontSize(size as any)}
+                        className={`flex-1 py-3 rounded-xl border-2 font-bold transition-all capitalize ${
+                          fontSize === size 
+                            ? 'border-transparent text-white shadow-md' 
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
+                        style={fontSize === size ? { backgroundColor: primaryColor } : {}}
+                      >
+                        {size === 'small' ? 'Pequeño' : size === 'large' ? 'Grande' : 'Normal'}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
