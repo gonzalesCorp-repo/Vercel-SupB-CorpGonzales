@@ -8,7 +8,7 @@ import { Activity, ArrowDownRight, ArrowUpRight, Filter } from 'lucide-react';
 export default function KardexPanel() {
   const [movimientos, setMovimientos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
 
   useEffect(() => {
     const loadData = async () => {

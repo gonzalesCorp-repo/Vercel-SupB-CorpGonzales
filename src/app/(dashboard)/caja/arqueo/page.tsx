@@ -47,7 +47,7 @@ export default function ArqueoPage() {
   const [movDesc, setMovDesc] = useState('');
   const [isSavingMov, setIsSavingMov] = useState(false);
 
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
 
   const loadSession = async () => {

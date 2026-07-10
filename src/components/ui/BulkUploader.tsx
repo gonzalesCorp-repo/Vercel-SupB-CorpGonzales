@@ -33,7 +33,8 @@ export function BulkUploader({
   const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { userRol, sedeActiva } = useAppStore();
+  const userRol = useAppStore((state) => state.userRol);
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   
   // Solo ADMIN o SUPERADMIN pueden ver esto
   if (userRol !== 'ADMIN' && userRol !== 'SUPERADMIN') return null;

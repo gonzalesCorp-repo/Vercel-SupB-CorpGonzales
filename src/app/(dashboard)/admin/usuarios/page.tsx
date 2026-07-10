@@ -20,7 +20,8 @@ export default function UsuariosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
-  const { sedeActiva, userRol } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
+  const userRol = useAppStore((state) => state.userRol);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<AgenteAdmin>>({

@@ -12,7 +12,7 @@ const supabase = createClient();
 export default function DespachoPanel() {
   const [pedidos, setPedidos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
 
   useEffect(() => {

@@ -24,7 +24,7 @@ export default function RecursosPanel() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const { showAlert } = useUIStore();
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
 
   const resetTimeout = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);

@@ -20,7 +20,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
-  const { sedeActiva, setSedeActiva, clearSede, userRol, setUserRol } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
+  const setSedeActiva = useAppStore((state) => state.setSedeActiva);
+  const clearSede = useAppStore((state) => state.clearSede);
+  const userRol = useAppStore((state) => state.userRol);
+  const setUserRol = useAppStore((state) => state.setUserRol);
   const { themeMode } = useThemeStore();
   
   const [misSedes, setMisSedes] = useState<Sede[]>([]);

@@ -9,7 +9,7 @@ import { BulkUploader } from '@/components/ui/BulkUploader';
 export default function StockPanel() {
   const [stock, setStock] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
 
   useEffect(() => {
     const loadStock = async () => {

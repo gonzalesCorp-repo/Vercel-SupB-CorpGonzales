@@ -20,7 +20,7 @@ export default function CatalogoMasterPage() {
   const [filtroTexto, setFiltroTexto] = useState('');
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'insumo' | 'producto' | 'servicio'>('todos');
   const [mostrarInactivos, setMostrarInactivos] = useState(false);
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
 
   const [expandedMarcas, setExpandedMarcas] = useState<Record<string, boolean>>({});
   const [expandedLineas, setExpandedLineas] = useState<Record<string, boolean>>({});

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function DevLayout({ children }: { children: React.ReactNode }) {
-  const { userRol } = useAppStore();
+  const userRol = useAppStore((state) => state.userRol);
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
 

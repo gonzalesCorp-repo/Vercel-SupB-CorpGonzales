@@ -14,7 +14,7 @@ export default function IngresoCentralPanel() {
   const [search, setSearch] = useState('');
   const [referencia, setReferencia] = useState('FACT-001');
   const [carrito, setCarrito] = useState<any[]>([]);
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
   const [isProcessing, setIsProcessing] = useState(false);
 

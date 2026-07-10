@@ -15,7 +15,7 @@ export default function WFMConfigPage() {
   const [activeTab, setActiveTab] = useState<'PETICIONES' | 'DEMANDAS' | 'MOTIVOS'>('PETICIONES');
   const [isLoading, setIsLoading] = useState(true);
   
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showConfirm, showAlert } = useUIStore();
 
   // States for Peticiones

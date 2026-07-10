@@ -19,7 +19,7 @@ export default function RecepcionReportesPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState<ReporteRecepcion | null>(null);
   
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
 
   const loadData = async () => {
     if (!sedeActiva?.id) return;
@@ -43,7 +43,7 @@ export default function RecepcionReportesPage() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'oatc', filter: `sede_id=eq.${sedeActiva?.id}` },
-        (payload) => {
+        (payload: any) => {
           console.log('Cambio detectado en OATC (Realtime):', payload);
           if (isRealtimeConnected) {
             loadData(); // Recargar datos automáticamente en background

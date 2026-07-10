@@ -33,7 +33,7 @@ export default function AdminProductividadPage() {
   const [comisionValue, setComisionValue] = useState('');
   const [excepciones, setExcepciones] = useState<any[]>([]);
 
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
 
   useEffect(() => {

@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
-  const { clearSede } = useAppStore();
+  const clearSede = useAppStore((state) => state.clearSede);
 
   useEffect(() => {
     // Limpiar caché de sesión previa si entra al login directamente

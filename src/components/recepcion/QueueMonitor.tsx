@@ -23,7 +23,7 @@ export default function QueueMonitor() {
   
   const [tick, setTick] = useState(0);
   
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert, showConfirm } = useUIStore();
   const supabase = createClient();
 

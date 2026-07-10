@@ -18,7 +18,7 @@ interface AgentProd {
 export default function CajaProductividadPage() {
   const [productividad, setProductividad] = useState<AgentProd[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
 
   useEffect(() => {
     if (sedeActiva) {

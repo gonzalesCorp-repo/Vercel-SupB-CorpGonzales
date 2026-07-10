@@ -18,7 +18,7 @@ export function DirectorioCRM() {
   const [nuevoCliente, setNuevoCliente] = useState<Cliente>({ nombre: '', dni: '', celular: '' });
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const supabase = createClient();
 
   const cargarClientes = async () => {

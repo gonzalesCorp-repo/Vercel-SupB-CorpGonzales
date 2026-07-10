@@ -44,7 +44,7 @@ export default function ComprobantesPage() {
   const [selectedComp, setSelectedComp] = useState<ComprobanteExt | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
 
   const loadData = async () => {

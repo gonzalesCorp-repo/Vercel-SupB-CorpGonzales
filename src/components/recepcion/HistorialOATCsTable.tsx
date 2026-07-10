@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Search, Filter, Clock, CheckCircle2, XCircle, UserCircle2, ArrowRight } from 'lucide-react';
+import { Calendar, Search, Filter, Clock, CheckCircle2, XCircle, UserCircle2, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { obtenerHistorialOatcs, OATC } from '@/services/recepcion';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -12,6 +12,11 @@ export default function HistorialOATCsTable() {
   const [isLoading, setIsLoading] = useState(true);
   const [fechaInicio, setFechaInicio] = useState<string>('');
   const [fechaFin, setFechaFin] = useState<string>('');
+  
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(50);
+  const [totalRegistros, setTotalRegistros] = useState(0);
   
   // Modal states
   const [selectedOatc, setSelectedOatc] = useState<OATC | null>(null);
@@ -32,25 +37,35 @@ export default function HistorialOATCsTable() {
       fechaInicioAjustada = d.toISOString();
     }
 
-    const data = await obtenerHistorialOatcs(fechaInicioAjustada, fechaFinAjustada);
+    const { data, total } = await obtenerHistorialOatcs(fechaInicioAjustada, fechaFinAjustada, page, limit);
     setOatcs(data);
+    setTotalRegistros(total);
     setIsLoading(false);
   };
 
   useEffect(() => {
+    // Detectar pantalla móvil vs escritorio para el limit
+    const updateLimit = () => {
+      setLimit(window.innerWidth < 768 ? 20 : 50);
+    };
+    updateLimit();
+    window.addEventListener('resize', updateLimit);
+    
     // Por defecto inicializamos con la fecha de hoy
     const hoy = new Date();
     const hoyStr = format(hoy, 'yyyy-MM-dd');
     setFechaInicio(hoyStr);
     setFechaFin(hoyStr);
+
+    return () => window.removeEventListener('resize', updateLimit);
   }, []);
 
-  // Cargar datos cuando cambien las fechas
+  // Cargar datos cuando cambien las fechas o la paginación
   useEffect(() => {
     if (fechaInicio !== '' && fechaFin !== '') {
       cargarDatos();
     }
-  }, [fechaInicio, fechaFin]);
+  }, [fechaInicio, fechaFin, page, limit]);
 
   const getServicios = (puntoPartida: any[]) => {
     if (!puntoPartida || !Array.isArray(puntoPartida)) return 'Sin servicios';
@@ -116,7 +131,7 @@ export default function HistorialOATCsTable() {
                 />
               </div>
               <button 
-                onClick={cargarDatos}
+                onClick={() => { setPage(1); cargarDatos(); }}
                 className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors border border-slate-200"
                 title="Actualizar"
               >
@@ -198,6 +213,32 @@ export default function HistorialOATCsTable() {
             </table>
           )}
         </div>
+        
+        {/* Pagination Controls */}
+        {!isLoading && totalRegistros > 0 && (
+          <div className="px-6 py-4 border-t border-slate-100 bg-white flex items-center justify-between">
+            <span className="text-sm text-slate-500">
+              Mostrando <span className="font-medium text-slate-700">{((page - 1) * limit) + 1}</span> a <span className="font-medium text-slate-700">{Math.min(page * limit, totalRegistros)}</span> de <span className="font-medium text-slate-700">{totalRegistros}</span> resultados
+            </span>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-1.5 rounded-md border border-slate-200 text-slate-600 disabled:opacity-50 disabled:bg-slate-50 hover:bg-slate-50 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setPage(p => p + 1)}
+                disabled={page * limit >= totalRegistros}
+                className="p-1.5 rounded-md border border-slate-200 text-slate-600 disabled:opacity-50 disabled:bg-slate-50 hover:bg-slate-50 transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <Modal

@@ -49,7 +49,7 @@ export default function WorkspaceCajaPage() {
   const [selectedTipo, setSelectedTipo] = useState<string>('BOLETA');
   const [selectedSerieId, setSelectedSerieId] = useState<string>('');
 
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
 
   const cargarTicketsCaja = async () => {

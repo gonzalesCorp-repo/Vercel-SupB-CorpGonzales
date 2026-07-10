@@ -13,7 +13,7 @@ export default function TransferenciaPanel() {
   const [stockCentral, setStockCentral] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
 
   useEffect(() => {

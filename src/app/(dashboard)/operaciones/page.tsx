@@ -29,7 +29,7 @@ export default function WorkspaceOperativoPage() {
   const supabase = createClient();
   const router = useRouter();
   const { showAlert, showConfirm } = useUIStore();
-  const { sedeActiva } = useAppStore();
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   
   // Modales
   const [showLabModal, setShowLabModal] = useState(false);
