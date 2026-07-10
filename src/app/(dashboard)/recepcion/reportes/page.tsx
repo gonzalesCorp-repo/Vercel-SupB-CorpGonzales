@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { obtenerDatosReporteRecepcion, ReporteRecepcion } from '@/services/reportesRecepcion';
+import { createClient } from '@/lib/supabase/client';
 
 export default function RecepcionReportesPage() {
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
@@ -35,8 +36,27 @@ export default function RecepcionReportesPage() {
 
   React.useEffect(() => {
     loadData();
+
+    // 🌟 Innovate: Supabase Realtime Subscription para OATC
+    const supabase = createClient();
+    const channel = supabase.channel('realtime-oatc')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'oatc', filter: `sede_id=eq.${sedeActiva?.id}` },
+        (payload) => {
+          console.log('Cambio detectado en OATC (Realtime):', payload);
+          if (isRealtimeConnected) {
+            loadData(); // Recargar datos automáticamente en background
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fecha, sedeActiva?.id]);
+  }, [fecha, sedeActiva?.id, isRealtimeConnected]);
   
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 bg-slate-50 min-h-screen">
@@ -101,10 +121,10 @@ export default function RecepcionReportesPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-500 ease-in-out">
         {/* Card 1 */}
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 relative overflow-hidden">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">1. Balance de Atenciones</h3>
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default group">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 group-hover:text-emerald-500 transition-colors">1. Balance de Atenciones</h3>
           <div className="flex items-baseline gap-2 mb-6">
             <span className="text-3xl font-black text-slate-800">{reportData?.atencionesOk ?? '-'}</span>
             <span className="text-sm font-semibold text-emerald-500">Ok</span>
@@ -116,14 +136,14 @@ export default function RecepcionReportesPage() {
             <span className="text-slate-500">Efectividad de Resolución:</span>
             <span className="font-bold text-slate-800">{reportData?.efectividad ?? 0}%</span>
           </div>
-          <div className="absolute top-5 right-5 text-emerald-100 bg-emerald-50 p-2 rounded-lg">
+          <div className="absolute top-5 right-5 text-emerald-100 bg-emerald-50 p-2 rounded-lg group-hover:scale-110 transition-transform">
             <ShieldCheck className="w-6 h-6 text-emerald-500" />
           </div>
         </div>
 
         {/* Card 2 */}
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 relative">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">2. Personal en Sala por Especialidad</h3>
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 relative transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default group">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 group-hover:text-blue-500 transition-colors">2. Personal en Sala por Especialidad</h3>
           <p className="text-[10px] text-slate-400 mb-5">Especialidades validadas con la hoja Agentes</p>
           
           <div className="flex flex-wrap gap-2">
@@ -137,14 +157,14 @@ export default function RecepcionReportesPage() {
               );
             })}
           </div>
-          <div className="absolute top-5 right-5 text-blue-100 bg-blue-50 p-2 rounded-lg">
+          <div className="absolute top-5 right-5 text-blue-100 bg-blue-50 p-2 rounded-lg group-hover:scale-110 transition-transform">
             <Users className="w-5 h-5 text-blue-500" />
           </div>
         </div>
 
         {/* Card 3 */}
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 relative">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">3. Flujo Global / Turnos</h3>
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 relative transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default group">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 group-hover:text-orange-500 transition-colors">3. Flujo Global / Turnos</h3>
           <div className="flex items-baseline gap-2 mb-4">
             <span className="text-3xl font-black text-slate-800">{reportData?.flujoGlobal?.total ?? 0}</span>
             <span className="text-sm font-medium text-slate-500">movimientos</span>
@@ -164,7 +184,7 @@ export default function RecepcionReportesPage() {
               Asesorías: {reportData?.flujoGlobal?.asesorias ?? 0}
             </div>
           </div>
-          <div className="absolute top-5 right-5 text-indigo-100 bg-indigo-50 p-2 rounded-lg">
+          <div className="absolute top-5 right-5 text-indigo-100 bg-indigo-50 p-2 rounded-lg group-hover:scale-110 transition-transform">
             <Activity className="w-5 h-5 text-indigo-500" />
           </div>
         </div>
@@ -174,7 +194,7 @@ export default function RecepcionReportesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         
         {/* Auditoria Table */}
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100">
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 transition-all duration-300 hover:shadow-md">
           <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             4. Distribución de Reclamos por Categoría (Detalle de Auditoría)
@@ -194,7 +214,7 @@ export default function RecepcionReportesPage() {
               <tbody className="text-slate-600">
                 {reportData?.reclamos && reportData.reclamos.length > 0 ? (
                   reportData.reclamos.map(r => (
-                    <tr key={r.id} className="border-b border-slate-50">
+                    <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer">
                       <td className="py-3 pr-2">{r.detalle_cancelacion || '-'}</td>
                       <td className="py-3 pr-2">{r.motivos_cancelacion?.motivo || '-'}</td>
                       <td className="py-3 pr-2">{r.agente_nombre || 'Desconocido'}</td>
@@ -215,7 +235,7 @@ export default function RecepcionReportesPage() {
         </div>
 
         {/* Ranking */}
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100">
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-slate-100 transition-all duration-300 hover:shadow-md">
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-xs font-bold text-orange-500 uppercase tracking-wider flex items-center gap-2 max-w-[50%] leading-tight">
               <span>🏆</span>
