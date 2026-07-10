@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +12,57 @@ import { NotificationTicker } from './NotificationTicker';
 import { registrarLog } from '@/services/logger';
 import { GlobalUI } from '@/components/ui/GlobalUI';
 import { useThemeStore } from '@/store/useThemeStore';
+
+const NavItem = ({ href, icon: Icon, label, disabled = false, pathname, isExpanded }: any) => {
+  const isActive = pathname.startsWith(href) && href !== '/' || (href === '/' && pathname === '/');
+  return (
+    <li>
+      <Link href={disabled ? '#' : href} className={`relative flex items-center p-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+        {isActive && (
+          <motion.div layoutId="activeNavIndicator" className="absolute left-0 w-1 h-8 bg-indigo-600 rounded-r-full" />
+        )}
+        <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-900'}`} />
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.span 
+              initial={{ opacity: 0, width: 0, marginLeft: 0 }}
+              animate={{ opacity: 1, width: 'auto', marginLeft: 12 }}
+              exit={{ opacity: 0, width: 0, marginLeft: 0 }}
+              className="font-semibold text-sm whitespace-nowrap overflow-hidden"
+            >
+              {label}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </Link>
+    </li>
+  );
+};
+
+const NavSection = ({ title, children, isExpanded }: any) => (
+  <div className="mb-6">
+    <AnimatePresence>
+      {isExpanded && (
+        <motion.div 
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="px-4 mb-2"
+        >
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{title}</span>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    <ul className="space-y-1 px-2">
+      {React.Children.map(children, child => {
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child, { isExpanded } as any);
+        }
+        return child;
+      })}
+    </ul>
+  </div>
+);
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -114,52 +165,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const isExpanded = mobileMenuOpen || isHovered;
 
-  const NavItem = ({ href, icon: Icon, label, disabled = false }: any) => {
-    const isActive = pathname.startsWith(href);
-    return (
-      <li>
-        <Link href={disabled ? '#' : href} className={`relative flex items-center p-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
-          {isActive && (
-            <motion.div layoutId="activeNavIndicator" className="absolute left-0 w-1 h-8 bg-indigo-600 rounded-r-full" />
-          )}
-          <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-900'}`} />
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.span 
-                initial={{ opacity: 0, width: 0, marginLeft: 0 }}
-                animate={{ opacity: 1, width: 'auto', marginLeft: 12 }}
-                exit={{ opacity: 0, width: 0, marginLeft: 0 }}
-                className="font-semibold text-sm whitespace-nowrap overflow-hidden"
-              >
-                {label}
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </Link>
-      </li>
-    );
-  };
-
-  const NavSection = ({ title, children }: any) => (
-    <div className="mb-6">
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="px-4 mb-2"
-          >
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{title}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <ul className="space-y-1 px-2">
-        {children}
-      </ul>
-    </div>
-  );
-
   return (
     <div className="relative min-h-screen bg-[#fafafa] dark:bg-slate-950 font-sans selection:bg-indigo-500/30">
       <GlobalUI />
@@ -259,61 +264,61 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="h-[calc(100vh-6rem)] overflow-y-auto overflow-x-hidden py-6 scrollbar-hide">
           {tienePermiso('recepcion') && (
-            <NavSection title="CRM & Front">
-              <NavItem href="/recepcion" icon={LayoutDashboard} label="Workspace Recepción" />
-              <NavItem href="/recepcion/historial" icon={FileText} label="Historial de OATC" />
-              <NavItem href="/recepcion/agenda" icon={UserCircle} label="Agenda CRM" />
-              <NavItem href="/recepcion/reportes" icon={FileText} label="Reportes Recepción" />
-              <NavItem href="/wfm" icon={Activity} label="Mapa WFM" />
+            <NavSection title="CRM & Front" isExpanded={isExpanded}>
+              <NavItem href="/recepcion" icon={LayoutDashboard} label="Workspace Recepción" pathname={pathname} />
+              <NavItem href="/recepcion/historial" icon={FileText} label="Historial de OATC" pathname={pathname} />
+              <NavItem href="/recepcion/agenda" icon={UserCircle} label="Agenda CRM" pathname={pathname} />
+              <NavItem href="/recepcion/reportes" icon={FileText} label="Reportes Recepción" pathname={pathname} />
+              <NavItem href="/wfm" icon={Activity} label="Mapa WFM" pathname={pathname} />
             </NavSection>
           )}
 
           {tienePermiso('caja') && (
-            <NavSection title="Finanzas">
-              <NavItem href="/caja" icon={Briefcase} label="Punto de Venta" />
-              <NavItem href="/caja/arqueo" icon={FileText} label="Arqueo" />
-              <NavItem href="/caja/productividad" icon={Activity} label="Productividad" />
-              <NavItem href="/caja/comprobantes" icon={FileText} label="Comprobantes" />
-              <NavItem href="/caja/facturas" icon={Layers} label="Facturas" />
-              <NavItem href="/caja/cuentas" icon={Briefcase} label="Gestión de Cuentas" />
+            <NavSection title="Finanzas" isExpanded={isExpanded}>
+              <NavItem href="/caja" icon={Briefcase} label="Punto de Venta" pathname={pathname} />
+              <NavItem href="/caja/arqueo" icon={FileText} label="Arqueo" pathname={pathname} />
+              <NavItem href="/caja/productividad" icon={Activity} label="Productividad" pathname={pathname} />
+              <NavItem href="/caja/comprobantes" icon={FileText} label="Comprobantes" pathname={pathname} />
+              <NavItem href="/caja/facturas" icon={Layers} label="Facturas" pathname={pathname} />
+              <NavItem href="/caja/cuentas" icon={Briefcase} label="Gestión de Cuentas" pathname={pathname} />
             </NavSection>
           )}
 
           {tienePermiso('despacho') && (
-            <NavSection title="Logística">
-              <NavItem href="/lab/despacho" icon={PackageSearch} label="Despacho (ODI)" />
-              <NavItem href="/lab/kardex" icon={Activity} label="Kardex" />
-              <NavItem href="/lab/transferencia" icon={ArrowRightLeft} label="Transferencias" />
-              <NavItem href="/lab/stock" icon={Layers} label="Stock" />
-              <NavItem href="/lab/ingreso" icon={Download} label="Ingreso Central" />
-              <NavItem href="/lab/metricas" icon={BarChart3} label="Métricas" />
+            <NavSection title="Logística" isExpanded={isExpanded}>
+              <NavItem href="/lab/despacho" icon={PackageSearch} label="Despacho (ODI)" pathname={pathname} />
+              <NavItem href="/lab/kardex" icon={Activity} label="Kardex" pathname={pathname} />
+              <NavItem href="/lab/transferencia" icon={ArrowRightLeft} label="Transferencias" pathname={pathname} />
+              <NavItem href="/lab/stock" icon={Layers} label="Stock" pathname={pathname} />
+              <NavItem href="/lab/ingreso" icon={Download} label="Ingreso Central" pathname={pathname} />
+              <NavItem href="/lab/metricas" icon={BarChart3} label="Métricas" pathname={pathname} />
             </NavSection>
           )}
 
           {tienePermiso('operaciones') && (
-            <NavSection title="Operaciones">
-              <NavItem href="/operaciones" icon={Briefcase} label="Workspace Operativo" />
+            <NavSection title="Operaciones" isExpanded={isExpanded}>
+              <NavItem href="/operaciones" icon={Briefcase} label="Workspace Operativo" pathname={pathname} />
             </NavSection>
           )}
 
           {tienePermiso('admin') && (
-            <NavSection title="Sistema">
-              <NavItem href="/admin/reportes" icon={Activity} label="Dashboard Global" />
-              <NavItem href="/admin/catalogo" icon={Database} label="Catálogo Maestro" />
-              <NavItem href="/admin/usuarios" icon={Shield} label="Usuarios" />
-              <NavItem href="/admin/configuracion" icon={Settings} label="Configuración WFM" />
-              <NavItem href="/admin/caja-config" icon={Settings} label="Configuración Caja" />
+            <NavSection title="Sistema" isExpanded={isExpanded}>
+              <NavItem href="/admin/reportes" icon={Activity} label="Dashboard Global" pathname={pathname} />
+              <NavItem href="/admin/catalogo" icon={Database} label="Catálogo Maestro" pathname={pathname} />
+              <NavItem href="/admin/usuarios" icon={Shield} label="Usuarios" pathname={pathname} />
+              <NavItem href="/admin/configuracion" icon={Settings} label="Configuración WFM" pathname={pathname} />
+              <NavItem href="/admin/caja-config" icon={Settings} label="Configuración Caja" pathname={pathname} />
             </NavSection>
           )}
 
           {tienePermiso('dev') && (
-            <NavSection title="Desarrollador">
-              <NavItem href="/dev" icon={Settings} label="System Logs" />
+            <NavSection title="Desarrollador" isExpanded={isExpanded}>
+              <NavItem href="/dev" icon={Settings} label="System Logs" pathname={pathname} />
             </NavSection>
           )}
 
-          <NavSection title="Personal">
-            <NavItem href="/perfil" icon={User} label="Mi Cuenta" />
+          <NavSection title="Personal" isExpanded={isExpanded}>
+            <NavItem href="/perfil" icon={User} label="Mi Cuenta" pathname={pathname} />
           </NavSection>
         </div>
       </motion.aside>
