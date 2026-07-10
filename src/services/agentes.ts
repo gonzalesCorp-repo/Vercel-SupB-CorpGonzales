@@ -25,6 +25,8 @@ export async function obtenerTodosLosAgentes(): Promise<Agente[]> {
 
 // Cambia el estado de un agente
 export async function cambiarEstadoAgente(id: string, nuevoEstado: string) {
+  const { data: agentePrevio } = await supabase.from('agentes').select('estado').eq('id', id).single();
+  
   const { error } = await supabase
     .from('agentes')
     .update({ 
@@ -36,5 +38,12 @@ export async function cambiarEstadoAgente(id: string, nuevoEstado: string) {
   if (error) {
     console.error("Error cambiando estado del agente:", error);
     throw error;
+  }
+
+  // Registrar Asistencia
+  if (agentePrevio && agentePrevio.estado === 'INACTIVO' && nuevoEstado !== 'INACTIVO') {
+    await registrarLog('ASISTENCIA', 'INGRESO', { agente_id: id });
+  } else if (agentePrevio && agentePrevio.estado !== 'INACTIVO' && nuevoEstado === 'INACTIVO') {
+    await registrarLog('ASISTENCIA', 'SALIDA', { agente_id: id });
   }
 }

@@ -1,8 +1,11 @@
 'use client';
 
 import { useUIStore } from '@/store/useUIStore';
-import { AlertCircle, CheckCircle, Info, XCircle, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, XCircle, X, Power } from 'lucide-react';
 import { Modal } from './Modal';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { registrarLog } from '@/services/logger';
 
 export function GlobalUI() {
   const { toasts, removeToast, confirmState, closeConfirm } = useUIStore();
@@ -23,6 +26,47 @@ export function GlobalUI() {
       case 'warning': return 'bg-orange-50 border-orange-200 text-orange-900';
       default: return 'bg-blue-50 border-blue-200 text-blue-900';
     }
+  };
+
+  const [pendingAlert, setPendingAlert] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) return;
+
+      const { data, error } = await supabase
+        .from('alertas_usuarios')
+        .select('*')
+        .eq('usuario_email', user.email)
+        .eq('resuelta', false)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (!error && data && data.length > 0) {
+        setPendingAlert(data[0]);
+      }
+    };
+
+    fetchAlerts();
+  }, []);
+
+  const handleResolverAlerta = async () => {
+    if (!pendingAlert) return;
+    
+    // 1. Registrar salida retroactiva (usando el agente del usuario actual)
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      const { data: agente } = await supabase.from('agentes').select('id').eq('email', user.email).single();
+      if (agente) {
+        await registrarLog('ASISTENCIA', 'SALIDA', { agente_id: agente.id, retroactivo: true, alerta_id: pendingAlert.id });
+      }
+    }
+
+    // 2. Marcar resuelta
+    await supabase.from('alertas_usuarios').update({ resuelta: true }).eq('id', pendingAlert.id);
+    setPendingAlert(null);
   };
 
   return (
@@ -80,6 +124,25 @@ export function GlobalUI() {
               Confirmar
             </button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Alerta de Asistencia Rezagada */}
+      <Modal isOpen={!!pendingAlert} onClose={() => {}} title="Notificación del Sistema">
+        <div className="space-y-6">
+          <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl flex gap-3">
+            <AlertCircle className="w-6 h-6 text-orange-500 shrink-0 mt-0.5" />
+            <p className="text-orange-900 text-sm font-medium leading-relaxed">
+              {pendingAlert?.mensaje}
+            </p>
+          </div>
+          <button 
+            onClick={handleResolverAlerta}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-sm transition-colors"
+          >
+            <Power className="w-5 h-5" />
+            Marcar Salida Ahora
+          </button>
         </div>
       </Modal>
     </>

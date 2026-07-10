@@ -101,13 +101,7 @@ export default function QueueMonitor() {
     }
   };
 
-  const handleCerrarDia = async () => {
-    setIsRefreshing(true);
-    const oatcsData = await obtenerOatcsActivosDelDia();
-    setActiveOATCs(oatcsData);
-    setIsRefreshing(false);
-    setShowAuditModal(true);
-  };
+
 
   const handleForzarCierre = () => {
     showConfirm(
@@ -169,14 +163,7 @@ export default function QueueMonitor() {
         </div>
         
         <div className="flex gap-2">
-          <button 
-            onClick={handleCerrarDia}
-            className="flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors border border-purple-100 font-medium text-sm shadow-sm"
-            title="Auditoría de Cierre (Timbre)"
-          >
-            <Power className="w-4 h-4" />
-            <span className="hidden sm:inline">Timbre de Cierre</span>
-          </button>
+
           <button 
             onClick={() => setShowAllAgents(!showAllAgents)}
             className={`p-2 rounded-lg transition-colors border shadow-sm flex items-center justify-center ${showAllAgents ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
@@ -321,36 +308,7 @@ export default function QueueMonitor() {
         )}
       </div>
 
-      <Modal isOpen={showAuditModal} onClose={() => setShowAuditModal(false)} title="Auditoría de Cierre (Timbre)">
-        <div className="space-y-4">
-          <p className="text-sm text-slate-600">
-            Revisa los elementos colgados antes de forzar el cierre del día. Lo ideal es que los operarios cierren sus propios tickets.
-          </p>
-          
-          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-            <h4 className="font-bold text-orange-800 text-sm mb-2">Agentes Aún en Cola ({agentesColgados.length})</h4>
-            <ul className="text-xs text-orange-700 space-y-1 ml-4 list-disc">
-              {agentesColgados.length === 0 ? <li>Ninguno</li> : agentesColgados.map(a => <li key={a.id}>{a.nombre} ({a.estado})</li>)}
-            </ul>
-          </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <h4 className="font-bold text-blue-800 text-sm mb-2">Órdenes de Atención sin Finalizar ({activeOATCs.length})</h4>
-            <ul className="text-xs text-blue-700 space-y-1 ml-4 list-disc">
-              {activeOATCs.length === 0 ? <li>Ninguna</li> : activeOATCs.map(o => <li key={o.id}>{o.cliente_nombre} - {o.agente_nombre || 'Sin Agente'} ({o.estado_proceso})</li>)}
-            </ul>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-            <button onClick={() => setShowAuditModal(false)} className="px-4 py-2 text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 font-bold transition-colors">
-              Cancelar
-            </button>
-            <button onClick={handleForzarCierre} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold transition-colors shadow-sm">
-              Forzar Cierre de Cola
-            </button>
-          </div>
-        </div>
-      </Modal>
 
     </div>
   );
