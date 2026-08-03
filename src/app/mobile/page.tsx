@@ -129,18 +129,64 @@ export default function DedicatedMobileViewPage() {
     setClientesEncontrados(res);
   };
 
-  // Handlers WFM / Alertas Rápidas
+  // Handlers WFM / Alertas Rápidas (Automatizado Directo - Sin validación de recepción)
   const handleAlertaRapidaWFM = async (accion: string, nuevoEstado: string) => {
     if (!agente) return;
     try {
       await cambiarEstadoAgente(agente.id, nuevoEstado);
       setEstadoActual(nuevoEstado);
-      showAlert(`Alerta enviada a Recepción: ${accion}`, 'success');
+      showAlert(`✅ Registro Automático Exitoso: ${accion} (Sin intermediarios)`, 'success');
       cargarDatosMobile();
     } catch (err: any) {
       showAlert(`Error: ${err.message}`, 'error');
     }
   };
+
+  // Escaneo Automático vía Tag NFC de la Sede
+  const handleNfcTagScan = async () => {
+    if (!agente) return;
+
+    let siguienteEstado = 'DISPONIBLE';
+    let mensajeAccion = 'Entrada de Turno';
+
+    if (estadoActual === 'INACTIVO') {
+      siguienteEstado = 'DISPONIBLE';
+      mensajeAccion = 'Entrada de Turno';
+    } else if (estadoActual === 'DISPONIBLE' || estadoActual === 'OCUPADO') {
+      siguienteEstado = 'PAUSA';
+      mensajeAccion = 'Inicio de Refrigerio';
+    } else if (estadoActual === 'PAUSA') {
+      siguienteEstado = 'DISPONIBLE';
+      mensajeAccion = 'Fin de Refrigerio / Retorno';
+    }
+
+    try {
+      await cambiarEstadoAgente(agente.id, siguienteEstado);
+      setEstadoActual(siguienteEstado);
+      showAlert(`🏷️ Tag NFC Detectado: ${mensajeAccion} registrado automáticamente.`, 'success');
+      cargarDatosMobile();
+    } catch (err: any) {
+      showAlert(`Error registrando vía NFC: ${err.message}`, 'error');
+    }
+  };
+
+  // WebNFC Listener Automático (Android Chrome/Edge)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'NDEFReader' in window) {
+      try {
+        const ndef = new (window as any).NDEFReader();
+        ndef.scan().then(() => {
+          ndef.onreading = () => {
+            handleNfcTagScan();
+          };
+        }).catch((err: any) => {
+          console.log('WebNFC listo o en espera de interacción:', err);
+        });
+      } catch (err) {
+        console.log('WebNFC no soportado en esta plataforma');
+      }
+    }
+  }, [agente, estadoActual]);
 
   // Handler Pedido Bar
   const handleEnviarPedidoBar = async () => {
@@ -541,6 +587,16 @@ export default function DedicatedMobileViewPage() {
                   >
                     <span className="text-3xl group-hover:scale-110 transition-transform">🏁</span>
                     <span className="font-black text-xs text-slate-100 tracking-wider">ACABÓ MI DÍA</span>
+                  </button>
+                </div>
+
+                {/* Botón de Autogestión vía Tag NFC (Sin Validación de Recepción) */}
+                <div className="pt-2">
+                  <button
+                    onClick={handleNfcTagScan}
+                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 text-white font-black text-xs uppercase tracking-wider shadow-xl shadow-emerald-600/20 border border-emerald-400/30 flex items-center justify-center gap-2 active:scale-95 transition-all"
+                  >
+                    🏷️ Escanear / Simular Tag NFC Sede (Auto-Marcado)
                   </button>
                 </div>
               </div>
