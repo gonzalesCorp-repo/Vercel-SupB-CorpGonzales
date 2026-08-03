@@ -107,15 +107,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         const sedes = await obtenerSedesUsuario(user.email);
         setMisSedes(sedes);
         
-        // Si no hay sede activa en Zustand y tiene sedes, autoseleccionar la primera
-        if (!sedeActiva && sedes.length === 1) {
-          setSedeActiva(sedes[0]);
+        // Autoseleccionar la primera sede si no hay ninguna activa o si la activa no está en la lista del usuario
+        if (sedes.length > 0) {
+          const SedeActualValida = useAppStore.getState().sedeActiva;
+          if (!SedeActualValida || !sedes.some(s => s.id === SedeActualValida.id)) {
+            setSedeActiva(sedes[0]);
+          }
         }
       }
       setLoadingSedes(false);
     };
     fetchUserAndSedes();
-  }, [supabase.auth, sedeActiva, setSedeActiva, userRol, setUserRol]);
+  }, [userEmail]);
   
   const tienePermiso = (modulo: string) => {
     if (!userRol) return false;
