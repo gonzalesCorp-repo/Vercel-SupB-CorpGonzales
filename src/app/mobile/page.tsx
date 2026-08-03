@@ -895,61 +895,87 @@ export default function DedicatedMobileViewPage() {
 
       </main>
 
-      {/* 🔮 Speed Dial FAB Button (+) / (X) (Exactamente como en Screenshot 6 del Piloto) */}
-      <div className="fixed bottom-14 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center">
+      {/* 🔮 Speed Dial Floating Backdrop (Exactamente como en Screenshot 6 del Piloto) */}
+      <AnimatePresence>
+        {isFabOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsFabOpen(false)}
+            className="fixed inset-0 z-[45] bg-slate-950/70 backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* 🔮 Speed Dial FAB Button (+) / (X) (Screenshot 6 Exact Match) */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[50] flex flex-col items-center">
         
-        {/* Sub-botones Speed Dial Flotantes */}
+        {/* Sub-botones Speed Dial Flotantes Radiantes */}
         <AnimatePresence>
           {isFabOpen && (
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="flex items-center gap-4 mb-4"
+              initial={{ opacity: 0, y: 30, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.8 }}
+              className="flex items-end justify-center gap-5 mb-5"
             >
-              {/* Opción Histórico */}
-              <button 
+              {/* Opción 1: Historial */}
+              <motion.button 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => { setIsFabOpen(false); setActiveSecondaryView('historico'); }}
-                className="flex flex-col items-center gap-1 group active:scale-90 transition-transform"
+                className="flex flex-col items-center gap-1.5 group cursor-pointer"
               >
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-indigo-500/40 text-indigo-400 shadow-xl flex items-center justify-center">
-                  <History className="w-5 h-5" />
+                <div className="w-14 h-14 rounded-full bg-slate-900 border-2 border-indigo-500/50 text-indigo-400 shadow-2xl shadow-indigo-500/30 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
+                  <History className="w-6 h-6" />
                 </div>
-                <span className="text-[9px] font-black text-slate-200 bg-slate-900/90 px-2 py-0.5 rounded-full border border-slate-800">Historial</span>
-              </button>
+                <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-lg tracking-wider">
+                  Historial
+                </span>
+              </motion.button>
 
-              {/* Opción Métricas */}
-              <button 
+              {/* Opción 2: Métricas (Centro más elevado) */}
+              <motion.button 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => { setIsFabOpen(false); setActiveSecondaryView('metricas'); }}
-                className="flex flex-col items-center gap-1 group active:scale-90 transition-transform -translate-y-3"
+                className="flex flex-col items-center gap-1.5 group cursor-pointer -translate-y-4"
               >
-                <div className="w-13 h-13 rounded-2xl bg-slate-900 border border-purple-500/40 text-purple-400 shadow-xl flex items-center justify-center">
-                  <BarChart2 className="w-6 h-6" />
+                <div className="w-16 h-16 rounded-full bg-slate-900 border-2 border-purple-500/50 text-purple-400 shadow-2xl shadow-purple-500/30 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
+                  <BarChart2 className="w-7 h-7" />
                 </div>
-                <span className="text-[9px] font-black text-slate-200 bg-slate-900/90 px-2 py-0.5 rounded-full border border-slate-800">Métricas</span>
-              </button>
+                <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-lg tracking-wider">
+                  Métricas
+                </span>
+              </motion.button>
 
-              {/* Opción Perfil */}
-              <button 
+              {/* Opción 3: Perfil */}
+              <motion.button 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => { setIsFabOpen(false); setActiveSecondaryView('perfil'); }}
-                className="flex flex-col items-center gap-1 group active:scale-90 transition-transform"
+                className="flex flex-col items-center gap-1.5 group cursor-pointer"
               >
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-pink-500/40 text-pink-400 shadow-xl flex items-center justify-center">
-                  <User className="w-5 h-5" />
+                <div className="w-14 h-14 rounded-full bg-slate-900 border-2 border-pink-500/50 text-pink-400 shadow-2xl shadow-pink-500/30 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
+                  <User className="w-6 h-6" />
                 </div>
-                <span className="text-[9px] font-black text-slate-200 bg-slate-900/90 px-2 py-0.5 rounded-full border border-slate-800">Perfil</span>
-              </button>
+                <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-lg tracking-wider">
+                  Perfil
+                </span>
+              </motion.button>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* FAB Principal (+) que rota a (X) */}
+        {/* FAB Principal (+) que gira a (X) */}
         <motion.button
           onClick={() => setIsFabOpen(!isFabOpen)}
-          animate={{ rotate: isFabOpen ? 45 : 0 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white font-black flex items-center justify-center shadow-2xl shadow-purple-500/50 border-2 border-slate-950 active:scale-90 transition-transform"
+          animate={{ rotate: isFabOpen ? 135 : 0 }}
+          transition={{ duration: 0.3, ease: 'backOut' }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
+          className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white font-black flex items-center justify-center shadow-2xl shadow-purple-500/50 border-2 border-slate-950 cursor-pointer"
         >
           <Plus className="w-7 h-7" />
         </motion.button>
