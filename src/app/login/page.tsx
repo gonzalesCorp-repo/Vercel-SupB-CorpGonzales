@@ -120,11 +120,45 @@ export default function LoginPage() {
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg text-sm px-5 py-3 text-center transition disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-3 text-center transition disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {!isLoading ? 'Ingresar al Sistema' : 'Verificando...'}
           </button>
         </form>
+
+        <div className="mt-6 pt-5 border-t border-gray-200">
+          <p className="text-xs text-gray-500 font-semibold mb-2 text-center uppercase tracking-wider">Cuentas de Prueba Rápida (Sandbox)</p>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <button
+              type="button"
+              onClick={() => { setEmail('cristian@gonzales.page'); setPassword('123456'); }}
+              className="p-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded border border-purple-200 text-left font-medium transition"
+            >
+              👑 SUPERADMIN
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEmail('socrates@vaikuntha.com'); setPassword('123456'); }}
+              className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded border border-blue-200 text-left font-medium transition"
+            >
+              🛎️ RECEPCION
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEmail('tales@vaikuntha.com'); setPassword('123456'); }}
+              className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded border border-emerald-200 text-left font-medium transition"
+            >
+              💵 CAJA
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEmail('democrito@vaikuntha.com'); setPassword('123456'); }}
+              className="p-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded border border-amber-200 text-left font-medium transition"
+            >
+              💈 STAFF (Móvil)
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
