@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { OATC, Bien } from './recepcion';
 import { registrarLog } from './logger';
+import { registrarVisitaCliente } from '@/lib/gamification/clientEngine';
+import { otorgarXP } from '@/lib/gamification/engine';
+import { XP_REWARDS } from '@/lib/gamification/config';
 
 const supabase = createClient();
 
@@ -193,12 +196,19 @@ export async function solicitarFinAtencion(oatc: any, userRol?: string): Promise
     .eq('id', oatc.id);
     
   if (error) return false;
-  await registrarLog('OPERACIONES', `Fin de atencin procesado`, { oatc_id: oatc.id, estado: newState });
+  await registrarLog('OPERACIONES', `Fin de atención procesado`, { oatc_id: oatc.id, estado: newState });
 
   if (newState === 'FINALIZADO') {
     const { data: agente } = await supabase.from('agentes').select('id').eq('nombre', oatc.agente_nombre).single();
     if (agente) {
       await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', agente.id);
+      // 🎮 Octalysis: XP para el operario por atención completada
+      await otorgarXP(agente.id, XP_REWARDS.ATENCION_COMPLETADA, 'ATENCION_COMPLETADA', { oatc_id: oatc.id });
+    }
+
+    // 🎮 Octalysis: XP y visita para el CLIENTE
+    if (oatc.cliente_id) {
+      await registrarVisitaCliente(oatc.cliente_id, oatc.servicio_nombre || undefined);
     }
   }
 
