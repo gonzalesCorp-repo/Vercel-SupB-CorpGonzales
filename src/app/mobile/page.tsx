@@ -26,6 +26,10 @@ import StreakCounter from '@/components/mobile/StreakCounter';
 import HallOfFameBanner from '@/components/mobile/HallOfFameBanner';
 import BadgeCollection from '@/components/mobile/BadgeCollection';
 import KudosModal from '@/components/mobile/KudosModal';
+import CajaMobileView from '@/components/mobile/CajaMobileView';
+import RecepcionMobileView from '@/components/mobile/RecepcionMobileView';
+import DespachoMobileView from '@/components/mobile/DespachoMobileView';
+import AdminMobileView from '@/components/mobile/AdminMobileView';
 
 interface OATCExtended extends OATC {
   codigo_ticket?: string;
@@ -302,8 +306,19 @@ export default function DedicatedMobileViewPage() {
         </button>
       </div>
 
+      {/* Role-based routing: Non-STAFF roles get dedicated views */}
+      {agente?.rol && agente.rol !== 'STAFF' && (
+        <main className="flex-1 p-4 max-w-md mx-auto w-full">
+          {agente.rol === 'CAJA' && <CajaMobileView agente={agente} sedeId={sedeActiva?.id || ''} />}
+          {agente.rol === 'RECEPCION' && <RecepcionMobileView agente={agente} sedeId={sedeActiva?.id || ''} />}
+          {agente.rol === 'DESPACHO' && <DespachoMobileView agente={agente} sedeId={sedeActiva?.id || ''} />}
+          {(agente.rol === 'ADMIN' || agente.rol === 'SUPERADMIN') && <AdminMobileView agente={agente} sedeId={sedeActiva?.id || ''} />}
+        </main>
+      )}
+
       {/* 📱 Main Body Content */}
-      <main className="flex-1 p-4 max-w-md mx-auto w-full space-y-4">
+      {(!agente?.rol || agente.rol === 'STAFF') && (
+        <main className="flex-1 p-4 max-w-md mx-auto w-full space-y-4">
         
         {/* ================= VISTA SECUNDARIA: HISTÓRICO (Screenshot 7) ================= */}
         {activeSecondaryView === 'historico' && (
@@ -967,6 +982,7 @@ export default function DedicatedMobileViewPage() {
         )}
 
       </main>
+      )}
 
       {/* 🔮 Speed Dial Floating Backdrop (Exactamente como en Screenshot 6 del Piloto) */}
       <AnimatePresence>
