@@ -259,27 +259,54 @@ export default function WorkspaceOperativoPage() {
     setIsEnviando(false);
   };
 
+  // Estado Modo Kiosko / Tablet
+  const [isKioskoTablet, setIsKioskoTablet] = useState(false);
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className={`max-w-7xl mx-auto space-y-6 ${isKioskoTablet ? 'p-2 sm:p-4 bg-slate-900/90 rounded-3xl text-white' : ''}`}>
       
-      {/* Header Modo Quiosco */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-5 rounded-2xl border border-gray-200 shadow-sm gap-4">
+      {/* Header Modo Quiosco / Tablet */}
+      <div className={`flex flex-col md:flex-row justify-between items-start md:items-center p-5 rounded-2xl border shadow-sm gap-4 transition-colors ${
+        isKioskoTablet ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-gray-200'
+      }`}>
         <div className="flex items-center gap-4">
-          <div className="bg-indigo-900 p-3 rounded-xl text-white shadow-md">
-            <User className="w-6 h-6" />
+          <div className="bg-indigo-600 p-3.5 rounded-2xl text-white shadow-lg shadow-indigo-500/30 shrink-0">
+            <User className="w-7 h-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Workspace Operativo</h1>
-            <p className="text-sm text-gray-500 font-medium">Panel Compartido - Operaciones de Piso</p>
+            <div className="flex items-center gap-2">
+              <h1 className={`text-2xl sm:text-3xl font-black tracking-tight ${isKioskoTablet ? 'text-white' : 'text-gray-900'}`}>
+                Workspace Operativo
+              </h1>
+              {isKioskoTablet && (
+                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-full uppercase tracking-wider">
+                  Modo Tablet Kiosko
+                </span>
+              )}
+            </div>
+            <p className={`text-sm font-medium ${isKioskoTablet ? 'text-slate-400' : 'text-gray-500'}`}>
+              Estación de Piso y Atención Táctil
+            </p>
           </div>
         </div>
         
-        <div className="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto">
+          <button 
+            onClick={() => setIsKioskoTablet(!isKioskoTablet)}
+            className={`px-4 py-3 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 border transition-all shadow-md ${
+              isKioskoTablet 
+                ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500' 
+                : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200'
+            }`}
+          >
+            📟 {isKioskoTablet ? 'Vista Estándar' : 'Modo Tablet / Tótem'}
+          </button>
+          
           <div className="w-full md:w-auto">
             <PanelWFM isPersonalMode={isPersonalMode} miAgenteId={miAgenteId} />
           </div>
-          <button onClick={cargarTickets} className="p-2.5 text-gray-500 bg-gray-100 rounded-xl hover:text-indigo-600 hover:bg-indigo-50 transition shadow-sm">
-            <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+          <button onClick={cargarTickets} className="p-3 text-gray-500 bg-gray-100 dark:bg-slate-800 rounded-xl hover:text-indigo-600 transition shadow-sm">
+            <RefreshCw className={`w-6 h-6 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>

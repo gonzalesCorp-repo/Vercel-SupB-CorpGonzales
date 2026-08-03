@@ -165,6 +165,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const isExpanded = mobileMenuOpen || isHovered;
 
+  // Si la ruta es /mobile (App Web Móvil), renderizamos una vista nativa sin Navbar/Sidebar de escritorio
+  if (pathname.startsWith('/mobile')) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+        <GlobalUI />
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen bg-[#fafafa] dark:bg-slate-950 font-sans selection:bg-indigo-500/30">
       <GlobalUI />
