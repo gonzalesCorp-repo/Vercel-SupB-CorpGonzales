@@ -256,7 +256,7 @@ export async function obtenerOatcsActivosDelDia(): Promise<OATC[]> {
 
   const { data, error } = await supabase
     .from('oatc')
-    .select('id, created_at, cliente_nombre, punto_partida, agente_nombre, estado_proceso, vehiculo, agente_id, notas, ticket, monto_total')
+    .select('id, created_at, cliente_id, cliente_nombre, punto_partida, agente_id, agente_nombre, estado_proceso, estado_pago, sede_id, tipo_demanda')
     .eq('sede_id', sedeId)
     .neq('estado_proceso', 'FINALIZADO')
     .neq('estado_proceso', 'CANCELADO')
@@ -281,7 +281,7 @@ export async function obtenerHistorialOatcs(
 
   let query = supabase
     .from('oatc')
-    .select('id, created_at, cliente_nombre, punto_partida, agente_nombre, estado_proceso, motivo_cancelacion_id, notas, vehiculo, agente_id, ticket, monto_total', { count: 'exact' })
+    .select('id, created_at, cliente_id, cliente_nombre, punto_partida, agente_id, agente_nombre, estado_proceso, estado_pago, motivo_cancelacion_id, sede_id, tipo_demanda', { count: 'exact' })
     .eq('sede_id', sedeId)
     .order('created_at', { ascending: false });
 
@@ -334,7 +334,7 @@ export async function obtenerAutorizacionesPendientes(): Promise<OATC[]> {
 
   const { data, error } = await supabase
     .from('oatc')
-    .select('id, created_at, cliente_nombre, punto_partida, agente_nombre, estado_proceso, vehiculo, cambios_pendientes, notas')
+    .select('id, created_at, cliente_id, cliente_nombre, punto_partida, agente_id, agente_nombre, estado_proceso, cambios_pendientes, sede_id')
     .eq('sede_id', sedeId)
     .eq('estado_proceso', 'PENDIENTE_CONFIRMACION')
     .order('created_at', { ascending: true });
