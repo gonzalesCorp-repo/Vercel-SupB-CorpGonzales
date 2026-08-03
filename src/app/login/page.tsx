@@ -40,9 +40,30 @@ export default function LoginPage() {
         // Registrar auditoría de inicio de sesión
         await registrarLog('AUTH', 'Inicio de sesión exitoso', { method: 'password' });
 
-        // Redirect to dashboard/reception page
-        router.push('/recepcion');
-        router.refresh(); // Refresh to update server components with new cookie
+        // Obtener rol del agente para redirección inteligente por dispositivo y rol
+        const { data: agente } = await supabase
+          .from('agentes')
+          .select('rol')
+          .ilike('email', email.trim())
+          .maybeSingle();
+
+        const userRol = (agente?.rol || '').toUpperCase();
+        const isMobileDevice = typeof window !== 'undefined' && (
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+          window.innerWidth < 768
+        );
+
+        if (isMobileDevice || userRol === 'STAFF') {
+          router.push('/mobile');
+        } else if (userRol === 'CAJA') {
+          router.push('/caja');
+        } else if (userRol === 'DESPACHO') {
+          router.push('/lab/despacho');
+        } else {
+          router.push('/recepcion');
+        }
+
+        router.refresh();
       } else {
         setError('Por favor ingresa correo electrónico y contraseña');
       }
