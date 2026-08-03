@@ -1,68 +1,36 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle2, UserCircle2, ArrowRight, Edit2, XCircle, CheckSquare, ShieldAlert, Bell, ChevronDown, ChevronUp } from 'lucide-react';
-import { obtenerOatcsActivosDelDia, OATC, MotivoCancelacion, obtenerMotivosCancelacion, agregarMotivoCancelacion } from '@/services/recepcion';
-import { createClient } from '@/lib/supabase/client';
+import React, { useState } from 'react';
+import { Clock, CheckCircle2, UserCircle2, ArrowRight, Edit2, XCircle, CheckSquare, ShieldAlert, Bell, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { OATC } from '@/services/recepcion';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Modal } from '@/components/ui/Modal';
-import { Plus } from 'lucide-react';
+import { useOATCFlow } from './hooks/useOATCFlow';
+import { useOATCActions } from './hooks/useOATCActions';
 
 interface ActiveOATCsTableProps {
   onGenerarOrden?: () => void;
 }
 
 export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTableProps) {
-  const [oatcs, setOatcs] = useState<OATC[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [now, setNow] = useState(new Date());
+  const { oatcs, motivos, isLoading, now, cargarDatos } = useOATCFlow();
+  const { isCanceling, handleApprove, submitReject, handleCancelar } = useOATCActions({
+    onSuccess: cargarDatos,
+    oatcs
+  });
   
   // Modal states
   const [selectedOatc, setSelectedOatc] = useState<OATC | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [motivos, setMotivos] = useState<MotivoCancelacion[]>([]);
   const [selectedMotivoId, setSelectedMotivoId] = useState<string>('');
   const [detalleCancelacion, setDetalleCancelacion] = useState('');
-  const [isCanceling, setIsCanceling] = useState(false);
 
   // Alertas / Approvals
   const [isAlertsMinimized, setIsAlertsMinimized] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [oatcToReject, setOatcToReject] = useState<OATC | null>(null);
-  
-  const supabase = createClient();
-
-  const cargarDatos = async () => {
-    setIsLoading(true);
-    const [dataOatcs, dataMotivos] = await Promise.all([
-      obtenerOatcsActivosDelDia(),
-      obtenerMotivosCancelacion()
-    ]);
-    setOatcs(dataOatcs);
-    setMotivos(dataMotivos);
-    setIsLoading(false);
-  };
-
-
-
-  const handleApprove = async (oatc: OATC) => {
-    let nuevoEstado = oatc.estado_proceso === 'PENDIENTE_INICIO' ? 'EN_CURSO' : 'POR_COBRAR';
-    if (oatc.estado_proceso === 'PENDIENTE_PRE_COBRO') {
-      nuevoEstado = 'PRE_COBRADO';
-    }
-    
-    const { error } = await supabase
-      .from('oatc')
-      .update({ 
-        estado_proceso: nuevoEstado,
-        cambios_pendientes: null // Clear any pending rejections
-      })
-      .eq('id', oatc.id);
-      
-    if (!error) cargarDatos();
-  };
 
   const handleRejectClick = (oatc: OATC) => {
     setOatcToReject(oatc);
@@ -70,89 +38,28 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
     setIsRejectModalOpen(true);
   };
 
-  const submitReject = async (e: React.FormEvent) => {
+  const onSubmitReject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!oatcToReject || !rejectReason.trim()) return;
-
-    let estadoAnterior = oatcToReject.estado_proceso === 'PENDIENTE_INICIO' ? 'ASESORIA' : 'EN_CURSO';
-    if (oatcToReject.estado_proceso === 'PENDIENTE_PRE_COBRO') {
-      estadoAnterior = 'EN_CURSO';
-    }
-    
-    const { error } = await supabase
-      .from('oatc')
-      .update({ 
-        estado_proceso: estadoAnterior,
-        cambios_pendientes: { motivo_rechazo: rejectReason }
-      })
-      .eq('id', oatcToReject.id);
-
+    const { error } = await submitReject(oatcToReject, rejectReason);
     if (!error) {
       setIsRejectModalOpen(false);
       setOatcToReject(null);
-      cargarDatos();
     }
   };
   
-  const handleCancelar = async (oatcId: string) => {
-    if (!selectedMotivoId) {
-      alert('Por favor, selecciona un motivo de cancelación.');
-      return;
-    }
-    
-    if (!confirm('¿Estás seguro de que deseas cancelar esta atención?')) return;
-    
-    setIsCanceling(true);
-
-    // Primero, liberar al agente si hay uno asignado
-    const oatc = oatcs.find(o => o.id === oatcId);
-    if (oatc?.agente_id) {
-      await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', oatc.agente_id);
-    }
-    
-    // Luego cancelar la OATC
-    const { error } = await supabase
-      .from('oatc')
-      .update({ 
-        estado_proceso: 'CANCELADO', 
-        hora_fin_atencion: new Date().toISOString(),
-        motivo_cancelacion_id: selectedMotivoId,
-        detalle_cancelacion: detalleCancelacion.trim() || null
-      })
-      .eq('id', oatcId);
-      
+  const onCancelar = async (oatcId: string) => {
+    const { error } = await handleCancelar(oatcId, selectedMotivoId, detalleCancelacion);
     if (!error) {
-      cargarDatos();
       setIsModalOpen(false);
       setSelectedMotivoId('');
       setDetalleCancelacion('');
     }
-    setIsCanceling(false);
   };
   
   const openDetails = (oatc: OATC) => {
     setSelectedOatc(oatc);
     setIsModalOpen(true);
   };
-
-  useEffect(() => {
-    cargarDatos();
-
-    const channel = supabase.channel('realtime-oatc')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => {
-        cargarDatos();
-      })
-      .subscribe();
-
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-
-    return () => {
-      supabase.removeChannel(channel);
-      clearInterval(interval);
-    };
-  }, []);
 
   const getTiempoTranscurrido = (dateStr: string) => {
     try {
@@ -407,7 +314,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
 
             <div className="flex gap-3">
               <button 
-                onClick={() => handleCancelar(selectedOatc.id!)}
+                onClick={() => onCancelar(selectedOatc.id!)}
                 className="flex-1 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-medium rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isCanceling || !selectedMotivoId}
               >
@@ -424,7 +331,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
         title="Rechazar Solicitud"
         maxWidth="max-w-md"
       >
-        <form onSubmit={submitReject} className="space-y-4 mt-2">
+        <form onSubmit={onSubmitReject} className="space-y-4 mt-2">
           <div className="bg-red-50 p-4 rounded-xl border border-red-100">
             <h4 className="font-bold text-red-800 mb-1">Motivo del rechazo</h4>
             <p className="text-sm text-red-600 mb-3">Este mensaje será enviado al workspace del staff y bloqueará la solicitud.</p>
