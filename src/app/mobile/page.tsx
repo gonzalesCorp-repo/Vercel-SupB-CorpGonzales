@@ -8,15 +8,24 @@ import {
   Search, CheckCircle2, Clock, MapPin, ChevronRight, UserPlus, 
   CalendarPlus, Utensils, AlertTriangle, ShieldCheck, Heart, Sparkles,
   Minus, PlayCircle, CreditCard, Beaker, X, ArrowRight, BarChart2, 
-  History, User, Sun, Moon, Edit3, Filter, Users2, Layers, CheckCircle
+  History, User, Sun, Moon, Edit3, Filter, Users2, Layers, CheckCircle,
+  Award, Trophy
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useUIStore } from '@/store/useUIStore';
 import { useAppStore } from '@/store/useAppStore';
+import { useGamificationStore } from '@/store/useGamificationStore';
 import { cambiarEstadoAgente } from '@/services/agentes';
 import { obtenerTicketsAsignados, solicitarInicioAtencion, solicitarFinAtencion, solicitarPreCobro } from '@/services/operaciones';
 import { buscarClientes, crearCliente, Cliente } from '@/services/clientes';
 import { OATC, Agente, obtenerAgentesDisponibles } from '@/services/recepcion';
+import { otorgarXP, actualizarStreak, enviarKudos } from '@/lib/gamification/engine';
+import { calcularFinCiclo, BADGE_CATALOG, KUDOS_CATALOG, XP_REWARDS, getNivelPorXP } from '@/lib/gamification/config';
+import GamificationHeader from '@/components/mobile/GamificationHeader';
+import StreakCounter from '@/components/mobile/StreakCounter';
+import HallOfFameBanner from '@/components/mobile/HallOfFameBanner';
+import BadgeCollection from '@/components/mobile/BadgeCollection';
+import KudosModal from '@/components/mobile/KudosModal';
 
 interface OATCExtended extends OATC {
   codigo_ticket?: string;
@@ -64,6 +73,11 @@ export default function DedicatedMobileViewPage() {
   // Modales y FAB Speed Dial
   const [isFabOpen, setIsFabOpen] = useState(false);
 
+  // Gamificación Octalysis
+  const [showKudosModal, setShowKudosModal] = useState(false);
+  const [kudosTargetId, setKudosTargetId] = useState('');
+  const [kudosTargetName, setKudosTargetName] = useState('');
+
   // Filtros de Rango de Producción (Histórico & Métricas)
   const [fechaDesde, setFechaDesde] = useState<string>(new Date().toISOString().split('T')[0]);
   const [fechaHasta, setFechaHasta] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -72,6 +86,7 @@ export default function DedicatedMobileViewPage() {
   const router = useRouter();
   const { showAlert } = useUIStore();
   const sedeActiva = useAppStore((state) => state.sedeActiva);
+  const { profile: gamProfile, loadProfile: loadGamProfile, refreshHallOfFame, hallOfFame, addXP: addXPLocal } = useGamificationStore();
 
   const cargarDatosMobile = async () => {
     setIsLoading(true);
@@ -97,6 +112,10 @@ export default function DedicatedMobileViewPage() {
       const allTickets = await obtenerTicketsAsignados('ALL');
       const misTickets = allTickets.filter(t => t.agente_id === agenteData.id);
       setTickets(misTickets);
+
+      // Cargar perfil de gamificación Octalysis
+      await loadGamProfile(agenteData.id);
+      await refreshHallOfFame();
     }
 
     // Cargar lista global de colegas de la sede para el modal de equipo
@@ -133,13 +152,25 @@ export default function DedicatedMobileViewPage() {
     setClientesEncontrados(res);
   };
 
-  // Handlers WFM / Alertas Rápidas (Automatizado Directo - Sin validación de recepción)
+  // Handlers WFM / Alertas Rápidas (Automatizado Directo + Gamificación Octalysis)
   const handleAlertaRapidaWFM = async (accion: string, nuevoEstado: string) => {
     if (!agente) return;
     try {
       await cambiarEstadoAgente(agente.id, nuevoEstado);
       setEstadoActual(nuevoEstado);
       showAlert(`✅ Registro Automático Exitoso: ${accion} (Sin intermediarios)`, 'success');
+
+      // 🎮 Octalysis: Otorgar XP por acciones WFM
+      if (nuevoEstado === 'DISPONIBLE' && accion === 'YA LLEGUÉ') {
+        await otorgarXP(agente.id, XP_REWARDS.LLEGADA_PUNTUAL, 'LLEGADA_PUNTUAL', { accion });
+        await actualizarStreak(agente.id);
+        addXPLocal(XP_REWARDS.LLEGADA_PUNTUAL);
+        showAlert(`🎮 +${XP_REWARDS.LLEGADA_PUNTUAL} XP • Streak actualizado 🔥`, 'info');
+      } else if (accion === 'REGRESÉ') {
+        await otorgarXP(agente.id, XP_REWARDS.NFC_CHECKIN, 'REGRESO_PAUSA', { accion });
+        addXPLocal(XP_REWARDS.NFC_CHECKIN);
+      }
+
       cargarDatosMobile();
     } catch (err: any) {
       showAlert(`Error: ${err.message}`, 'error');
@@ -245,41 +276,31 @@ export default function DedicatedMobileViewPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col pb-28 select-none font-sans">
       
-      {/* 🚀 Top Header (Piloto Refactored Impeccable UI) */}
-      <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-2xl border-b border-slate-800/80 px-4 py-3 flex justify-between items-center shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="relative cursor-pointer" onClick={() => setActiveSecondaryView('perfil')}>
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-600 to-pink-500 p-[2px] shadow-lg shadow-purple-500/20">
-              <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center font-black text-white text-base">
-                {agente?.nombre ? agente.nombre.charAt(0) : 'K'}
-              </div>
-            </div>
-            <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-slate-950 ${
-              estadoActual === 'DISPONIBLE' ? 'bg-emerald-400' : 'bg-amber-400'
-            }`} />
-          </div>
+      {/* 🎮 Octalysis Gamification Header */}
+      <GamificationHeader
+        agente={agente}
+        profile={gamProfile ? {
+          xp_total: gamProfile.xp_total,
+          nivel: gamProfile.nivel,
+          titulo: gamProfile.titulo,
+          streak_asistencia: gamProfile.streak_asistencia,
+          monedas: gamProfile.monedas
+        } : { xp_total: 0, nivel: 1, titulo: 'Novato', streak_asistencia: 0, monedas: 0 }}
+        sedeNombre={sedeActiva?.nombre || 'Sede'}
+      />
 
-          <div>
-            <h1 className="font-black text-sm text-slate-100 leading-tight">
-              {agente?.nombre || 'Koko Vascones'}
-            </h1>
-            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1">
-              <MapPin className="w-3 h-3 inline text-indigo-400" />
-              {sedeActiva?.nombre || 'Sede RD'}
-            </p>
-          </div>
-        </div>
-
+      {/* Botón Salir flotante */}
+      <div className="fixed top-3 right-3 z-50">
         <button 
           onClick={async () => {
             await supabase.auth.signOut();
             router.push('/login');
           }}
-          className="px-3.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 font-bold text-xs active:scale-95 transition-all"
+          className="px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 font-bold text-[10px] active:scale-95 transition-all backdrop-blur-xl"
         >
           Salir
         </button>
-      </header>
+      </div>
 
       {/* 📱 Main Body Content */}
       <main className="flex-1 p-4 max-w-md mx-auto w-full space-y-4">
@@ -528,12 +549,48 @@ export default function DedicatedMobileViewPage() {
                 <Sun className="w-4 h-4 text-amber-400" /> Modo Claro / Oscuro
               </button>
             </div>
+
+            {/* 🏅 Badge Collection — Octalysis CD2+CD4 */}
+            {gamProfile && (
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-xl">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                  <Award className="w-4 h-4 text-amber-400" /> MIS INSIGNIAS
+                </h3>
+                <BadgeCollection
+                  earnedBadges={gamProfile.badges}
+                  allBadges={BADGE_CATALOG.filter(b => !b.role_filter || b.role_filter.includes(agente?.rol || 'STAFF'))}
+                />
+              </div>
+            )}
           </motion.div>
         )}
 
-        {/* ================= TAB 1: INICIO (ALERTAS & BAR) ================= */}
+        {/* ================= TAB 1: INICIO (ALERTAS & BAR + GAMIFICACIÓN) ================= */}
         {mainTab === 'inicio' && activeSecondaryView === null && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+
+            {/* 🏆 Hall of Fame Banner — Octalysis CD2+CD5 */}
+            {hallOfFame.length > 0 && (
+              <HallOfFameBanner
+                hallOfFame={hallOfFame.slice(0, 3).map(h => ({
+                  nombre: h.nombre,
+                  xp_ciclo: h.xp_ciclo,
+                  streak: h.streak_asistencia,
+                  titulo: h.titulo,
+                  agente_id: h.agente_id
+                }))}
+                currentAgenteId={agente?.id || ''}
+                cicloFin={calcularFinCiclo()}
+              />
+            )}
+
+            {/* 🔥 Streak Counter — Octalysis CD8 */}
+            {gamProfile && (
+              <StreakCounter
+                streak={gamProfile.streak_asistencia}
+                streakMax={gamProfile.streak_max}
+              />
+            )}
             
             {/* Sub Tabs: Alertas vs Bar */}
             <div className="grid grid-cols-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-inner">
@@ -1292,6 +1349,23 @@ export default function DedicatedMobileViewPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 🤝 Kudos Modal — Octalysis CD5 */}
+      <KudosModal
+        isOpen={showKudosModal}
+        onClose={() => setShowKudosModal(false)}
+        receiverId={kudosTargetId}
+        receiverName={kudosTargetName}
+        onSend={async (tipo: string, mensaje: string) => {
+          if (!agente) return;
+          const ok = await enviarKudos(agente.id, kudosTargetId, tipo, mensaje);
+          if (ok) {
+            showAlert(`✨ Kudos "${tipo}" enviado a ${kudosTargetName}`, 'success');
+            addXPLocal(XP_REWARDS.KUDOS_ENVIADO);
+          }
+          setShowKudosModal(false);
+        }}
+      />
 
     </div>
   );
