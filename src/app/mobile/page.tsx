@@ -57,6 +57,10 @@ export default function DedicatedMobileViewPage() {
   const [showAddClienteModal, setShowAddClienteModal] = useState(false);
   const [newClienteForm, setNewClienteForm] = useState({ nombre: '', dni: '', celular: '', email: '' });
 
+  // Estado Modal Registrar Cita
+  const [showAddCitaModal, setShowAddCitaModal] = useState(false);
+  const [newCitaForm, setNewCitaForm] = useState({ clienteNombre: '', servicio: 'Colorimetria', fecha: new Date().toISOString().split('T')[0], hora: '09:00' });
+
   // Modales y FAB Speed Dial
   const [isFabOpen, setIsFabOpen] = useState(false);
 
@@ -197,6 +201,18 @@ export default function DedicatedMobileViewPage() {
     }
     showAlert(`Pedido de Bar enviado a Recepción (${totalItems} bebidas)`, 'success');
     setBarOrder({ cafe: 0, infusion: 0, agua: 0 });
+  };
+
+  // Handler Crear Cita
+  const handleCrearCita = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCitaForm.clienteNombre.trim()) {
+      showAlert('Ingresa el nombre del cliente', 'warning');
+      return;
+    }
+    showAlert(`📅 Cita agendada con éxito para ${newCitaForm.clienteNombre} (${newCitaForm.fecha} - ${newCitaForm.hora})`, 'success');
+    setShowAddCitaModal(false);
+    setNewCitaForm({ clienteNombre: '', servicio: 'Colorimetria', fecha: new Date().toISOString().split('T')[0], hora: '09:00' });
   };
 
   // Handler Crear Cliente
@@ -848,7 +864,7 @@ export default function DedicatedMobileViewPage() {
             </div>
 
             <button 
-              onClick={() => showAlert('Módulo de Citas activado', 'info')}
+              onClick={() => setShowAddCitaModal(true)}
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-sm shadow-xl shadow-purple-600/30 active:scale-95 transition-all flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4" /> Registrar Cita
@@ -1186,6 +1202,90 @@ export default function DedicatedMobileViewPage() {
                   className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-xs shadow-lg shadow-emerald-500/30 active:scale-95 transition-all mt-2"
                 >
                   Guardar Cliente
+                </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Registrar Cita */}
+      <AnimatePresence>
+        {showAddCitaModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl text-slate-100"
+            >
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 className="font-black text-sm text-slate-100 flex items-center gap-2">
+                  <CalendarPlus className="w-4 h-4 text-purple-400" /> Agendar Nueva Cita
+                </h3>
+                <button onClick={() => setShowAddCitaModal(false)} className="text-slate-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCrearCita} className="space-y-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Nombre del Cliente *</label>
+                  <input 
+                    type="text"
+                    required
+                    value={newCitaForm.clienteNombre}
+                    onChange={e => setNewCitaForm({ ...newCitaForm, clienteNombre: e.target.value })}
+                    placeholder="Ej. Yolanda Flores"
+                    className="w-full bg-slate-950 text-slate-100 p-3 rounded-xl text-xs border border-slate-800 focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Servicio Solicitado</label>
+                  <select 
+                    value={newCitaForm.servicio}
+                    onChange={e => setNewCitaForm({ ...newCitaForm, servicio: e.target.value })}
+                    className="w-full bg-slate-950 text-slate-100 p-3 rounded-xl text-xs border border-slate-800 focus:outline-none focus:border-purple-500 font-bold"
+                  >
+                    <option value="Colorimetria">Colorimetría</option>
+                    <option value="Corte y Diseño">Corte y Diseño</option>
+                    <option value="Peinados y Cepillados">Peinados y Cepillados</option>
+                    <option value="Manicure">Manicure</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Fecha</label>
+                    <input 
+                      type="date"
+                      value={newCitaForm.fecha}
+                      onChange={e => setNewCitaForm({ ...newCitaForm, fecha: e.target.value })}
+                      className="w-full bg-slate-950 text-slate-100 p-3 rounded-xl text-xs border border-slate-800 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Hora</label>
+                    <input 
+                      type="time"
+                      value={newCitaForm.hora}
+                      onChange={e => setNewCitaForm({ ...newCitaForm, hora: e.target.value })}
+                      className="w-full bg-slate-950 text-slate-100 p-3 rounded-xl text-xs border border-slate-800 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs shadow-lg shadow-purple-600/30 active:scale-95 transition-all mt-2"
+                >
+                  Confirmar y Agendar
                 </button>
               </form>
             </motion.div>
