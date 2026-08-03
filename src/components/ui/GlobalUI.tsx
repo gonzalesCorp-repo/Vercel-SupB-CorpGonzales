@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { registrarLog } from '@/services/logger';
 
+import { AIAssistantWidget } from './AIAssistantWidget';
+
 export function GlobalUI() {
   const { toasts, removeToast, confirmState, closeConfirm } = useUIStore();
 
@@ -145,6 +147,9 @@ export function GlobalUI() {
           </button>
         </div>
       </Modal>
+
+      {/* Copiloto Inteligente Vercel AI */}
+      <AIAssistantWidget />
     </>
   );
 }
