@@ -13,6 +13,7 @@ export interface AddServiceModalProps {
   setSearchCat: (s: string) => void;
   handleAgregarServicio: (bien: Bien) => void;
   handleRemoverServicio: (index: number) => void;
+  handleUpdatePrecio?: (index: number, newPrice: number) => void;
 }
 
 export default function AddServiceModal({
@@ -23,7 +24,8 @@ export default function AddServiceModal({
   searchCat,
   setSearchCat,
   handleAgregarServicio,
-  handleRemoverServicio
+  handleRemoverServicio,
+  handleUpdatePrecio
 }: AddServiceModalProps) {
   return (
     <Modal
@@ -37,17 +39,33 @@ export default function AddServiceModal({
         <div className="space-y-2 mb-6">
           {selectedOatc?.punto_partida?.map((srv: any, idx: number) => (
             <div key={idx} className="flex justify-between items-center p-3 border border-gray-200 rounded-xl bg-gray-50">
-              <div>
+              <div className="flex-1 pr-3">
                 <p className="font-bold text-gray-800">{srv.nombre}</p>
-                <p className="text-xs text-gray-500">Precio: ${srv.precio}</p>
               </div>
-              <button
-                onClick={() => handleRemoverServicio(idx)}
-                className="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"
-                title="Eliminar servicio"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 bg-white px-2 py-1.5 rounded-lg border border-gray-300 shadow-sm">
+                  <span className="text-xs font-bold text-gray-500">S/</span>
+                  <input 
+                    type="number" 
+                    value={srv.precio ?? srv.monto ?? srv.precio_venta ?? 0}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      if (handleUpdatePrecio) {
+                        handleUpdatePrecio(idx, val);
+                      }
+                    }}
+                    className="w-20 font-bold text-gray-900 text-sm bg-transparent focus:outline-none text-right"
+                    step="0.5"
+                  />
+                </div>
+                <button
+                  onClick={() => handleRemoverServicio(idx)}
+                  className="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"
+                  title="Eliminar servicio"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           ))}
           {(!selectedOatc?.punto_partida || selectedOatc.punto_partida.length === 0) && (

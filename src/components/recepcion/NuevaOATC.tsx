@@ -11,7 +11,7 @@ import { useAppStore } from '@/store/useAppStore';
 
 export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
   const [cliente, setCliente] = useState<Cliente | null>(null);
-  const [puntoPartida, setPuntoPartida] = useState<Bien[]>([]);
+  const [puntoPartida, setPuntoPartida] = useState<(Bien & { precio?: number })[]>([]);
   
   const [agentes, setAgentes] = useState<Agente[]>([]);
   const [agenteId, setAgenteId] = useState<string>('');
@@ -62,7 +62,17 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
   };
 
   const handleAddBien = (bien: Bien) => {
-    setPuntoPartida([...puntoPartida, bien]);
+    const itemWithPrice = {
+      ...bien,
+      precio: (bien as any).precio ?? bien.precio_venta ?? 0
+    };
+    setPuntoPartida([...puntoPartida, itemWithPrice]);
+  };
+
+  const handleUpdatePrecio = (index: number, newPrice: number) => {
+    const newItems = [...puntoPartida];
+    newItems[index] = { ...newItems[index], precio: newPrice, precio_venta: newPrice };
+    setPuntoPartida(newItems);
   };
 
   const handleRemoveBien = (index: number) => {
@@ -153,16 +163,29 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
             {puntoPartida.length === 0 ? (
               <div className="text-xs text-gray-400 text-center mt-2">Agrega servicios o productos con los botones de arriba ➔</div>
             ) : (
-              <ul className="space-y-1">
+              <ul className="space-y-1.5">
                 {puntoPartida.map((item, index) => (
-                  <li key={index} className="flex justify-between items-center text-xs bg-white p-1.5 border rounded shadow-sm">
-                    <span className="font-semibold text-gray-800 truncate pl-1">{item.nombre}</span>
-                    <button 
-                      onClick={() => handleRemoveBien(index)} 
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded ml-2 p-1 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                  <li key={index} className="flex justify-between items-center text-xs bg-white p-2 border rounded-lg shadow-sm">
+                    <span className="font-bold text-gray-800 truncate pl-1 flex-1">{item.nombre}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded border border-gray-300">
+                        <span className="text-[10px] font-bold text-gray-500">S/</span>
+                        <input 
+                          type="number" 
+                          value={(item as any).precio ?? item.precio_venta ?? 0}
+                          onChange={(e) => handleUpdatePrecio(index, parseFloat(e.target.value) || 0)}
+                          className="w-16 font-bold text-gray-900 text-xs bg-transparent focus:outline-none text-right"
+                          step="0.5 text-xs font-mono"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => handleRemoveBien(index)} 
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-1 transition-colors"
+                        title="Eliminar ítem"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>

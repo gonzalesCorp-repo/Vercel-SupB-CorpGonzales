@@ -18,6 +18,7 @@ export interface StaffTurnoTabProps {
   handleSolicitarPreCobro: (id: string) => void;
   handleFinalizarAtencion: () => void;
   handleSolicitarCancelacion: (ticketId: string, motivoId: string, detalle: string) => void;
+  handleUpdateItemPrecio?: (itemIdx: number, newPrice: number) => void;
 }
 
 export default function StaffTurnoTab({
@@ -32,7 +33,8 @@ export default function StaffTurnoTab({
   handleOpenAddService,
   handleSolicitarPreCobro,
   handleFinalizarAtencion,
-  handleSolicitarCancelacion
+  handleSolicitarCancelacion,
+  handleUpdateItemPrecio
 }: StaffTurnoTabProps) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [motivos, setMotivos] = useState<MotivoCancelacion[]>([]);
@@ -138,9 +140,23 @@ export default function StaffTurnoTab({
               )}
             </div>
             {ticketActivo.punto_partida?.map((srv: any, idx: number) => (
-              <div key={idx} className="flex justify-between items-center text-sm font-semibold text-slate-200">
-                <span>{srv.nombre}</span>
-                <span className="text-indigo-400 font-bold">${srv.precio || srv.monto}</span>
+              <div key={idx} className="flex justify-between items-center text-sm font-semibold text-slate-200 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
+                <span className="truncate pr-2">{srv.nombre}</span>
+                <div className="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
+                  <span className="text-[10px] font-bold text-slate-400">S/</span>
+                  <input 
+                    type="number" 
+                    value={srv.precio ?? srv.monto ?? srv.precio_venta ?? 0}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      if (handleUpdateItemPrecio) {
+                        handleUpdateItemPrecio(idx, val);
+                      }
+                    }}
+                    className="w-16 font-bold text-indigo-400 text-xs bg-transparent focus:outline-none text-right"
+                    step="0.5 text-xs font-mono"
+                  />
+                </div>
               </div>
             ))}
           </div>

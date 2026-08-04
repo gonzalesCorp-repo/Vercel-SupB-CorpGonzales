@@ -221,6 +221,18 @@ export default function WorkspaceOperativoPage() {
     }
     setIsEnviando(false);
   };
+  
+  const actualizarPrecioServicio = async (index: number, newPrice: number) => {
+    if (selectedOatc?.id) {
+      const currentServicios = [...(selectedOatc.punto_partida || [])];
+      currentServicios[index] = { ...currentServicios[index], precio: newPrice, precio_venta: newPrice, monto: newPrice };
+      const ok = await actualizarServiciosOatc(selectedOatc.id, currentServicios);
+      if (ok) {
+        cargarTickets();
+        setSelectedOatc({ ...selectedOatc, punto_partida: currentServicios });
+      }
+    }
+  };
 
   return (
     <div className={`max-w-7xl mx-auto space-y-6 ${isKioskoTablet ? 'p-2 sm:p-4 bg-slate-900/90 rounded-3xl text-white' : ''}`}>
@@ -238,93 +250,79 @@ export default function WorkspaceOperativoPage() {
                 Workspace Operativo
               </h1>
               {isKioskoTablet && (
-                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-full uppercase tracking-wider">
-                  Modo Tablet Kiosko
+                <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs px-2.5 py-0.5 rounded-full font-bold">
+                  📱 Modo Estación
                 </span>
               )}
             </div>
-            <p className={`text-sm font-medium ${isKioskoTablet ? 'text-slate-400' : 'text-gray-500'}`}>
-              Estación de Piso y Atención Táctil
+            <p className={`text-xs ${isKioskoTablet ? 'text-slate-400' : 'text-gray-500'}`}>
+              Control de Piso y Atenciones Asignadas en Vivo
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
           <button
-            onClick={() => setIsKioskoTablet(!isKioskoTablet)}
-            className={`px-4 py-3 rounded-xl font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 border transition-all shadow-md ${
-              isKioskoTablet
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500'
-                : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200'
+            onClick={cargarTickets}
+            className={`px-4 py-2.5 rounded-xl border text-sm font-bold flex items-center gap-2 transition-all ${
+              isKioskoTablet 
+                ? 'bg-slate-800 border-slate-700 text-indigo-300 hover:bg-slate-700' 
+                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
             }`}
           >
-            📟 {isKioskoTablet ? 'Vista Estándar' : 'Modo Tablet / Tótem'}
-          </button>
-
-          <div className="w-full md:w-auto">
-            <PanelWFM isPersonalMode={isPersonalMode} miAgenteId={miAgenteId} />
-          </div>
-          <button onClick={cargarTickets} className="p-3 text-gray-500 bg-gray-100 dark:bg-slate-800 rounded-xl hover:text-indigo-600 transition shadow-sm">
-            <RefreshCw className={`w-6 h-6 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refrescar
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mb-6">
+      {/* Tabs Principales */}
+      <div className="flex border-b border-gray-200">
         <button
           onClick={() => setActiveTab('piso')}
-          className={`px-6 py-2 rounded-md text-sm font-semibold transition-colors ${
-            activeTab === 'piso' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          className={`py-3 px-6 text-sm font-bold border-b-2 transition-colors ${
+            activeTab === 'piso'
+              ? 'border-indigo-600 text-indigo-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Workspace Operativo
+          🎯 Atenciones en Piso ({tickets.length})
         </button>
-
-        {!isPersonalMode && (
-          <button
-            onClick={() => setActiveTab('historial')}
-            className={`px-6 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2 ${
-              activeTab === 'historial' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <User className="w-4 h-4" /> Recursos
-          </button>
-        )}
+        <button
+          onClick={() => setActiveTab('historial')}
+          className={`py-3 px-6 text-sm font-bold border-b-2 transition-colors ${
+            activeTab === 'historial'
+              ? 'border-indigo-600 text-indigo-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          🧪 Solicitud de Recursos / Insumos
+        </button>
       </div>
 
-      {/* Piso Content */}
+      {/* Atenciones Content */}
       {activeTab === 'piso' && (
-        <>
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-xl font-bold text-gray-800">Atenciones en Piso</h2>
-            <div className="h-px bg-gray-200 flex-1"></div>
-          </div>
-
-          {isLoading ? (
-            <div className="text-center p-12 bg-white rounded-2xl border border-gray-200">Cargando...</div>
-          ) : tickets.length === 0 ? (
-            <div className="text-center p-12 bg-white rounded-2xl border border-gray-200 shadow-sm text-gray-500 font-medium">
-              No hay atenciones activas en este momento.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {tickets.map((ticket) => (
-                <TicketOperativoCard
-                  key={ticket.id}
-                  oatc={ticket}
-                  isPersonalMode={isPersonalMode}
-                  miAgenteId={miAgenteId}
-                  handleActionClick={handleActionClick}
-                  openAddServiceModal={(oatc) => {
-                    setSelectedOatc(oatc);
-                    setShowAddServiceModal(true);
-                  }}
-                />
-              ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {tickets.map((t) => (
+            <TicketOperativoCard
+              key={t.id}
+              oatc={t}
+              isPersonalMode={isPersonalMode}
+              miAgenteId={miAgenteId}
+              handleActionClick={handleActionClick}
+              openAddServiceModal={(oatc) => {
+                setSelectedOatc(oatc);
+                setShowAddServiceModal(true);
+              }}
+            />
+          ))}
+          {tickets.length === 0 && !isLoading && (
+            <div className="col-span-full bg-white border border-gray-200 rounded-2xl p-12 text-center text-gray-500 space-y-2">
+              <span className="text-4xl block">📋</span>
+              <p className="font-bold text-gray-800 text-lg">No hay atenciones asignadas</p>
+              <p className="text-sm text-gray-500">Los tickets asignados a tu usuario aparecerán aquí en vivo.</p>
             </div>
           )}
-        </>
+        </div>
       )}
 
       {/* Recursos Content */}
@@ -355,6 +353,7 @@ export default function WorkspaceOperativoPage() {
         setSearchCat={setSearchCat}
         handleAgregarServicio={confirmarNuevoServicio}
         handleRemoverServicio={removerServicio}
+        handleUpdatePrecio={actualizarPrecioServicio}
       />
 
       {/* Modal Laboratorio */}

@@ -216,6 +216,16 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
               cargarDatosMobile();
             }
           }}
+          handleUpdateItemPrecio={async (itemIdx, newPrice) => {
+            if (!ticketActivo || !ticketActivo.id) return;
+            const currentList = [...(ticketActivo.punto_partida || [])];
+            currentList[itemIdx] = { ...currentList[itemIdx], precio: newPrice, precio_venta: newPrice, monto: newPrice };
+            const ok = await actualizarServiciosOatc(ticketActivo.id, currentList);
+            if (ok) {
+              showAlert('Precio actualizado', 'success');
+              cargarDatosMobile();
+            }
+          }}
         />
       );
       case 'clientes': return <StaffClientesTab queryCliente={queryCliente} setQueryCliente={setQueryCliente} clientesEncontrados={clientesEncontrados} showAddClienteModal={showAddClienteModal} setShowAddClienteModal={setShowAddClienteModal} newClienteForm={newClienteForm} setNewClienteForm={setNewClienteForm} handleCrearCliente={handleCrearCliente} />;
