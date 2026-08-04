@@ -77,7 +77,9 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
   const pendingAlerts = oatcs.filter(o => 
     o.estado_proceso === 'PENDIENTE_INICIO' || 
     o.estado_proceso === 'PENDIENTE_TERMINO' || 
-    o.estado_proceso === 'PENDIENTE_PRE_COBRO'
+    o.estado_proceso === 'PENDIENTE_PRE_COBRO' ||
+    o.estado_proceso === 'PENDIENTE_CANCELACION' ||
+    o.cambios_pendientes?.tipo === 'SOLICITUD_CANCELACION'
   );
 
   return (
@@ -135,15 +137,21 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
                       {oatc.agente_nombre || 'POR ASIGNAR'}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${
-                        (oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-700'
-                      }`}>
-                        {(oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? (
-                          <><Clock className="w-3.5 h-3.5"/> {oatc.estado_proceso === 'ASESORIA' ? 'Asesoría' : 'En Espera'}</>
-                        ) : (
-                          <><CheckCircle2 className="w-3.5 h-3.5"/> {oatc.estado_proceso}</>
-                        )}
-                      </span>
+                      {oatc.cambios_pendientes?.tipo === 'SOLICITUD_CANCELACION' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-red-100 text-red-700 border border-red-200 animate-pulse">
+                          <ShieldAlert className="w-3.5 h-3.5" /> Sol. Cancelación
+                        </span>
+                      ) : (
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${
+                          (oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-700'
+                        }`}>
+                          {(oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? (
+                            <><Clock className="w-3.5 h-3.5"/> {oatc.estado_proceso === 'ASESORIA' ? 'Asesoría' : 'En Espera'}</>
+                          ) : (
+                            <><CheckCircle2 className="w-3.5 h-3.5"/> {oatc.estado_proceso}</>
+                          )}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-slate-500 text-xs font-mono font-medium">
@@ -218,25 +226,37 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
               </div>
               
               <div className="overflow-y-auto p-4 space-y-3 bg-slate-50 flex-1">
-                {pendingAlerts.map(alert => (
-                  <div key={alert.id} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                    <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">
-                      {alert.estado_proceso === 'PENDIENTE_INICIO' 
-                        ? 'Solicitud de Inicio' 
-                        : alert.estado_proceso === 'PENDIENTE_PRE_COBRO' 
-                          ? 'Solicitud de Pre-Cobro' 
-                          : 'Solicitud de Término'}
-                    </p>
-                    <p className="font-bold text-slate-800 mb-2">
-                      <span className="text-slate-500 font-medium">Agente: </span>{alert.agente_nombre} <br/>
-                      <span className="text-slate-500 font-medium">Cliente: </span>{alert.cliente_nombre}
-                    </p>
-                    <div className="flex gap-2 mt-3">
-                      <button onClick={() => handleApprove(alert)} className="flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-bold py-1.5 rounded-lg text-sm transition-colors">Aprobar</button>
-                      <button onClick={() => handleRejectClick(alert)} className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-1.5 rounded-lg text-sm transition-colors">Rechazar</button>
+                {pendingAlerts.map(alert => {
+                  const isCancelRequest = alert.cambios_pendientes?.tipo === 'SOLICITUD_CANCELACION' || alert.estado_proceso === 'PENDIENTE_CANCELACION';
+                  return (
+                    <div key={alert.id} className={`p-3 rounded-xl border shadow-sm ${isCancelRequest ? 'bg-red-50/50 border-red-200' : 'bg-white border-slate-200'}`}>
+                      <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${isCancelRequest ? 'text-red-600' : 'text-indigo-600'}`}>
+                        {isCancelRequest
+                          ? '🚫 Solicitud de Cancelación' 
+                          : alert.estado_proceso === 'PENDIENTE_INICIO' 
+                            ? 'Solicitud de Inicio' 
+                            : alert.estado_proceso === 'PENDIENTE_PRE_COBRO' 
+                              ? 'Solicitud de Pre-Cobro' 
+                              : 'Solicitud de Término'}
+                      </p>
+                      <p className="font-bold text-slate-800 mb-2 text-xs">
+                        <span className="text-slate-500 font-medium">Agente: </span>{alert.agente_nombre} <br/>
+                        <span className="text-slate-500 font-medium">Cliente: </span>{alert.cliente_nombre}
+                        {isCancelRequest && alert.cambios_pendientes?.detalle && (
+                          <span className="block text-[11px] text-red-700 font-medium mt-1 bg-red-100/70 p-1.5 rounded">
+                            Motivo: {alert.cambios_pendientes.detalle}
+                          </span>
+                        )}
+                      </p>
+                      <div className="flex gap-2 mt-2">
+                        <button onClick={() => handleApprove(alert)} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 rounded-lg text-xs transition-colors shadow-sm">
+                          {isCancelRequest ? 'Aprobar Cancelación' : 'Aprobar'}
+                        </button>
+                        <button onClick={() => handleRejectClick(alert)} className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-1.5 rounded-lg text-xs transition-colors">Rechazar</button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
