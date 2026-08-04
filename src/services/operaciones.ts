@@ -227,7 +227,54 @@ export async function solicitarPreCobro(oatcId: string): Promise<boolean> {
   return true;
 }
 
-// 8. Validar PIN Operativo
+// 9. Iniciar atención directamente (pasa de ASESORIA/PENDIENTE a EN_CURSO)
+export async function iniciarAtencionOatc(oatcId: string, agenteId?: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('oatc')
+    .update({ 
+      estado_proceso: 'EN_CURSO',
+      hora_inicio_atencion: new Date().toISOString()
+    })
+    .eq('id', oatcId);
+    
+  if (error) {
+    console.error('Error iniciando atencion:', error);
+    return false;
+  }
+
+  if (agenteId) {
+    await supabase.from('agentes').update({ estado: 'OCUPADO' }).eq('id', agenteId);
+  }
+
+  await registrarLog('OPERACIONES', `Inició atención de la OATC`, { oatc_id: oatcId });
+  return true;
+}
+
+// 10. Solicitar Cancelación desde Staff Mobile (Requiere aprobación de Recepción)
+export async function solicitarCancelacionOatc(oatcId: string, motivoId: string, detalle: string, agenteNombre?: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('oatc')
+    .update({ 
+      cambios_pendientes: {
+        tipo: 'SOLICITUD_CANCELACION',
+        motivo_id: motivoId,
+        detalle: detalle,
+        solicitado_por: agenteNombre || 'STAFF',
+        fecha: new Date().toISOString()
+      }
+    })
+    .eq('id', oatcId);
+    
+  if (error) {
+    console.error('Error solicitando cancelacion:', error);
+    return false;
+  }
+
+  await registrarLog('OPERACIONES', `Solicitó cancelación de OATC por motivo`, { oatc_id: oatcId, motivo_id: motivoId });
+  return true;
+}
+
+// 11. Validar PIN Operativo
 export async function validarPin(pin: string): Promise<{id: string, rol: string, nombre: string} | null> {
   const sedeId = useAppStore.getState().sedeActiva?.id;
   if (!sedeId) return null;
@@ -252,3 +299,5 @@ export async function validarPin(pin: string): Promise<{id: string, rol: string,
 
   return agente;
 }
+
+

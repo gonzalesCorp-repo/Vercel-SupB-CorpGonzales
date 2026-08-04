@@ -7,13 +7,14 @@ import { createClient } from '@/lib/supabase/client';
 import { useUIStore } from '@/store/useUIStore';
 import { useGamificationStore } from '@/store/useGamificationStore';
 import { cambiarEstadoAgente } from '@/services/agentes';
-import { obtenerTicketsAsignados, solicitarInicioAtencion, solicitarFinAtencion, solicitarPreCobro } from '@/services/operaciones';
+import { obtenerTicketsAsignados, solicitarInicioAtencion, solicitarFinAtencion, solicitarPreCobro, iniciarAtencionOatc, solicitarCancelacionOatc, actualizarServiciosOatc } from '@/services/operaciones';
 import { buscarClientes, crearCliente, Cliente } from '@/services/clientes';
-import { OATC, Agente, obtenerAgentesDisponibles } from '@/services/recepcion';
+import { OATC, Agente, obtenerAgentesDisponibles, Bien } from '@/services/recepcion';
 import { otorgarXP, actualizarStreak, enviarKudos } from '@/lib/gamification/engine';
 import { calcularFinCiclo, XP_REWARDS } from '@/lib/gamification/config';
 
 import KudosModal from '@/components/mobile/KudosModal';
+import CatalogModal from '@/components/recepcion/CatalogModal';
 import StaffInicioTab from '@/components/mobile/staff/StaffInicioTab';
 import StaffTurnoTab from '@/components/mobile/staff/StaffTurnoTab';
 import StaffClientesTab from '@/components/mobile/staff/StaffClientesTab';
@@ -46,6 +47,9 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
   const [showColegasModal, setShowColegasModal] = useState(false);
   const [filtroEspecialidad, setFiltroEspecialidad] = useState<string>('TODAS');
 
+  const [showCatalogModal, setShowCatalogModal] = useState(false);
+  const [catalogTipo, setCatalogTipo] = useState<'servicio' | 'producto' | null>(null);
+
   const [barOrder, setBarOrder] = useState({ cafe: 0, infusion: 0, agua: 0 });
 
   const [queryCliente, setQueryCliente] = useState('');
@@ -54,109 +58,98 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
   const [newClienteForm, setNewClienteForm] = useState({ nombre: '', dni: '', celular: '', email: '' });
 
   const [showAddCitaModal, setShowAddCitaModal] = useState(false);
-  const [newCitaForm, setNewCitaForm] = useState({ clienteNombre: '', servicio: 'Colorimetria', fecha: new Date().toISOString().split('T')[0], hora: '09:00' });
+  const [newCitaForm, setNewCitaForm] = useState({ clienteNombre: '', servicio: 'Corte Tradicional', fecha: new Date().toISOString().split('T')[0], hora: '10:00' });
 
-  const [isFabOpen, setIsFabOpen] = useState(false);
+  const [fechaDesde, setFechaDesde] = useState(new Date().toISOString().split('T')[0]);
+  const [fechaHasta, setFechaHasta] = useState(new Date().toISOString().split('T')[0]);
 
   const [showKudosModal, setShowKudosModal] = useState(false);
   const [kudosTargetId, setKudosTargetId] = useState('');
   const [kudosTargetName, setKudosTargetName] = useState('');
+  const [isFabOpen, setIsFabOpen] = useState(false);
 
-  const [fechaDesde, setFechaDesde] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [fechaHasta, setFechaHasta] = useState<string>(new Date().toISOString().split('T')[0]);
+  const { showAlert } = useUIStore();
+  const gamProfile = useGamificationStore((state) => state.profile);
+  const hallOfFame = useGamificationStore((state) => state.hallOfFame);
+  const loadGamification = useGamificationStore((state) => state.loadProfile);
+  const addXP = useGamificationStore((state) => state.addXP);
 
   const supabase = createClient();
-  const { showAlert } = useUIStore();
-  const { profile: gamProfile, loadProfile: loadGamProfile, refreshHallOfFame, hallOfFame, addXP: addXPLocal } = useGamificationStore();
 
   const cargarDatosMobile = async () => {
     setIsLoading(true);
-    if (agente) {
-      setEstadoActual(agente.estado || 'DISPONIBLE');
-      const allTickets = await obtenerTicketsAsignados('ALL');
-      setTickets(allTickets.filter(t => t.agente_id === agente.id));
-      await loadGamProfile(agente.id);
-      await refreshHallOfFame();
+    if (agente?.id) {
+      loadGamification(agente.id);
     }
-    const listaAgentes = await obtenerAgentesDisponibles();
-    setColegas(listaAgentes);
+
+    const [misTickets, otrosColegas] = await Promise.all([
+      agente?.nombre ? obtenerTicketsAsignados(agente.nombre) : Promise.resolve([]),
+      obtenerAgentesDisponibles()
+    ]);
+
+    setTickets(misTickets as OATCExtended[]);
+    setColegas(otrosColegas);
+
+    if (agente?.id) {
+      const { data: dbAgente } = await supabase.from('agentes').select('estado').eq('id', agente.id).single();
+      if (dbAgente) setEstadoActual(dbAgente.estado);
+    }
     setIsLoading(false);
   };
 
   useEffect(() => {
     cargarDatosMobile();
-    const channel = supabase.channel('realtime-mobile-pilot-v2')
+
+    const channel = supabase.channel('mobile-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarDatosMobile())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'agentes' }, () => cargarDatosMobile())
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'agentes' }, () => cargarDatosMobile())
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, []);
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [agente, sedeId]);
 
   useEffect(() => {
-    if (queryCliente.trim().length >= 2) {
-      buscarClientes(queryCliente).then(res => setClientesEncontrados(res));
+    if (queryCliente.trim().length > 1) {
+      buscarClientes(queryCliente).then(setClientesEncontrados);
     } else {
       setClientesEncontrados([]);
     }
   }, [queryCliente]);
 
   const handleAlertaRapidaWFM = async (accion: string, nuevoEstado: string) => {
-    if (!agente) return;
-    try {
-      await cambiarEstadoAgente(agente.id, nuevoEstado);
-      setEstadoActual(nuevoEstado);
-      showAlert(`✅ Registro Automático Exitoso: ${accion} (Sin intermediarios)`, 'success');
-      if (nuevoEstado === 'DISPONIBLE' && accion === 'YA LLEGUÉ') {
-        await otorgarXP(agente.id, XP_REWARDS.LLEGADA_PUNTUAL, 'LLEGADA_PUNTUAL', { accion });
-        await actualizarStreak(agente.id);
-        addXPLocal(XP_REWARDS.LLEGADA_PUNTUAL);
-        showAlert(`🎮 +${XP_REWARDS.LLEGADA_PUNTUAL} XP • Streak actualizado 🔥`, 'info');
-      } else if (accion === 'REGRESÉ') {
-        await otorgarXP(agente.id, XP_REWARDS.NFC_CHECKIN, 'REGRESO_PAUSA', { accion });
-        addXPLocal(XP_REWARDS.NFC_CHECKIN);
-      }
-      cargarDatosMobile();
-    } catch (err: any) { showAlert(`Error: ${err.message}`, 'error'); }
+    if (!agente?.id) return;
+    await cambiarEstadoAgente(agente.id, nuevoEstado);
+    setEstadoActual(nuevoEstado);
+    showAlert(`Estado cambiado a: ${nuevoEstado}`, 'success');
+    addXP(XP_REWARDS.MARCACION_WFM);
+    cargarDatosMobile();
   };
 
-  const handleNfcTagScan = async () => {
-    if (!agente) return;
-    let siguienteEstado = estadoActual === 'INACTIVO' ? 'DISPONIBLE' : (estadoActual === 'PAUSA' ? 'DISPONIBLE' : 'PAUSA');
-    let mensajeAccion = siguienteEstado === 'PAUSA' ? 'Inicio de Refrigerio' : 'Entrada / Retorno';
-    try {
-      await cambiarEstadoAgente(agente.id, siguienteEstado);
-      setEstadoActual(siguienteEstado);
-      showAlert(`🏷️ Tag NFC Detectado: ${mensajeAccion} registrado.`, 'success');
-      cargarDatosMobile();
-    } catch (err: any) { showAlert(`Error NFC: ${err.message}`, 'error'); }
+  const handleNfcTagScan = () => {
+    showAlert('📱 Escaneando Tag NFC de Estación... ¡Confirmado!', 'info');
+    handleAlertaRapidaWFM('NFC', 'DISPONIBLE');
   };
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'NDEFReader' in window) {
-      try {
-        const ndef = new (window as any).NDEFReader();
-        ndef.scan().then(() => { ndef.onreading = () => handleNfcTagScan(); }).catch(() => {});
-      } catch (err) {}
+  const handleEnviarPedidoBar = () => {
+    if (barOrder.cafe === 0 && barOrder.infusion === 0 && barOrder.agua === 0) {
+      showAlert('Selecciona al menos 1 bebida', 'warning');
+      return;
     }
-  }, [agente, estadoActual]);
-
-  const handleEnviarPedidoBar = async () => {
-    const totalItems = barOrder.cafe + barOrder.infusion + barOrder.agua;
-    if (totalItems === 0) return showAlert('Selecciona al menos 1 bebida', 'warning');
-    showAlert(`Pedido de Bar enviado a Recepción (${totalItems} bebidas)`, 'success');
+    showAlert('🍹 Pedido enviado al Bar con éxito', 'success');
     setBarOrder({ cafe: 0, infusion: 0, agua: 0 });
+    addXP(10);
   };
 
-  const handleCrearCita = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCitaForm.clienteNombre.trim()) return showAlert('Ingresa el nombre del cliente', 'warning');
-    showAlert(`📅 Cita agendada con éxito para ${newCitaForm.clienteNombre} (${newCitaForm.fecha} - ${newCitaForm.hora})`, 'success');
+  const handleCrearCita = async () => {
+    if (!newCitaForm.clienteNombre.trim()) return;
+    showAlert(`Cita agendada para ${newCitaForm.clienteNombre}`, 'success');
     setShowAddCitaModal(false);
-    setNewCitaForm({ clienteNombre: '', servicio: 'Colorimetria', fecha: new Date().toISOString().split('T')[0], hora: '09:00' });
+    setNewCitaForm({ clienteNombre: '', servicio: 'Corte Tradicional', fecha: new Date().toISOString().split('T')[0], hora: '10:00' });
   };
 
-  const handleCrearCliente = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCrearCliente = async () => {
     if (!newClienteForm.nombre.trim()) return;
     const res = await crearCliente(newClienteForm);
     if (res) {
@@ -169,7 +162,7 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
     }
   };
 
-  const ticketActivo = tickets.find(t => t.estado_proceso && ['EN_CURSO', 'PRE_COBRADO', 'ASESORIA'].includes(t.estado_proceso));
+  const ticketActivo = tickets.find(t => t.estado_proceso && ['EN_CURSO', 'PRE_COBRADO', 'ASESORIA', 'ESPERA', 'PENDIENTE_INICIO'].includes(t.estado_proceso));
   const misColegasEnCola = colegas.filter(c => c.estado !== 'INACTIVO');
   const miPosicionEnCola = agente ? misColegasEnCola.findIndex(c => c.id === agente.id) + 1 : 1;
 
@@ -184,7 +177,47 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
     if (activeSecondaryView !== null) return null;
     switch (mainTab) {
       case 'inicio': return <StaffInicioTab hallOfFame={hallOfFame} agente={agente} calcularFinCiclo={calcularFinCiclo} gamProfile={gamProfile} inicioSubTab={inicioSubTab} setInicioSubTab={setInicioSubTab} handleAlertaRapidaWFM={handleAlertaRapidaWFM} handleNfcTagScan={handleNfcTagScan} barOrder={barOrder} setBarOrder={setBarOrder} handleEnviarPedidoBar={handleEnviarPedidoBar} />;
-      case 'turno': return <StaffTurnoTab tickets={tickets} isLoading={isLoading} cargarDatosMobile={cargarDatosMobile} estadoActual={estadoActual} miPosicionEnCola={miPosicionEnCola} setShowColegasModal={setShowColegasModal} ticketActivo={ticketActivo} handleSolicitarPreCobro={async (id) => { await solicitarPreCobro(id); showAlert('Pre-cobro solicitado', 'success'); cargarDatosMobile(); }} handleFinalizarAtencion={async () => { if (ticketActivo) { await solicitarFinAtencion(ticketActivo, agente?.rol || 'STAFF'); showAlert('Atención Finalizada', 'success'); cargarDatosMobile(); } }} />;
+      case 'turno': return (
+        <StaffTurnoTab 
+          tickets={tickets} 
+          isLoading={isLoading} 
+          cargarDatosMobile={cargarDatosMobile} 
+          estadoActual={estadoActual} 
+          miPosicionEnCola={miPosicionEnCola} 
+          setShowColegasModal={setShowColegasModal} 
+          ticketActivo={ticketActivo} 
+          handleIniciarAtencion={async (id) => {
+            const ok = await iniciarAtencionOatc(id, agente?.id);
+            if (ok) {
+              showAlert('▶️ Atención Iniciada. El tiempo de atención ha comenzado.', 'success');
+              cargarDatosMobile();
+            }
+          }}
+          handleOpenAddService={(ticket) => {
+            setShowCatalogModal(true);
+            setCatalogTipo('servicio');
+          }}
+          handleSolicitarPreCobro={async (id) => { 
+            await solicitarPreCobro(id); 
+            showAlert('Pre-cobro solicitado a Recepción / Caja', 'success'); 
+            cargarDatosMobile(); 
+          }} 
+          handleFinalizarAtencion={async () => { 
+            if (ticketActivo) { 
+              await solicitarFinAtencion(ticketActivo, agente?.rol || 'STAFF'); 
+              showAlert('Atención Finalizada', 'success'); 
+              cargarDatosMobile(); 
+            } 
+          }} 
+          handleSolicitarCancelacion={async (ticketId, motivoId, detalle) => {
+            const ok = await solicitarCancelacionOatc(ticketId, motivoId, detalle, agente?.nombre);
+            if (ok) {
+              showAlert('Solicitud de cancelación enviada a Recepción para aprobación', 'warning');
+              cargarDatosMobile();
+            }
+          }}
+        />
+      );
       case 'clientes': return <StaffClientesTab queryCliente={queryCliente} setQueryCliente={setQueryCliente} clientesEncontrados={clientesEncontrados} showAddClienteModal={showAddClienteModal} setShowAddClienteModal={setShowAddClienteModal} newClienteForm={newClienteForm} setNewClienteForm={setNewClienteForm} handleCrearCliente={handleCrearCliente} />;
       case 'agenda': return <StaffAgendaTab isLoading={isLoading} cargarDatosMobile={cargarDatosMobile} showAddCitaModal={showAddCitaModal} setShowAddCitaModal={setShowAddCitaModal} newCitaForm={newCitaForm} setNewCitaForm={setNewCitaForm} handleCrearCita={handleCrearCita} />;
       default: return null;
@@ -237,7 +270,24 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
 
       {showColegasModal && <StaffColegasModal isOpen={showColegasModal} onClose={() => setShowColegasModal(false)} filtroEspecialidad={filtroEspecialidad} setFiltroEspecialidad={setFiltroEspecialidad} colegas={colegas} agenteId={agente?.id} />}
       
-      <KudosModal isOpen={showKudosModal} onClose={() => setShowKudosModal(false)} receiverId={kudosTargetId} receiverName={kudosTargetName} onSend={async (tipo: string, mensaje: string) => { if (!agente?.id) return; const ok = await enviarKudos(agente.id, kudosTargetId, tipo, mensaje); if (ok) { showAlert(`✨ Kudos "${tipo}" enviado a ${kudosTargetName}`, 'success'); addXPLocal(XP_REWARDS.KUDOS_ENVIADO); } setShowKudosModal(false); }} />
+      <CatalogModal
+        isOpen={showCatalogModal}
+        onClose={() => setShowCatalogModal(false)}
+        tipo={catalogTipo}
+        onAdd={async (bien: Bien) => {
+          if (!ticketActivo || !ticketActivo.id) return;
+          const currentList = ticketActivo.punto_partida || [];
+          const updated = [...currentList, { id: bien.id, nombre: bien.nombre, precio: bien.precio_venta, cantidad: 1 }];
+          const ok = await actualizarServiciosOatc(ticketActivo.id, updated);
+          if (ok) {
+            showAlert(`✨ Adicional "${bien.nombre}" agregado al ticket`, 'success');
+            setShowCatalogModal(false);
+            cargarDatosMobile();
+          }
+        }}
+      />
+
+      <KudosModal isOpen={showKudosModal} onClose={() => setShowKudosModal(false)} receiverId={kudosTargetId} receiverName={kudosTargetName} onSend={async (tipo: string, mensaje: string) => { if (!agente?.id) return; const ok = await enviarKudos(agente.id, kudosTargetId, tipo, mensaje); if (ok) { showAlert(`✨ Kudos "${tipo}" enviado a ${kudosTargetName}`, 'success'); addXP(XP_REWARDS.KUDOS_ENVIADO); } setShowKudosModal(false); }} />
     </>
   );
 }
