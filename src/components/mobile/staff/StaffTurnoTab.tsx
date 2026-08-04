@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, Users2, Play, Plus, CreditCard, CheckCircle, Ban, AlertTriangle, X } from 'lucide-react';
 import { obtenerMotivosCancelacion, MotivoCancelacion } from '@/services/recepcion';
+import TouchActionButton from '@/components/mobile/ui/TouchActionButton';
 
 export interface StaffTurnoTabProps {
   tickets: any[];
@@ -72,7 +73,7 @@ export default function StaffTurnoTab({
         </span>
         <button 
           onClick={cargarDatosMobile}
-          className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-indigo-400 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition"
+          className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-indigo-400 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition cursor-pointer hover:bg-slate-800"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} /> Refrescar
         </button>
@@ -92,7 +93,7 @@ export default function StaffTurnoTab({
 
         <button 
           onClick={() => setShowColegasModal(true)}
-          className="p-3.5 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white rounded-2xl border border-indigo-400/30 shadow-lg shadow-indigo-600/30 active:scale-90 transition flex flex-col items-center gap-0.5"
+          className="p-3.5 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white rounded-2xl border border-indigo-400/30 shadow-lg shadow-indigo-600/30 active:scale-90 transition flex flex-col items-center gap-0.5 cursor-pointer"
           title="Ver Disponibilidad del Equipo"
         >
           <Users2 className="w-6 h-6" />
@@ -133,7 +134,7 @@ export default function StaffTurnoTab({
               {isEnCurso && (
                 <button 
                   onClick={() => handleOpenAddService(ticketActivo)}
-                  className="px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 rounded-lg text-[10px] font-bold flex items-center gap-1 transition"
+                  className="px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 rounded-lg text-[10px] font-bold flex items-center gap-1 transition cursor-pointer"
                 >
                   <Plus className="w-3 h-3" /> Agregar Servicios
                 </button>
@@ -162,44 +163,53 @@ export default function StaffTurnoTab({
             ))}
           </div>
 
-          {/* Botones según Gobernanza del Flujo */}
-          <div className="space-y-2 pt-1">
+          {/* Botones según Gobernanza del Flujo con TouchActionButton */}
+          <div className="space-y-3 pt-1">
             {/* Si está en Asesoría, mostrar Botón INICIAR ATENCIÓN */}
             {isAsesoria && !isPendingCancel && (
-              <button 
+              <TouchActionButton
+                variant="primary"
+                icon={Play}
                 onClick={() => handleIniciarAtencion(ticketActivo.id)}
-                className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+                className="w-full"
               >
-                <Play className="w-5 h-5 fill-current" /> Comenzar Atención Ahora
-              </button>
+                Comenzar Atención Ahora
+              </TouchActionButton>
             )}
 
             {/* Si está EN CURSO, mostrar PRE-COBRAR y FINALIZAR */}
             {isEnCurso && !isPendingCancel && (
               <div className="grid grid-cols-2 gap-3">
-                <button 
+                <TouchActionButton
+                  variant="secondary"
+                  icon={CreditCard}
                   onClick={() => handleSolicitarPreCobro(ticketActivo.id)}
-                  className="py-3.5 bg-amber-600 hover:bg-amber-500 text-white font-black text-xs rounded-2xl shadow-lg shadow-amber-600/30 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                  className="w-full"
                 >
-                  <CreditCard className="w-4 h-4" /> Pre-Cobrar
-                </button>
-                <button 
+                  Pre-Cobrar
+                </TouchActionButton>
+
+                <TouchActionButton
+                  variant="primary"
+                  icon={CheckCircle}
                   onClick={handleFinalizarAtencion}
-                  className="py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-2xl shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                  className="w-full"
                 >
-                  <CheckCircle className="w-4 h-4" /> Finalizar
-                </button>
+                  Finalizar
+                </TouchActionButton>
               </div>
             )}
 
-            {/* Botón Solicitar Cancelación (Disponible en cualquier momento) */}
+            {/* Botón Solicitar Cancelación */}
             {!isPendingCancel && (
-              <button 
+              <TouchActionButton
+                variant="danger"
+                icon={Ban}
                 onClick={() => setShowCancelModal(true)}
-                className="w-full py-2.5 bg-slate-950 hover:bg-red-950/40 text-slate-400 hover:text-red-400 font-bold text-xs rounded-xl border border-slate-800 hover:border-red-900/50 transition flex items-center justify-center gap-1.5"
+                className="w-full"
               >
-                <Ban className="w-3.5 h-3.5" /> Solicitar Cancelación a Recepción
-              </button>
+                Solicitar Cancelación a Recepción
+              </TouchActionButton>
             )}
           </div>
         </div>
@@ -222,7 +232,7 @@ export default function StaffTurnoTab({
                 <h3 className="font-black text-sm text-red-400 flex items-center gap-2">
                   <Ban className="w-5 h-5" /> SOLICITAR CANCELACIÓN
                 </h3>
-                <button onClick={() => setShowCancelModal(false)} className="p-1 text-slate-400 hover:text-white rounded-lg bg-slate-800">
+                <button onClick={() => setShowCancelModal(false)} className="p-1 text-slate-400 hover:text-white rounded-lg bg-slate-800 cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -255,16 +265,19 @@ export default function StaffTurnoTab({
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-2">
-                <button onClick={() => setShowCancelModal(false)} className="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl">
+                <TouchActionButton
+                  variant="ghost"
+                  onClick={() => setShowCancelModal(false)}
+                >
                   Cancelar
-                </button>
-                <button 
-                  onClick={onSubmitCancel} 
+                </TouchActionButton>
+                <TouchActionButton
+                  variant="danger"
+                  onClick={onSubmitCancel}
                   disabled={isSubmittingCancel}
-                  className="py-2.5 bg-red-600 hover:bg-red-500 text-white font-black text-xs rounded-xl shadow-lg shadow-red-600/30 flex items-center justify-center gap-1"
                 >
                   {isSubmittingCancel ? 'Enviando...' : 'Enviar Solicitud'}
-                </button>
+                </TouchActionButton>
               </div>
             </motion.div>
           </div>
@@ -273,4 +286,3 @@ export default function StaffTurnoTab({
     </motion.div>
   );
 }
-

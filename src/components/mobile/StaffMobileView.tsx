@@ -23,6 +23,7 @@ import StaffHistoricoView from '@/components/mobile/staff/StaffHistoricoView';
 import StaffMetricasView from '@/components/mobile/staff/StaffMetricasView';
 import StaffPerfilView from '@/components/mobile/staff/StaffPerfilView';
 import StaffColegasModal from '@/components/mobile/staff/StaffColegasModal';
+import FloatingBottomDock from '@/components/mobile/ui/FloatingBottomDock';
 
 interface OATCExtended extends OATC {
   codigo_ticket?: string;
@@ -241,42 +242,14 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
         {renderMainTab()}
       </main>
 
-      <AnimatePresence>
-        {isFabOpen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsFabOpen(false)} className="fixed inset-0 z-[45] bg-slate-950/70 backdrop-blur-sm" />}
-      </AnimatePresence>
-
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[50] flex flex-col items-center">
-        <AnimatePresence>
-          {isFabOpen && (
-            <motion.div initial={{ opacity: 0, y: 30, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30, scale: 0.8 }} className="flex items-end justify-center gap-5 mb-5">
-              <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => { setIsFabOpen(false); setActiveSecondaryView('historico'); }} className="flex flex-col items-center gap-1.5 group cursor-pointer">
-                <div className="w-14 h-14 rounded-full bg-slate-900 border-2 border-indigo-500/50 text-indigo-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900"><History className="w-6 h-6" /></div>
-                <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-lg">Historial</span>
-              </motion.button>
-              <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => { setIsFabOpen(false); setActiveSecondaryView('metricas'); }} className="flex flex-col items-center gap-1.5 group cursor-pointer -translate-y-4">
-                <div className="w-16 h-16 rounded-full bg-slate-900 border-2 border-purple-500/50 text-purple-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900"><BarChart2 className="w-7 h-7" /></div>
-                <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-lg">Métricas</span>
-              </motion.button>
-              <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => { setIsFabOpen(false); setActiveSecondaryView('perfil'); }} className="flex flex-col items-center gap-1.5 group cursor-pointer">
-                <div className="w-14 h-14 rounded-full bg-slate-900 border-2 border-pink-500/50 text-pink-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900"><User className="w-6 h-6" /></div>
-                <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-lg">Perfil</span>
-              </motion.button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <motion.button onClick={() => setIsFabOpen(!isFabOpen)} animate={{ rotate: isFabOpen ? 135 : 0 }} transition={{ duration: 0.3, ease: 'backOut' }} whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white font-black flex items-center justify-center shadow-2xl shadow-purple-500/50 border-2 border-slate-950 cursor-pointer">
-          <Plus className="w-7 h-7" />
-        </motion.button>
-      </div>
-
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-2xl border-t border-slate-800/80 px-4 py-2 flex justify-around items-center max-w-md mx-auto shadow-2xl">
-        <button onClick={() => { setActiveSecondaryView(null); setMainTab('inicio'); }} className={`flex flex-col items-center gap-1 transition-all ${mainTab === 'inicio' && !activeSecondaryView ? 'text-red-400 font-bold scale-105' : 'text-slate-500 hover:text-slate-300'}`}><Bell className="w-5 h-5" /><span className="text-[10px]">Inicio</span></button>
-        <button onClick={() => { setActiveSecondaryView(null); setMainTab('turno'); }} className={`flex flex-col items-center gap-1 transition-all ${mainTab === 'turno' && !activeSecondaryView ? 'text-amber-400 font-bold scale-105' : 'text-slate-500 hover:text-slate-300'}`}><Zap className="w-5 h-5" /><span className="text-[10px]">Turno</span></button>
-        <div className="w-8"></div>
-        <button onClick={() => { setActiveSecondaryView(null); setMainTab('clientes'); }} className={`flex flex-col items-center gap-1 transition-all ${mainTab === 'clientes' && !activeSecondaryView ? 'text-emerald-400 font-bold scale-105' : 'text-slate-500 hover:text-slate-300'}`}><Users className="w-5 h-5" /><span className="text-[10px]">Clientes</span></button>
-        <button onClick={() => { setActiveSecondaryView(null); setMainTab('agenda'); }} className={`flex flex-col items-center gap-1 transition-all ${mainTab === 'agenda' && !activeSecondaryView ? 'text-purple-400 font-bold scale-105' : 'text-slate-500 hover:text-slate-300'}`}><Calendar className="w-5 h-5" /><span className="text-[10px]">Agenda</span></button>
-      </nav>
+      <FloatingBottomDock
+        mainTab={mainTab}
+        setMainTab={setMainTab}
+        activeSecondaryView={activeSecondaryView}
+        setActiveSecondaryView={setActiveSecondaryView}
+        isFabOpen={isFabOpen}
+        setIsFabOpen={setIsFabOpen}
+      />
 
       {showColegasModal && <StaffColegasModal isOpen={showColegasModal} onClose={() => setShowColegasModal(false)} filtroEspecialidad={filtroEspecialidad} setFiltroEspecialidad={setFiltroEspecialidad} colegas={colegas} agenteId={agente?.id} />}
       

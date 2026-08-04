@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { Bell, Coffee } from 'lucide-react';
 import StreakCounter from '@/components/mobile/StreakCounter';
 import HallOfFameBanner from '@/components/mobile/HallOfFameBanner';
+import SegmentedControl from '@/components/mobile/ui/SegmentedControl';
+import TouchActionButton from '@/components/mobile/ui/TouchActionButton';
 
 export interface StaffInicioTabProps {
   hallOfFame: any[];
@@ -58,30 +60,15 @@ export default function StaffInicioTab({
         />
       )}
       
-      {/* Sub Tabs: Alertas vs Bar */}
-      <div className="grid grid-cols-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-inner">
-        <button
-          onClick={() => setInicioSubTab('alertas')}
-          className={`py-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition-all ${
-            inicioSubTab === 'alertas'
-              ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/30'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Bell className="w-4 h-4" /> Alertas
-        </button>
-
-        <button
-          onClick={() => setInicioSubTab('bar')}
-          className={`py-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 transition-all ${
-            inicioSubTab === 'bar'
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/30'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Coffee className="w-4 h-4" /> Bar
-        </button>
-      </div>
+      {/* Sub Tabs: Alertas vs Bar — Kimi K3 Glassmorphism SegmentedControl */}
+      <SegmentedControl
+        options={[
+          { id: 'alertas', label: '🚨 Alertas' },
+          { id: 'bar', label: '🍹 Bar' },
+        ]}
+        value={inicioSubTab}
+        onChange={(id) => setInicioSubTab(id as 'alertas' | 'bar')}
+      />
 
       {/* SECCIÓN ALERTAS INMEDIATAS */}
       {inicioSubTab === 'alertas' && (
@@ -96,47 +83,52 @@ export default function StaffInicioTab({
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-2">
-            <button 
+            <motion.button 
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleAlertaRapidaWFM('YA LLEGUÉ', 'DISPONIBLE')}
-              className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 hover:border-emerald-500/50 flex flex-col items-center justify-center gap-2 shadow-lg active:scale-95 transition-all group"
+              className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 hover:border-emerald-500/50 flex flex-col items-center justify-center gap-2 shadow-lg transition-all group cursor-pointer"
             >
               <span className="text-3xl group-hover:scale-110 transition-transform">👋</span>
               <span className="font-black text-xs text-slate-100 tracking-wider">YA LLEGUÉ</span>
-            </button>
+            </motion.button>
 
-            <button 
+            <motion.button 
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleAlertaRapidaWFM('VOY A COMER', 'PAUSA')}
-              className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 hover:border-amber-500/50 flex flex-col items-center justify-center gap-2 shadow-lg active:scale-95 transition-all group"
+              className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 hover:border-amber-500/50 flex flex-col items-center justify-center gap-2 shadow-lg transition-all group cursor-pointer"
             >
               <span className="text-3xl group-hover:scale-110 transition-transform">🍕</span>
               <span className="font-black text-xs text-slate-100 tracking-wider">VOY A COMER</span>
-            </button>
+            </motion.button>
 
-            <button 
+            <motion.button 
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleAlertaRapidaWFM('REGRESÉ', 'DISPONIBLE')}
-              className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 hover:border-blue-500/50 flex flex-col items-center justify-center gap-2 shadow-lg active:scale-95 transition-all group"
+              className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 hover:border-blue-500/50 flex flex-col items-center justify-center gap-2 shadow-lg transition-all group cursor-pointer"
             >
               <span className="text-3xl group-hover:scale-110 transition-transform">🔄</span>
               <span className="font-black text-xs text-slate-100 tracking-wider">REGRESÉ</span>
-            </button>
+            </motion.button>
 
-            <button 
+            <motion.button 
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleAlertaRapidaWFM('ACABÓ MI DÍA', 'INACTIVO')}
-              className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 hover:border-red-500/50 flex flex-col items-center justify-center gap-2 shadow-lg active:scale-95 transition-all group"
+              className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 hover:border-red-500/50 flex flex-col items-center justify-center gap-2 shadow-lg transition-all group cursor-pointer"
             >
               <span className="text-3xl group-hover:scale-110 transition-transform">🏁</span>
               <span className="font-black text-xs text-slate-100 tracking-wider">ACABÓ MI DÍA</span>
-            </button>
+            </motion.button>
           </div>
 
-          {/* Botón de Autogestión vía Tag NFC */}
+          {/* Botón de Autogestión vía Tag NFC con TouchActionButton */}
           <div className="pt-2">
-            <button
+            <TouchActionButton
               onClick={handleNfcTagScan}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 text-white font-black text-xs uppercase tracking-wider shadow-xl shadow-emerald-600/20 border border-emerald-400/30 flex items-center justify-center gap-2 active:scale-95 transition-all"
+              variant="primary"
+              className="w-full"
             >
               🏷️ Escanear / Simular Tag NFC Sede (Auto-Marcado)
-            </button>
+            </TouchActionButton>
           </div>
         </div>
       )}
@@ -191,12 +183,13 @@ export default function StaffInicioTab({
             </div>
           </div>
 
-          <button 
+          <TouchActionButton
             onClick={handleEnviarPedidoBar}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-sm shadow-xl shadow-purple-600/30 active:scale-95 transition-all mt-2"
+            variant="primary"
+            className="w-full mt-2"
           >
             Enviar Pedido a Recepción
-          </button>
+          </TouchActionButton>
         </div>
       )}
     </motion.div>
