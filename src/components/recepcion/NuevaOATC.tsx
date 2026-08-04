@@ -168,14 +168,15 @@ export default function NuevaOATC({ onClose }: { onClose?: () => void }) {
                   <li key={index} className="flex justify-between items-center text-xs bg-white p-2 border rounded-lg shadow-sm">
                     <span className="font-bold text-gray-800 truncate pl-1 flex-1">{item.nombre}</span>
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded border border-gray-300">
-                        <span className="text-[10px] font-bold text-gray-500">S/</span>
+                      <div className="flex items-center gap-1 bg-gray-100 px-2.5 py-1.5 rounded-lg border border-gray-300 focus-within:border-blue-500 focus-within:bg-white transition-all">
+                        <span className="text-xs font-bold text-gray-600">S/</span>
                         <input 
                           type="number" 
+                          inputMode="decimal"
                           value={(item as any).precio ?? item.precio_venta ?? 0}
                           onChange={(e) => handleUpdatePrecio(index, parseFloat(e.target.value) || 0)}
-                          className="w-16 font-bold text-gray-900 text-xs bg-transparent focus:outline-none text-right"
-                          step="0.5 text-xs font-mono"
+                          className="w-16 font-mono font-bold text-gray-900 text-sm bg-transparent focus:outline-none text-right"
+                          step="0.5"
                         />
                       </div>
                       <button 

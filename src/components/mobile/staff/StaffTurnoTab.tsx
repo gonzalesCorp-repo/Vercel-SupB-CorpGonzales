@@ -140,12 +140,13 @@ export default function StaffTurnoTab({
               )}
             </div>
             {ticketActivo.punto_partida?.map((srv: any, idx: number) => (
-              <div key={idx} className="flex justify-between items-center text-sm font-semibold text-slate-200 bg-slate-900/90 p-2 rounded-xl border border-slate-800">
-                <span className="truncate pr-2">{srv.nombre}</span>
-                <div className="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
-                  <span className="text-[10px] font-bold text-slate-400">S/</span>
+              <div key={idx} className="flex items-center justify-between gap-2 bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800 shadow-md">
+                <span className="text-xs font-bold text-slate-100 truncate flex-1">{srv.nombre}</span>
+                <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-indigo-500/40 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition-all">
+                  <span className="text-xs font-black text-amber-400">S/</span>
                   <input 
                     type="number" 
+                    inputMode="decimal"
                     value={srv.precio ?? srv.monto ?? srv.precio_venta ?? 0}
                     onChange={(e) => {
                       const val = parseFloat(e.target.value) || 0;
@@ -153,8 +154,8 @@ export default function StaffTurnoTab({
                         handleUpdateItemPrecio(idx, val);
                       }
                     }}
-                    className="w-16 font-bold text-indigo-400 text-xs bg-transparent focus:outline-none text-right"
-                    step="0.5 text-xs font-mono"
+                    className="w-16 font-mono font-black text-amber-300 text-sm bg-transparent focus:outline-none text-right"
+                    step="0.5"
                   />
                 </div>
               </div>
