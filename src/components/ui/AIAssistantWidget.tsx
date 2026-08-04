@@ -93,10 +93,10 @@ export function AIAssistantWidget() {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white shadow-2xl shadow-indigo-500/40 border border-white/20 flex items-center gap-2 group cursor-pointer"
-        title="Copiloto IA Vaikuntha"
+        title="Copiloto V.AI"
       >
         <Sparkles className="w-6 h-6 animate-pulse" />
-        <span className="font-bold text-xs hidden md:inline-block pr-1">Vaikuntha AI</span>
+        <span className="font-bold text-xs hidden md:inline-block pr-1">V.AI</span>
       </motion.button>
 
       {/* Floating AI Chat Drawer */}
@@ -116,7 +116,7 @@ export function AIAssistantWidget() {
                 </div>
                 <div>
                   <h3 className="font-black text-sm text-white tracking-tight flex items-center gap-1.5">
-                    Vaikuntha Copilot <span className="text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">Vercel AI</span>
+                    V.AI Copilot <span className="text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">Vercel AI</span>
                   </h3>
                   <p className="text-[10px] text-slate-400 font-medium">Asistente Inteligente en Vivo</p>
                 </div>

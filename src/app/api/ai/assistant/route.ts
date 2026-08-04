@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     const { messages, context } = await req.json();
 
     const systemPrompt = `
-Eres Vaikuntha AI, el asistente inteligente y Copiloto operativo de Corporación Gonzales (Vaikuntha ERP).
+Eres V.AI, el asistente inteligente y Copiloto operativo de Corporación Gonzales (Vaikuntha ERP).
 Tu rol es ayudar a administradores, recepcionistas y operarios de piso con:
 1. Recomendar servicios o combinaciones de insumos de laboratorio según las OATC activas.
 2. Responder dudas operativas sobre el control de asistencia WFM, turnos y comisiones.
