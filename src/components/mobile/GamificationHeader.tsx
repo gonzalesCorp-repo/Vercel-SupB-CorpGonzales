@@ -1,8 +1,6 @@
-'use client'
-
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Flame, Gem } from 'lucide-react'
+import { Flame, Gem, LogOut } from 'lucide-react'
 
 // types
 export interface GamificationHeaderProps {
@@ -15,12 +13,14 @@ export interface GamificationHeaderProps {
     monedas: number
   }
   sedeNombre: string
+  onLogout?: () => void
 }
 
 export default function GamificationHeader({
   agente,
   profile,
   sedeNombre,
+  onLogout,
 }: GamificationHeaderProps) {
   const { xp_total, nivel, titulo, streak_asistencia, monedas } = profile
 
@@ -30,11 +30,11 @@ export default function GamificationHeader({
   const progress = Math.min(100, Math.max(0, ((xp_total - xp_current_level) / (xp_next_level - xp_current_level)) * 100))
 
   return (
-    <div className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 p-4 pb-3">
-      <div className="flex items-center justify-between mb-3">
+    <div className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800 p-4 pb-3">
+      <div className="flex items-center justify-between mb-3 gap-2">
         {/* Left: Avatar & Info */}
-        <div className="flex items-center space-x-3">
-          <div className="relative">
+        <div className="flex items-center space-x-3 min-w-0">
+          <div className="relative shrink-0">
             <div className="w-12 h-12 rounded-full bg-slate-800 border-2 border-indigo-500 overflow-hidden flex items-center justify-center">
               {agente?.avatar_url ? (
                 <img src={agente.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
@@ -48,27 +48,37 @@ export default function GamificationHeader({
               {nivel}
             </div>
           </div>
-          <div>
-            <h2 className="text-slate-100 font-bold leading-tight">{agente?.nombre || 'Agente'}</h2>
-            <p className="text-slate-400 text-xs">{sedeNombre}</p>
+          <div className="min-w-0">
+            <h2 className="text-slate-100 font-bold leading-tight truncate">{agente?.nombre || 'Agente'}</h2>
+            <p className="text-slate-400 text-xs truncate">{sedeNombre}</p>
           </div>
         </div>
 
-        {/* Right: Streak & Coins */}
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-1">
+        {/* Right: Streak & Coins & Logout Button */}
+        <div className="flex items-center space-x-2.5 shrink-0">
+          <div className="flex items-center space-x-1 bg-slate-900/90 px-2 py-1 rounded-xl border border-slate-800">
             <motion.div
               animate={streak_asistencia > 5 ? { scale: [1, 1.2, 1] } : {}}
               transition={{ repeat: Infinity, duration: 1.5 }}
             >
-              <Flame className={streak_asistencia > 0 ? "text-orange-500" : "text-slate-600"} size={18} />
+              <Flame className={streak_asistencia > 0 ? "text-orange-500" : "text-slate-600"} size={16} />
             </motion.div>
-            <span className="text-slate-200 font-bold text-sm">{streak_asistencia}</span>
+            <span className="text-slate-200 font-bold text-xs">{streak_asistencia}</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <Gem className="text-cyan-400" size={18} />
-            <span className="text-slate-200 font-bold text-sm">{monedas}</span>
+          <div className="flex items-center space-x-1 bg-slate-900/90 px-2 py-1 rounded-xl border border-slate-800">
+            <Gem className="text-cyan-400" size={16} />
+            <span className="text-slate-200 font-bold text-xs">{monedas}</span>
           </div>
+          {onLogout && (
+            <button 
+              onClick={onLogout}
+              className="px-2.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 active:scale-95 transition-all flex items-center gap-1 text-[11px] font-bold shrink-0 cursor-pointer"
+              title="Cerrar Sesión"
+            >
+              <LogOut size={14} />
+              <span>Salir</span>
+            </button>
+          )}
         </div>
       </div>
 

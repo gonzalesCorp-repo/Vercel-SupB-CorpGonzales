@@ -69,19 +69,11 @@ export default function DedicatedMobileViewPage() {
           monedas: gamProfile.monedas
         } : { xp_total: 0, nivel: 1, titulo: 'Novato', streak_asistencia: 0, monedas: 0 }}
         sedeNombre={sedeActiva?.nombre || 'Sede'}
+        onLogout={async () => {
+          await supabase.auth.signOut();
+          router.push('/login');
+        }}
       />
-
-      <div className="fixed top-3 right-3 z-50">
-        <button 
-          onClick={async () => {
-            await supabase.auth.signOut();
-            router.push('/login');
-          }}
-          className="px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 font-bold text-[10px] active:scale-95 transition-all backdrop-blur-xl"
-        >
-          Salir
-        </button>
-      </div>
 
       {(!agente?.rol || agente?.rol === 'STAFF') ? (
         <StaffMobileView agente={agente} sedeId={sedeActiva?.id || ''} />
