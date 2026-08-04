@@ -199,7 +199,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
 
       {/* FLOATING ALERTS WIDGET */}
       {pendingAlerts.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div className="fixed bottom-6 right-24 md:right-28 z-50 flex flex-col items-end">
           
           {/* Minimized Badge */}
           {isAlertsMinimized ? (
