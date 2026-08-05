@@ -17,8 +17,8 @@ export interface StaffInicioTabProps {
   setInicioSubTab: (tab: 'alertas' | 'bar') => void;
   handleAlertaRapidaWFM: (accion: string, estado: string) => void;
   handleNfcTagScan: () => void;
-  barOrder: { cafe: number; infusion: number; agua: number };
-  setBarOrder: React.Dispatch<React.SetStateAction<{ cafe: number; infusion: number; agua: number }>>;
+  barOrder: { cafe: number; infusion: number; agua: number; especial: number };
+  setBarOrder: React.Dispatch<React.SetStateAction<{ cafe: number; infusion: number; agua: number; especial: number }>>;
   handleEnviarPedidoBar: () => void;
 }
 
@@ -35,6 +35,9 @@ export default function StaffInicioTab({
   setBarOrder,
   handleEnviarPedidoBar
 }: StaffInicioTabProps) {
+  const today = new Date().getDay();
+  const isWeekendSpecial = today === 5 || today === 6;
+
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       {/* 🏆 Hall of Fame Banner — Octalysis CD2+CD5 */}
@@ -181,6 +184,23 @@ export default function StaffInicioTab({
                 <button onClick={() => setBarOrder(p => ({ ...p, agua: p.agua + 1 }))} className="w-9 h-9 rounded-xl bg-purple-600 text-white font-black flex items-center justify-center shadow-lg active:scale-90 transition">+</button>
               </div>
             </div>
+
+            {isWeekendSpecial && (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 to-slate-950/80 border border-purple-500/20 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🍹</span>
+                  <div>
+                    <span className="font-bold text-sm text-purple-300 block">Trago Especial (V/S)</span>
+                    <span className="text-[9px] text-purple-400 font-semibold uppercase tracking-wider">Con Alcohol Activo</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setBarOrder(p => ({ ...p, especial: Math.max(0, p.especial - 1) }))} className="w-9 h-9 rounded-xl bg-slate-800 text-slate-300 font-black flex items-center justify-center active:scale-90 transition">-</button>
+                  <span className="font-black text-base w-4 text-center text-purple-400">{barOrder.especial}</span>
+                  <button onClick={() => setBarOrder(p => ({ ...p, especial: p.especial + 1 }))} className="w-9 h-9 rounded-xl bg-purple-600 text-white font-black flex items-center justify-center shadow-lg active:scale-90 transition">+</button>
+                </div>
+              </div>
+            )}
           </div>
 
           <TouchActionButton

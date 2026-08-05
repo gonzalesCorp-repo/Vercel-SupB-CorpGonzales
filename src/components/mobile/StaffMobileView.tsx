@@ -51,7 +51,7 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
   const [showCatalogModal, setShowCatalogModal] = useState(false);
   const [catalogTipo, setCatalogTipo] = useState<'servicio' | 'producto' | null>(null);
 
-  const [barOrder, setBarOrder] = useState({ cafe: 0, infusion: 0, agua: 0 });
+  const [barOrder, setBarOrder] = useState({ cafe: 0, infusion: 0, agua: 0, especial: 0 });
 
   const [queryCliente, setQueryCliente] = useState('');
   const [clientesEncontrados, setClientesEncontrados] = useState<Cliente[]>([]);
@@ -134,12 +134,12 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
   };
 
   const handleEnviarPedidoBar = () => {
-    if (barOrder.cafe === 0 && barOrder.infusion === 0 && barOrder.agua === 0) {
+    if (barOrder.cafe === 0 && barOrder.infusion === 0 && barOrder.agua === 0 && barOrder.especial === 0) {
       showAlert('Selecciona al menos 1 bebida', 'warning');
       return;
     }
     showAlert('🍹 Pedido enviado al Bar con éxito', 'success');
-    setBarOrder({ cafe: 0, infusion: 0, agua: 0 });
+    setBarOrder({ cafe: 0, infusion: 0, agua: 0, especial: 0 });
     addXP(10);
   };
 
