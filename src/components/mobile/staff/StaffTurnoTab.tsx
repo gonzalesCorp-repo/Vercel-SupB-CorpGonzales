@@ -65,7 +65,7 @@ export default function StaffTurnoTab({
       return;
     }
     const delayDebounceFn = setTimeout(async () => {
-      const results = await buscarClientes(newName.trim());
+      const results = await buscarClientes(newName.trim(), ticketActivo?.agente_id);
       setClientSuggestions(results);
     }, 300);
 

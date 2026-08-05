@@ -14,12 +14,17 @@ export interface Cliente {
 
 const supabase = createClient();
 
-export async function buscarClientes(query: string): Promise<Cliente[]> {
-  const { data, error } = await supabase
+export async function buscarClientes(query: string, agenteId?: string | null): Promise<Cliente[]> {
+  let q = supabase
     .from('clientes')
     .select('*, sedes(nombre), agentes(nombre)')
-    .or(`nombre.ilike.%${query}%,dni.ilike.%${query}%,celular.ilike.%${query}%`)
-    .limit(20);
+    .or(`nombre.ilike.%${query}%,dni.ilike.%${query}%,celular.ilike.%${query}%`);
+
+  if (agenteId) {
+    q = q.eq('agente_id', agenteId);
+  }
+
+  const { data, error } = await q.limit(20);
 
   if (error) {
     console.error("Error buscando clientes:", error);

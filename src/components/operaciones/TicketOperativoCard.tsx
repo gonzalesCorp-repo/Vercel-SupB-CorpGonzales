@@ -45,7 +45,7 @@ export default function TicketOperativoCard({
       return;
     }
     const delayDebounceFn = setTimeout(async () => {
-      const results = await buscarClientes(newName.trim());
+      const results = await buscarClientes(newName.trim(), oatc?.agente_id);
       setClientSuggestions(results);
     }, 300);
 
