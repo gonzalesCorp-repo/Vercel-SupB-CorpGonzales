@@ -237,9 +237,9 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
               cargarDatosMobile();
             }
           }}
-          handleUpdateClienteNombre={async (newName) => {
+          handleUpdateClienteNombre={async (newName, clienteId) => {
             if (!ticketActivo || !ticketActivo.id) return;
-            const ok = await actualizarClienteNombreOatc(ticketActivo.id, newName);
+            const ok = await actualizarClienteNombreOatc(ticketActivo.id, newName, clienteId);
             if (ok) {
               showAlert('Nombre de cliente actualizado', 'success');
               cargarDatosMobile();

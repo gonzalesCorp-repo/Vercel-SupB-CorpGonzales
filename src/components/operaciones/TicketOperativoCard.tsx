@@ -1,8 +1,10 @@
 'use client';
 
-import { PlayCircle, PlusCircle, Beaker, CreditCard, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { PlayCircle, PlusCircle, Beaker, CreditCard, CheckCircle, XCircle, AlertTriangle, Edit2 } from 'lucide-react';
 import { OATC } from '@/services/recepcion';
 import { translateEstado } from '@/lib/utils';
+import { buscarClientes, Cliente } from '@/services/clientes';
 
 export interface OATCExtended extends OATC {
   estado_ui?: 'Espera' | 'En Curso' | 'Finalizado';
@@ -14,7 +16,7 @@ export interface TicketOperativoCardProps {
   oatc: OATCExtended;
   isPersonalMode: boolean;
   miAgenteId: string;
-  handleActionClick: (oatc: OATCExtended, action: string) => void;
+  handleActionClick: (oatc: OATCExtended, action: string, payload?: any) => void;
   openAddServiceModal: (oatc: OATCExtended) => void;
 }
 
@@ -25,6 +27,41 @@ export default function TicketOperativoCard({
   handleActionClick,
   openAddServiceModal
 }: TicketOperativoCardProps) {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [selectedClienteId, setSelectedClienteId] = useState<string | null>(null);
+  const [clientSuggestions, setClientSuggestions] = useState<Cliente[]>([]);
+
+  useEffect(() => {
+    if (oatc) {
+      setNewName(oatc.cliente_nombre || '');
+      setSelectedClienteId(oatc.cliente_id || null);
+    }
+  }, [oatc]);
+
+  useEffect(() => {
+    if (!isEditingName || !newName.trim() || newName.length < 2) {
+      setClientSuggestions([]);
+      return;
+    }
+    const delayDebounceFn = setTimeout(async () => {
+      const results = await buscarClientes(newName.trim());
+      setClientSuggestions(results);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [newName, isEditingName]);
+
+  const handleSaveName = async () => {
+    if (!newName.trim()) return;
+    await handleActionClick(oatc, 'EDIT_CLIENT_NAME', {
+      nuevoNombre: newName.trim(),
+      nuevoClienteId: selectedClienteId
+    });
+    setIsEditingName(false);
+    setClientSuggestions([]);
+  };
+
   const isEnCurso = oatc.estado_proceso === 'EN_CURSO' || oatc.estado_proceso === 'PRE_COBRADO';
 
   return (
@@ -37,7 +74,76 @@ export default function TicketOperativoCard({
               {oatc.codigo_ticket}
             </span>
           )}
-          <h3 className="text-xl font-black text-gray-800 mt-0.5">{oatc.cliente_nombre}</h3>
+          {isEditingName ? (
+            <div className="relative mt-2 w-full max-w-[280px]">
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => {
+                    setNewName(e.target.value);
+                    setSelectedClienteId(null);
+                  }}
+                  placeholder="Nombre del cliente..."
+                  className="bg-white border border-indigo-300 rounded-xl px-3 py-1 text-sm text-gray-800 focus:outline-none focus:border-indigo-500 font-bold w-full"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSaveName}
+                  className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shrink-0 cursor-pointer"
+                >
+                  Guardar
+                </button>
+                <button
+                  onClick={() => {
+                    setNewName(oatc.cliente_nombre || '');
+                    setSelectedClienteId(oatc.cliente_id || null);
+                    setIsEditingName(false);
+                    setClientSuggestions([]);
+                  }}
+                  className="px-2.5 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer"
+                >
+                  X
+                </button>
+              </div>
+
+              {clientSuggestions.length > 0 && (
+                <div className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-gray-100">
+                  {clientSuggestions.map((cli) => (
+                    <div
+                      key={cli.id}
+                      onClick={() => {
+                        setNewName(cli.nombre);
+                        setSelectedClienteId(cli.id || null);
+                        setClientSuggestions([]);
+                      }}
+                      className="px-3 py-2 hover:bg-gray-50 cursor-pointer text-left transition-colors"
+                    >
+                      <p className="text-xs font-bold text-gray-800">{cli.nombre}</p>
+                      <p className="text-[10px] text-gray-400">
+                        {cli.dni ? `DNI: ${cli.dni}` : ''} {cli.celular ? `| Cel: ${cli.celular}` : ''}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mt-0.5">
+              <h3 className="text-xl font-black text-gray-800">{oatc.cliente_nombre}</h3>
+              <button
+                onClick={() => {
+                  setNewName(oatc.cliente_nombre || '');
+                  setSelectedClienteId(oatc.cliente_id || null);
+                  setIsEditingName(true);
+                }}
+                className="p-1 text-gray-400 hover:text-indigo-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                title="Editar nombre de cliente"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
           <p className="text-sm text-gray-600 mt-1">
             <span className="font-semibold text-gray-400">Atendido por:</span> {oatc.agente_nombre}
           </p>

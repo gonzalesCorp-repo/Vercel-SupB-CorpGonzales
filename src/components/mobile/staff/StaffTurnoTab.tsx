@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, Users2, Play, Plus, CreditCard, CheckCircle, Ban, AlertTriangle, X, Trash2, Edit2 } from 'lucide-react';
 import { obtenerMotivosCancelacion, MotivoCancelacion } from '@/services/recepcion';
 import TouchActionButton from '@/components/mobile/ui/TouchActionButton';
+import { buscarClientes, Cliente } from '@/services/clientes';
 
 export interface StaffTurnoTabProps {
   tickets: any[];
@@ -21,7 +22,7 @@ export interface StaffTurnoTabProps {
   handleSolicitarCancelacion: (ticketId: string, motivoId: string, detalle: string) => void;
   handleUpdateItemPrecio?: (itemIdx: number, newPrice: number) => void;
   handleRemoveItem?: (itemIdx: number) => void;
-  handleUpdateClienteNombre?: (newName: string) => void;
+  handleUpdateClienteNombre?: (newName: string, clienteId: string | null) => void;
 }
 
 export default function StaffTurnoTab({
@@ -48,19 +49,36 @@ export default function StaffTurnoTab({
   const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState('');
+  const [selectedClienteId, setSelectedClienteId] = useState<string | null>(null);
+  const [clientSuggestions, setClientSuggestions] = useState<Cliente[]>([]);
 
   useEffect(() => {
-    if (ticketActivo?.cliente_nombre) {
-      setNewName(ticketActivo.cliente_nombre);
+    if (ticketActivo) {
+      setNewName(ticketActivo.cliente_nombre || '');
+      setSelectedClienteId(ticketActivo.cliente_id || null);
     }
   }, [ticketActivo]);
+
+  useEffect(() => {
+    if (!isEditingName || !newName.trim() || newName.length < 2) {
+      setClientSuggestions([]);
+      return;
+    }
+    const delayDebounceFn = setTimeout(async () => {
+      const results = await buscarClientes(newName.trim());
+      setClientSuggestions(results);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [newName, isEditingName]);
 
   const handleSaveName = async () => {
     if (!newName.trim()) return;
     if (handleUpdateClienteNombre) {
-      await handleUpdateClienteNombre(newName.trim());
+      await handleUpdateClienteNombre(newName.trim(), selectedClienteId);
     }
     setIsEditingName(false);
+    setClientSuggestions([]);
   };
 
   useEffect(() => {
@@ -141,35 +159,68 @@ export default function StaffTurnoTab({
                 </span>
               )}
               {isEditingName ? (
-                <div className="flex items-center gap-2 mt-2">
-                  <input
-                    type="text"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    className="bg-slate-950 border border-indigo-500/40 rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-400 font-bold w-full"
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleSaveName}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shrink-0 cursor-pointer"
-                  >
-                    Guardar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setNewName(ticketActivo.cliente_nombre || '');
-                      setIsEditingName(false);
-                    }}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer"
-                  >
-                    X
-                  </button>
+                <div className="relative mt-2 w-full max-w-[280px]">
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      value={newName}
+                      onChange={(e) => {
+                        setNewName(e.target.value);
+                        setSelectedClienteId(null);
+                      }}
+                      placeholder="Nombre del cliente..."
+                      className="bg-slate-950 border border-indigo-500/40 rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-400 font-bold w-full"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shrink-0 cursor-pointer"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setNewName(ticketActivo.cliente_nombre || '');
+                        setSelectedClienteId(ticketActivo.cliente_id || null);
+                        setIsEditingName(false);
+                        setClientSuggestions([]);
+                      }}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer"
+                    >
+                      X
+                    </button>
+                  </div>
+
+                  {clientSuggestions.length > 0 && (
+                    <div className="absolute left-0 right-0 mt-1 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-800">
+                      {clientSuggestions.map((cli) => (
+                        <div
+                          key={cli.id}
+                          onClick={() => {
+                            setNewName(cli.nombre);
+                            setSelectedClienteId(cli.id || null);
+                            setClientSuggestions([]);
+                          }}
+                          className="px-3 py-2.5 hover:bg-slate-800 cursor-pointer text-left transition-colors"
+                        >
+                          <p className="text-xs font-bold text-white">{cli.nombre}</p>
+                          <p className="text-[10px] text-slate-400">
+                            {cli.dni ? `DNI: ${cli.dni}` : ''} {cli.celular ? `| Cel: ${cli.celular}` : ''}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex items-center gap-2 mt-2">
                   <h2 className="text-2xl font-black text-white">{ticketActivo.cliente_nombre}</h2>
                   <button
-                    onClick={() => setIsEditingName(true)}
+                    onClick={() => {
+                      setNewName(ticketActivo.cliente_nombre || '');
+                      setSelectedClienteId(ticketActivo.cliente_id || null);
+                      setIsEditingName(true);
+                    }}
                     className="p-1 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                     title="Editar nombre de cliente"
                   >

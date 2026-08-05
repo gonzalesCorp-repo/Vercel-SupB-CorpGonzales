@@ -301,11 +301,12 @@ export async function validarPin(pin: string): Promise<{id: string, rol: string,
 }
 
 // 12. Actualizar el nombre del cliente en el ticket
-export async function actualizarClienteNombreOatc(oatcId: string, nuevoNombre: string): Promise<boolean> {
+export async function actualizarClienteNombreOatc(oatcId: string, nuevoNombre: string, clienteId?: string | null): Promise<boolean> {
   const { error } = await supabase
     .from('oatc')
     .update({ 
-      cliente_nombre: nuevoNombre
+      cliente_nombre: nuevoNombre,
+      ...(clienteId !== undefined ? { cliente_id: clienteId } : {})
     })
     .eq('id', oatcId);
 
@@ -314,7 +315,7 @@ export async function actualizarClienteNombreOatc(oatcId: string, nuevoNombre: s
     return false;
   }
 
-  await registrarLog('OPERACIONES', `Nombre de cliente actualizado por staff`, { oatc_id: oatcId, nuevo_nombre: nuevoNombre });
+  await registrarLog('OPERACIONES', `Nombre de cliente actualizado por staff`, { oatc_id: oatcId, nuevo_nombre: nuevoNombre, cliente_id: clienteId });
   return true;
 }
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, RefreshCw } from 'lucide-react';
-import { obtenerTicketsAsignados, pedirInsumo, solicitarInicioAtencion, solicitarFinAtencion, actualizarServiciosOatc, validarPin, solicitarPreCobro } from '@/services/operaciones';
+import { obtenerTicketsAsignados, pedirInsumo, solicitarInicioAtencion, solicitarFinAtencion, actualizarServiciosOatc, validarPin, solicitarPreCobro, actualizarClienteNombreOatc } from '@/services/operaciones';
 import { Bien, obtenerCatalogo } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 import { Modal } from '@/components/ui/Modal';
@@ -19,7 +19,7 @@ import OperacionesHistorialTab from '@/components/operaciones/OperacionesHistori
 import TicketOperativoCard, { OATCExtended } from '@/components/operaciones/TicketOperativoCard';
 import { useOATCActions } from '@/components/recepcion/hooks/useOATCActions';
 
-type PendingAction = 'START_ATTENTION' | 'END_ATTENTION' | 'PRE_COBRO' | null;
+type PendingAction = 'START_ATTENTION' | 'END_ATTENTION' | 'PRE_COBRO' | 'EDIT_CLIENT_NAME' | 'ADD_SERVICE' | null;
 
 export default function WorkspaceOperativoPage() {
   const [tickets, setTickets] = useState<OATCExtended[]>([]);
@@ -41,6 +41,7 @@ export default function WorkspaceOperativoPage() {
   const [pinError, setPinError] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [selectedOatc, setSelectedOatc] = useState<OATCExtended | null>(null);
+  const [pendingPayload, setPendingPayload] = useState<any>(null);
 
   // Catálogo Real
   const [catalogo, setCatalogo] = useState<Bien[]>([]);
@@ -149,16 +150,38 @@ export default function WorkspaceOperativoPage() {
     const agent = await validarPin(pin);
     if (!agent) { setPinError(true); return; }
 
+    const isAssignedAgent = selectedOatc && (agent.nombre === selectedOatc.agente_nombre);
+    const isAuthorizedRole = agent.rol === 'ADMIN' || agent.rol === 'RECEPCION' || agent.rol === 'SUPERADMIN';
+
+    if (!isAssignedAgent && !isAuthorizedRole) {
+      showAlert("Identidad no autorizada. Solo el trabajador asignado o administración puede modificar esta atención.", "error");
+      setPinError(true);
+      return;
+    }
+
     setShowPinModal(false);
     setPinError(false);
 
-    if (pendingAction === 'START_ATTENTION' && selectedOatc?.id) await solicitarInicioAtencion(selectedOatc.id, agent.rol);
-    else if (pendingAction === 'END_ATTENTION' && selectedOatc?.id) await solicitarFinAtencion(selectedOatc, agent.rol);
-    else if (pendingAction === 'PRE_COBRO' && selectedOatc?.id) await solicitarPreCobro(selectedOatc.id);
+    if (pendingAction === 'START_ATTENTION' && selectedOatc?.id) {
+      await solicitarInicioAtencion(selectedOatc.id, agent.rol);
+    } else if (pendingAction === 'END_ATTENTION' && selectedOatc?.id) {
+      await solicitarFinAtencion(selectedOatc, agent.rol);
+    } else if (pendingAction === 'PRE_COBRO' && selectedOatc?.id) {
+      await solicitarPreCobro(selectedOatc.id);
+    } else if (pendingAction === 'EDIT_CLIENT_NAME' && selectedOatc?.id && pendingPayload) {
+      const ok = await actualizarClienteNombreOatc(selectedOatc.id, pendingPayload.nuevoNombre, pendingPayload.nuevoClienteId);
+      if (ok) {
+        showAlert("Nombre de cliente actualizado correctamente.", "success");
+      } else {
+        showAlert("No se pudo actualizar el nombre del cliente.", "error");
+      }
+    } else if (pendingAction === 'ADD_SERVICE') {
+      setShowAddServiceModal(true);
+    }
     cargarTickets();
   };
 
-  const handleActionClick = async (oatc: OATCExtended, action: string) => {
+  const handleActionClick = async (oatc: OATCExtended, action: string, payload?: any) => {
     if (action === 'LAB') {
       setSelectedOatc(oatc);
       setShowLabModal(true);
@@ -176,6 +199,23 @@ export default function WorkspaceOperativoPage() {
         }
         await submitReject(oatc, reason.trim());
         showAlert("Solicitud de cancelación rechazada.", "success");
+      }
+    } else if (action === 'EDIT_CLIENT_NAME') {
+      setSelectedOatc(oatc);
+      setPendingPayload(payload);
+      if (isPersonalMode) {
+        const ok = await actualizarClienteNombreOatc(oatc.id, payload.nuevoNombre, payload.nuevoClienteId);
+        if (ok) {
+          showAlert("Nombre de cliente actualizado correctamente.", "success");
+          cargarTickets();
+        } else {
+          showAlert("No se pudo actualizar el nombre del cliente.", "error");
+        }
+      } else {
+        setPendingAction('EDIT_CLIENT_NAME');
+        setPin('');
+        setPinError(false);
+        setShowPinModal(true);
       }
     } else {
       requerirPinParaAccion(action as PendingAction, oatc);
@@ -329,7 +369,14 @@ export default function WorkspaceOperativoPage() {
               handleActionClick={handleActionClick}
               openAddServiceModal={(oatc) => {
                 setSelectedOatc(oatc);
-                setShowAddServiceModal(true);
+                if (isPersonalMode) {
+                  setShowAddServiceModal(true);
+                } else {
+                  setPendingAction('ADD_SERVICE');
+                  setPin('');
+                  setPinError(false);
+                  setShowPinModal(true);
+                }
               }}
             />
           ))}
