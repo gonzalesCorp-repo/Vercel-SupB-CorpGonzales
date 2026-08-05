@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Users2, Play, Plus, CreditCard, CheckCircle, Ban, AlertTriangle, X, Trash2 } from 'lucide-react';
+import { RefreshCw, Users2, Play, Plus, CreditCard, CheckCircle, Ban, AlertTriangle, X, Trash2, Edit2 } from 'lucide-react';
 import { obtenerMotivosCancelacion, MotivoCancelacion } from '@/services/recepcion';
 import TouchActionButton from '@/components/mobile/ui/TouchActionButton';
 
@@ -21,6 +21,7 @@ export interface StaffTurnoTabProps {
   handleSolicitarCancelacion: (ticketId: string, motivoId: string, detalle: string) => void;
   handleUpdateItemPrecio?: (itemIdx: number, newPrice: number) => void;
   handleRemoveItem?: (itemIdx: number) => void;
+  handleUpdateClienteNombre?: (newName: string) => void;
 }
 
 export default function StaffTurnoTab({
@@ -37,13 +38,30 @@ export default function StaffTurnoTab({
   handleFinalizarAtencion,
   handleSolicitarCancelacion,
   handleUpdateItemPrecio,
-  handleRemoveItem
+  handleRemoveItem,
+  handleUpdateClienteNombre
 }: StaffTurnoTabProps) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [motivos, setMotivos] = useState<MotivoCancelacion[]>([]);
   const [selectedMotivoId, setSelectedMotivoId] = useState('');
   const [cancelDetalle, setCancelDetalle] = useState('');
   const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newName, setNewName] = useState('');
+
+  useEffect(() => {
+    if (ticketActivo?.cliente_nombre) {
+      setNewName(ticketActivo.cliente_nombre);
+    }
+  }, [ticketActivo]);
+
+  const handleSaveName = async () => {
+    if (!newName.trim()) return;
+    if (handleUpdateClienteNombre) {
+      await handleUpdateClienteNombre(newName.trim());
+    }
+    setIsEditingName(false);
+  };
 
   useEffect(() => {
     async function loadMotivos() {
@@ -122,7 +140,43 @@ export default function StaffTurnoTab({
                   ⚡ Atención Activa en Curso
                 </span>
               )}
-              <h2 className="text-2xl font-black text-white mt-2">{ticketActivo.cliente_nombre}</h2>
+              {isEditingName ? (
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="bg-slate-950 border border-indigo-500/40 rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-400 font-bold w-full"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleSaveName}
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shrink-0 cursor-pointer"
+                  >
+                    Guardar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setNewName(ticketActivo.cliente_nombre || '');
+                      setIsEditingName(false);
+                    }}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer"
+                  >
+                    X
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 mt-2">
+                  <h2 className="text-2xl font-black text-white">{ticketActivo.cliente_nombre}</h2>
+                  <button
+                    onClick={() => setIsEditingName(true)}
+                    className="p-1 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                    title="Editar nombre de cliente"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
             <span className="text-xs font-mono font-bold text-indigo-400 bg-slate-950 px-3 py-1 rounded-xl border border-slate-800">
               {ticketActivo.codigo_ticket || 'OATC-LIVE'}

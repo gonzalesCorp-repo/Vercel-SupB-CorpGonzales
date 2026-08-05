@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useUIStore } from '@/store/useUIStore';
 import { useGamificationStore } from '@/store/useGamificationStore';
 import { cambiarEstadoAgente } from '@/services/agentes';
-import { obtenerTicketsAsignados, solicitarInicioAtencion, solicitarFinAtencion, solicitarPreCobro, iniciarAtencionOatc, solicitarCancelacionOatc, actualizarServiciosOatc } from '@/services/operaciones';
+import { obtenerTicketsAsignados, solicitarInicioAtencion, solicitarFinAtencion, solicitarPreCobro, iniciarAtencionOatc, solicitarCancelacionOatc, actualizarServiciosOatc, actualizarClienteNombreOatc } from '@/services/operaciones';
 import { buscarClientes, crearCliente, Cliente } from '@/services/clientes';
 import { OATC, Agente, obtenerAgentesDisponibles, Bien } from '@/services/recepcion';
 import { otorgarXP, actualizarStreak, enviarKudos } from '@/lib/gamification/engine';
@@ -234,6 +234,14 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
             const ok = await actualizarServiciosOatc(ticketActivo.id, currentList);
             if (ok) {
               showAlert('Servicio removido', 'success');
+              cargarDatosMobile();
+            }
+          }}
+          handleUpdateClienteNombre={async (newName) => {
+            if (!ticketActivo || !ticketActivo.id) return;
+            const ok = await actualizarClienteNombreOatc(ticketActivo.id, newName);
+            if (ok) {
+              showAlert('Nombre de cliente actualizado', 'success');
               cargarDatosMobile();
             }
           }}

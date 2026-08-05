@@ -300,4 +300,23 @@ export async function validarPin(pin: string): Promise<{id: string, rol: string,
   return agente;
 }
 
+// 12. Actualizar el nombre del cliente en el ticket
+export async function actualizarClienteNombreOatc(oatcId: string, nuevoNombre: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('oatc')
+    .update({ 
+      cliente_nombre: nuevoNombre
+    })
+    .eq('id', oatcId);
+
+  if (error) {
+    console.error("Error actualizando nombre de cliente:", error);
+    return false;
+  }
+
+  await registrarLog('OPERACIONES', `Nombre de cliente actualizado por staff`, { oatc_id: oatcId, nuevo_nombre: nuevoNombre });
+  return true;
+}
+
+
 

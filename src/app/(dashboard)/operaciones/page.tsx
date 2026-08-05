@@ -30,7 +30,6 @@ export default function WorkspaceOperativoPage() {
   const router = useRouter();
   const { showAlert } = useUIStore();
   const sedeActiva = useAppStore((state) => state.sedeActiva);
-  const { handleApprove, submitReject } = useOATCActions({ onSuccess: cargarTickets });
 
   // Modales
   const [showLabModal, setShowLabModal] = useState(false);
@@ -92,6 +91,8 @@ export default function WorkspaceOperativoPage() {
     setTickets(isPersonal ? dataTickets.filter(t => t.agente_id === personalId) : dataTickets);
     setIsLoading(false);
   };
+
+  const { handleApprove, submitReject } = useOATCActions({ onSuccess: cargarTickets });
 
   useEffect(() => {
     cargarTickets();
