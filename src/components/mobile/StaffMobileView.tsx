@@ -227,6 +227,16 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
               cargarDatosMobile();
             }
           }}
+          handleRemoveItem={async (itemIdx) => {
+            if (!ticketActivo || !ticketActivo.id) return;
+            const currentList = [...(ticketActivo.punto_partida || [])];
+            currentList.splice(itemIdx, 1);
+            const ok = await actualizarServiciosOatc(ticketActivo.id, currentList);
+            if (ok) {
+              showAlert('Servicio removido', 'success');
+              cargarDatosMobile();
+            }
+          }}
         />
       );
       case 'clientes': return <StaffClientesTab queryCliente={queryCliente} setQueryCliente={setQueryCliente} clientesEncontrados={clientesEncontrados} showAddClienteModal={showAddClienteModal} setShowAddClienteModal={setShowAddClienteModal} newClienteForm={newClienteForm} setNewClienteForm={setNewClienteForm} handleCrearCliente={handleCrearCliente} />;

@@ -1,6 +1,6 @@
 'use client';
 
-import { PlayCircle, PlusCircle, Beaker, CreditCard, CheckCircle, XCircle } from 'lucide-react';
+import { PlayCircle, PlusCircle, Beaker, CreditCard, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { OATC } from '@/services/recepcion';
 import { translateEstado } from '@/lib/utils';
 
@@ -130,6 +130,31 @@ export default function TicketOperativoCard({
           {oatc.estado_proceso === 'PENDIENTE_TERMINO' && (
             <div className="w-full text-center text-sm font-bold text-emerald-600 bg-emerald-50 py-3 rounded-xl border border-emerald-200 animate-pulse">
               ⏳ Esperando autorización para Terminar...
+            </div>
+          )}
+
+          {oatc.cambios_pendientes?.tipo === 'SOLICITUD_CANCELACION' && (
+            <div className="w-full mt-2 text-sm font-bold text-red-600 bg-red-50 p-4 rounded-xl border border-red-200 shadow-sm">
+              <p className="flex items-center gap-1.5"><AlertTriangle className="w-4 h-4 text-red-600 animate-pulse" /> Solicitud de Cancelación Pendiente</p>
+              {oatc.cambios_pendientes?.detalle && (
+                <p className="font-normal mt-1 text-xs text-red-700">Motivo: {oatc.cambios_pendientes.detalle}</p>
+              )}
+              {!isPersonalMode && (
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => handleActionClick(oatc, 'APPROVE_CANCEL')}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs transition-colors shadow-sm cursor-pointer"
+                  >
+                    Aprobar
+                  </button>
+                  <button
+                    onClick={() => handleActionClick(oatc, 'REJECT_CANCEL')}
+                    className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 rounded-lg text-xs transition-colors cursor-pointer"
+                  >
+                    Rechazar
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

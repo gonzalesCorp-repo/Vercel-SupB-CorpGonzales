@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Users2, Play, Plus, CreditCard, CheckCircle, Ban, AlertTriangle, X } from 'lucide-react';
+import { RefreshCw, Users2, Play, Plus, CreditCard, CheckCircle, Ban, AlertTriangle, X, Trash2 } from 'lucide-react';
 import { obtenerMotivosCancelacion, MotivoCancelacion } from '@/services/recepcion';
 import TouchActionButton from '@/components/mobile/ui/TouchActionButton';
 
@@ -20,6 +20,7 @@ export interface StaffTurnoTabProps {
   handleFinalizarAtencion: () => void;
   handleSolicitarCancelacion: (ticketId: string, motivoId: string, detalle: string) => void;
   handleUpdateItemPrecio?: (itemIdx: number, newPrice: number) => void;
+  handleRemoveItem?: (itemIdx: number) => void;
 }
 
 export default function StaffTurnoTab({
@@ -35,7 +36,8 @@ export default function StaffTurnoTab({
   handleSolicitarPreCobro,
   handleFinalizarAtencion,
   handleSolicitarCancelacion,
-  handleUpdateItemPrecio
+  handleUpdateItemPrecio,
+  handleRemoveItem
 }: StaffTurnoTabProps) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [motivos, setMotivos] = useState<MotivoCancelacion[]>([]);
@@ -131,7 +133,7 @@ export default function StaffTurnoTab({
           <div className="bg-slate-950/80 p-3.5 rounded-2xl border border-slate-800 space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Servicios / Productos:</span>
-              {isEnCurso && (
+              {(isEnCurso || isAsesoria) && (
                 <button 
                   onClick={() => handleOpenAddService(ticketActivo)}
                   className="px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 rounded-lg text-[10px] font-bold flex items-center gap-1 transition cursor-pointer"
@@ -143,21 +145,36 @@ export default function StaffTurnoTab({
             {ticketActivo.punto_partida?.map((srv: any, idx: number) => (
               <div key={idx} className="flex items-center justify-between gap-2 bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800 shadow-md">
                 <span className="text-xs font-bold text-slate-100 truncate flex-1">{srv.nombre}</span>
-                <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-indigo-500/40 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition-all">
-                  <span className="text-xs font-black text-amber-400">S/</span>
-                  <input 
-                    type="number" 
-                    inputMode="decimal"
-                    value={srv.precio ?? srv.monto ?? srv.precio_venta ?? 0}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value) || 0;
-                      if (handleUpdateItemPrecio) {
-                        handleUpdateItemPrecio(idx, val);
-                      }
-                    }}
-                    className="w-16 font-mono font-black text-amber-300 text-sm bg-transparent focus:outline-none text-right"
-                    step="0.5"
-                  />
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-indigo-500/40 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition-all">
+                    <span className="text-xs font-black text-amber-400">S/</span>
+                    <input 
+                      type="number" 
+                      inputMode="decimal"
+                      value={srv.precio ?? srv.monto ?? srv.precio_venta ?? 0}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        if (handleUpdateItemPrecio) {
+                          handleUpdateItemPrecio(idx, val);
+                        }
+                      }}
+                      className="w-16 font-mono font-black text-amber-300 text-sm bg-transparent focus:outline-none text-right"
+                      step="0.5"
+                    />
+                  </div>
+                  {handleRemoveItem && (
+                    <button
+                      onClick={() => {
+                        if (confirm(`¿Remover "${srv.nombre}" de la orden?`)) {
+                          handleRemoveItem(idx);
+                        }
+                      }}
+                      className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                      title="Eliminar servicio"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

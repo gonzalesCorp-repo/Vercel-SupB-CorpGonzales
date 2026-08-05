@@ -17,6 +17,7 @@ import PinValidationModal from '@/components/operaciones/PinValidationModal';
 import AddServiceModal from '@/components/operaciones/AddServiceModal';
 import OperacionesHistorialTab from '@/components/operaciones/OperacionesHistorialTab';
 import TicketOperativoCard, { OATCExtended } from '@/components/operaciones/TicketOperativoCard';
+import { useOATCActions } from '@/components/recepcion/hooks/useOATCActions';
 
 type PendingAction = 'START_ATTENTION' | 'END_ATTENTION' | 'PRE_COBRO' | null;
 
@@ -29,6 +30,7 @@ export default function WorkspaceOperativoPage() {
   const router = useRouter();
   const { showAlert } = useUIStore();
   const sedeActiva = useAppStore((state) => state.sedeActiva);
+  const { handleApprove, submitReject } = useOATCActions({ onSuccess: cargarTickets });
 
   // Modales
   const [showLabModal, setShowLabModal] = useState(false);
@@ -155,10 +157,25 @@ export default function WorkspaceOperativoPage() {
     cargarTickets();
   };
 
-  const handleActionClick = (oatc: OATCExtended, action: string) => {
+  const handleActionClick = async (oatc: OATCExtended, action: string) => {
     if (action === 'LAB') {
       setSelectedOatc(oatc);
       setShowLabModal(true);
+    } else if (action === 'APPROVE_CANCEL') {
+      if (confirm('¿Confirmas la aprobación de la cancelación de esta atención?')) {
+        await handleApprove(oatc);
+        showAlert("Atención cancelada correctamente", "success");
+      }
+    } else if (action === 'REJECT_CANCEL') {
+      const reason = prompt('Escribe el motivo del rechazo para la solicitud de cancelación:');
+      if (reason !== null) {
+        if (!reason.trim()) {
+          showAlert("Debes ingresar un motivo para rechazar la solicitud.", "error");
+          return;
+        }
+        await submitReject(oatc, reason.trim());
+        showAlert("Solicitud de cancelación rechazada.", "success");
+      }
     } else {
       requerirPinParaAccion(action as PendingAction, oatc);
     }
