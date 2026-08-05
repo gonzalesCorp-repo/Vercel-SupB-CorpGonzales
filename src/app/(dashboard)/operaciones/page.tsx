@@ -201,6 +201,7 @@ export default function WorkspaceOperativoPage() {
         showAlert("Solicitud de cancelación rechazada.", "success");
       }
     } else if (action === 'EDIT_CLIENT_NAME') {
+      if (!oatc.id) return;
       setSelectedOatc(oatc);
       setPendingPayload(payload);
       if (isPersonalMode) {
