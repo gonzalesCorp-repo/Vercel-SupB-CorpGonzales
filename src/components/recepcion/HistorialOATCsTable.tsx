@@ -6,6 +6,7 @@ import { obtenerHistorialOatcs, OATC } from '@/services/recepcion';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Modal } from '@/components/ui/Modal';
+import { translateEstado } from '@/lib/utils';
 
 export default function HistorialOATCsTable() {
   const [oatcs, setOatcs] = useState<OATC[]>([]);
@@ -82,7 +83,7 @@ export default function HistorialOATCsTable() {
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
           <CheckCircle2 className="w-3.5 h-3.5" />
-          {estado}
+          {translateEstado(estado)}
         </span>
       );
     }
@@ -90,14 +91,14 @@ export default function HistorialOATCsTable() {
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-red-50 text-red-700 border border-red-100">
           <XCircle className="w-3.5 h-3.5" />
-          {estado}
+          {translateEstado(estado)}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-orange-50 text-orange-700 border border-orange-100">
         <Clock className="w-3.5 h-3.5" />
-        {estado}
+        {translateEstado(estado)}
       </span>
     );
   };

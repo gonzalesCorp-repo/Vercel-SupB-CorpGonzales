@@ -2,6 +2,7 @@
 
 import { PlayCircle, PlusCircle, Beaker, CreditCard, CheckCircle, XCircle } from 'lucide-react';
 import { OATC } from '@/services/recepcion';
+import { translateEstado } from '@/lib/utils';
 
 export interface OATCExtended extends OATC {
   estado_ui?: 'Espera' | 'En Curso' | 'Finalizado';
@@ -52,7 +53,7 @@ export default function TicketOperativoCard({
             </span>
           ) : (
             <span className="px-3 py-1 bg-yellow-100 text-yellow-700 font-bold text-xs rounded-full uppercase tracking-widest">
-              {oatc.estado_proceso === 'ASESORIA' ? 'Asesoría' : oatc.estado_proceso || 'En Espera'}
+              {translateEstado(oatc.estado_proceso)}
             </span>
           )}
         </div>

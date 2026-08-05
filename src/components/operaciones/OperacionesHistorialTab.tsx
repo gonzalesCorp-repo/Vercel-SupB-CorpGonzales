@@ -1,6 +1,7 @@
 'use client';
 
 import { Calendar, RefreshCw } from 'lucide-react';
+import { translateEstado } from '@/lib/utils';
 
 export interface OperacionesHistorialTabProps {
   historialTickets: any[];
@@ -81,7 +82,7 @@ export default function OperacionesHistorialTab({
                   <td className="px-6 py-4 text-gray-600">{ticket.agente_nombre || 'N/A'}</td>
                   <td className="px-6 py-4">
                     <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-bold text-xs rounded-full uppercase">
-                      {ticket.estado_proceso || 'FINALIZADO'}
+                      {translateEstado(ticket.estado_proceso || 'FINALIZADO')}
                     </span>
                   </td>
                   <td className="px-6 py-4">

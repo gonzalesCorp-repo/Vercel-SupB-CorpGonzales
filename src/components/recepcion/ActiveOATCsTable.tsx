@@ -8,6 +8,7 @@ import { es } from 'date-fns/locale';
 import { Modal } from '@/components/ui/Modal';
 import { useOATCFlow } from './hooks/useOATCFlow';
 import { useOATCActions } from './hooks/useOATCActions';
+import { translateEstado } from '@/lib/utils';
 
 interface ActiveOATCsTableProps {
   onGenerarOrden?: () => void;
@@ -148,7 +149,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
                           {(oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? (
                             <><Clock className="w-3.5 h-3.5"/> {oatc.estado_proceso === 'ASESORIA' ? 'Asesoría' : 'En Espera'}</>
                           ) : (
-                            <><CheckCircle2 className="w-3.5 h-3.5"/> {oatc.estado_proceso}</>
+                            <><CheckCircle2 className="w-3.5 h-3.5"/> {translateEstado(oatc.estado_proceso)}</>
                           )}
                         </span>
                       )}
@@ -304,7 +305,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
                 </div>
                 <div>
                   <p className="font-bold text-slate-700">{selectedOatc.agente_nombre || 'Sin asignar'}</p>
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{selectedOatc.estado_proceso}</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{translateEstado(selectedOatc.estado_proceso)}</p>
                 </div>
               </div>
             </div>
