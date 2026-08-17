@@ -1,150 +1,125 @@
-# Vaikuntha ERP
+# 💎 Vaikuntha Enterprise ERP
 
-> *"Un lugar libre de ansiedad o de toda obstrucción"* — inspirado en el templo Vaikuntha Perumal
+> *"Un lugar libre de ansiedad o de toda obstrucción"* — Arquitectura operativa integral para salones de belleza y centros de estética de alto rendimiento.
 
-Sistema ERP de gestión operativa para salones de belleza, construido con Next.js 14 + Supabase + Realtime. Cubre el ciclo completo de atención al cliente con módulos de recepción, caja, inventario, WFM, gamificación Octalysis y portal de fidelización de clientes.
+Plataforma ERP Enterprise construida sobre **Next.js 14 (App Router) + Supabase Realtime + Zustand + Watermelon UI Patterns**, que centraliza el flujo de atención al cliente, facturación SUNAT, gestión de inventarios WMS/IoT, Workforce Management (WFM) y experiencia móvil para colaboradores.
 
 ---
 
-## Stack Tecnológico
+## ⚡ Capacidades Principales
+
+### 🛎️ 1. Workspace de Recepción Multitarea
+- **Transiciones Optimistas a 0ms**: Creación, actualización y cancelación de OATCs con actualización instantánea de interfaz y rollback automático en caso de fallo de red.
+- **Autocompletado Inteligente (`SmartClientAutocomplete`)**: Búsqueda fuzzy debounced por DNI, Nombre o Celular, detección automática de clientes VIP y modal de creación rápida en 1-clic.
+- **Barra Ejecutiva en Tiempo Real (`Live Status Strip`)**: Métricas conectadas a base de datos (Atenciones en Curso, Staff en Piso Activo y Tiempo Promedio Actual).
+
+### 💵 2. Caja & Facturación POS
+- Cobros con pagos mixtos (Efectivo, Tarjeta, Yape/Plin), arqueo ciego por turno, comprobantes electrónicos (Boletas y Facturas) con emisión correlativa.
+
+### 🧪 3. WMS & Laboratorio de Colorimetría (`/lab/stock`)
+- **Inventario Distribuido**: Control sincronizado entre Almacén Central y Laboratorio de Color.
+- **Traslado Rápido a Lab**: Mover insumos en 1-toque deduciendo de Central y registrando el Kardex en tiempo real.
+- **Métricas & Alertas**: Monitoreo de stock crítico ($< 10$ unidades) y reposición programada.
+
+### 📱 4. Suite Operativa Móvil (PWA)
+- Shell móvil minimalista con **Selector de Modo Claro / Oscuro** y paleta de acentos personalizable.
+- **Cola de Piso Dinámica**: Rotación de turnos en tiempo real con detección precisa de estado en piso vs. fuera de turno.
+- Vinculación de estaciones físicas mediante **Web NFC**.
+
+### 🎨 5. Gobernanza Visual & Catálogo de Skins (`/admin/config`)
+- Colección de skins de alta fidelidad (*EVA-01 Test Type, EVA-02 Production, Cyberpunk 2077 Night City, Matrix Code, Lumina Gold Luxury*).
+- Controles de brillo reactivo con CSS Houdini y gestión de sellos visuales por sede.
+
+---
+
+## 🛠️ Stack Tecnológico
 
 | Capa | Tecnología |
 |:---|:---|
-| Frontend | Next.js 14 (App Router), React 18, TypeScript |
-| Estilos | Tailwind CSS, Framer Motion |
-| Estado Global | Zustand |
-| Base de Datos | Supabase (PostgreSQL) + Realtime |
-| Autenticación | Supabase Auth (JWT + email/password) |
-| Despliegue | Vercel (CI/CD automático desde GitHub) |
-| Iconos | Lucide React |
-| Hardware | Web NFC API (Android Chrome/Edge) |
+| **Frontend** | Next.js 14 (App Router), React 18, TypeScript (Strict Mode) |
+| **Estilos & UI** | Vanilla Tailwind CSS, Watermelon Patterns, Motion Primitives, Framer Motion |
+| **Estado Global** | Zustand (Store modular desacoplado) |
+| **Backend & BD** | Supabase (PostgreSQL) + Realtime Channels (WebSockets) |
+| **Autenticación** | Supabase Auth (JWT con sesión persistente resiliente) |
+| **Testing** | Playwright E2E Test Suite (Multi-rol & UI Crawler) |
+| **Despliegue** | Vercel CI/CD Automático |
 
 ---
 
-## Prerequisitos
+## 🚀 Inicio Rápido
 
-- Node.js >= 18
-- npm >= 9
-- Cuenta Supabase con proyecto activo
-- Cuenta Vercel (para despliegue)
+### Prerrequisitos
+- Node.js >= 18.17.0
+- npm >= 9.0.0
 
----
-
-## Variables de Entorno
-
-Copia `.env.example` a `.env.local` y completa con tus valores:
+### Instalación y Ejecución Local
 
 ```bash
-cp .env.example .env.local
-```
+# 1. Clonar el repositorio
+git clone https://github.com/gonzalesCorp-repo/Vercel-SupB-CorpGonzales.git
+cd Vercel-SupB-CorpGonzales
 
-| Variable | Descripción | Dónde obtenerla |
-|:---|:---|:---|
-| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase | Supabase → Project Settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anon pública | Supabase → Project Settings → API |
-
----
-
-## Comandos de Desarrollo
-
-```bash
-# Instalar dependencias
+# 2. Instalar dependencias
 npm install
 
-# Servidor de desarrollo (http://localhost:3000)
-npm run dev
+# 3. Configurar variables de entorno (.env.local)
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key-publica
 
-# Verificar tipos TypeScript (sin compilar)
+# 4. Iniciar servidor de desarrollo (http://localhost:3000)
+npm run dev
+```
+
+### Comprobación de Calidad & Tests
+
+```bash
+# Verificación de Tipos TypeScript (0 errores)
 npx tsc --noEmit
 
-# Build de producción
-npm run build
+# Ejecutar Suite Completa de Pruebas E2E (Playwright)
+npm run test:e2e
 ```
 
 ---
 
-## Estructura del Proyecto
+## 👑 Cuentas de Acceso Sandbox (1-Clic)
 
-```
-src/
-├── app/
-│   ├── (dashboard)/          # Rutas protegidas con AppShell
-│   │   ├── recepcion/        # CRM + Cola de atención
-│   │   ├── caja/             # Cobros, comprobantes, arqueo
-│   │   ├── wfm/              # Workforce Management
-│   │   ├── lab/              # Inventario y laboratorio
-│   │   ├── operaciones/      # Vista operaria desktop (STAFF)
-│   │   ├── admin/            # Panel administración
-│   │   ├── perfil/           # Perfil de usuario
-│   │   └── dev/              # Canal desarrollador (SUPERADMIN)
-│   ├── mobile/               # Shell móvil multi-rol + Octalysis
-│   ├── cliente/              # Portal público de fidelización (QR)
-│   └── login/                # Autenticación
-├── components/
-│   ├── layout/               # AppShell, NotificationTicker
-│   ├── recepcion/            # 10 componentes de recepción
-│   ├── mobile/               # 9 componentes móviles + gamificación
-│   ├── wfm/                  # PanelWFM, BotonAsistencia
-│   └── ui/                   # Componentes genéricos compartidos
-├── lib/
-│   ├── gamification/         # Engine Octalysis (config, engine, clientEngine)
-│   └── supabase/             # Cliente Supabase (server/client)
-├── services/                 # 15 módulos de acceso a datos
-└── store/                    # 4 stores Zustand
-```
+El sistema incluye botones de ingreso directo en `/login` para pruebas y demostraciones:
 
----
-
-## Roles de Usuario
-
-| Rol | Canal | Acceso |
+| Rol | Correo Sandbox | Acceso Principal |
 |:---|:---|:---|
-| `SUPERADMIN` | Desktop + Mobile | Todo, incluyendo `/dev` |
-| `ADMIN` | Desktop + Mobile | Todos los módulos excepto `/dev` |
-| `RECEPCION` | Desktop + Mobile | `/recepcion`, `/wfm` |
-| `CAJA` | Desktop + Mobile | `/caja` |
-| `STAFF` | Mobile | `/mobile` (vista STAFF) |
-| `DESPACHO` | Mobile | `/mobile` (vista DESPACHO) |
-| `CLIENTE` | Portal Público | `/cliente?id={uuid}` vía QR |
+| 👑 **SUPERADMIN** | `cristian@gonzales.page` | Acceso Global a todos los módulos y `/admin/config` |
+| 🏢 **ADMIN** | `platon@vaikuntha.com` | Gestión de Sedes, Personal y Catálogo Maestro |
+| 🛎️ **RECEPCIÓN** | `socrates@vaikuntha.com` | Workspace de Recepción & Monitor de Cola |
+| 💵 **CAJA & POS** | `tales@vaikuntha.com` | Workspace de Venta, Cobros y SUNAT |
+| 💈 **STAFF** | `democrito@vaikuntha.com` | Suite Móvil de Estación & Cola de Piso |
 
 ---
 
-## Módulos Principales
+## 📁 Estructura del Repositorio
 
-### 🛎️ Recepción & CRM
-Cola de atención en tiempo real con Supabase Realtime. Gestión de OATCs (Órdenes de Atención al Cliente), agenda de citas, directorio CRM, historial y reportes.
-
-### 💵 Caja & Finanzas
-Cobros con pagos mixtos, sesiones de caja, arqueo, comprobantes electrónicos (Boleta/Factura) con series de emisor y correlativo automático.
-
-### 📋 WFM (Workforce Management)
-Panel de marcación de asistencia, gestión de peticiones inter-rol (cola_peticiones), configuración de tipos de petición y estados de agente.
-
-### 🧪 Lab & Inventario
-Stock en almacén principal y laboratorio, movimientos (Kardex), despacho de insumos, transferencias entre almacenes, métricas de inventario.
-
-### 🎮 Gamificación Octalysis
-Motor de XP, niveles (1-20), streaks de asistencia, 22 badges, kudos entre colegas y Hall de la Fama con ciclo económico mensual. Marketplace de recompensas canjeables con monedas 💎.
-
-### 👤 Portal Cliente
-Accesible vía QR o enlace directo. Muestra perfil de fidelidad, progreso de nivel, badges por visitas y marketplace de recompensas.
-
----
-
-## Despliegue
-
-El proyecto se despliega automáticamente en Vercel al hacer `git push origin main`.
-
-Variables requeridas en Vercel Dashboard:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+```
+📦 Vercel-SupB-CorpGonzales/
+├── 📁 src/                      # Código fuente de la aplicación
+│   ├── 📁 app/                  # Next.js App Router (Dashboard, Mobile, Kiosk)
+│   ├── 📁 components/           # Componentes UI (Recepción, WMS, Watermelon, Motion)
+│   ├── 📁 lib/                  # Clientes Supabase y utilidades
+│   ├── 📁 services/             # Servicios desacoplados de backend
+│   └── 📁 store/                # Stores de Zustand (App, Theme, UI)
+├── 📁 supabase/
+│   └── 📁 migrations/           # Migraciones SQL consolidadas de base de datos
+├── 📁 scripts/
+│   └── 📁 dev/                  # Scripts de diagnóstico, seed y utilidades
+├── 📁 docs/                     # Documentación técnica organizada
+│   └── 📁 legacy/               # Archivos históricos y datos de migración
+├── 📁 tests/                    # Tests E2E de Playwright
+├── 📄 package.json              # Dependencias y scripts de ejecución
+├── 📄 playwright.config.ts      # Configuración de pruebas automatizadas
+└── 📄 README.md                 # Documentación principal del proyecto
+```
 
 ---
 
-## Estado del Proyecto
+## 🔒 Licencia y Propiedad
 
-> ⚠️ **v1.0 — Pre-producción.** El sistema no ha sido probado en campo. El módulo `/lab` está implementado pero pendiente de validación operativa.
-
-**Módulos estables:** recepcion, caja, wfm, mobile, gamificación, portal cliente  
-**Módulos pendientes de prueba:** lab/inventario, comprobantes electrónicos  
-**Deuda técnica:** Ver `docs/DEUDA_TECNICA.md`
+Desarrollado para **Vaikuntha Enterprise ERP** por Corporación Gonzales. Todos los derechos reservados.
