@@ -1,16 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import NuevaOATC from '@/components/recepcion/NuevaOATC';
 import QueueMonitor from '@/components/recepcion/QueueMonitor';
 import ActiveOATCsTable from '@/components/recepcion/ActiveOATCsTable';
 import ColaboradorDetalleCard from '@/components/recepcion/ColaboradorDetalleCard';
 import { DesktopWindow, WindowState } from '@/components/ui/DesktopWindow';
 import { DesktopTaskbar } from '@/components/ui/DesktopTaskbar';
-import { Agente } from '@/services/recepcion';
-import { MetricCard } from '@/components/ui/watermelon-patterns/metric-card';
-import { Users, Clock, Layers, Sparkles, Plus } from 'lucide-react';
+import { Agente, obtenerAgentesDisponibles } from '@/services/recepcion';
+import { AnimatedNumber } from '@/components/ui/motion-primitives/animated-number';
+import { Users, Clock, Layers, Plus, RefreshCw, Activity } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+import { useAppStore } from '@/store/useAppStore';
+import { createClient } from '@/lib/supabase/client';
 
 interface ExtendedWindowState extends WindowState {
   type: 'OATC' | 'AGENTE';
@@ -20,6 +22,77 @@ interface ExtendedWindowState extends WindowState {
 export default function RecepcionPage() {
   const [windows, setWindows] = useState<ExtendedWindowState[]>([]);
   const [topZIndex, setTopZIndex] = useState(100);
+  
+  // Métricas en Vivo conectadas a la base de datos real
+  const [metrics, setMetrics] = useState({
+    atencionesEnCurso: 0,
+    staffEnPiso: 0,
+    tiempoPromedioMin: 0,
+    loading: true
+  });
+
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
+  const supabase = createClient();
+
+  const fetchLiveMetrics = useCallback(async () => {
+    if (!sedeActiva?.id) return;
+    try {
+      const [resOatc, agentes] = await Promise.all([
+        supabase
+          .from('oatc')
+          .select('id, estado_proceso, hora_inicio_atencion, created_at')
+          .eq('sede_id', sedeActiva.id)
+          .in('estado_proceso', ['EN_ESPERA', 'ASESORIA', 'EN_PROCESO', 'EN_EXPOSICION']),
+        obtenerAgentesDisponibles()
+      ]);
+
+      const oatcsActivas = resOatc.data || [];
+      const atencionesCount = oatcsActivas.length;
+
+      // Staff presente en turno (no fuera de turno)
+      const staffPresente = (agentes || []).filter(
+        (a: Agente) => a.estadoOperativo && a.estadoOperativo !== 'FUERA_DE_TURNO'
+      ).length;
+
+      // Tiempo promedio de atención en minutos de las órdenes activas
+      let totalMin = 0;
+      let count = 0;
+      oatcsActivas.forEach((o: any) => {
+        const inicio = o.hora_inicio_atencion || o.created_at;
+        if (inicio) {
+          const diffMin = Math.max(1, Math.floor((Date.now() - new Date(inicio).getTime()) / (1000 * 60)));
+          totalMin += diffMin;
+          count++;
+        }
+      });
+      const avgMin = count > 0 ? Math.round(totalMin / count) : 0;
+
+      setMetrics({
+        atencionesEnCurso: atencionesCount,
+        staffEnPiso: staffPresente,
+        tiempoPromedioMin: avgMin,
+        loading: false
+      });
+    } catch (e) {
+      console.error('Error al obtener métricas en vivo de recepción:', e);
+    }
+  }, [sedeActiva?.id]);
+
+  useEffect(() => {
+    fetchLiveMetrics();
+    const interval = setInterval(fetchLiveMetrics, 15000);
+
+    const channel = supabase
+      .channel(`recepcion_kpis_${sedeActiva?.id || 'default'}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => fetchLiveMetrics())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'asistencias_turnos' }, () => fetchLiveMetrics())
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [fetchLiveMetrics, sedeActiva?.id]);
 
   // Abrir nueva ventana de borrador de orden
   const abrirNuevaVentanaOATC = () => {
@@ -123,62 +196,112 @@ export default function RecepcionPage() {
   };
 
   return (
-    <div className="relative p-6 lg:p-8 h-full bg-slate-50/50 dark:bg-slate-950/50 min-h-[calc(100vh-4rem)] pb-24">
+    <div className="relative p-4 sm:p-6 lg:p-7 h-full bg-slate-50/50 dark:bg-slate-950/50 min-h-[calc(100vh-4rem)] pb-24">
       
-      {/* Header Recepción */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Header Compacto de Recepción */}
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-3">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-3">
             Workspace de Recepción
-            <span className="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-bold px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-800">
+            <span className="text-[11px] bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-extrabold px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
               Escritorio Multitarea
             </span>
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">
-            Gestiona la llegada de clientes y abre múltiples borradores de órdenes simultáneamente.
+          <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
+            Control de flujo en piso, asignación de turnos y emisión de órdenes en tiempo real.
           </p>
         </div>
 
         <button
           onClick={abrirNuevaVentanaOATC}
-          className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-lg shadow-indigo-600/20"
+          className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-md shadow-indigo-600/20 active:scale-95 cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>+ Nueva Orden (Escritorio)</span>
         </button>
       </div>
 
-      {/* 📊 Métricas Rápidas Estilo Watermelon */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <MetricCard
-          title="Atenciones en Curso"
-          value={12}
-          icon={<Layers className="w-4 h-4 text-indigo-500" />}
-          badge="Tiempo Real"
-          badgeColor="bg-indigo-500/10 text-indigo-400 border-indigo-500/30"
-          trend={{ value: 8.5, label: 'vs ayer', isPositive: true }}
-        />
-        <MetricCard
-          title="Staff en Piso Activo"
-          value={8}
-          icon={<Users className="w-4 h-4 text-emerald-500" />}
-          badge="WFM Online"
-          badgeColor="bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-        />
-        <MetricCard
-          title="Tiempo Promedio Atención"
-          value={32}
-          suffix=" min"
-          decimals={0}
-          icon={<Clock className="w-4 h-4 text-amber-500" />}
-          badge="Eficiencia"
-          badgeColor="bg-amber-500/10 text-amber-400 border-amber-500/30"
-          trend={{ value: -4.2, label: 'más ágil', isPositive: true }}
-        />
+      {/* 📊 Barra de Métricas en Vivo Ultra-Compacta (Live Status Strip) */}
+      <div className="mb-5 bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-2.5 sm:px-4 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-4 sm:gap-7 flex-wrap">
+          
+          {/* Métrica 1: Atenciones en Curso */}
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+              <Layers className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 block tracking-wider">
+                Atenciones en Curso
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-black text-slate-900 dark:text-white">
+                  <AnimatedNumber value={metrics.atencionesEnCurso} decimals={0} />
+                </span>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                  En Vivo
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden sm:block h-6 w-px bg-slate-200 dark:bg-slate-800" />
+
+          {/* Métrica 2: Staff en Piso Activo */}
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <Users className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 block tracking-wider">
+                Staff en Piso Activo
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-black text-slate-900 dark:text-white">
+                  <AnimatedNumber value={metrics.staffEnPiso} decimals={0} />
+                </span>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  WFM
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden sm:block h-6 w-px bg-slate-200 dark:bg-slate-800" />
+
+          {/* Métrica 3: Tiempo Promedio */}
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 block tracking-wider">
+                Tiempo Promedio Actual
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-black text-slate-900 dark:text-white">
+                  <AnimatedNumber value={metrics.tiempoPromedioMin} decimals={0} suffix=" min" />
+                </span>
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                  {metrics.tiempoPromedioMin > 45 ? 'Elevado' : 'Ágil'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Botón de recarga sutil */}
+        <button
+          onClick={fetchLiveMetrics}
+          className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
+          title="Actualizar métricas en vivo"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${metrics.loading ? 'animate-spin' : ''}`} />
+        </button>
       </div>
 
-      {/* Grid Principal */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      {/* Grid Principal: Monitor de Disponibilidad y Atenciones Activas en Primer Plano */}
+      <div className="flex flex-col lg:flex-row gap-5">
         {/* Columna Izquierda (30%): Monitor de Disponibilidad */}
         <div className="w-full lg:w-[30%]">
           <QueueMonitor onSelectAgente={abrirVentanaAgente} />

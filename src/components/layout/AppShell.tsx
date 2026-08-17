@@ -79,8 +79,7 @@ const NavItem = ({ href, icon: Icon, label, disabled = false, pathname, isExpand
               </span>
               {badge && (
                 <span 
-                  className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-tighter border border-white/10"
-                  style={{ backgroundColor: 'var(--active-theme-primary, rgba(79, 70, 229, 0.2))', color: 'var(--active-theme-accent, #4f46e5)' }}
+                  className="ml-auto text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-200 border border-amber-500/30 shadow-xs shrink-0"
                 >
                   {badge}
                 </span>
