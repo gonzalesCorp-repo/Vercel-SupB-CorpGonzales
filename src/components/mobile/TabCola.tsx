@@ -90,32 +90,57 @@ export function TabCola({ miNombre }: TabColaProps) {
     return cats.includes(filtro);
   });
 
-  // Calcular mi posición en la cola filtrada
+  // 1. Verificar si el colaborador actual está presente en piso (no fuera de turno)
+  const miAgenteEnPiso = agentesEnPiso.find(c => 
+    c.nombre.toLowerCase().includes(miNombre.toLowerCase()) || 
+    miNombre.toLowerCase().includes(c.nombre.toLowerCase())
+  );
+  const estoyEnPiso = !!miAgenteEnPiso;
+
+  // 2. Calcular mi posición en la cola filtrada
   const miIndex = filtrados.findIndex(c => 
     c.nombre.toLowerCase().includes(miNombre.toLowerCase()) || 
     miNombre.toLowerCase().includes(c.nombre.toLowerCase())
   );
-  const miPosicion = miIndex >= 0 ? miIndex + 1 : 1;
+  const miPosicion = miIndex >= 0 ? miIndex + 1 : null;
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       
-      {/* Banner de Posición */}
-      <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-500 text-white p-5 rounded-3xl shadow-xl shadow-indigo-950/30 relative overflow-hidden">
-        <div className="absolute -right-4 -top-4 w-28 h-28 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-100">
-          Posición de Turno en Sede
-        </span>
-        <div className="flex items-center justify-between mt-2">
-          <div>
-            <p className="text-xs text-indigo-100 font-medium">Estás en el turno:</p>
-            <p className="text-3xl font-black mt-0.5">#{miPosicion} de {filtrados.length || 1}</p>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl border border-white/20">
-            👥
+      {/* Banner de Posición o Fuera de Turno */}
+      {estoyEnPiso && miPosicion ? (
+        <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-500 text-white p-5 rounded-3xl shadow-xl shadow-indigo-950/30 relative overflow-hidden">
+          <div className="absolute -right-4 -top-4 w-28 h-28 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-100">
+            Posición de Turno en Sede
+          </span>
+          <div className="flex items-center justify-between mt-2">
+            <div>
+              <p className="text-xs text-indigo-100 font-medium">Estás en el turno:</p>
+              <p className="text-3xl font-black mt-0.5">#{miPosicion} de {filtrados.length}</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl border border-white/20">
+              👥
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-slate-900 border border-slate-800 text-white p-5 rounded-3xl shadow-xl relative overflow-hidden">
+          <div className="absolute -right-4 -top-4 w-28 h-28 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              Estado: Fuera de Turno
+            </span>
+            <span className="text-xl">🚪</span>
+          </div>
+          <div className="mt-2.5">
+            <h3 className="text-sm font-black text-white">No estás en la cola activa</h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              Actualmente figuras fuera de jornada. Para ingresar a la asignación de atenciones en piso, ve a la pestaña <strong>Mi Turno</strong> y presiona <strong>Ya Llegué</strong>.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Filtros de Especialidad Claros y Estándar */}
       <div className="flex gap-1.5 p-1 bg-slate-900 rounded-2xl border border-slate-800">

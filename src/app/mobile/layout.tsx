@@ -29,9 +29,9 @@ export default function MobileLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-100 overflow-x-hidden select-none antialiased">
-      {/* Contenedor Ergonómico Centrado sobre fondo Slate-950 total */}
-      <div className="w-full max-w-md mx-auto min-h-screen bg-slate-950 relative flex flex-col shadow-2xl">
+    <div className="min-h-screen w-full bg-slate-900 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden select-none antialiased transition-colors duration-300">
+      {/* Contenedor Ergonómico Centrado */}
+      <div className="w-full max-w-md mx-auto min-h-screen bg-slate-900 dark:bg-slate-950 relative flex flex-col shadow-2xl transition-colors duration-300">
         {children}
       </div>
     </div>

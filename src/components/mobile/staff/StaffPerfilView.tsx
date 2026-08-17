@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, X, Edit3, Sun, Award, Heart, LogOut, Sliders, KeyRound, Check, Palette } from 'lucide-react';
+import { User, X, Edit3, Sun, Moon, Award, Heart, LogOut, Sliders, KeyRound, Check, Palette } from 'lucide-react';
 import StreakCounter from '@/components/mobile/StreakCounter';
 import HallOfFameBanner from '@/components/mobile/HallOfFameBanner';
 import BadgeCollection from '@/components/mobile/BadgeCollection';
@@ -196,6 +196,39 @@ export default function StaffPerfilView({
           <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-slate-800">
             <span className="font-bold text-slate-400">CORREO / USUARIO</span>
             <span className="font-medium text-slate-300 truncate max-w-[180px]">{agente?.email || 'staff@empresa.com'}</span>
+          </div>
+        </div>
+
+        {/* Selector de Modo de Tema (Claro / Oscuro) */}
+        <div className="pt-2 border-t border-slate-800">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
+            <Sun className="w-3.5 h-3.5 text-amber-400" /> Modo Visual (Tema)
+          </label>
+          <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-2xl border border-slate-800">
+            <button
+              type="button"
+              onClick={() => setThemeMode('light', agente?.id)}
+              className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                themeMode === 'light'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Sun className="w-4 h-4 text-amber-400" />
+              <span>Modo Claro</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setThemeMode('dark', agente?.id)}
+              className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                themeMode === 'dark'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Moon className="w-4 h-4 text-indigo-300" />
+              <span>Modo Oscuro</span>
+            </button>
           </div>
         </div>
 
