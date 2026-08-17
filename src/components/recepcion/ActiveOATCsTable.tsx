@@ -9,6 +9,8 @@ import { Modal } from '@/components/ui/Modal';
 import { useOATCFlow } from './hooks/useOATCFlow';
 import { useOATCActions } from './hooks/useOATCActions';
 import { translateEstado } from '@/lib/utils';
+import { OatcPhaseStepper } from '@/components/ui/OatcPhaseStepper';
+import { OatcTicket, obtenerTicketsDeOatc, aprobarValidacionTicket } from '@/services/tickets';
 
 interface ActiveOATCsTableProps {
   onGenerarOrden?: () => void;
@@ -23,6 +25,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
   
   // Modal states
   const [selectedOatc, setSelectedOatc] = useState<OATC | null>(null);
+  const [selectedOatcTickets, setSelectedOatcTickets] = useState<OatcTicket[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMotivoId, setSelectedMotivoId] = useState<string>('');
   const [detalleCancelacion, setDetalleCancelacion] = useState('');
@@ -57,8 +60,12 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
     }
   };
   
-  const openDetails = (oatc: OATC) => {
+  const openDetails = async (oatc: OATC) => {
     setSelectedOatc(oatc);
+    if (oatc.id) {
+      const tks = await obtenerTicketsDeOatc(oatc.id);
+      setSelectedOatcTickets(tks);
+    }
     setIsModalOpen(true);
   };
 
@@ -83,31 +90,66 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
     o.cambios_pendientes?.tipo === 'SOLICITUD_CANCELACION'
   );
 
+  const [faseFiltro, setFaseFiltro] = useState<string>('TODOS');
+
+  const fasesConfig = [
+    { id: 'TODOS', label: 'Todos', count: oatcs.filter(o => o.estado_proceso !== 'CANCELADO').length },
+    { id: 'EN_ESPERA', label: 'En Espera', count: oatcs.filter(o => o.estado_proceso === 'EN_ESPERA').length },
+    { id: 'ASESORIA', label: 'En Asesoría', count: oatcs.filter(o => o.estado_proceso === 'ASESORIA').length },
+    { id: 'EN_PROCESO', label: 'En Proceso', count: oatcs.filter(o => o.estado_proceso === 'EN_PROCESO' || o.estado_proceso === 'TRABAJANDO').length },
+    { id: 'POR_COBRAR', label: 'Por Cobrar', count: oatcs.filter(o => o.estado_proceso === 'POR_COBRAR' || o.estado_proceso === 'PRE_COBRADO').length },
+    { id: 'FINALIZADO', label: 'Finalizados Hoy', count: oatcs.filter(o => o.estado_proceso === 'FINALIZADO').length },
+  ];
+
+  const oatcsFiltradas = oatcs.filter(o => {
+    if (faseFiltro === 'TODOS') return o.estado_proceso !== 'CANCELADO';
+    if (faseFiltro === 'EN_PROCESO') return o.estado_proceso === 'EN_PROCESO' || o.estado_proceso === 'TRABAJANDO';
+    if (faseFiltro === 'POR_COBRAR') return o.estado_proceso === 'POR_COBRAR' || o.estado_proceso === 'PRE_COBRADO';
+    return o.estado_proceso === faseFiltro;
+  });
+
   return (
     <>
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h3 className="font-bold text-slate-800 text-lg">Atenciones Activas</h3>
-            <span className="bg-blue-50 text-blue-600 text-xs font-bold px-2.5 py-1 rounded-full">
-              {oatcs.length} en sala
+            <span className="bg-indigo-50 text-indigo-600 text-xs font-bold px-2.5 py-1 rounded-full border border-indigo-100">
+              {oatcsFiltradas.length} en vista
             </span>
           </div>
-          {onGenerarOrden && (
-            <button 
-              onClick={onGenerarOrden}
-              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Generar Orden de Atención</span>
-              <span className="sm:hidden">Nueva</span>
-            </button>
-          )}
+
+          {/* Selector de Fases */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            {fasesConfig.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFaseFiltro(f.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  faseFiltro === f.id
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                }`}
+              >
+                <span>{f.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                  faseFiltro === f.id ? 'bg-indigo-700 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  {f.count}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
         
         <div className="overflow-x-auto">
           {isLoading ? (
             <div className="p-8 text-center text-slate-500">Cargando atenciones...</div>
+          ) : oatcsFiltradas.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 text-xs">
+              No hay órdenes de atención en la fase seleccionada ({fasesConfig.find(f => f.id === faseFiltro)?.label}).
+            </div>
           ) : (
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wider">
@@ -115,13 +157,13 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
                   <th className="px-6 py-3">Cliente</th>
                   <th className="px-6 py-3">Servicio</th>
                   <th className="px-6 py-3">Agente Asignado</th>
-                  <th className="px-6 py-3">Estado</th>
+                  <th className="px-6 py-3">Fase de Atención</th>
                   <th className="px-6 py-3">Tiempo</th>
                   <th className="px-6 py-3 text-right">Acción</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {oatcs.map((oatc) => (
+                {oatcsFiltradas.map((oatc) => (
                   <tr key={oatc.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -143,15 +185,7 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
                           <ShieldAlert className="w-3.5 h-3.5" /> Sol. Cancelación
                         </span>
                       ) : (
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${
-                          (oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? 'bg-orange-50 text-orange-700' : 'bg-emerald-50 text-emerald-700'
-                        }`}>
-                          {(oatc.estado_proceso === 'ESPERA' || oatc.estado_proceso === 'ASESORIA') ? (
-                            <><Clock className="w-3.5 h-3.5"/> {oatc.estado_proceso === 'ASESORIA' ? 'Asesoría' : 'En Espera'}</>
-                          ) : (
-                            <><CheckCircle2 className="w-3.5 h-3.5"/> {translateEstado(oatc.estado_proceso)}</>
-                          )}
-                        </span>
+                        <OatcPhaseStepper faseActual={oatc.estado_proceso || 'EN_ESPERA'} compacto />
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -285,16 +319,49 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
               </div>
             </div>
 
-            <div>
-              <h4 className="text-sm text-slate-500 font-medium mb-2">Servicios Solicitados</h4>
-              <div className="bg-slate-50 rounded-lg p-3 space-y-2">
-                {selectedOatc.punto_partida?.map((srv: any, idx: number) => (
-                  <div key={idx} className="flex justify-between items-center text-sm">
-                    <span className="font-medium text-slate-700">{srv.nombre}</span>
-                    <span className="text-slate-500">x1</span>
+            {/* Stepper Cromático de 4 Fases */}
+            <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800">
+              <OatcPhaseStepper faseActual={selectedOatc.estado_proceso || 'EN_ESPERA'} />
+            </div>
+
+            {/* Tickets Anidados por Colaborador */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold text-slate-700">Tickets de Servicio & Venta Anidados ({selectedOatcTickets.length})</h4>
+              {selectedOatcTickets.length === 0 ? (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-500">
+                  Sin tickets anidados creados todavía.
+                </div>
+              ) : (
+                selectedOatcTickets.map((t, idx) => (
+                  <div key={t.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-slate-800">#{idx + 1} • {t.agente_nombre} ({t.estacion_nombre || 'Estación'})</span>
+                      {t.requiere_validacion && (
+                        <button
+                          onClick={async () => {
+                            await aprobarValidacionTicket(t.id, 'Recepción');
+                            if (selectedOatc?.id) {
+                              const tks = await obtenerTicketsDeOatc(selectedOatc.id);
+                              setSelectedOatcTickets(tks);
+                            }
+                          }}
+                          className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] rounded-lg shadow-sm animate-pulse flex items-center gap-1"
+                        >
+                          ✓ Aprobar Cortesía S/ 0.00
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      {t.items?.map((item, iIdx) => (
+                        <div key={iIdx} className="flex justify-between text-xs text-slate-600">
+                          <span>{item.nombre} {item.es_cortesia && <strong className="text-amber-600 font-bold">(Cortesía)</strong>}</span>
+                          <span className="font-mono font-bold text-slate-800">S/ {Number(item.precio_final || 0).toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                ))
+              )}
             </div>
 
             <div>

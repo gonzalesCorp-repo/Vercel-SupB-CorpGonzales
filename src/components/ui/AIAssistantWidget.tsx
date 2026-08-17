@@ -92,11 +92,15 @@ export function AIAssistantWidget() {
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white shadow-2xl shadow-indigo-500/40 border border-white/20 flex items-center gap-2 group cursor-pointer"
+        className="fixed bottom-6 right-6 z-50 p-4 rounded-full text-white border border-white/20 flex items-center gap-2 group cursor-pointer transition-all"
+        style={{ 
+          background: 'linear-gradient(135deg, var(--active-theme-primary, #4f46e5), var(--active-theme-accent, #ec4899))',
+          boxShadow: '0 0 24px var(--active-theme-glow, rgba(79, 70, 229, 0.4))'
+        }}
         title="Copiloto V.AI"
       >
-        <Sparkles className="w-6 h-6 animate-pulse" />
-        <span className="font-bold text-xs hidden md:inline-block pr-1">V.AI</span>
+        <Sparkles className="w-6 h-6 animate-pulse text-white" />
+        <span className="font-bold text-xs hidden md:inline-block pr-1 font-mono">V.AI</span>
       </motion.button>
 
       {/* Floating AI Chat Drawer */}
@@ -111,12 +115,25 @@ export function AIAssistantWidget() {
             {/* Header */}
             <div className="p-4 border-b border-slate-800 bg-slate-900/80 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white shadow-md">
+                <div 
+                  className="p-2.5 rounded-2xl text-white shadow-md"
+                  style={{ background: 'linear-gradient(135deg, var(--active-theme-primary, #4f46e5), var(--active-theme-accent, #7c3aed))' }}
+                >
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="font-black text-sm text-white tracking-tight flex items-center gap-1.5">
-                    V.AI Copilot <span className="text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">Vercel AI</span>
+                    V.AI Copilot 
+                    <span 
+                      className="text-[10px] border px-2 py-0.5 rounded-full font-bold"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: 'var(--active-theme-accent, #4f46e5)',
+                        color: 'var(--active-theme-accent, #4f46e5)'
+                      }}
+                    >
+                      Vercel AI
+                    </span>
                   </h3>
                   <p className="text-[10px] text-slate-400 font-medium">Asistente Inteligente en Vivo</p>
                 </div>

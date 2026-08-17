@@ -5,14 +5,11 @@ import { useAppStore } from '@/store/useAppStore';
 
 const supabase = createClient();
 
-// Obtiene todos los agentes para el buscador de ingreso
+// Obtiene todos los agentes
 export async function obtenerTodosLosAgentes(): Promise<Agente[]> {
-  const sedeId = useAppStore.getState().sedeActiva?.id;
-  
   const { data, error } = await supabase
     .from('agentes')
-    .select('*, sedes_usuarios!inner(sede_id)')
-    .eq('sedes_usuarios.sede_id', sedeId)
+    .select('*')
     .order('nombre');
     
   if (error) {
@@ -23,27 +20,77 @@ export async function obtenerTodosLosAgentes(): Promise<Agente[]> {
   return data as Agente[];
 }
 
-// Cambia el estado de un agente
+// Cambia el estado operativo del agente en piso (WFM / Turno)
 export async function cambiarEstadoAgente(id: string, nuevoEstado: string) {
-  const { data: agentePrevio } = await supabase.from('agentes').select('estado').eq('id', id).single();
-  
   const { error } = await supabase
     .from('agentes')
     .update({ 
-      estado: nuevoEstado,
+      estado_operativo: nuevoEstado,
       ultimo_cambio_estado: new Date().toISOString()
     })
     .eq('id', id);
     
   if (error) {
-    console.error("Error cambiando estado del agente:", error);
+    console.error("Error cambiando estado operativo del agente:", error);
     throw error;
   }
+}
 
-  // Registrar Asistencia
-  if (agentePrevio && agentePrevio.estado === 'INACTIVO' && nuevoEstado !== 'INACTIVO') {
-    await registrarLog('ASISTENCIA', 'INGRESO', { agente_id: id });
-  } else if (agentePrevio && agentePrevio.estado !== 'INACTIVO' && nuevoEstado === 'INACTIVO') {
-    await registrarLog('ASISTENCIA', 'SALIDA', { agente_id: id });
-  }
+// Dar de baja definitiva o cesar a un colaborador (Exclusivo SUPERADMIN / ADMIN)
+export async function darDeBajaColaborador(agenteId: string, motivo: string, adminNombre: string) {
+  const { data: agente, error: errAgente } = await supabase
+    .from('agentes')
+    .select('nombre, email, rol')
+    .eq('id', agenteId)
+    .single();
+
+  if (errAgente || !agente) throw new Error("Colaborador no encontrado");
+
+  const { error } = await supabase
+    .from('agentes')
+    .update({ 
+      estado: 'INACTIVO',
+      ultimo_cambio_estado: new Date().toISOString()
+    })
+    .eq('id', agenteId);
+
+  if (error) throw error;
+
+  await registrarLog('BAJA_LABORAL', `Cese laboral de ${agente.nombre} (${agente.rol}) autorizado por ${adminNombre}`, {
+    agente_id: agenteId,
+    agente_nombre: agente.nombre,
+    motivo,
+    autorizado_por: adminNombre
+  });
+
+  return true;
+}
+
+// Reactivar colaborador
+export async function reactivarColaborador(agenteId: string, adminNombre: string) {
+  const { data: agente, error: errAgente } = await supabase
+    .from('agentes')
+    .select('nombre, email, rol')
+    .eq('id', agenteId)
+    .single();
+
+  if (errAgente || !agente) throw new Error("Colaborador no encontrado");
+
+  const { error } = await supabase
+    .from('agentes')
+    .update({ 
+      estado: 'ACTIVO',
+      ultimo_cambio_estado: new Date().toISOString()
+    })
+    .eq('id', agenteId);
+
+  if (error) throw error;
+
+  await registrarLog('REACTIVACION_LABORAL', `Reactivación laboral de ${agente.nombre} autorizada por ${adminNombre}`, {
+    agente_id: agenteId,
+    agente_nombre: agente.nombre,
+    autorizado_por: adminNombre
+  });
+
+  return true;
 }

@@ -19,11 +19,11 @@ export async function GET(request: Request) {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Reiniciar estado de todos los agentes a INACTIVO y limpiar badges
+  // Reiniciar estado operativo de todos los agentes a FUERA_DE_TURNO y limpiar badges de turno
   const { error } = await supabase
     .from('agentes')
-    .update({ estado: 'INACTIVO', badge: null })
-    .neq('estado', 'INACTIVO');
+    .update({ estado_operativo: 'FUERA_DE_TURNO', badge: null })
+    .neq('estado_operativo', 'FUERA_DE_TURNO');
 
   if (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

@@ -9,8 +9,10 @@ interface Sede {
 interface AppState {
   sedeActiva: Sede | null;
   userRol: string | null;
+  userEmail: string | null;
   setSedeActiva: (sede: Sede) => void;
   setUserRol: (rol: string | null) => void;
+  setUserEmail: (email: string | null) => void;
   clearSede: () => void;
 }
 
@@ -19,12 +21,14 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       sedeActiva: null,
       userRol: null,
+      userEmail: null,
       setSedeActiva: (sede) => set({ sedeActiva: sede }),
       setUserRol: (rol) => set({ userRol: rol }),
-      clearSede: () => set({ sedeActiva: null, userRol: null })
+      setUserEmail: (email) => set({ userEmail: email }),
+      clearSede: () => set({ sedeActiva: null, userRol: null, userEmail: null })
     }),
     {
-      name: 'erp-gonzales-storage', // name of the item in the storage (must be unique)
+      name: 'erp-gonzales-storage',
     }
   )
 );

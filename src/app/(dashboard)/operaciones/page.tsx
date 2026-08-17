@@ -10,7 +10,6 @@ import { Modal } from '@/components/ui/Modal';
 import PanelWFM from '@/components/wfm/PanelWFM';
 import { useUIStore } from '@/store/useUIStore';
 import { useAppStore } from '@/store/useAppStore';
-import RecursosPanel from './components/RecursosPanel';
 
 // Sub-componentes refactorizados
 import PinValidationModal from '@/components/operaciones/PinValidationModal';
@@ -354,7 +353,7 @@ export default function WorkspaceOperativoPage() {
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          🧪 Solicitud de Recursos / Insumos
+          📊 Historial de Atenciones
         </button>
       </div>
 
@@ -391,10 +390,17 @@ export default function WorkspaceOperativoPage() {
         </div>
       )}
 
-      {/* Recursos Content */}
+      {/* Historial Content */}
       {activeTab === 'historial' && (
         <div className="h-full">
-          <RecursosPanel />
+          <OperacionesHistorialTab
+            historialTickets={historialTickets}
+            fechaInicio={fechaInicio}
+            setFechaInicio={setFechaInicio}
+            fechaFin={fechaFin}
+            setFechaFin={setFechaFin}
+            isLoadingHistorial={isLoadingHistorial}
+          />
         </div>
       )}
 

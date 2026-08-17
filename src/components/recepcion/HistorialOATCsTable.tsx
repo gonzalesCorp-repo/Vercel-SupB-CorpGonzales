@@ -52,10 +52,14 @@ export default function HistorialOATCsTable() {
     updateLimit();
     window.addEventListener('resize', updateLimit);
     
-    // Por defecto inicializamos con la fecha de hoy
+    // Por defecto inicializamos con los últimos 30 días para ver todas las órdenes históricas
     const hoy = new Date();
     const hoyStr = format(hoy, 'yyyy-MM-dd');
-    setFechaInicio(hoyStr);
+    const hace30d = new Date();
+    hace30d.setDate(hace30d.getDate() - 30);
+    const hace30dStr = format(hace30d, 'yyyy-MM-dd');
+    
+    setFechaInicio(hace30dStr);
     setFechaFin(hoyStr);
 
     return () => window.removeEventListener('resize', updateLimit);

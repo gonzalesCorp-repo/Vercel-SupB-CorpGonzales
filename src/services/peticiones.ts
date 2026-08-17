@@ -182,7 +182,7 @@ export async function resolverPeticion(pet: Peticion, estado: 'APROBADO' | 'RECH
       }
     }
 
-    const updatePayload: any = { estado: destino };
+    const updatePayload: any = { estado_operativo: destino };
     
     if (actualiza) {
       updatePayload.ultimo_cambio_estado = new Date().toISOString();
@@ -190,8 +190,42 @@ export async function resolverPeticion(pet: Peticion, estado: 'APROBADO' | 'RECH
 
     const { error: errorAgente } = await supabase.from('agentes').update(updatePayload).eq('id', pet.agente_id);
     if (errorAgente) {
-      console.error("Error actualizando estado del agente:", errorAgente);
-      throw new Error("No se pudo actualizar el estado del agente: " + errorAgente.message);
+      console.error("Error actualizando estado operativo del agente:", errorAgente);
+      throw new Error("No se pudo actualizar el estado operativo del agente: " + errorAgente.message);
+    }
+
+    // Registrar en asistencias_turnos si corresponde a un movimiento de turno/asistencia
+    const nombrePet = conf?.nombre || '';
+    let tipoMov: any = null;
+    if (nombrePet.includes('Inicio de Turno') || nombrePet.includes('Asistencia')) {
+      tipoMov = 'ENTRADA';
+    } else if (nombrePet.includes('Refrigerio')) {
+      tipoMov = 'INICIO_REFRIGERIO';
+    } else if (nombrePet.includes('Retorno de Servicio')) {
+      tipoMov = 'FIN_REFRIGERIO';
+    } else if (nombrePet.includes('Fin de Turno') || nombrePet.includes('Salida')) {
+      tipoMov = 'SALIDA';
+    }
+
+    if (tipoMov) {
+      try {
+        const { validarYRegistrarAsistenciaNfc } = await import('./asistencias');
+        await validarYRegistrarAsistenciaNfc({
+          agente_id: pet.agente_id,
+          agente_nombre: (pet as any).agente?.nombre || (pet as any).agentes?.nombre || 'Colaborador',
+          sede_id: pet.sede_id,
+          tipo_movimiento: tipoMov,
+          punto_acceso: 'Recepción Central (Desktop)',
+          dispositivo: 'Recepción Workspace',
+          metadatos: {
+            metodo: 'RECEPCION_DESKTOP',
+            peticion_id: pet.id,
+            validado_fisicamente: true
+          }
+        });
+      } catch (e) {
+        console.warn('Error registrando asistencia desde peticiones:', e);
+      }
     }
   }
 

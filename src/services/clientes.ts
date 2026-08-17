@@ -68,3 +68,95 @@ export async function obtenerTodosLosClientes(): Promise<Cliente[]> {
   }
   return data as Cliente[];
 }
+
+export interface ClienteVipPerfil {
+  cliente: Cliente;
+  puntosVaikuntha: number;
+  visitasTotales: number;
+  totalGastado: number;
+  oatcActiva?: any | null;
+  posicionCola?: number | null;
+  historialVisitas: any[];
+}
+
+export async function obtenerPerfilCompletoCliente(term: string): Promise<ClienteVipPerfil | null> {
+  const supabase = createClient();
+  const trimmed = term.trim();
+  if (!trimmed) return null;
+
+  try {
+    // 1. Buscar cliente por DNI, Celular o Nombre
+    const { data: clientes, error: errCliente } = await supabase
+      .from('clientes')
+      .select('*')
+      .or(`dni.eq.${trimmed},celular.eq.${trimmed},nombre.ilike.%${trimmed}%`)
+      .limit(1);
+
+    if (errCliente || !clientes || clientes.length === 0) {
+      return null;
+    }
+
+    const cliente = clientes[0];
+
+    // 2. Consultar historial de OATCs del cliente
+    const { data: historialOatc, error: errOatc } = await supabase
+      .from('oatc')
+      .select('*')
+      .eq('cliente_id', cliente.id)
+      .order('created_at', { ascending: false });
+
+    if (errOatc) {
+      console.error('[clientes] Error consultando OATCs:', errOatc);
+    }
+
+    const oatcs = historialOatc || [];
+    
+    // OATC activa en sala hoy
+    const oatcActiva = (oatcs as any[]).find((o: any) => 
+      ['EN_ESPERA', 'ASESORIA', 'EN_PROCESO', 'POR_COBRAR', 'PRE_COBRADO'].includes(o.estado_proceso)
+    ) || null;
+
+    // Historial pasado finalizado
+    const historialVisitas = (oatcs as any[]).filter((o: any) => o.estado_proceso === 'FINALIZADO' || o.estado_pago === 'Pagado');
+
+    // Calcular gasto total y Vaikuntha Points
+    let totalGastado = 0;
+    historialVisitas.forEach((o: any) => {
+      if (o.punto_partida && Array.isArray(o.punto_partida)) {
+        o.punto_partida.forEach((p: any) => {
+          totalGastado += Number(p.precio || 0);
+        });
+      }
+    });
+
+    // Puntos Vaikuntha = 100 de bienvenida + 1 punto por cada sol gastado
+    const puntosVaikuntha = 100 + Math.round(totalGastado);
+    const visitasTotales = Math.max(1, historialVisitas.length);
+
+    // Calcular posición en sala de espera si está en espera
+    let posicionCola = null;
+    if (oatcActiva && oatcActiva.estado_proceso === 'EN_ESPERA') {
+      const { count } = await supabase
+        .from('oatc')
+        .select('*', { count: 'exact', head: true })
+        .eq('estado_proceso', 'EN_ESPERA')
+        .lte('created_at', oatcActiva.created_at);
+
+      posicionCola = count || 1;
+    }
+
+    return {
+      cliente,
+      puntosVaikuntha,
+      visitasTotales,
+      totalGastado,
+      oatcActiva,
+      posicionCola,
+      historialVisitas
+    };
+
+  } catch (err) {
+    console.error('Error en obtenerPerfilCompletoCliente:', err);
+    return null;
+  }
+}

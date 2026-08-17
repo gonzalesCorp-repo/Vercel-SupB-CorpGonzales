@@ -1,6 +1,26 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ===================================================
+   ✨ CSS HOUDINI: REGISTRO DE PROPIEDAD ANIMABLE CON SOPORTE SEGURO
+   =================================================== */
+@supports (background: paint(something)) or (animation-timeline: auto) or (contain: paint) {
+  @property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+}
+
+@keyframes spin-angle {
+  from {
+    --angle: 0deg;
+  }
+  to {
+    --angle: 360deg;
+  }
+}
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
@@ -9,34 +29,207 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-left {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  .safe-right {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
 }
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --glow-opacity: 0.6;
+  --active-theme-primary: #4f46e5;
+  --active-theme-accent: #3b82f6;
+  --active-theme-glow: rgba(79, 70, 229, 0.4);
+}
+
+:root.dark,
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+}
+
+/* ===================================================
+   ✨ BORDE GIRATORIO DUAL NEÓN (CSS HOUDINI + CONIC GRADIENT)
+   =================================================== */
+.card-glow-animated {
+  position: relative;
+  border-radius: 1.5rem;
+  background: var(--background, #020617);
+  z-index: 1;
+}
+
+/* Fallback para navegadores sin soporte Houdini */
+@supports not (background: paint(something)) {
+  .card-glow-animated {
+    border: 2px solid var(--active-theme-primary, #6b3fa0);
+    box-shadow: 0 0 20px var(--active-theme-glow, rgba(118, 255, 3, 0.3));
+  }
+}
+
+/* Borde dual nítido perimetral animado */
+.card-glow-animated::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    var(--active-theme-primary, #6b3fa0) 0%,
+    transparent 25%,
+    var(--active-theme-accent, #76ff03) 50%,
+    transparent 75%,
+    var(--active-theme-primary, #6b3fa0) 100%
+  );
+  border-radius: inherit;
+  z-index: -1;
+  animation: spin-angle 4s linear infinite;
+  pointer-events: none;
+}
+
+/* Resplandor exterior suave difuminado (Glow Dual) */
+.card-glow-animated::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    var(--active-theme-primary, #6b3fa0) 0%,
+    transparent 25%,
+    var(--active-theme-accent, #76ff03) 50%,
+    transparent 75%,
+    var(--active-theme-primary, #6b3fa0) 100%
+  );
+  border-radius: inherit;
+  z-index: -2;
+  filter: blur(16px);
+  opacity: var(--glow-opacity, 0.6);
+  animation: spin-angle 4s linear infinite;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* ===================================================
+   🧬 PALETAS DE SKINS MODULARES (DATA-THEME)
+   =================================================== */
+
+/* EVA-01 TEST TYPE */
+[data-theme="eva-01"] {
+  --eva-primary: #6b3fa0;
+  --eva-accent: #76ff03;
+  --eva-dark: #1b1625;
+  --eva-light: #e8e0f5;
+  --eva-glow: rgba(118, 255, 3, 0.45);
+  --background: #1b1625;
+  --foreground: #e8e0f5;
+}
+
+/* EVA-02 PRODUCTION */
+[data-theme="eva-02"] {
+  --eva-primary: #c9182b;
+  --eva-accent: #ff5722;
+  --eva-dark: #201719;
+  --eva-light: #ffffff;
+  --eva-glow: rgba(255, 87, 34, 0.45);
+  --background: #201719;
+  --foreground: #ffffff;
+}
+
+/* EVA-00 REPAIRED (BLUE) */
+[data-theme="eva-00-blue"] {
+  --eva-primary: #19529e;
+  --eva-accent: #e53935;
+  --eva-dark: #161c24;
+  --eva-light: #eef3f8;
+  --eva-glow: rgba(255, 87, 34, 0.45);
+  --background: #161c24;
+  --foreground: #eef3f8;
+}
+
+/* EVA-00 PROTO (ORANGE) */
+[data-theme="eva-00-orange"] {
+  --eva-primary: #e65100;
+  --eva-accent: #00e5ff;
+  --eva-dark: #212121;
+  --eva-light: #fafafa;
+  --eva-glow: rgba(230, 81, 0, 0.45);
+  --background: #212121;
+  --foreground: #fafafa;
+}
+
+/* MARK.06 SPACE */
+[data-theme="eva-mark06"] {
+  --eva-primary: #0d1b2a;
+  --eva-accent: #ff0055;
+  --eva-dark: #070b12;
+  --eva-light: #e0e1dd;
+  --eva-glow: rgba(255, 0, 85, 0.45);
+  --background: #070b12;
+  --foreground: #e0e1dd;
+}
+
+/* CYBERPUNK 2077 */
+[data-theme="cyberpunk-neon"] {
+  --eva-primary: #00f0ff;
+  --eva-accent: #fee715;
+  --eva-dark: #10141d;
+  --eva-light: #f0f6fc;
+  --eva-glow: rgba(0, 240, 255, 0.45);
+  --background: #10141d;
+  --foreground: #f0f6fc;
+}
+
+/* MATRIX TERMINAL */
+[data-theme="matrix-terminal"] {
+  --eva-primary: #00ff66;
+  --eva-accent: #50fa7b;
+  --eva-dark: #050a06;
+  --eva-light: #e2fbe8;
+  --eva-glow: rgba(0, 255, 102, 0.45);
+  --background: #050a06;
+  --foreground: #e2fbe8;
+}
+
+/* LUMINA VIP GOLD */
+[data-theme="lumina-gold"] {
+  --eva-primary: #d4af37;
+  --eva-accent: #10b981;
+  --eva-dark: #0f1115;
+  --eva-light: #fdfbf7;
+  --eva-glow: rgba(212, 175, 55, 0.4);
+  --background: #0f1115;
+  --foreground: #fdfbf7;
+}
+
+[data-theme] {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+[data-theme] body,
+[data-theme] main {
+  background-color: var(--background);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
-  --color-primary-950: #172554;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-body {
+html, body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }

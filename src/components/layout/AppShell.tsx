@@ -4,34 +4,88 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, Palette, User, PackageSearch, ArrowRightLeft, Layers, Download, BarChart3, Database } from 'lucide-react';
+import { 
+  Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, 
+  Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, 
+  User, PackageSearch, ArrowRightLeft, Layers, Download, BarChart3, 
+  Database, Sliders, Calculator, Zap, Calendar, Users, Award, Sparkles
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { obtenerSedesUsuario, Sede } from '@/services/sedes';
 import { NotificationTicker } from './NotificationTicker';
+import { LiveFeedDrawer } from './LiveFeedDrawer';
 import { registrarLog } from '@/services/logger';
 import { GlobalUI } from '@/components/ui/GlobalUI';
 import { useThemeStore } from '@/store/useThemeStore';
+import { obtenerHerramientasAgente, CATALOGO_HERRAMIENTAS, HerramientaDefinicion } from '@/services/permisos';
+import { obtenerConfiguracionSede } from '@/services/sedesConfig';
+import { IncidenciasGlobalBell } from './IncidenciasGlobalBell';
 
-const NavItem = ({ href, icon: Icon, label, disabled = false, pathname, isExpanded }: any) => {
-  const isActive = pathname.startsWith(href) && href !== '/' || (href === '/' && pathname === '/');
+const ICON_MAP: Record<string, any> = {
+  Inbox,
+  CreditCard: Briefcase,
+  Beaker,
+  Calendar,
+  Users,
+  FileText,
+  Calculator,
+  BarChart3,
+  PackageSearch,
+  Layers,
+  Activity,
+  Award,
+  Sliders,
+  Settings,
+  Shield,
+  Database,
+  Sparkles
+};
+
+const NavItem = ({ href, icon: Icon, label, disabled = false, pathname, isExpanded, badge }: any) => {
+  const isActive = (pathname.startsWith(href) && href !== '/') || (href === '/' && pathname === '/');
   return (
     <li>
-      <Link href={disabled ? '#' : href} className={`relative flex items-center p-3 rounded-2xl transition-all duration-300 group ${isActive ? 'bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+      <Link 
+        href={disabled ? '#' : href} 
+        className={`relative flex items-center p-3 rounded-2xl transition-all duration-300 group ${
+          isActive 
+            ? 'bg-slate-800/80 shadow-xs' 
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        style={isActive ? { 
+          color: 'var(--active-theme-accent, #4f46e5)',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)'
+        } : {}}
+      >
         {isActive && (
-          <motion.div layoutId="activeNavIndicator" className="absolute left-0 w-1 h-8 bg-indigo-600 rounded-r-full" />
+          <motion.div 
+            layoutId="activeNavIndicator" 
+            className="absolute left-0 w-1 h-8 rounded-r-full shadow-sm"
+            style={{ backgroundColor: 'var(--active-theme-accent, #4f46e5)' }}
+          />
         )}
-        <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-900'}`} />
+        {Icon && <Icon className="w-5 h-5 shrink-0 transition-colors" style={isActive ? { color: 'var(--active-theme-accent, #4f46e5)' } : {}} />}
         <AnimatePresence>
           {isExpanded && (
-            <motion.span 
+            <motion.div 
               initial={{ opacity: 0, width: 0, marginLeft: 0 }}
               animate={{ opacity: 1, width: 'auto', marginLeft: 12 }}
               exit={{ opacity: 0, width: 0, marginLeft: 0 }}
-              className="font-semibold text-sm whitespace-nowrap overflow-hidden"
+              className="flex items-center justify-between flex-1 overflow-hidden"
             >
-              {label}
-            </motion.span>
+              <span className="font-semibold text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                {label}
+              </span>
+              {badge && (
+                <span 
+                  className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-tighter border border-white/10"
+                  style={{ backgroundColor: 'var(--active-theme-primary, rgba(79, 70, 229, 0.2))', color: 'var(--active-theme-accent, #4f46e5)' }}
+                >
+                  {badge}
+                </span>
+              )}
+            </motion.div>
           )}
         </AnimatePresence>
       </Link>
@@ -39,17 +93,18 @@ const NavItem = ({ href, icon: Icon, label, disabled = false, pathname, isExpand
   );
 };
 
-const NavSection = ({ title, children, isExpanded }: any) => (
-  <div className="mb-6">
+const NavSection = ({ title, children, isExpanded, icon: SectionIcon }: any) => (
+  <div className="mb-5">
     <AnimatePresence>
       {isExpanded && (
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="px-4 mb-2"
+          className="px-4 mb-2 flex items-center gap-1.5"
         >
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{title}</span>
+          {SectionIcon && <SectionIcon className="w-3 h-3 text-gray-400" />}
+          <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">{title}</span>
         </motion.div>
       )}
     </AnimatePresence>
@@ -67,7 +122,9 @@ const NavSection = ({ title, children, isExpanded }: any) => (
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [userEmail, setUserEmail] = useState<string>('Cargando...');
+  const [userEmail, setUserEmailLocal] = useState<string>('Cargando...');
+  const [agenteId, setAgenteId] = useState<string | null>(null);
+  const [herramientasPermitidas, setHerramientasPermitidas] = useState<string[]>([]);
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -76,30 +133,51 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const clearSede = useAppStore((state) => state.clearSede);
   const userRol = useAppStore((state) => state.userRol);
   const setUserRol = useAppStore((state) => state.setUserRol);
+  const setUserEmail = useAppStore((state) => state.setUserEmail);
   const { themeMode } = useThemeStore();
   
   const [misSedes, setMisSedes] = useState<Sede[]>([]);
   const [loadingSedes, setLoadingSedes] = useState(true);
   const [showSedesDropdown, setShowSedesDropdown] = useState(false);
+  const [pluginLuminaHqActivo, setPluginLuminaHqActivo] = useState(false);
+  const [isLiveFeedDrawerOpen, setIsLiveFeedDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const cargarToggles = async () => {
+      const toggles = await obtenerConfiguracionSede();
+      setPluginLuminaHqActivo(!!toggles.pluginLuminaHqActivo);
+    };
+    cargarToggles();
+  }, [sedeActiva?.id]);
 
   useEffect(() => {
     const fetchUserAndSedes = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user && user.email) {
+        setUserEmailLocal(user.email);
         setUserEmail(user.email);
         
-        // Cargar rol desde la DB siempre para evitar bugs de caché entre usuarios
-        // Usamos maybeSingle() para evitar el error 406 si el usuario aún no existe en la tabla agentes
-        // Usamos ilike y trim() para evitar problemas de mayúsculas/minúsculas y espacios invisibles en el correo
-        const { data: agente, error: errAgente } = await supabase.from('agentes').select('rol').ilike('email', user.email.trim()).maybeSingle();
+        const { data: agente, error: errAgente } = await supabase
+          .from('agentes')
+          .select('id, rol')
+          .ilike('email', user.email.trim())
+          .maybeSingle();
         
         if (errAgente) console.error('Error fetching agente:', errAgente);
 
         if (agente && agente.rol) {
-          // Guardamos el rol en mayúsculas para evitar errores de tipeo en la BD (ej. 'admin' vs 'ADMIN')
-          setUserRol(agente.rol.toUpperCase());
+          // Normalizar rol si contiene legado
+          let rolNormalizado = agente.rol.toUpperCase();
+          if (['RECEPCION', 'CAJA', 'DESPACHO'].includes(rolNormalizado)) {
+            rolNormalizado = 'SOPORTE';
+          }
+          setUserRol(rolNormalizado);
+          setAgenteId(agente.id);
+
+          // Cargar herramientas delegadas
+          const keys = await obtenerHerramientasAgente(agente.id);
+          setHerramientasPermitidas(keys);
         } else {
-          // Si no tiene rol en la base de datos, forzamos a null para mostrar la pantalla de error
           setUserRol(null);
         }
         
@@ -107,7 +185,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         const sedes = await obtenerSedesUsuario(user.email);
         setMisSedes(sedes);
         
-        // Autoseleccionar la primera sede si no hay ninguna activa o si la activa no está en la lista del usuario
         if (sedes.length > 0) {
           const SedeActualValida = useAppStore.getState().sedeActiva;
           if (!SedeActualValida || !sedes.some(s => s.id === SedeActualValida.id)) {
@@ -120,43 +197,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     fetchUserAndSedes();
   }, [userEmail]);
   
-  const tienePermiso = (modulo: string) => {
-    if (!userRol) return false;
-    const roles = userRol.split(',').map(r => r.trim());
-    
-    if (roles.includes('SUPERADMIN')) return true;
-    if (roles.includes('ADMIN') && modulo !== 'dev') return true;
-    
-    switch (modulo) {
-      case 'recepcion': return roles.includes('RECEPCION');
-      case 'caja': return roles.includes('CAJA');
-      case 'despacho': return roles.includes('DESPACHO');
-      case 'operaciones': return roles.includes('STAFF');
-      case 'wfm': return roles.includes('WFM') || roles.includes('RECEPCION');
-      case 'admin': return false; // Administradores ya cubiertos
-      case 'dev': return false; // Devs ya cubiertos
-      case 'perfil': return true; // Acceso global
-      case 'configuracion': return true; // Acceso global
-      default: return false;
-    }
-  };
+  const esSuperAdmin = userRol === 'SUPERADMIN';
+  const esAdmin = userRol === 'ADMIN' || esSuperAdmin;
+  const esJefeOperativo = userRol === 'JEFE_OPERATIVO' || userRol === 'JEFE_OPERACIONES' || userRol === 'SUPERVISOR';
+  const esSoporte = userRol === 'SOPORTE';
 
-  // Bloqueo Forzoso de Rutas
+  // Guardia de Seguridad: STAFF no tiene acceso a vistas de escritorio (Recepción, Caja, Admin, etc.)
   useEffect(() => {
-    if (!loadingSedes && userRol && pathname !== '/') {
-      const pathModulo = pathname.split('/')[1] || '';
-      
-      if (pathModulo && !tienePermiso(pathModulo)) {
-        // Redirigir al primer módulo al que sí tenga acceso
-        if (tienePermiso('recepcion')) router.push('/recepcion');
-        else if (tienePermiso('operaciones')) router.push('/operaciones');
-        else if (tienePermiso('caja')) router.push('/caja');
-        else if (tienePermiso('despacho')) router.push('/despacho');
-        else if (tienePermiso('admin')) router.push('/admin/reportes');
-        else if (tienePermiso('dev')) router.push('/dev');
-      }
+    if (userRol === 'STAFF' && !pathname.startsWith('/mobile') && !pathname.startsWith('/kiosk')) {
+      router.replace('/mobile/operacion');
     }
-  }, [pathname, loadingSedes, userRol, router]);
+  }, [userRol, pathname, router]);
 
   const handleLogout = async () => {
     await registrarLog('AUTH', 'Cierre de sesión');
@@ -168,8 +219,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const isExpanded = mobileMenuOpen || isHovered;
 
-  // Si la ruta es /mobile (App Web Móvil), renderizamos una vista nativa sin Navbar/Sidebar de escritorio
-  if (pathname.startsWith('/mobile')) {
+  if (pathname.startsWith('/mobile') || pathname.startsWith('/kiosk')) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
         <GlobalUI />
@@ -178,9 +228,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Filtrar herramientas habilitadas sin duplicar
+  const herramientasHabilitadasObj = CATALOGO_HERRAMIENTAS.filter(h => 
+    herramientasPermitidas.includes(h.key)
+  );
+
   return (
     <div className="relative min-h-screen bg-[#fafafa] dark:bg-slate-950 font-sans selection:bg-indigo-500/30">
       <GlobalUI />
+      
+      {/* Live Feed Drawer Deslizable */}
+      <LiveFeedDrawer 
+        isOpen={isLiveFeedDrawerOpen} 
+        onClose={() => setIsLiveFeedDrawerOpen(false)} 
+        sedeId={sedeActiva?.id || null} 
+      />
       
       {/* Floating Glass Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 h-16 mx-4 mt-4 lg:ml-24 lg:mr-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl transition-all duration-300">
@@ -192,7 +254,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <NotificationTicker />
+            <NotificationTicker onOpenDrawer={() => setIsLiveFeedDrawerOpen(true)} />
           </div>
 
           <div className="flex items-center gap-4">
@@ -231,23 +293,30 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 </AnimatePresence>
               </div>
             )}
+
+            {/* Buzón de Incidencias Operativas Global */}
+            <IncidenciasGlobalBell />
             
             <div className="hidden sm:flex items-center gap-3 pl-4 border-l border-gray-200/50 dark:border-slate-800">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-[2px]">
-                <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
-                  <UserCircle className="w-5 h-5 text-indigo-600" />
+              <div 
+                className="w-8 h-8 rounded-full p-[2px] transition-all shadow-sm"
+                style={{ background: 'linear-gradient(135deg, var(--active-theme-primary, #4f46e5), var(--active-theme-accent, #ec4899))' }}
+              >
+                <div className="w-full h-full bg-white dark:bg-slate-900 rounded-full flex items-center justify-center">
+                  <UserCircle className="w-5 h-5" style={{ color: 'var(--active-theme-accent, #4f46e5)' }} />
                 </div>
               </div>
               <div className="flex flex-col">
                 <span className="text-xs font-black text-gray-900 dark:text-slate-100 leading-none">{userEmail.split('@')[0]}</span>
-                <button onClick={handleLogout} className="text-[10px] font-bold text-gray-400 hover:text-red-500 text-left transition-colors mt-0.5">Logout</button>
+                <span className="text-[10px] font-bold" style={{ color: 'var(--active-theme-accent, #4f46e5)' }}>{userRol || 'SOPORTE'}</span>
+                <button onClick={handleLogout} className="text-[10px] font-bold text-gray-400 hover:text-red-500 text-left transition-colors mt-0.5 cursor-pointer">Logout</button>
               </div>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Ultra-thin Sidebar (Aceternity Style) */}
+      {/* Sidebar Híbrido Deduplicado */}
       <motion.aside 
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -256,8 +325,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="flex items-center gap-3 px-6 h-24 border-b border-gray-100/50">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
+        <div className="flex items-center gap-3 px-6 h-24 border-b border-gray-100/50 dark:border-white/5">
+          <div 
+            className="w-8 h-8 rounded-xl flex items-center justify-center shadow-lg shrink-0 transition-all"
+            style={{ 
+              background: 'linear-gradient(135deg, var(--active-theme-primary, #4f46e5), var(--active-theme-accent, #7c3aed))',
+              boxShadow: '0 4px 14px var(--active-theme-glow, rgba(79, 70, 229, 0.4))'
+            }}
+          >
             <span className="text-white font-black text-lg">V</span>
           </div>
           <AnimatePresence>
@@ -269,70 +344,138 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 className="flex flex-col overflow-hidden"
               >
                 <span className="text-lg font-black text-gray-900 dark:text-slate-100 tracking-tight whitespace-nowrap">Vaikuntha</span>
-                <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest whitespace-nowrap">Enterprise ERP</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap" style={{ color: 'var(--active-theme-accent, #4f46e5)' }}>
+                  Enterprise ERP
+                </span>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
         <div className="h-[calc(100vh-6rem)] overflow-y-auto overflow-x-hidden py-6 scrollbar-hide">
-          {tienePermiso('recepcion') && (
-            <NavSection title="CRM & Front" isExpanded={isExpanded}>
-              <NavItem href="/recepcion" icon={LayoutDashboard} label="Workspace Recepción" pathname={pathname} />
-              <NavItem href="/recepcion/historial" icon={FileText} label="Historial de OATC" pathname={pathname} />
-              <NavItem href="/recepcion/agenda" icon={UserCircle} label="Agenda CRM" pathname={pathname} />
-              <NavItem href="/recepcion/reportes" icon={FileText} label="Reportes Recepción" pathname={pathname} />
-              <NavItem href="/wfm" icon={Activity} label="Mapa WFM" pathname={pathname} />
-            </NavSection>
-          )}
-
-          {tienePermiso('caja') && (
-            <NavSection title="Finanzas" isExpanded={isExpanded}>
-              <NavItem href="/caja" icon={Briefcase} label="Punto de Venta" pathname={pathname} />
-              <NavItem href="/caja/arqueo" icon={FileText} label="Arqueo" pathname={pathname} />
-              <NavItem href="/caja/productividad" icon={Activity} label="Productividad" pathname={pathname} />
-              <NavItem href="/caja/comprobantes" icon={FileText} label="Comprobantes" pathname={pathname} />
-              <NavItem href="/caja/facturas" icon={Layers} label="Facturas" pathname={pathname} />
-              <NavItem href="/caja/cuentas" icon={Briefcase} label="Gestión de Cuentas" pathname={pathname} />
-            </NavSection>
-          )}
-
-          {tienePermiso('despacho') && (
-            <NavSection title="Logística" isExpanded={isExpanded}>
-              <NavItem href="/lab/despacho" icon={PackageSearch} label="Despacho (ODI)" pathname={pathname} />
-              <NavItem href="/lab/kardex" icon={Activity} label="Kardex" pathname={pathname} />
-              <NavItem href="/lab/transferencia" icon={ArrowRightLeft} label="Transferencias" pathname={pathname} />
-              <NavItem href="/lab/stock" icon={Layers} label="Stock" pathname={pathname} />
-              <NavItem href="/lab/ingreso" icon={Download} label="Ingreso Central" pathname={pathname} />
-              <NavItem href="/lab/metricas" icon={BarChart3} label="Métricas" pathname={pathname} />
-            </NavSection>
-          )}
-
-          {tienePermiso('operaciones') && (
-            <NavSection title="Operaciones" isExpanded={isExpanded}>
-              <NavItem href="/operaciones" icon={Briefcase} label="Workspace Operativo" pathname={pathname} />
-            </NavSection>
-          )}
-
-          {tienePermiso('admin') && (
-            <NavSection title="Sistema" isExpanded={isExpanded}>
-              <NavItem href="/admin/reportes" icon={Activity} label="Dashboard Global" pathname={pathname} />
-              <NavItem href="/admin/catalogo" icon={Database} label="Catálogo Maestro" pathname={pathname} />
-              <NavItem href="/admin/usuarios" icon={Shield} label="Usuarios" pathname={pathname} />
-              <NavItem href="/admin/configuracion" icon={Settings} label="Configuración WFM" pathname={pathname} />
-              <NavItem href="/admin/caja-config" icon={Settings} label="Configuración Caja" pathname={pathname} />
-            </NavSection>
-          )}
-
-          {tienePermiso('dev') && (
-            <NavSection title="Desarrollador" isExpanded={isExpanded}>
-              <NavItem href="/dev" icon={Settings} label="System Logs" pathname={pathname} />
-            </NavSection>
-          )}
-
+          
+          {/* 1. SECCIÓN PERSONAL (Mi Cuenta - Disponible para Todos) */}
           <NavSection title="Personal" isExpanded={isExpanded}>
-            <NavItem href="/perfil" icon={User} label="Mi Cuenta" pathname={pathname} />
+            <NavItem href="/perfil" icon={User} label="Mi Cuenta" pathname={pathname} badge="Base" />
           </NavSection>
+
+          {/* 2. SI ES USUARIO SOPORTE: Mostrar solo sus herramientas delegadas */}
+          {esSoporte && (
+            <NavSection title="Herramientas Habilitadas" isExpanded={isExpanded} icon={Zap}>
+              {herramientasHabilitadasObj.length > 0 ? (
+                herramientasHabilitadasObj.map(h => (
+                  <NavItem 
+                    key={h.key} 
+                    href={h.ruta} 
+                    icon={ICON_MAP[h.icono] || Sparkles} 
+                    label={h.nombre} 
+                    pathname={pathname} 
+                    badge="Activo" 
+                  />
+                ))
+              ) : (
+                <NavItem href="/recepcion" icon={Inbox} label="Recepción Básica" pathname={pathname} badge="Default" />
+              )}
+            </NavSection>
+          )}
+
+          {/* 3. SI ES JEFE OPERATIVO: Mostrar Recepción, Operaciones, CRM y Logística */}
+          {esJefeOperativo && (
+            <>
+              {/* WORKSPACES */}
+              <NavSection title="Workspaces" isExpanded={isExpanded}>
+                <NavItem href="/recepcion" icon={Inbox} label="Workspace Recepción" pathname={pathname} />
+                <NavItem href="/caja" icon={Briefcase} label="Workspace Venta" pathname={pathname} />
+                <NavItem href="/lab/despacho" icon={Beaker} label="Workspace Taller" pathname={pathname} />
+                <NavItem href="/kiosk" icon={Sparkles} label="Lanzar Kiosko Totem" pathname={pathname} badge="Totem" />
+              </NavSection>
+ 
+              {/* OPERACIONES */}
+              <NavSection title="Operaciones" isExpanded={isExpanded} icon={Shield}>
+                <NavItem href="/operaciones/jefe" icon={Shield} label="Panel Jefe Operativo" pathname={pathname} badge="Piso" />
+                <NavItem href="/operaciones" icon={Briefcase} label="Workspace Operativo" pathname={pathname} />
+                <NavItem href="/wfm" icon={Activity} label="Mapa WFM" pathname={pathname} />
+              </NavSection>
+ 
+              {/* CRM & FRONT */}
+              <NavSection title="CRM & Front" isExpanded={isExpanded}>
+                <NavItem href="/recepcion/crm" icon={Users} label="Directorio CRM" pathname={pathname} />
+                <NavItem href="/recepcion/agenda" icon={UserCircle} label="Agenda CRM" pathname={pathname} />
+                <NavItem href="/recepcion/historial" icon={FileText} label="Historial OATC" pathname={pathname} />
+              </NavSection>
+ 
+              {/* LOGÍSTICA */}
+              <NavSection title="Logística" isExpanded={isExpanded}>
+                <NavItem href="/lab/kardex" icon={Activity} label="Kardex IoT" pathname={pathname} />
+                <NavItem href="/lab/transferencia" icon={ArrowRightLeft} label="Transferencias" pathname={pathname} />
+                <NavItem href="/lab/stock" icon={Layers} label="Stock Central" pathname={pathname} />
+              </NavSection>
+            </>
+          )}
+
+          {/* 4. SI ES ADMIN O SUPERADMIN: Mostrar toda la estructura maestra */}
+          {esAdmin && (
+            <>
+              {/* WORKSPACES GENERALES */}
+              <NavSection title="Workspaces" isExpanded={isExpanded}>
+                <NavItem href="/recepcion" icon={Inbox} label="Workspace Recepción" pathname={pathname} />
+                <NavItem href="/caja" icon={Briefcase} label="Workspace Venta" pathname={pathname} />
+                <NavItem href="/lab/despacho" icon={Beaker} label="Workspace Taller" pathname={pathname} />
+                <NavItem href="/kiosk" icon={Sparkles} label="Lanzar Kiosko Totem" pathname={pathname} badge="Totem" />
+              </NavSection>
+
+              {/* SECCIONES TRADICIONALES */}
+              <NavSection title="CRM & Front" isExpanded={isExpanded}>
+                <NavItem href="/recepcion/crm" icon={Users} label="Directorio CRM" pathname={pathname} />
+                <NavItem href="/recepcion/agenda" icon={UserCircle} label="Agenda CRM" pathname={pathname} />
+                <NavItem href="/recepcion/historial" icon={FileText} label="Historial OATC" pathname={pathname} />
+                <NavItem href="/wfm" icon={Activity} label="Mapa WFM" pathname={pathname} />
+              </NavSection>
+
+              <NavSection title="Finanzas" isExpanded={isExpanded}>
+                <NavItem href="/caja/arqueo" icon={Calculator} label="Arqueo Ciego" pathname={pathname} />
+                <NavItem href="/caja/productividad" icon={Activity} label="Productividad" pathname={pathname} />
+                <NavItem href="/caja/comprobantes" icon={FileText} label="Comprobantes SUNAT" pathname={pathname} />
+              </NavSection>
+
+              <NavSection title="Logística" isExpanded={isExpanded}>
+                <NavItem href="/lab/kardex" icon={Activity} label="Kardex IoT" pathname={pathname} />
+                <NavItem href="/lab/transferencia" icon={ArrowRightLeft} label="Transferencias" pathname={pathname} />
+                <NavItem href="/lab/stock" icon={Layers} label="Stock Central" pathname={pathname} />
+                <NavItem href="/lab/ingreso" icon={Download} label="Ingreso Central" pathname={pathname} />
+              </NavSection>
+
+              <NavSection title="Operaciones" isExpanded={isExpanded}>
+                <NavItem href="/operaciones" icon={Briefcase} label="Workspace Operativo" pathname={pathname} />
+                <NavItem href="/operaciones/jefe" icon={Shield} label="Panel Jefe Operativo" pathname={pathname} badge="Piso" />
+              </NavSection>
+
+              {/* SISTEMA & GOBERNANZA */}
+              <NavSection title="Sistema" isExpanded={isExpanded} icon={Shield}>
+                <NavItem href="/admin/reportes" icon={Activity} label="Dashboard Global" pathname={pathname} />
+                <NavItem href="/admin/usuarios" icon={Users} label="Usuarios & Delegación" pathname={pathname} badge="Admin" />
+                <NavItem href="/admin/config" icon={Sliders} label="Configuración Sede" pathname={pathname} badge="Admin" />
+                <NavItem href="/admin/reglas-clientes" icon={Award} label="Reglas de Clientes" pathname={pathname} badge="Insignias" />
+                <NavItem href="/admin/catalogo" icon={Database} label="Catálogo de Bienes" pathname={pathname} />
+              </NavSection>
+            </>
+          )}
+
+          {/* 4. PLUG-IN LUMINA-HQ AI SUITE (Visible si el plugin está activado en Configuración) */}
+          {pluginLuminaHqActivo && (
+            <NavSection title="LuminaHQ AI Suite" isExpanded={isExpanded} icon={Sparkles}>
+              <NavItem href="/luminahq/diagnostico" icon={Sparkles} label="Diagnóstico IA Capilar/Piel" pathname={pathname} badge="IA" />
+              <NavItem href="/luminahq/fichas" icon={FileText} label="Fichas Clínicas Inteligentes" pathname={pathname} />
+              <NavItem href="/luminahq/copilot" icon={Sparkles} label="Copiloto V.AI & Ventas" pathname={pathname} badge="V.AI" />
+            </NavSection>
+          )}
+
+          {/* SuperAdmin Developer Controls */}
+          {esSuperAdmin && (
+            <NavSection title="Desarrollador" isExpanded={isExpanded}>
+              <NavItem href="/dev" icon={Settings} label="System Logs & Debug" pathname={pathname} badge="Dev" />
+            </NavSection>
+          )}
         </div>
       </motion.aside>
 

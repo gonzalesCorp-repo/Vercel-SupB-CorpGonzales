@@ -79,7 +79,7 @@ for (const account of accounts) {
           }
         } catch (clickErr) {
           // Log click failures but do not block the test runner from completing the audit
-          console.log(`Warning: Failed to click element #${i} - ${clickErr.message}`);
+          console.log(`Warning: Failed to click element #${i} - ${(clickErr as Error).message}`);
         }
       }
 

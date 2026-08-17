@@ -10,7 +10,11 @@ export async function POST(request: Request) {
     );
 
     const body = await request.json();
-    const { nombre, email, password, rol, especialidad, sedes_ids } = body;
+    const { 
+      nombre, email, password, rol, especialidad, sedes_ids,
+      regimen_laboral, sueldo_base, tipo_pension, asignacion_familiar,
+      porcentaje_comision, tarifa_hora
+    } = body;
 
     if (!email || !password || !nombre) {
       return NextResponse.json({ error: 'Faltan campos obligatorios (nombre, email, password)' }, { status: 400 });
@@ -43,7 +47,14 @@ export async function POST(request: Request) {
         email: email.trim(),
         rol,
         especialidad: especialidad?.trim() || null,
-        estado: 'DISPONIBLE'
+        estado: 'FUERA_TURNO',
+        estado_operativo: 'FUERA_TURNO',
+        regimen_laboral: regimen_laboral || 'HONORARIOS_RHE',
+        sueldo_base: Number(sueldo_base || 0),
+        tipo_pension: tipo_pension || 'AFP',
+        asignacion_familiar: Boolean(asignacion_familiar),
+        porcentaje_comision: Number(porcentaje_comision || 40),
+        tarifa_hora: Number(tarifa_hora || 0)
       }]);
 
     if (agenteError) {

@@ -27,7 +27,7 @@ export function useOATCActions({ onSuccess, oatcs = [] }: UseOATCActionsProps = 
         .eq('id', oatc.id);
 
       if (oatc.agente_id) {
-        await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', oatc.agente_id);
+        await supabase.from('agentes').update({ estado_operativo: 'DISPONIBLE' }).eq('id', oatc.agente_id);
       }
       
       if (!error && onSuccess) onSuccess();
@@ -84,7 +84,7 @@ export function useOATCActions({ onSuccess, oatcs = [] }: UseOATCActionsProps = 
 
     const oatc = oatcs.find(o => o.id === oatcId);
     if (oatc?.agente_id) {
-      await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', oatc.agente_id);
+      await supabase.from('agentes').update({ estado_operativo: 'DISPONIBLE' }).eq('id', oatc.agente_id);
     }
     
     const { error } = await supabase

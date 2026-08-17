@@ -1,15 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Search, UserPlus, Users, Phone, CreditCard, CheckCircle2, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, UserPlus, Users, Phone, CreditCard, CheckCircle2, Sparkles, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 import { Cliente, obtenerTodosLosClientes, buscarClientes, crearCliente } from '@/services/clientes';
+import { 
+  ReglaEtiquetaCliente, obtenerReglasEtiquetas, calcularMetricasCliente, 
+  evaluarEtiquetas 
+} from '@/services/reglasClientes';
 import { Modal } from '@/components/ui/Modal';
 import { BulkUploader } from '@/components/ui/BulkUploader';
 import { useAppStore } from '@/store/useAppStore';
 import { createClient } from '@/lib/supabase/client';
 
+interface ClienteConInsignias extends Cliente {
+  insignias?: ReglaEtiquetaCliente[];
+}
+
 export function DirectorioCRM() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clientes, setClientes] = useState<ClienteConInsignias[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,9 +32,26 @@ export function DirectorioCRM() {
 
   const cargarClientes = async () => {
     setIsLoading(true);
-    const data = await obtenerTodosLosClientes();
-    setClientes(data);
-    setIsLoading(false);
+    try {
+      const reglasActivas = await obtenerReglasEtiquetas(true);
+      const data = await obtenerTodosLosClientes();
+      
+      const conInsignias = await Promise.all(
+        data.map(async (c) => {
+          const metricas = await calcularMetricasCliente(c.id || '', c.nombre, c.dni);
+          const insignias = evaluarEtiquetas(metricas, reglasActivas);
+          return {
+            ...c,
+            insignias
+          };
+        })
+      );
+      setClientes(conInsignias);
+    } catch (e) {
+      console.warn('Error cargando clientes con reglas:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -41,7 +67,18 @@ export function DirectorioCRM() {
     
     setIsSearching(true);
     const results = await buscarClientes(searchQuery);
-    setClientes(results);
+    const reglasActivas = await obtenerReglasEtiquetas(true);
+    const conInsignias = await Promise.all(
+      results.map(async (c) => {
+        const metricas = await calcularMetricasCliente(c.id || '', c.nombre, c.dni);
+        const insignias = evaluarEtiquetas(metricas, reglasActivas);
+        return {
+          ...c,
+          insignias
+        };
+      })
+    );
+    setClientes(conInsignias);
     setIsSearching(false);
   };
 
@@ -51,7 +88,6 @@ export function DirectorioCRM() {
     
     setIsSaving(true);
     
-    // Inyectar Sede y Agente
     let agenteId = null;
     const { data: { user } } = await supabase.auth.getUser();
     if (user) agenteId = user.id;
@@ -85,11 +121,18 @@ export function DirectorioCRM() {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Directorio de Clientes</h1>
-            <p className="text-sm text-slate-500">Busca, administra y registra nuevos perfiles de clientes.</p>
+            <h1 className="text-2xl font-bold text-slate-800">Directorio de Clientes CRM</h1>
+            <p className="text-sm text-slate-500">Busca, administra perfiles e insignias dinámicas de fidelización.</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/recepcion/crm"
+            className="flex items-center gap-1.5 text-xs text-indigo-600 bg-indigo-50 px-4 py-2.5 rounded-xl hover:bg-indigo-100 border border-indigo-100 transition shadow-sm font-bold"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Ver Vista Avanzada CRM</span>
+          </Link>
           <BulkUploader 
             tableName="clientes" 
             title="Importar Clientes" 
@@ -143,7 +186,7 @@ export function DirectorioCRM() {
         
         <div className="overflow-x-auto">
           {isLoading ? (
-            <div className="p-12 text-center text-slate-500">Cargando directorio...</div>
+            <div className="p-12 text-center text-slate-500">Cargando directorio e insignias...</div>
           ) : clientes.length === 0 ? (
             <div className="p-12 text-center text-slate-500 flex flex-col items-center">
               <Search className="w-12 h-12 text-slate-300 mb-3" />
@@ -154,10 +197,10 @@ export function DirectorioCRM() {
             <table className="w-full text-sm text-left text-slate-600">
               <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4">Cliente</th>
+                  <th className="px-6 py-4">Cliente & Categoría</th>
                   <th className="px-6 py-4 text-center">DNI/Doc</th>
                   <th className="px-6 py-4 text-center">Celular</th>
-                  <th className="px-6 py-4 text-center">Origen</th>
+                  <th className="px-6 py-4 text-center">Sede / Agente</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -165,7 +208,20 @@ export function DirectorioCRM() {
                   <tr key={c.id} className="hover:bg-indigo-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-bold text-slate-900">{c.nombre}</div>
-                      <div className="text-[10px] text-slate-400 uppercase mt-0.5 tracking-wider">Cliente Habitual</div>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {c.insignias && c.insignias.length > 0 ? (
+                          c.insignias.map(ins => (
+                            <span 
+                              key={ins.id} 
+                              className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${ins.color_badge}`}
+                            >
+                              {ins.nombre}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-slate-400 italic">Consumidor Registrado</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2 text-slate-700 font-medium">
@@ -219,45 +275,49 @@ export function DirectorioCRM() {
               placeholder="Ej. María López"
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Documento (DNI/CE/RUC)</label>
-            <input 
-              type="text" 
-              value={nuevoCliente.dni || ''}
-              onChange={e => setNuevoCliente({...nuevoCliente, dni: e.target.value})}
-              className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-              placeholder="Ej. 12345678"
-            />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">DNI</label>
+              <input 
+                type="text" 
+                value={nuevoCliente.dni || ''}
+                onChange={e => setNuevoCliente({...nuevoCliente, dni: e.target.value})}
+                className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                placeholder="8 dígitos"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Celular</label>
+              <input 
+                type="tel" 
+                value={nuevoCliente.celular || ''}
+                onChange={e => setNuevoCliente({...nuevoCliente, celular: e.target.value})}
+                className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                placeholder="999..."
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Celular / WhatsApp</label>
-            <input 
-              type="tel" 
-              value={nuevoCliente.celular || ''}
-              onChange={e => setNuevoCliente({...nuevoCliente, celular: e.target.value})}
-              className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-              placeholder="Ej. 987654321"
-            />
-          </div>
-          
-          <div className="flex gap-3 pt-4 border-t border-slate-100">
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
             <button 
               type="button" 
               onClick={() => setIsModalOpen(false)}
-              className="w-1/2 bg-slate-100 text-slate-700 px-4 py-3 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors"
+              className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl text-sm font-semibold transition-colors"
             >
               Cancelar
             </button>
             <button 
               type="submit" 
-              disabled={isSaving || !nuevoCliente.nombre}
-              className="w-1/2 bg-indigo-600 text-white px-4 py-3 rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-md shadow-indigo-600/20"
+              disabled={isSaving}
+              className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-md disabled:opacity-50"
             >
               {isSaving ? 'Guardando...' : 'Guardar Cliente'}
             </button>
           </div>
         </form>
       </Modal>
+
     </div>
   );
 }

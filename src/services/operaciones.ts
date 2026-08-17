@@ -65,7 +65,7 @@ export async function terminarAtencion(oatcId: string): Promise<boolean> {
   if (agente) {
     if (oatc.estado_pago === 'Pagado') {
       // FAST-PASS: Si ya está pagado (Pre-cobro o cobrado), reingresa directo a DISPONIBLE
-      await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', agente.id);
+      await supabase.from('agentes').update({ estado_operativo: 'DISPONIBLE' }).eq('id', agente.id);
     } else {
       // No está pagado: Va al Inbox de Recepción
       nuevoEstadoOatc = 'ASESORANDO'; // Esto alerta a recepción en la pizarra
@@ -201,7 +201,7 @@ export async function solicitarFinAtencion(oatc: any, userRol?: string): Promise
   if (newState === 'FINALIZADO') {
     const { data: agente } = await supabase.from('agentes').select('id').eq('nombre', oatc.agente_nombre).single();
     if (agente) {
-      await supabase.from('agentes').update({ estado: 'DISPONIBLE' }).eq('id', agente.id);
+      await supabase.from('agentes').update({ estado_operativo: 'DISPONIBLE' }).eq('id', agente.id);
       // 🎮 Octalysis: XP para el operario por atención completada
       await otorgarXP(agente.id, XP_REWARDS.ATENCION_COMPLETADA, 'ATENCION_COMPLETADA', { oatc_id: oatc.id });
     }
@@ -243,7 +243,7 @@ export async function iniciarAtencionOatc(oatcId: string, agenteId?: string): Pr
   }
 
   if (agenteId) {
-    await supabase.from('agentes').update({ estado: 'OCUPADO' }).eq('id', agenteId);
+    await supabase.from('agentes').update({ estado_operativo: 'OCUPADO' }).eq('id', agenteId);
   }
 
   await registrarLog('OPERACIONES', `Inició atención de la OATC`, { oatc_id: oatcId });

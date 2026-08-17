@@ -93,7 +93,13 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
           rol: agente.rol,
           especialidad: agente.especialidad,
           estado: agente.estado,
-          sedes_ids: sedes_ids
+          sedes_ids: sedes_ids,
+          regimen_laboral: agente.regimen_laboral,
+          sueldo_base: agente.sueldo_base,
+          tipo_pension: agente.tipo_pension,
+          asignacion_familiar: agente.asignacion_familiar,
+          porcentaje_comision: agente.porcentaje_comision,
+          tarifa_hora: agente.tarifa_hora
         })
       });
       const result = await response.json();
@@ -118,7 +124,13 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
           password: agente.password,
           rol: agente.rol,
           especialidad: agente.especialidad,
-          sedes_ids: sedes_ids
+          sedes_ids: sedes_ids,
+          regimen_laboral: agente.regimen_laboral,
+          sueldo_base: agente.sueldo_base,
+          tipo_pension: agente.tipo_pension,
+          asignacion_familiar: agente.asignacion_familiar,
+          porcentaje_comision: agente.porcentaje_comision,
+          tarifa_hora: agente.tarifa_hora
         })
       });
       const result = await response.json();

@@ -13,12 +13,15 @@ erDiagram
     agentes ||--o{ oatc : "atiende"
     clientes ||--o{ oatc : "solicita"
     sedes ||--o{ oatc : "registrada en"
-    agentes ||--o{ system_logs : "genera"
+    oatc ||--o{ comprobantes : "facturada en"
+    clientes ||--o{ cuentas_corrientes : "mantiene línea"
+    agentes ||--o{ asistencias_turnos : "registra asistencia"
     
     sedes {
         uuid id PK
         string nombre
         string direccion
+        jsonb config_toggles
         timestamp created_at
     }
 
@@ -26,9 +29,46 @@ erDiagram
         uuid id PK "Matches auth.users id"
         string nombre
         string email
-        string rol "SUPERADMIN | ADMIN | RECEPCION | CAJA | DESPACHO | STAFF"
-        string estado "DISPONIBLE | OCUPADO | PAUSA | INACTIVO"
-        timestamp updated_at
+        string rol "SUPERADMIN | ADMIN | JEFE_OPERATIVO | SOPORTE | STAFF"
+        string estado "ACTIVO | INACTIVO"
+        string estado_operativo "DISPONIBLE | OCUPADO | EN_DESCANSO | FUERA_TURNO"
+        string regimen_laboral "HONORARIOS_RHE | PLANILLA_5TA"
+        numeric sueldo_base
+        string tipo_pension "AFP | ONP"
+        boolean asignacion_familiar
+        numeric porcentaje_comision
+        numeric tarifa_hora
+        timestamp ultimo_cambio_estado
+    }
+
+    comprobantes {
+        uuid id PK
+        string tipo "BOLETA | FACTURA | NOTA_VENTA"
+        string serie "B001 | F001"
+        integer correlativo
+        numeric subtotal
+        numeric igv
+        numeric total
+        string medio_pago
+        jsonb metadata_fiscal
+        string estado_sunat
+    }
+
+    cuentas_corrientes {
+        uuid id PK
+        uuid cliente_id FK
+        numeric limite_credito
+        numeric saldo_utilizado
+        string estado
+    }
+
+    asistencias_turnos {
+        uuid id PK
+        string agente_id
+        string tipo_movimiento "ENTRADA | SALIDA | REFRIGERIO_IN | REFRIGERIO_OUT"
+        string punto_acceso
+        jsonb metadatos "requiere_validacion_horas"
+        timestamp timestamp_registro
     }
 
     sedes_usuarios {

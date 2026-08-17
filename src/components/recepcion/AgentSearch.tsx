@@ -117,7 +117,9 @@ export default function AgentSearch({ agentes, selectedAgenteId, onSelectAgente 
                     <div className="flex flex-col">
                       <span>{agente.nombre}</span>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded uppercase tracking-wider">{agente.estado}</span>
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                          {agente.estadoOperativo || (agente as any).estado_operativo || agente.estado}
+                        </span>
                         {(agente as any).especialidad && (
                           <span className="text-[10px] text-slate-400 truncate max-w-[150px]" title={(agente as any).especialidad}>
                             {(agente as any).especialidad}

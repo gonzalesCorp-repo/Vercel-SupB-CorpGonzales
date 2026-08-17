@@ -92,8 +92,8 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
     setColegas(otrosColegas);
 
     if (agente?.id) {
-      const { data: dbAgente } = await supabase.from('agentes').select('estado').eq('id', agente.id).single();
-      if (dbAgente) setEstadoActual(dbAgente.estado);
+      const { data: dbAgente } = await supabase.from('agentes').select('estado_operativo').eq('id', agente.id).single();
+      if (dbAgente) setEstadoActual(dbAgente.estado_operativo || 'DISPONIBLE');
     }
     setIsLoading(false);
   };

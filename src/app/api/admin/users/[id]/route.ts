@@ -9,7 +9,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     );
 
     const body = await request.json();
-    const { nombre, email, rol, especialidad, estado, sedes_ids } = body;
+    const { 
+      nombre, email, rol, especialidad, estado, sedes_ids,
+      regimen_laboral, sueldo_base, tipo_pension, asignacion_familiar,
+      porcentaje_comision, tarifa_hora
+    } = body;
     const { id } = await params;
     const userId = id;
 
@@ -25,7 +29,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         email: email?.trim(),
         rol,
         especialidad: especialidad?.trim() || null,
-        estado
+        estado,
+        regimen_laboral: regimen_laboral || 'HONORARIOS_RHE',
+        sueldo_base: Number(sueldo_base || 0),
+        tipo_pension: tipo_pension || 'AFP',
+        asignacion_familiar: Boolean(asignacion_familiar),
+        porcentaje_comision: Number(porcentaje_comision || 40),
+        tarifa_hora: Number(tarifa_hora || 0)
       })
       .eq('id', userId);
 
