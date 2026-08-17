@@ -153,6 +153,24 @@ export default function NuevaOATC({ onClose, onClientSelected, onCreatedSuccess 
             onSelect={handleClienteSelect} 
             selectedClientName={cliente?.nombre} 
           />
+          {cliente && (
+            <div className="mt-2 p-2.5 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 rounded-xl flex items-center justify-between animate-in fade-in duration-200">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-[10px] font-black">
+                  {cliente.nombre.charAt(0)}
+                </div>
+                <div>
+                  <span className="text-xs font-black text-slate-900 dark:text-white block">{cliente.nombre}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                    {cliente.dni ? `DNI: ${cliente.dni}` : ''} {cliente.dni && cliente.celular ? '• ' : ''} {cliente.celular ? `Cel: ${cliente.celular}` : ''}
+                  </span>
+                </div>
+              </div>
+              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                Ficha VIP
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Fila 2: Punto de Partida */}

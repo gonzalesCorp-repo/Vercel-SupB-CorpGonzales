@@ -76,6 +76,9 @@ export interface OATC {
   motivo_cancelacion_id?: string;
   motivos_cancelacion?: { motivo: string };
   detalle_cancelacion?: string;
+  hora_inicio_atencion?: string;
+  hora_fin_atencion?: string;
+  sede_id?: string;
   created_at?: string;
 }
 

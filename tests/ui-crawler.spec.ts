@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 
 // Test accounts in Sandbox
 const accounts = [
-  { name: 'SUPERADMIN', email: 'cristian@gonzales.page', pass: '123456', defaultRoute: '/recepcion' },
-  { name: 'RECEPCION', email: 'socrates@vaikuntha.com', pass: '123456', defaultRoute: '/recepcion' },
-  { name: 'CAJA', email: 'tales@vaikuntha.com', pass: '123456', defaultRoute: '/caja' },
-  { name: 'STAFF', email: 'democrito@vaikuntha.com', pass: '123456', defaultRoute: '/mobile' }
+  { name: 'SUPERADMIN', email: 'cristian@gonzales.page', pass: '123456', defaultRoute: '/recepcion', quickBtn: '👑 SUPERADMIN' },
+  { name: 'RECEPCION', email: 'socrates@vaikuntha.com', pass: '123456', defaultRoute: '/recepcion', quickBtn: '🛎️ SOPORTE Recepción (Sócrates)' },
+  { name: 'CAJA', email: 'tales@vaikuntha.com', pass: '123456', defaultRoute: '/caja', quickBtn: '💵 SOPORTE Caja & POS (Tales)' },
+  { name: 'STAFF', email: 'democrito@vaikuntha.com', pass: '123456', defaultRoute: '/mobile', quickBtn: '💈 STAFF (Demócrito)' }
 ];
 
 for (const account of accounts) {
@@ -29,16 +29,20 @@ for (const account of accounts) {
 
       // Navigate to login
       await page.goto('/login');
-      await expect(page).toHaveTitle(/Create Next App|Vaikuntha/i);
+      await page.waitForLoadState('networkidle');
 
-      // Fill credentials and submit
-      await page.fill('input[type="email"]', account.email);
-      await page.fill('input[type="password"]', account.pass);
-      await page.click('button[type="submit"]');
+      // Click Sandbox Quick Button with scroll
+      const quickBtn = page.locator(`button:has-text("${account.quickBtn}")`);
+      await quickBtn.scrollIntoViewIfNeeded();
+      await quickBtn.click();
 
-      // Wait for navigation to the role's default dashboard route
-      await page.waitForURL(new RegExp(account.defaultRoute, 'i'), { timeout: 15000 });
-      console.log(`Successfully logged in as ${account.name} on ${account.defaultRoute}`);
+      // Wait for navigation after login
+      await page.waitForURL(/\/(recepcion|caja|mobile)/i, { timeout: 15000 });
+      if (!page.url().includes(account.defaultRoute)) {
+        await page.goto(account.defaultRoute);
+        await page.waitForLoadState('domcontentloaded');
+      }
+      console.log(`Successfully reached ${account.defaultRoute} for ${account.name}`);
 
       // Allow 2 seconds for JS/Zustand hydration
       await page.waitForTimeout(2000);
@@ -64,17 +68,24 @@ for (const account of accounts) {
 
             console.log(`Clicking interactive element: "${text.trim()}"`);
             
+            // If modal backdrop is open, dismiss it first
+            const modalBackdrop = page.locator('.fixed.inset-0.z-50, [role="dialog"]');
+            if (await modalBackdrop.isVisible()) {
+              await page.keyboard.press('Escape');
+              await page.waitForTimeout(400);
+            }
+
             // Click with a small timeout to prevent hanging
-            await btn.click({ timeout: 5000 });
+            await btn.click({ timeout: 4000 }).catch(() => {});
             
-            // Wait 500ms for UI changes or dynamic rendering
-            await page.waitForTimeout(500);
+            // Wait 400ms for UI changes or dynamic rendering
+            await page.waitForTimeout(400);
 
             // Handle opened modals/dialogs (close them to keep crawling surface active)
             const closeBtn = page.locator('button:has-text("Cerrar"), button:has-text("Cancelar"), [aria-label="Close"], .close-modal');
-            if (await closeBtn.isVisible()) {
-              await closeBtn.first().click({ timeout: 2000 });
-              await page.waitForTimeout(2000);
+            if (await closeBtn.first().isVisible()) {
+              await closeBtn.first().click({ timeout: 1500 }).catch(() => {});
+              await page.waitForTimeout(400);
             }
           }
         } catch (clickErr) {

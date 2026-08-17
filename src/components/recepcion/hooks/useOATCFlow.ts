@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { OATC, MotivoCancelacion, obtenerOatcsActivosDelDia, obtenerMotivosCancelacion } from '@/services/recepcion';
 import { createClient } from '@/lib/supabase/client';
 
@@ -10,7 +10,7 @@ export function useOATCFlow() {
   const [isLoading, setIsLoading] = useState(true);
   const [now, setNow] = useState(new Date());
 
-  const cargarDatos = async () => {
+  const cargarDatos = useCallback(async () => {
     setIsLoading(true);
     try {
       const [dataOatcs, dataMotivos] = await Promise.all([
@@ -24,13 +24,25 @@ export function useOATCFlow() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  // Mutación Optimista Instantánea (0ms de latencia)
+  const optimisticUpdateOatc = useCallback((id: string, partialData: Partial<OATC>) => {
+    setOatcs((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, ...partialData } : o))
+    );
+  }, []);
+
+  const optimisticRemoveOatc = useCallback((id: string) => {
+    setOatcs((prev) => prev.filter((o) => o.id !== id));
+  }, []);
 
   useEffect(() => {
     cargarDatos();
 
     const supabase = createClient();
-    const channel = supabase.channel('realtime-oatc')
+    const channelName = `realtime-oatc-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const channel = supabase.channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => {
         cargarDatos();
       })
@@ -41,16 +53,23 @@ export function useOATCFlow() {
     }, 1000);
 
     return () => {
-      supabase.removeChannel(channel);
+      try {
+        supabase.removeChannel(channel);
+      } catch (e) {
+        console.warn('Error removiendo canal realtime-oatc:', e);
+      }
       clearInterval(interval);
     };
-  }, []);
+  }, [cargarDatos]);
 
   return {
     oatcs,
+    setOatcs,
     motivos,
     isLoading,
     now,
-    cargarDatos
+    cargarDatos,
+    optimisticUpdateOatc,
+    optimisticRemoveOatc
   };
 }

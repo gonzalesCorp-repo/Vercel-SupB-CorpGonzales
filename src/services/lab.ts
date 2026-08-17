@@ -174,11 +174,11 @@ export async function obtenerStockUbicacion() {
     const [resPrincipal, resLab] = await Promise.all([
       supabase
         .from('almacen_principal')
-        .select('bien_id, marca, linea, presentacion, ubicacion, stock, stock_minimo, bienes(nombre, categoria, sku, peso_envase_tara_gramos, peso_neto_total_gramos, factor_densidad, es_intermedio_subreceta)')
+        .select('id, bien_id, marca, linea, presentacion, ubicacion, stock, stock_minimo, costo_unitario, bienes(id, nombre, categoria, tipo_bien, sku, peso_envase_tara_gramos, peso_neto_total_gramos, factor_densidad, es_intermedio_subreceta)')
         .eq('sede_id', sedeId),
       supabase
         .from('almacen_laboratorio')
-        .select('bien_id, stock_actual')
+        .select('id, bien_id, stock_actual, stock_en_uso')
         .eq('sede_id', sedeId)
     ]);
 
@@ -187,27 +187,47 @@ export async function obtenerStockUbicacion() {
       return [];
     }
 
-    const labMap = new Map<string, number>();
+    const labMap = new Map<string, { stock_actual: number; stock_en_uso: number }>();
     (resLab.data || []).forEach((item: any) => {
-      if (item.bien_id) labMap.set(item.bien_id, Number(item.stock_actual || 0));
+      if (item.bien_id) {
+        labMap.set(item.bien_id, {
+          stock_actual: Number(item.stock_actual || 0),
+          stock_en_uso: Number(item.stock_en_uso || 0)
+        });
+      }
     });
 
-    return (resPrincipal.data || []).map((p: any) => ({
-      bien_id: p.bien_id,
-      producto: p.bienes?.nombre || 'Desconocido',
-      sku: p.bienes?.sku || '',
-      es_subreceta: p.bienes?.es_intermedio_subreceta || false,
-      tara_gramos: p.bienes?.peso_envase_tara_gramos || 0,
-      factor_densidad: p.bienes?.factor_densidad || 1.0,
-      marca: p.marca || '',
-      linea: p.linea || '',
-      presentacion: p.presentacion || '',
-      ubicacion: p.ubicacion || 'RACK SIN NOMBRE',
-      stock_central: p.stock || 0,
-      stock_lab: labMap.get(p.bien_id) || 0,
-      stock_minimo: p.stock_minimo || 0
-    }));
+    return (resPrincipal.data || []).map((p: any) => {
+      const labInfo = labMap.get(p.bien_id);
+      const bienData = p.bienes;
+      const nombreItem = bienData?.nombre || p.marca || 'Insumo sin nombre';
+      const categoriaItem = bienData?.categoria || 'General';
+      const tipoBienItem = bienData?.tipo_bien || 'producto';
+
+      return {
+        id: p.id,
+        bien_id: p.bien_id,
+        nombre: nombreItem,
+        producto: nombreItem,
+        categoria: categoriaItem,
+        tipo_bien: tipoBienItem,
+        sku: bienData?.sku || p.sku || '',
+        es_subreceta: bienData?.es_intermedio_subreceta || false,
+        tara_gramos: bienData?.peso_envase_tara_gramos || 0,
+        factor_densidad: bienData?.factor_densidad || 1.0,
+        marca: p.marca || '',
+        linea: p.linea || '',
+        presentacion: p.presentacion || 'Unidad',
+        ubicacion: p.ubicacion || 'RACK CENTRAL',
+        stock_central: Number(p.stock || 0),
+        stock_lab: Number(labInfo?.stock_actual || 0),
+        stock_en_uso: Number(labInfo?.stock_en_uso || 0),
+        stock_minimo: Number(p.stock_minimo || 10),
+        costo_unitario: Number(p.costo_unitario || 0)
+      };
+    });
   } catch (e) {
+    console.error("Error en obtenerStockUbicacion:", e);
     return [];
   }
 }

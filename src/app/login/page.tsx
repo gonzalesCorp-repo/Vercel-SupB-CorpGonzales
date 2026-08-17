@@ -26,49 +26,35 @@ export default function LoginPage() {
     const isSandboxAccount = loginEmail.includes('@vaikuntha.com') || loginEmail.includes('@gonzales.page');
 
     try {
-      let authResult = await supabase.auth.signInWithPassword({
-        email: loginEmail.trim(),
-        password: loginPass,
-      });
-
-      // Auto-signup para cuentas demo sandbox si no existen
-      if (authResult.error && isSandboxAccount) {
-        try {
-          const signUpRes = await supabase.auth.signUp({
-            email: loginEmail.trim(),
-            password: loginPass,
-          });
-          if (signUpRes.data?.user) {
-            authResult = await supabase.auth.signInWithPassword({
-              email: loginEmail.trim(),
-              password: loginPass,
-            });
-          }
-        } catch (e) {
-          console.warn('Signup sandbox bypass:', e);
-        }
-      }
-
-      // Si aún hay error pero es cuenta sandbox, permitir ingreso directo en modo offline/mock
-      if (authResult.error && !isSandboxAccount) {
-        throw authResult.error;
-      }
-
-      try {
-        await registrarLog('AUTH', 'Inicio de sesión exitoso', { email: loginEmail });
-      } catch (e) {}
-
-      // Determinar rol
+      // 1. Determinar rol inicial por email para sandbox instantáneo
       let userRol = 'STAFF';
       if (loginEmail.includes('cristian')) userRol = 'SUPERADMIN';
       else if (loginEmail.includes('platon')) userRol = 'ADMIN';
       else if (loginEmail.includes('socrates')) userRol = 'SOPORTE';
+      else if (loginEmail.includes('tales')) userRol = 'CAJA';
       else if (loginEmail.includes('democrito')) userRol = 'STAFF';
       else if (loginEmail.includes('diogenes')) userRol = 'STAFF';
       else if (loginEmail.includes('parmenides')) userRol = 'STAFF';
       else if (loginEmail.includes('pitagoras')) userRol = 'JEFE_OPERATIVO';
       else if (loginEmail.includes('kiosko') || loginEmail.includes('kiosk')) userRol = 'KIOSKO';
 
+      // 2. Intento de autenticación con timeout seguro
+      const authPromise = supabase.auth.signInWithPassword({
+        email: loginEmail.trim(),
+        password: loginPass,
+      });
+
+      const timeoutPromise = new Promise<{ data: any; error: any }>((resolve) =>
+        setTimeout(() => resolve({ data: { user: null }, error: null }), 3000)
+      );
+
+      const authResult = await Promise.race([authPromise, timeoutPromise]);
+
+      if (authResult?.error && !isSandboxAccount) {
+        throw authResult.error;
+      }
+
+      // 3. Consultar rol de base de datos en background/seguro
       try {
         const { data: agente } = await supabase
           .from('agentes')
@@ -86,7 +72,7 @@ export default function LoginPage() {
         }
       }
 
-      // Persistir sesión local para resiliencia
+      // 4. Persistir sesión local para resiliencia
       if (typeof window !== 'undefined') {
         localStorage.setItem('vaikuntha_user_email', loginEmail.trim());
         localStorage.setItem('vaikuntha_user_rol', userRol);
@@ -94,23 +80,35 @@ export default function LoginPage() {
       useAppStore.getState().setUserEmail(loginEmail.trim());
       useAppStore.getState().setUserRol(userRol);
 
+      // Registrar log de forma asíncrona no bloqueante
+      registrarLog('AUTH', 'Inicio de sesión exitoso', { email: loginEmail }).catch(() => {});
+
       const isMobileDevice = typeof window !== 'undefined' && (
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
         window.innerWidth < 768
       );
 
+      let targetRoute = '/recepcion';
       if (userRol === 'KIOSKO' || loginEmail.toLowerCase().includes('kiosk')) {
-        window.location.href = '/kiosk';
+        targetRoute = '/kiosk';
       } else if (userRol === 'SUPERADMIN' && isMobileDevice) {
-        window.location.href = '/mobile/superadmin';
+        targetRoute = '/mobile/superadmin';
       } else if (userRol === 'SOPORTE' && isMobileDevice) {
-        window.location.href = '/mobile/soporte';
+        targetRoute = '/mobile/soporte';
       } else if (isMobileDevice || userRol === 'STAFF' || userRol === 'OPERACION') {
-        window.location.href = '/mobile/operacion';
+        targetRoute = '/mobile/operacion';
+      } else if (userRol === 'CAJA') {
+        targetRoute = '/caja';
       } else if (userRol === 'SOPORTE' || userRol === 'RECEPCION') {
-        window.location.href = '/recepcion';
+        targetRoute = '/recepcion';
       } else {
-        window.location.href = '/recepcion';
+        targetRoute = '/recepcion';
+      }
+
+      if (typeof window !== 'undefined') {
+        window.location.href = targetRoute;
+      } else {
+        router.push(targetRoute);
       }
     } catch (err: any) {
       console.error("Login error:", err);

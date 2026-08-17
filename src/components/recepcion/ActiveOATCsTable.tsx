@@ -17,10 +17,12 @@ interface ActiveOATCsTableProps {
 }
 
 export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTableProps) {
-  const { oatcs, motivos, isLoading, now, cargarDatos } = useOATCFlow();
+  const { oatcs, motivos, isLoading, now, cargarDatos, optimisticUpdateOatc, optimisticRemoveOatc } = useOATCFlow();
   const { isCanceling, handleApprove, submitReject, handleCancelar } = useOATCActions({
     onSuccess: cargarDatos,
-    oatcs
+    oatcs,
+    onOptimisticUpdate: optimisticUpdateOatc,
+    onOptimisticRemove: optimisticRemoveOatc
   });
   
   // Modal states
