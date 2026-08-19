@@ -7,6 +7,8 @@ import { Gift, Star, Trophy, Award, ShoppingBag, ChevronRight, Sparkles, X, Chec
 import { createClient } from '@/lib/supabase/client';
 import { obtenerPerfilCliente, obtenerRecompensasCliente, canjearRecompensa, CLIENTE_BADGES, ClienteGamProfile } from '@/lib/gamification/clientEngine';
 import { getNivelPorXP } from '@/lib/gamification/config';
+import { useClientProximity } from '@/hooks/useClientProximity';
+import { ClientProximityBanner } from '@/components/cliente/ClientProximityBanner';
 
 interface Reward {
   id: string;
@@ -31,6 +33,17 @@ export default function ClientePortalPage() {
   const [redeemSuccess, setRedeemSuccess] = useState(false);
 
   const supabase = createClient();
+  const defaultSedeId = 'd954b259-69a0-4546-9156-2f6ad392853f';
+
+  const proximity = useClientProximity({
+    sedeId: defaultSedeId,
+    clienteId: cliente?.id || clienteId || '',
+    clienteNombre: cliente?.nombre || 'Cliente VIP',
+    clienteDni: cliente?.dni || '',
+    servicioNombre: 'Corte & Estilismo Master',
+    estilistaNombre: 'Demócrito de Abdera',
+    horaCita: 'Hoy 4:30 PM'
+  });
 
   useEffect(() => {
     if (!clienteId) return;
@@ -40,25 +53,38 @@ export default function ClientePortalPage() {
   const cargarDatos = async () => {
     if (!clienteId) return;
     setIsLoading(true);
+    try {
+      // Obtener datos del cliente
+      const { data: clienteData } = await supabase
+        .from('clientes')
+        .select('*')
+        .eq('id', clienteId)
+        .maybeSingle();
 
-    // Obtener datos del cliente
-    const { data: clienteData } = await supabase
-      .from('clientes')
-      .select('*')
-      .eq('id', clienteId)
-      .single();
+      if (clienteData) {
+        setCliente(clienteData);
+      } else {
+        // Fallback para pruebas sandbox o enlace demo
+        setCliente({
+          id: clienteId,
+          nombre: 'Valeria Mendoza (Cliente VIP)',
+          dni: '74839201',
+          email: 'valeria.mendoza@gmail.com'
+        });
+      }
 
-    if (clienteData) setCliente(clienteData);
+      // Obtener perfil de gamificación
+      const gamProfile = await obtenerPerfilCliente(clienteId);
+      if (gamProfile) setProfile(gamProfile);
 
-    // Obtener perfil de gamificación
-    const gamProfile = await obtenerPerfilCliente(clienteId);
-    if (gamProfile) setProfile(gamProfile);
-
-    // Obtener recompensas disponibles
-    const rewardsList = await obtenerRecompensasCliente();
-    setRewards(rewardsList);
-
-    setIsLoading(false);
+      // Obtener recompensas disponibles
+      const rewardsList = await obtenerRecompensasCliente();
+      setRewards(rewardsList);
+    } catch (e) {
+      console.warn('Error cargando portal de cliente:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCanjear = async () => {
@@ -189,6 +215,22 @@ export default function ClientePortalPage() {
       {/* Content */}
       <main className="flex-1 p-4 max-w-md mx-auto w-full space-y-4">
         
+        {/* 🎯 Banner de Proximidad Bidireccional & Bienvenida VIP */}
+        <ClientProximityBanner
+          zona={proximity.zonaActual}
+          distanciaMetros={proximity.distanciaMetros}
+          sedeNombre={proximity.config?.nombre || 'Sede San Isidro'}
+          estilistaNombre="Demócrito de Abdera"
+          servicioNombre="Corte & Estilismo Master"
+          horaCita="Hoy 4:30 PM"
+          geolocalizacionActiva={proximity.geolocalizacionActiva}
+          onActivarGps={() => proximity.iniciarTrackingGps()}
+          onSimularDistancia={(metros) => proximity.simularDistancia(metros)}
+          onCheckInConfirmado={() => {
+            console.log('Check-in VIP confirmado por el cliente');
+          }}
+        />
+
         {/* TAB: INICIO */}
         {activeTab === 'inicio' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">

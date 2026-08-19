@@ -7,6 +7,7 @@ import StreakCounter from '@/components/mobile/StreakCounter';
 import HallOfFameBanner from '@/components/mobile/HallOfFameBanner';
 import SegmentedControl from '@/components/mobile/ui/SegmentedControl';
 import TouchActionButton from '@/components/mobile/ui/TouchActionButton';
+import { StaffProximityAlert } from './StaffProximityAlert';
 
 export interface StaffInicioTabProps {
   hallOfFame: any[];
@@ -40,6 +41,13 @@ export default function StaffInicioTab({
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+      {/* 🎯 Alerta de Proximidad de Cliente en Tiempo Real */}
+      <StaffProximityAlert
+        sedeId="d954b259-69a0-4546-9156-2f6ad392853f"
+        agenteId={agente?.id}
+        agenteNombre={agente?.nombre}
+      />
+
       {/* 🏆 Hall of Fame Banner — Octalysis CD2+CD5 */}
       {hallOfFame.length > 0 && (
         <HallOfFameBanner

@@ -8,10 +8,16 @@ export default defineConfig({
   workers: 1, // Run sequentially to avoid DB write collisons
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3005',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+  },
+  webServer: {
+    command: 'npm run dev -- -p 3005',
+    url: 'http://localhost:3005',
+    reuseExistingServer: true,
+    timeout: 60000,
   },
   projects: [
     {

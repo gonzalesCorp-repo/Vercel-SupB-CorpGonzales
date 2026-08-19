@@ -41,8 +41,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Define public routes
-  const isPublicRoute = request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/';
+  // Define public routes (Login, Home, Portal Cliente QR y Tótem Kiosko)
+  const isPublicRoute = 
+    request.nextUrl.pathname === '/login' || 
+    request.nextUrl.pathname === '/' ||
+    request.nextUrl.pathname.startsWith('/cliente') ||
+    request.nextUrl.pathname.startsWith('/kiosk');
 
   // Protect all private routes
   if (!user && !isPublicRoute) {

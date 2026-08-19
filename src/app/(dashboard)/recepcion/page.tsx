@@ -5,6 +5,7 @@ import NuevaOATC from '@/components/recepcion/NuevaOATC';
 import QueueMonitor from '@/components/recepcion/QueueMonitor';
 import ActiveOATCsTable from '@/components/recepcion/ActiveOATCsTable';
 import ColaboradorDetalleCard from '@/components/recepcion/ColaboradorDetalleCard';
+import { ProximityRadarModal } from '@/components/recepcion/ProximityRadarModal';
 import { DesktopWindow, WindowState } from '@/components/ui/DesktopWindow';
 import { DesktopTaskbar } from '@/components/ui/DesktopTaskbar';
 import { Agente, obtenerAgentesDisponibles } from '@/services/recepcion';
@@ -345,6 +346,12 @@ export default function RecepcionPage() {
         windows={windows}
         onToggleWindow={handleToggleFromTaskbar}
         onNewWindow={abrirNuevaVentanaOATC}
+      />
+
+      {/* Radar de Proximidad Bidireccional en Tiempo Real (GPS Geofence + BLE Beacons) */}
+      <ProximityRadarModal
+        sedeId={sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f'}
+        onPreAsignarOatc={() => abrirNuevaVentanaOATC()}
       />
     </div>
   );
