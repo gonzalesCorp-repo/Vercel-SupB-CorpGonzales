@@ -12,6 +12,7 @@ import { useThemeStore } from '@/store/useThemeStore';
 import { useAppStore } from '@/store/useAppStore';
 import { SKINS_CATALOG, getSkinById, ThemeCategory } from '@/config/themes';
 import { motion } from 'framer-motion';
+import { MultiDriveConfigPanel } from '@/components/admin/MultiDriveConfigPanel';
 
 export default function AdminSedeConfigPage() {
   const [toggles, setToggles] = useState<SedeFeatureToggles>({
@@ -412,6 +413,9 @@ export default function AdminSedeConfigPage() {
             </button>
           )}
         </div>
+
+        {/* GOBERNANZA MULTI-CUENTA GOOGLE DRIVE & STORAGE */}
+        <MultiDriveConfigPanel />
 
         {/* CONTROLES DE EFECTOS VISUALES HOUDINI */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -6,11 +6,12 @@ import QueueMonitor from '@/components/recepcion/QueueMonitor';
 import ActiveOATCsTable from '@/components/recepcion/ActiveOATCsTable';
 import ColaboradorDetalleCard from '@/components/recepcion/ColaboradorDetalleCard';
 import { ProximityRadarModal } from '@/components/recepcion/ProximityRadarModal';
+import { GoogleDriveExplorerModal } from '@/components/drive/GoogleDriveExplorerModal';
 import { DesktopWindow, WindowState } from '@/components/ui/DesktopWindow';
 import { DesktopTaskbar } from '@/components/ui/DesktopTaskbar';
 import { Agente, obtenerAgentesDisponibles } from '@/services/recepcion';
 import { AnimatedNumber } from '@/components/ui/motion-primitives/animated-number';
-import { Users, Clock, Layers, Plus, RefreshCw, Activity } from 'lucide-react';
+import { Users, Clock, Layers, Plus, RefreshCw, Activity, HardDrive } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { createClient } from '@/lib/supabase/client';
@@ -23,6 +24,7 @@ interface ExtendedWindowState extends WindowState {
 export default function RecepcionPage() {
   const [windows, setWindows] = useState<ExtendedWindowState[]>([]);
   const [topZIndex, setTopZIndex] = useState(100);
+  const [driveOpen, setDriveOpen] = useState(false);
   
   // Métricas en Vivo conectadas a la base de datos real
   const [metrics, setMetrics] = useState({
@@ -291,14 +293,27 @@ export default function RecepcionPage() {
           </div>
         </div>
 
-        {/* Botón de recarga sutil */}
-        <button
-          onClick={fetchLiveMetrics}
-          className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
-          title="Actualizar métricas en vivo"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${metrics.loading ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Botón de Google Drive Cloud */}
+          <button
+            type="button"
+            onClick={() => setDriveOpen(true)}
+            className="px-3 py-1.5 bg-gradient-to-r from-amber-500/15 to-orange-500/15 hover:from-amber-500/25 hover:to-orange-500/25 border border-amber-500/30 text-amber-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition active:scale-95 cursor-pointer shadow-sm"
+            title="Explorador Multimedia de Google Drive"
+          >
+            <HardDrive className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Google Drive</span>
+          </button>
+
+          {/* Botón de recarga sutil */}
+          <button
+            onClick={fetchLiveMetrics}
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
+            title="Actualizar métricas en vivo"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${metrics.loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {/* Grid Principal: Monitor de Disponibilidad y Atenciones Activas en Primer Plano */}
@@ -352,6 +367,14 @@ export default function RecepcionPage() {
       <ProximityRadarModal
         sedeId={sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f'}
         onPreAsignarOatc={() => abrirNuevaVentanaOATC()}
+      />
+
+      {/* Explorador Multimedia Embebido de Google Drive */}
+      <GoogleDriveExplorerModal
+        isOpen={driveOpen}
+        onClose={() => setDriveOpen(false)}
+        entidadTipo="SEDE"
+        entidadNombre={sedeActiva?.nombre || 'Sede San Isidro'}
       />
     </div>
   );
