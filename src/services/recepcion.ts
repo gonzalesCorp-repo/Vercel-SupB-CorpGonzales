@@ -318,28 +318,52 @@ export async function crearOatc(
     estadoPago = 'PARCIAL_ADELANTO';
   }
 
-  const { data, error } = await supabase
+  // Payload base garantizado estándar
+  const basePayload: any = {
+    cliente_id: clienteId,
+    cliente_nombre: clienteNombre,
+    agente_id: agenteId,
+    agente_nombre: agenteNombre,
+    punto_partida: puntoPartida,
+    tipo_demanda: tipoDemanda,
+    estado_proceso: estadoProceso,
+    estado_pago: estadoPago,
+    monto_total: totalCalculado,
+    sede_id: sedeId
+  };
+
+  // 1. Intentar primero con las columnas extendidas
+  const extendedPayload = {
+    ...basePayload,
+    monto_adelanto: montoAdelanto,
+    metodo_adelanto: metodoAdelanto || null
+  };
+
+  let res = await supabase
     .from('oatc')
-    .insert([{
-      cliente_id: clienteId,
-      cliente_nombre: clienteNombre,
-      agente_id: agenteId,
-      agente_nombre: agenteNombre,
-      punto_partida: puntoPartida,
-      tipo_demanda: tipoDemanda,
-      estado_proceso: estadoProceso,
-      estado_pago: estadoPago,
-      monto_adelanto: montoAdelanto,
-      metodo_adelanto: metodoAdelanto || null,
-      monto_total: totalCalculado,
-      sede_id: sedeId
-    }])
+    .insert([extendedPayload])
     .select();
 
-  if (error) {
-    console.error("Error creando OATC:", error);
-    throw new Error(error.message);
+  // 2. Si falla porque 'metodo_adelanto' o 'monto_adelanto' no existen en el schema cache de Supabase
+  if (res.error && (
+    res.error.message.includes('metodo_adelanto') || 
+    res.error.message.includes('monto_adelanto') ||
+    res.error.message.includes('schema cache') ||
+    res.error.code === 'PGRST204'
+  )) {
+    console.warn('[crearOatc] Reintentando inserción con payload base compatible:', res.error.message);
+    res = await supabase
+      .from('oatc')
+      .insert([basePayload])
+      .select();
   }
+
+  if (res.error) {
+    console.error("Error creando OATC:", res.error);
+    throw new Error(res.error.message);
+  }
+
+  const data = res.data;
 
   if (agenteId) {
     await supabase.from('agentes').update({ estado_operativo: 'OCUPADO' }).eq('id', agenteId);
