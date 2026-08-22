@@ -265,6 +265,72 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
               </div>
             )}
 
+            {/* 🎯 Calibración Fina de Margen & Ancho (Solución para margen del 25%) */}
+            <div className="pt-2 border-t border-slate-800/80">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-black text-indigo-300 uppercase tracking-wider flex items-center gap-1">
+                  <Settings2 className="w-3.5 h-3.5 text-indigo-400" />
+                  Calibración de Margen & Fuente
+                </span>
+                <span className="text-[10px] text-slate-400">
+                  Ajusta para 100% de ancho sin margen vacío
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                {/* Desplazamiento de Margen Izquierdo */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                    Margen Izquierdo (Offset)
+                  </label>
+                  <select
+                    value={config.margenIzquierdoEspacios || 0}
+                    onChange={(e) => handleConfigUpdate({ margenIzquierdoEspacios: Number(e.target.value) })}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white font-medium outline-none focus:border-indigo-500"
+                  >
+                    <option value={0}>0 espacios (Margen Cero)</option>
+                    <option value={1}>1 espacio</option>
+                    <option value={2}>2 espacios</option>
+                    <option value={4}>4 espacios</option>
+                    <option value={6}>6 espacios</option>
+                  </select>
+                </div>
+
+                {/* Tipo de Fuente */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                    Tipo de Fuente (Font)
+                  </label>
+                  <select
+                    value={config.fuenteTipo || 'FontA'}
+                    onChange={(e) => handleConfigUpdate({ fuenteTipo: e.target.value as any })}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white font-medium outline-none focus:border-indigo-500"
+                  >
+                    <option value="FontA">Font A (12x24 Estándar)</option>
+                    <option value="FontB">Font B (9x17 Compacta)</option>
+                  </select>
+                </div>
+
+                {/* Columnas Totales */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                    Columnas por Línea
+                  </label>
+                  <select
+                    value={config.columnasCustom || (config.ancho === '58mm' ? 32 : 48)}
+                    onChange={(e) => handleConfigUpdate({ columnasCustom: Number(e.target.value) })}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white font-medium outline-none focus:border-indigo-500"
+                  >
+                    <option value={30}>30 cols (Estrecho)</option>
+                    <option value={32}>32 cols (Estándar 58mm)</option>
+                    <option value={38}>38 cols (Medio)</option>
+                    <option value={42}>42 cols (Font B 58mm)</option>
+                    <option value={48}>48 cols (Estándar 80mm)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             {/* Checkboxes de Hardware */}
             <div className="flex items-center gap-4 pt-1">
               <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">

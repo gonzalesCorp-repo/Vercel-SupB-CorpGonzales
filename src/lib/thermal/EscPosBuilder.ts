@@ -9,18 +9,27 @@
 
 export type AnchoPapel = '58mm' | '80mm';
 export type Alineacion = 'left' | 'center' | 'right';
+export type FuenteTipo = 'FontA' | 'FontB';
 
 export interface OpcionesTicket {
   ancho: AnchoPapel;
   abrirCajon?: boolean;
   cortarPapel?: boolean;
   tamanoFuente?: 'normal' | 'pequena';
+  margenIzquierdoEspacios?: number; // 0 a 8 espacios para calibración
+  fuenteTipo?: FuenteTipo; // Font A (12x24) vs Font B (9x17)
+  columnasCustom?: number; // 30, 32, 38, 42, 48
 }
 
 // Comandos ESC/POS estándar
 const CMD = {
   INIT: [0x1b, 0x40], // ESC @ - Inicializar impresora
   CODEPAGE_CP437: [0x1b, 0x74, 0x00], // ESC t 0 - Tabla de caracteres estándar CP437
+  RESET_LEFT_MARGIN: [0x1d, 0x4c, 0x00, 0x00], // GS L 0 0 - Forzar margen izquierdo a 0 dots
+  SET_PRINT_AREA_58MM: [0x1d, 0x57, 0x80, 0x01], // GS W 384 dots - Ancho 100% en 58mm
+  SET_PRINT_AREA_80MM: [0x1d, 0x57, 0x40, 0x02], // GS W 576 dots - Ancho 100% en 80mm
+  SELECT_FONT_A: [0x1b, 0x4d, 0x00], // ESC M 0 - Fuente A (Estándar 12x24)
+  SELECT_FONT_B: [0x1b, 0x4d, 0x01], // ESC M 1 - Fuente B (Compacta 9x17)
   ALIGN_LEFT: [0x1b, 0x61, 0x00], // ESC a 0
   ALIGN_CENTER: [0x1b, 0x61, 0x01], // ESC a 1
   ALIGN_RIGHT: [0x1b, 0x61, 0x02], // ESC a 2
@@ -63,13 +72,23 @@ export class EscPosBuilder {
   private buffer: number[] = [];
   private ancho: AnchoPapel;
   private maxColumnas: number;
+  private margenOffset: string;
   private encoder: TextEncoder;
 
   constructor(opciones: OpcionesTicket = { ancho: '58mm' }) {
     this.ancho = opciones.ancho;
-    // 58mm -> 32 columnas estándar en Font A (o 42 en Font B)
-    // 80mm -> 48 columnas estándar en Font A
-    this.maxColumnas = opciones.ancho === '58mm' ? 32 : 48;
+    const margenSpaces = Math.max(0, Math.min(10, opciones.margenIzquierdoEspacios || 0));
+    this.margenOffset = ' '.repeat(margenSpaces);
+
+    // Si se especifican columnas custom, usar esas; sino según el ancho y tipo de fuente
+    if (opciones.columnasCustom && opciones.columnasCustom > 0) {
+      this.maxColumnas = Math.max(20, opciones.columnasCustom - margenSpaces);
+    } else if (opciones.fuenteTipo === 'FontB') {
+      this.maxColumnas = (opciones.ancho === '58mm' ? 42 : 56) - margenSpaces;
+    } else {
+      this.maxColumnas = (opciones.ancho === '58mm' ? 32 : 48) - margenSpaces;
+    }
+
     this.encoder = new TextEncoder();
     this.inicializar(opciones);
   }
@@ -77,6 +96,22 @@ export class EscPosBuilder {
   private inicializar(opciones: OpcionesTicket) {
     this.buffer.push(...CMD.INIT);
     this.buffer.push(...CMD.CODEPAGE_CP437);
+    this.buffer.push(...CMD.RESET_LEFT_MARGIN);
+
+    // Fijar el ancho del área imprimible al 100%
+    if (opciones.ancho === '80mm') {
+      this.buffer.push(...CMD.SET_PRINT_AREA_80MM);
+    } else {
+      this.buffer.push(...CMD.SET_PRINT_AREA_58MM);
+    }
+
+    // Seleccionar tipo de fuente
+    if (opciones.fuenteTipo === 'FontB') {
+      this.buffer.push(...CMD.SELECT_FONT_B);
+    } else {
+      this.buffer.push(...CMD.SELECT_FONT_A);
+    }
+
     this.buffer.push(...CMD.NORMAL_SIZE);
 
     if (opciones.abrirCajon) {
@@ -111,6 +146,9 @@ export class EscPosBuilder {
   }
 
   public linea(str: string = ''): this {
+    if (this.margenOffset.length > 0 && str.length > 0) {
+      this.texto(this.margenOffset);
+    }
     this.texto(str);
     this.buffer.push(0x0a); // LF (Line Feed)
     return this;

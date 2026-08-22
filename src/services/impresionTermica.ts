@@ -9,7 +9,7 @@
  * 4. BROWSER_HTML (Diálogo de impresión universal del sistema operativo)
  */
 
-import { EscPosBuilder, AnchoPapel } from '@/lib/thermal/EscPosBuilder';
+import { EscPosBuilder, AnchoPapel, FuenteTipo } from '@/lib/thermal/EscPosBuilder';
 import { createClient } from '@/lib/supabase/client';
 
 export type CanalImpresion = 'USB_SERIAL' | 'BLUETOOTH_BLE' | 'WIFI_LAN_CLOUD' | 'BROWSER_HTML';
@@ -20,6 +20,9 @@ export interface ThermalPrinterConfig {
   baudRate: number; // 9600, 19200, 38400, 115200 (Default 9600 o 38400)
   abrirCajonAutomatico: boolean;
   cortarPapelAutomatico: boolean;
+  margenIzquierdoEspacios?: number; // 0 a 8 espacios para calibración de margen
+  fuenteTipo?: FuenteTipo; // FontA (Estándar) vs FontB (Compacta)
+  columnasCustom?: number; // 30, 32, 38, 42, 48
   ipImpresoraLan?: string; // ej: 192.168.1.200
   puertoLan?: number; // Default 9100
   nombreImpresora?: string;
@@ -42,12 +45,15 @@ export interface ImpresionTicketPayload {
   sedeRuc?: string;
   sedeDireccion?: string;
   sedeTelefono?: string;
-  tipoComprobante: 'BOLETA DE VENTA' | 'FACTURA' | 'NOTA DE VENTA' | 'TICKET PROFORMA' | 'COMANDA BAR';
+  tipoComprobante: 'BOLETA DE VENTA' | 'FACTURA' | 'NOTA DE VENTA' | 'TICKET PROFORMA' | 'COMANDA BAR' | 'FICHA DE ATENCION' | 'PRE-CUENTA SILLON';
   serieNumero: string;
   fechaHora: string;
   clienteNombre: string;
   clienteDoc?: string;
   cajeroNombre?: string;
+  estilistaNombre?: string;
+  estacionSillon?: string;
+  formulaLab?: string;
   items: ItemTicketImpresion[];
   subtotal: number;
   igv: number;
@@ -64,11 +70,14 @@ export const DEFAULT_PRINTER_CONFIG: ThermalPrinterConfig = {
   canal: 'USB_SERIAL',
   ancho: '58mm',
   baudRate: 9600,
-  abrirCajonAutomatico: true,
+  abrirCajonAutomatico: false,
   cortarPapelAutomatico: true,
+  margenIzquierdoEspacios: 0,
+  fuenteTipo: 'FontA',
+  columnasCustom: 32,
   ipImpresoraLan: '192.168.1.200',
   puertoLan: 9100,
-  nombreImpresora: 'Impresora Térmica POS'
+  nombreImpresora: 'Impresora Térmica POS-58'
 };
 
 /**
@@ -121,7 +130,10 @@ export function compilarTicketEscPos(
   const builder = new EscPosBuilder({
     ancho: config.ancho,
     abrirCajon: config.abrirCajonAutomatico,
-    cortarPapel: config.cortarPapelAutomatico
+    cortarPapel: config.cortarPapelAutomatico,
+    margenIzquierdoEspacios: config.margenIzquierdoEspacios || 0,
+    fuenteTipo: config.fuenteTipo || 'FontA',
+    columnasCustom: config.columnasCustom
   });
 
   // 1. Encabezado
@@ -139,7 +151,7 @@ export function compilarTicketEscPos(
 
   builder.separador('=');
 
-  // 2. Datos del Comprobante
+  // 2. Datos del Comprobante / Ficha
   builder
     .alinear('center')
     .negrita(true)
@@ -148,26 +160,39 @@ export function compilarTicketEscPos(
     .negrita(false)
     .separador('-');
 
-  // 3. Cliente y Fecha
+  // 3. Cliente y Datos Operativos
   builder
     .alinear('left')
-    .filaDosColumnas('Fecha:', payload.fechaHora)
+    .filaDosColumnas('Fecha/Hora:', payload.fechaHora)
     .filaDosColumnas('Cliente:', payload.clienteNombre);
 
   if (payload.clienteDoc) {
-    builder.filaDosColumnas('Doc/RUC:', payload.clienteDoc);
+    builder.filaDosColumnas('Doc/DNI:', payload.clienteDoc);
+  }
+  if (payload.estilistaNombre) {
+    builder.filaDosColumnas('Especialista:', payload.estilistaNombre);
+  }
+  if (payload.estacionSillon) {
+    builder.filaDosColumnas('Sillon/Est:', payload.estacionSillon);
   }
   if (payload.cajeroNombre) {
-    builder.filaDosColumnas('Atendido por:', payload.cajeroNombre);
+    builder.filaDosColumnas('Caja:', payload.cajeroNombre);
+  }
+
+  // 4. Fórmula de Laboratorio / Taller si existe
+  if (payload.formulaLab) {
+    builder.separador('-');
+    builder.alinear('left').negrita(true).linea('FORMULA TECNICA (LAB):').negrita(false);
+    builder.linea(payload.formulaLab);
   }
 
   builder.separador('-');
 
-  // 4. Cabecera de Tabla
-  builder.filaDosColumnas('CANT / DESCRIPCION', 'TOTAL (S/)');
+  // 5. Cabecera de Tabla
+  builder.filaDosColumnas('CANT / SERVICIO', 'TOTAL');
   builder.separador('-');
 
-  // 5. Items
+  // 6. Items
   for (const item of payload.items) {
     const totalItemStr = `S/ ${Number(item.total || 0).toFixed(2)}`;
     builder.filaItem(item.cantidad, item.nombre, totalItemStr);
@@ -175,7 +200,7 @@ export function compilarTicketEscPos(
 
   builder.separador('=');
 
-  // 6. Totales
+  // 7. Totales
   builder
     .alinear('right')
     .filaDosColumnas('Subtotal:', `S/ ${Number(payload.subtotal || 0).toFixed(2)}`);
@@ -184,15 +209,18 @@ export function compilarTicketEscPos(
     builder.filaDosColumnas('Descuento:', `- S/ ${Number(payload.descuento).toFixed(2)}`);
   }
 
+  if (payload.igv && payload.igv > 0) {
+    builder.filaDosColumnas('IGV (18%):', `S/ ${Number(payload.igv || 0).toFixed(2)}`);
+  }
+
   builder
-    .filaDosColumnas('IGV (18%):', `S/ ${Number(payload.igv || 0).toFixed(2)}`)
     .negrita(true)
     .tamanoDoble(config.ancho === '80mm')
     .filaDosColumnas('TOTAL:', `S/ ${Number(payload.total || 0).toFixed(2)}`)
     .tamanoDoble(false)
     .negrita(false);
 
-  // 7. Pagos
+  // 8. Pagos
   if (payload.pagos && payload.pagos.length > 0) {
     builder.separador('-');
     builder.alinear('left').negrita(true).linea('MEDIOS DE PAGO:').negrita(false);
@@ -201,7 +229,7 @@ export function compilarTicketEscPos(
     }
   }
 
-  // 8. Pie de página
+  // 9. Pie de página
   builder.separador('=');
   builder
     .alinear('center')
@@ -256,7 +284,6 @@ export async function imprimirViaWebBluetooth(
   }
 
   try {
-    // Servicios estándar de impresoras térmicas BLE chinas (AliExpress / POS Printers)
     const device = await (navigator as any).bluetooth.requestDevice({
       filters: [
         { services: ['000018f0-0000-1000-8000-00805f9b34fb'] },
@@ -311,7 +338,6 @@ export async function encolarImpresionCloud(
   try {
     const supabase = createClient();
     const bytes = compilarTicketEscPos(payload, config);
-    // Convertir Uint8Array a Base64 para transporte seguro JSON
     const base64 = btoa(String.fromCharCode.apply(null, Array.from(bytes)));
 
     const job = {
@@ -325,13 +351,11 @@ export async function encolarImpresionCloud(
       created_at: new Date().toISOString()
     };
 
-    // 1. Insertar en tabla de cola
     const { error: dbError } = await supabase.from('impresiones_cola').insert([job]);
     if (dbError) {
       console.warn('[encolarImpresionCloud] Advertencia DB:', dbError.message);
     }
 
-    // 2. Emitir broadcast Realtime para el agente local
     const channel = supabase.channel(`realtime-print-${sedeId}`);
     await channel.send({
       type: 'broadcast',
@@ -397,6 +421,8 @@ export function imprimirViaIframeHtml(
         <div class="row"><span>Fecha:</span><span>${payload.fechaHora}</span></div>
         <div class="row"><span>Cliente:</span><span>${payload.clienteNombre}</span></div>
         ${payload.clienteDoc ? `<div class="row"><span>Doc:</span><span>${payload.clienteDoc}</span></div>` : ''}
+        ${payload.estilistaNombre ? `<div class="row"><span>Especialista:</span><span>${payload.estilistaNombre}</span></div>` : ''}
+        ${payload.estacionSillon ? `<div class="row"><span>Sillon:</span><span>${payload.estacionSillon}</span></div>` : ''}
         ${payload.cajeroNombre ? `<div class="row"><span>Cajero:</span><span>${payload.cajeroNombre}</span></div>` : ''}
         <div class="divider"></div>
         <div class="row bold"><span>CANT / DESCRIPCION</span><span>TOTAL</span></div>
@@ -410,7 +436,6 @@ export function imprimirViaIframeHtml(
         <div class="double-divider"></div>
         <div class="row"><span>Subtotal:</span><span>S/ ${Number(payload.subtotal).toFixed(2)}</span></div>
         ${payload.descuento ? `<div class="row"><span>Descuento:</span><span>- S/ ${Number(payload.descuento).toFixed(2)}</span></div>` : ''}
-        <div class="row"><span>IGV (18%):</span><span>S/ ${Number(payload.igv).toFixed(2)}</span></div>
         <div class="row bold" style="font-size: 13px;"><span>TOTAL:</span><span>S/ ${Number(payload.total).toFixed(2)}</span></div>
         ${payload.pagos && payload.pagos.length > 0 ? `
           <div class="divider"></div>
@@ -478,7 +503,6 @@ export async function imprimirTicketUniversal(
   if (config.canal === 'USB_SERIAL') {
     const res = await imprimirViaWebSerial(bytes, config.baudRate);
     if (!res.success) {
-      // Fallback a HTML si el usuario canceló o hubo error
       return { success: false, canalUsado: 'USB_SERIAL', error: res.error };
     }
     return { success: true, canalUsado: 'USB_SERIAL' };
@@ -503,7 +527,45 @@ export async function imprimirTicketUniversal(
 }
 
 /**
- * Genera un comprobante de prueba para verificar conectividad con la impresora
+ * IMPRESIÓN PARA STAFF: Imprime la ficha de atención activa / pre-cuenta en sillón
+ */
+export async function imprimirTicketAtencionStaff(
+  oatc: any,
+  configOverride?: Partial<ThermalPrinterConfig>,
+  agenteNombre?: string,
+  sedeId?: string
+): Promise<{ success: boolean; canalUsado: CanalImpresion; error?: string }> {
+  const servicios: ItemTicketImpresion[] = (oatc.punto_partida || []).map((s: any) => ({
+    nombre: s.nombre || s.servicio || 'Servicio',
+    cantidad: s.cantidad || 1,
+    precioUnitario: s.precio || s.precio_venta || 0,
+    total: (s.precio || s.precio_venta || 0) * (s.cantidad || 1)
+  }));
+
+  const subtotal = servicios.reduce((acc, it) => acc + it.total, 0);
+  const total = oatc.monto_total || subtotal;
+
+  const payload: ImpresionTicketPayload = {
+    sedeNombre: 'VAIKUNTHA SALON & SPA',
+    tipoComprobante: 'FICHA DE ATENCION',
+    serieNumero: `OATC-${(oatc.id || 'TEMP').substring(0, 8).toUpperCase()}`,
+    fechaHora: new Date().toLocaleString('es-PE'),
+    clienteNombre: oatc.cliente_nombre || 'Cliente en Sillón',
+    clienteDoc: oatc.cliente_dni || '',
+    estilistaNombre: agenteNombre || oatc.agente_nombre || 'Especialista',
+    estacionSillon: oatc.estacion_nombre || 'Sillón Principal',
+    items: servicios,
+    subtotal: subtotal,
+    igv: 0,
+    total: total,
+    mensajePie: 'Atención en proceso • Validación de servicios'
+  };
+
+  return await imprimirTicketUniversal(payload, configOverride, sedeId);
+}
+
+/**
+ * Genera un comprobante de prueba para verificar conectividad y calibración
  */
 export function generarPayloadPrueba(config: ThermalPrinterConfig): ImpresionTicketPayload {
   return {
@@ -512,19 +574,19 @@ export function generarPayloadPrueba(config: ThermalPrinterConfig): ImpresionTic
     sedeDireccion: 'Av. Conquistadores 450, San Isidro',
     sedeTelefono: '(01) 421-9876',
     tipoComprobante: 'TICKET PROFORMA',
-    serieNumero: 'TEST-0001',
+    serieNumero: 'CALIB-001',
     fechaHora: new Date().toLocaleString('es-PE'),
-    clienteNombre: 'Cliente de Prueba (AliExpress)',
+    clienteNombre: 'Test Calibracion 100% Ancho',
     clienteDoc: '88888888',
     cajeroNombre: 'Cajero Principal',
     items: [
-      { nombre: 'Prueba Corte Termico ESC/POS', cantidad: 1, precioUnitario: 35.0, total: 35.0 },
-      { nombre: 'Test Calibracion 58mm/80mm', cantidad: 1, precioUnitario: 15.0, total: 15.0 }
+      { nombre: 'Linea de Prueba Ancho Total', cantidad: 1, precioUnitario: 30.0, total: 30.0 },
+      { nombre: 'Margen 0% - 100% Ocupado', cantidad: 1, precioUnitario: 20.0, total: 20.0 }
     ],
     subtotal: 42.37,
     igv: 7.63,
     total: 50.0,
     pagos: [{ metodo: 'EFECTIVO', monto: 50.0 }],
-    mensajePie: '¡Prueba de impresion exitosa!'
+    mensajePie: `Calibracion: ${config.ancho} | ${config.fuenteTipo || 'FontA'} | Offset: ${config.margenIzquierdoEspacios || 0}`
   };
 }

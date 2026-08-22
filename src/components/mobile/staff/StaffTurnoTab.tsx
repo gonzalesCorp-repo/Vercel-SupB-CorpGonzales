@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Users2, Play, Plus, CreditCard, CheckCircle, Ban, AlertTriangle, X, Trash2, Edit2 } from 'lucide-react';
+import { RefreshCw, Users2, Play, Plus, CreditCard, CheckCircle, Ban, AlertTriangle, X, Trash2, Edit2, Printer, Settings2 } from 'lucide-react';
 import { obtenerMotivosCancelacion, MotivoCancelacion } from '@/services/recepcion';
 import TouchActionButton from '@/components/mobile/ui/TouchActionButton';
 import { buscarClientes, Cliente } from '@/services/clientes';
+import { ThermalPrinterHubModal } from '@/components/caja/ThermalPrinterHubModal';
+import { imprimirTicketAtencionStaff } from '@/services/impresionTermica';
 
 export interface StaffTurnoTabProps {
   tickets: any[];
@@ -93,6 +95,32 @@ export default function StaffTurnoTab({
   const isEnCurso = ticketActivo?.estado_proceso === 'EN_CURSO';
   const isAsesoria = !isEnCurso && (ticketActivo?.estado_proceso === 'ASESORIA' || ticketActivo?.estado_proceso === 'ESPERA' || ticketActivo?.estado_proceso === 'PENDIENTE_INICIO');
   const isPendingCancel = ticketActivo?.cambios_pendientes?.tipo === 'SOLICITUD_CANCELACION' || ticketActivo?.estado_proceso === 'PENDIENTE_CANCELACION';
+
+  // Estados de Impresión Térmica
+  const [showPrinterHub, setShowPrinterHub] = useState(false);
+  const [isPrintingTicket, setIsPrintingTicket] = useState(false);
+  const [printFeedback, setPrintFeedback] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+
+  const handlePrintTicket = async () => {
+    if (!ticketActivo) return;
+    setIsPrintingTicket(true);
+    setPrintFeedback({ type: 'info', text: 'Imprimiendo ticket...' });
+    try {
+      const res = await imprimirTicketAtencionStaff(ticketActivo, undefined, undefined, ticketActivo.sede_id);
+      if (res.success) {
+        setPrintFeedback({ type: 'success', text: `¡Ticket impreso vía ${res.canalUsado}!` });
+        setTimeout(() => setPrintFeedback(null), 3500);
+      } else {
+        setPrintFeedback({ type: 'error', text: res.error || 'No se pudo imprimir el ticket.' });
+        setTimeout(() => setPrintFeedback(null), 4000);
+      }
+    } catch (e: any) {
+      setPrintFeedback({ type: 'error', text: e?.message || 'Error al imprimir' });
+      setTimeout(() => setPrintFeedback(null), 4000);
+    } finally {
+      setIsPrintingTicket(false);
+    }
+  };
 
   const onSubmitCancel = async () => {
     if (!ticketActivo || !selectedMotivoId) return;
@@ -322,6 +350,41 @@ export default function StaffTurnoTab({
               </div>
             )}
 
+            {/* Fila de Impresión de Ficha / Pre-Cuenta para Staff */}
+            <div className="flex items-center gap-2 pt-1 border-t border-slate-800/80">
+              <TouchActionButton
+                variant="secondary"
+                icon={Printer}
+                onClick={handlePrintTicket}
+                disabled={isPrintingTicket}
+                className="flex-1 bg-slate-800/80 hover:bg-slate-700/80 border-slate-700 text-indigo-300"
+              >
+                {isPrintingTicket ? 'Imprimiendo...' : 'Imprimir Ficha / Pre-Cuenta'}
+              </TouchActionButton>
+
+              <button
+                type="button"
+                onClick={() => setShowPrinterHub(true)}
+                className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition shrink-0 cursor-pointer"
+                title="Configurar Impresora Bluetooth / USB"
+              >
+                <Settings2 className="w-5 h-5 text-indigo-400" />
+              </button>
+            </div>
+
+            {/* Feedback de Impresión */}
+            {printFeedback && (
+              <div className={`p-2.5 rounded-xl border text-xs text-center font-bold animate-in fade-in duration-200 ${
+                printFeedback.type === 'success'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                  : printFeedback.type === 'error'
+                  ? 'bg-red-500/10 border-red-500/30 text-red-300'
+                  : 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300'
+              }`}>
+                {printFeedback.text}
+              </div>
+            )}
+
             {/* Botón Solicitar Cancelación */}
             {!isPendingCancel && (
               <TouchActionButton
@@ -405,6 +468,13 @@ export default function StaffTurnoTab({
           </div>
         )}
       </AnimatePresence>
+
+      {/* Modal Hub de Impresión Térmica para Staff */}
+      <ThermalPrinterHubModal
+        isOpen={showPrinterHub}
+        onClose={() => setShowPrinterHub(false)}
+        sedeId={ticketActivo?.sede_id}
+      />
     </motion.div>
   );
 }
