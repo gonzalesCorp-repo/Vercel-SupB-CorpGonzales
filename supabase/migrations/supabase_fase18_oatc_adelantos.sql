@@ -1,14 +1,21 @@
 -- ==============================================================================
--- FASE 18: EXTENSIÓN OATC Y COLUMNAS DE ADELANTO / ANTICIPOS
+-- FASE 18: EXTENSIÓN OATC Y COLUMNAS MODERNAS
 -- VAIKUNTHA ENTERPRISE ERP ENGINE
 -- ==============================================================================
 
--- 1. Agregar columnas de adelanto a la tabla oatc si no existen
+-- 1. Agregar todas las columnas extendidas a la tabla oatc si no existen
 ALTER TABLE public.oatc
+ADD COLUMN IF NOT EXISTS sede_id UUID REFERENCES public.sedes(id) ON DELETE SET NULL,
+ADD COLUMN IF NOT EXISTS estado_pago VARCHAR(50) DEFAULT 'NO_PAGADO',
+ADD COLUMN IF NOT EXISTS monto_total NUMERIC(10, 2) DEFAULT 0,
 ADD COLUMN IF NOT EXISTS monto_adelanto NUMERIC(10, 2) DEFAULT 0,
 ADD COLUMN IF NOT EXISTS metodo_adelanto VARCHAR(50),
 ADD COLUMN IF NOT EXISTS tipo_demanda VARCHAR(100) DEFAULT 'NORMAL',
-ADD COLUMN IF NOT EXISTS monto_total NUMERIC(10, 2) DEFAULT 0;
+ADD COLUMN IF NOT EXISTS hora_inicio_atencion TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS hora_fin_atencion TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS cambios_pendientes JSONB,
+ADD COLUMN IF NOT EXISTS motivo_cancelacion_id UUID,
+ADD COLUMN IF NOT EXISTS detalle_cancelacion TEXT;
 
 -- 2. Asegurar permisos RLS en la tabla oatc
 ALTER TABLE public.oatc ENABLE ROW LEVEL SECURITY;

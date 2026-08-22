@@ -318,8 +318,8 @@ export async function crearOatc(
     estadoPago = 'PARCIAL_ADELANTO';
   }
 
-  // Payload base garantizado estándar
-  const basePayload: any = {
+  // Payload completo con todos los campos modernos
+  const payload: Record<string, any> = {
     cliente_id: clienteId,
     cliente_nombre: clienteNombre,
     agente_id: agenteId,
@@ -329,33 +329,37 @@ export async function crearOatc(
     estado_proceso: estadoProceso,
     estado_pago: estadoPago,
     monto_total: totalCalculado,
+    monto_adelanto: montoAdelanto,
+    metodo_adelanto: metodoAdelanto || null,
     sede_id: sedeId
   };
 
-  // 1. Intentar primero con las columnas extendidas
-  const extendedPayload = {
-    ...basePayload,
-    monto_adelanto: montoAdelanto,
-    metodo_adelanto: metodoAdelanto || null
-  };
+  // Limpiar llaves con undefined
+  Object.keys(payload).forEach(key => {
+    if (payload[key] === undefined) delete payload[key];
+  });
 
-  let res = await supabase
-    .from('oatc')
-    .insert([extendedPayload])
-    .select();
+  let res: any = null;
+  let intentos = 0;
+  const maxIntentos = 6;
 
-  // 2. Si falla porque 'metodo_adelanto' o 'monto_adelanto' no existen en el schema cache de Supabase
-  if (res.error && (
-    res.error.message.includes('metodo_adelanto') || 
-    res.error.message.includes('monto_adelanto') ||
-    res.error.message.includes('schema cache') ||
-    res.error.code === 'PGRST204'
-  )) {
-    console.warn('[crearOatc] Reintentando inserción con payload base compatible:', res.error.message);
-    res = await supabase
-      .from('oatc')
-      .insert([basePayload])
-      .select();
+  // Bucle de auto-adaptación: remueve automáticamente cualquier columna que no exista en el schema de Supabase
+  while (intentos < maxIntentos) {
+    res = await supabase.from('oatc').insert([payload]).select();
+    
+    if (!res.error) break;
+
+    // Detectar si el error es de columna faltante en schema cache (PGRST204)
+    const match = res.error.message.match(/Could not find the '([^']+)' column/i);
+    if (match && match[1] && payload[match[1]] !== undefined) {
+      const missingCol = match[1];
+      console.warn(`[crearOatc] Columna '${missingCol}' no existe en la tabla remota 'oatc'. Removiendo del payload para compatibilidad.`);
+      delete payload[missingCol];
+      intentos++;
+    } else {
+      // Si el error no es por columna faltante, salir del bucle
+      break;
+    }
   }
 
   if (res.error) {
