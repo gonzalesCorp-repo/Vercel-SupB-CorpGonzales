@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/client';
 import { registrarLog } from './logger';
 import { ItemTicket } from './tickets';
+import { procesarAcreditacionPagoPOS } from './pasarelasPOS';
+import { useAppStore } from '@/store/useAppStore';
 
 export interface SesionCaja {
   id: string;
@@ -240,9 +242,10 @@ export async function procesarCobroFlexible(params: {
     throw errComp;
   }
 
-  // 2. Registrar movimientos de caja por cada medio de pago
-  if (sesionCajaId) {
-    for (const pago of pagos) {
+  // 2. Registrar movimientos de caja por cada medio de pago y rutear fondos a cuentas financieras
+  const sedeId = useAppStore.getState().sedeActiva?.id || 'general';
+  for (const pago of pagos) {
+    if (sesionCajaId) {
       await supabase.from('movimientos_caja').insert([{
         sesion_caja_id: sesionCajaId,
         comprobante_id: comprobante.id,
@@ -251,6 +254,19 @@ export async function procesarCobroFlexible(params: {
         monto: pago.monto,
         descripcion: `Pago ${tipoComprobante} #${serie}-${comprobante.numero} de ${clienteNombre}`
       }]);
+    }
+
+    // Ruteo a cuentas financieras / Lotes POS en Tránsito
+    try {
+      await procesarAcreditacionPagoPOS({
+        sedeId,
+        metodoPago: pago.metodo,
+        montoBruto: pago.monto,
+        oatcId: oatcIds[0],
+        cajeroNombre
+      });
+    } catch (ruteoErr) {
+      console.warn('[Caja] Error en ruteo automático de fondos POS:', ruteoErr);
     }
   }
 

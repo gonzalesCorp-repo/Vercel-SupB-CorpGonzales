@@ -9,6 +9,9 @@ export type CategoriaMovimientoTesoreria =
   | 'REPOSICION_FONDO' 
   | 'PAGO_PROVEEDOR' 
   | 'SERVICIOS_BASICOS' 
+  | 'COMISION_PASARELA_POS'
+  | 'VENTA_POS_ACREDITADA'
+  | 'AJUSTE_CONCILIACION_POS'
   | 'OTROS_INGRESOS' 
   | 'OTROS_EGRESOS';
 

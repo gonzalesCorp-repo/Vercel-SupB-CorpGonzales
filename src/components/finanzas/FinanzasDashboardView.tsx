@@ -21,6 +21,8 @@ import { imprimirReciboEgresoFinanzas } from '@/services/impresionTermica';
 import { NuevaCuentaModal } from './NuevaCuentaModal';
 import { NuevoMovimientoModal } from './NuevoMovimientoModal';
 import { TransferenciaModal } from './TransferenciaModal';
+import { ConfiguracionPasarelasModal } from './pasarelas/ConfiguracionPasarelasModal';
+import { ConciliacionLotesPosModal } from './pasarelas/ConciliacionLotesPosModal';
 import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
 import { format } from 'date-fns';
@@ -40,6 +42,8 @@ export function FinanzasDashboardView() {
   const [modalNuevaCuentaOpen, setModalNuevaCuentaOpen] = useState(false);
   const [modalNuevoMovimientoOpen, setModalNuevoMovimientoOpen] = useState(false);
   const [modalTransferenciaOpen, setModalTransferenciaOpen] = useState(false);
+  const [modalConfigPasarelasOpen, setModalConfigPasarelasOpen] = useState(false);
+  const [modalConciliacionPosOpen, setModalConciliacionPosOpen] = useState(false);
 
   const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
@@ -145,6 +149,26 @@ export function FinanzasDashboardView() {
           >
             <ArrowRightLeft className="w-4 h-4" />
             <span>🔄 Transferir Fondos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setModalConfigPasarelasOpen(true)}
+            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-2xl transition border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 cursor-pointer"
+            title="Configurar tasas de comisión de Izipay, Niubiz, Yape y cuentas de ruteo"
+          >
+            <CreditCard className="w-4 h-4 text-indigo-500" />
+            <span>⚙️ Pasarelas & Comisiones</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setModalConciliacionPosOpen(true)}
+            className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-2xl transition border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 cursor-pointer"
+            title="Auditar y conciliar abonos de tarjetas en tránsito (D+1) y detectar varianzas"
+          >
+            <Clock className="w-4 h-4 text-amber-500" />
+            <span>⏳ Conciliar Lotes POS</span>
           </button>
 
           <button
@@ -496,6 +520,26 @@ export function FinanzasDashboardView() {
           cuentas={cuentas}
           sedeId={sedeActiva?.id}
           onTransferenciaRealizada={cargarDatos}
+        />
+      )}
+
+      {modalConfigPasarelasOpen && (
+        <ConfiguracionPasarelasModal
+          isOpen={modalConfigPasarelasOpen}
+          onClose={() => setModalConfigPasarelasOpen(false)}
+          cuentas={cuentas}
+          sedeId={sedeActiva?.id}
+          onConfiguracionGuardada={cargarDatos}
+        />
+      )}
+
+      {modalConciliacionPosOpen && (
+        <ConciliacionLotesPosModal
+          isOpen={modalConciliacionPosOpen}
+          onClose={() => setModalConciliacionPosOpen(false)}
+          sedeId={sedeActiva?.id}
+          adminNombre="Superadmin"
+          onConciliacionCompletada={cargarDatos}
         />
       )}
 
