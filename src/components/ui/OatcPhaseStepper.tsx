@@ -95,6 +95,27 @@ export function OatcPhaseStepper({
       );
     }
 
+    if (faseActual === 'FINALIZADO' || faseActual === 'FINALIZADA') {
+      return (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/60">
+            <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+            <span>Finalizado</span>
+          </span>
+        </div>
+      );
+    }
+
+    if (faseActual === 'CANCELADO') {
+      return (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/60">
+            <span>Cancelado</span>
+          </span>
+        </div>
+      );
+    }
+
     const pasoActual = PASOS.find(p => p.id === faseActual) || PASOS[0];
     const Icon = pasoActual.icon;
 

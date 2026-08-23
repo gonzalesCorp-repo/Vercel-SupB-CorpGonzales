@@ -246,15 +246,53 @@ export async function emitirComprobanteSunatPSE(
       }
     }]);
 
-    // Si hay OATCs vinculadas, actualizar su estado a PAGADO
+    // Si hay OATCs vinculadas, actualizar su estado a FINALIZADO y PAGADO
     if (params.oatcIds && params.oatcIds.length > 0) {
-      for (const oatcId of params.oatcIds) {
-        if (!oatcId.startsWith('libre_')) {
-          await supabase.from('oatc').update({
+      const validOatcIds = params.oatcIds.filter(id => id && !id.startsWith('libre_'));
+      if (validOatcIds.length > 0) {
+        await supabase
+          .from('oatc')
+          .update({
             estado_pago: 'PAGADO',
-            estado_proceso: 'FINALIZADA'
-          }).eq('id', oatcId);
+            estado_proceso: 'FINALIZADO',
+            hora_fin_atencion: new Date().toISOString()
+          })
+          .in('id', validOatcIds);
+
+        await supabase
+          .from('oatc_tickets')
+          .update({ estado_ticket: 'FINALIZADO' })
+          .in('oatc_id', validOatcIds);
+
+        // Liberar agentes asignados a DISPONIBLE
+        const { data: oatcsData } = await supabase
+          .from('oatc')
+          .select('agente_id')
+          .in('id', validOatcIds);
+
+        if (oatcsData) {
+          const agenteIds = oatcsData.map((o: any) => o.agente_id).filter(Boolean);
+          if (agenteIds.length > 0) {
+            await supabase
+              .from('agentes')
+              .update({
+                estado_operativo: 'DISPONIBLE',
+                ultimo_cambio_estado: new Date().toISOString()
+              })
+              .in('id', agenteIds);
+          }
         }
+
+        // Liberar estaciones de piso
+        await supabase
+          .from('estaciones_piso')
+          .update({
+            estado_ocupacion: 'LIBRE',
+            oatc_id_actual: null,
+            agente_id_actual: null,
+            cliente_nombre_actual: null
+          })
+          .in('oatc_id_actual', validOatcIds);
       }
     }
   } catch (dbErr) {

@@ -95,18 +95,20 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
   const [faseFiltro, setFaseFiltro] = useState<string>('TODOS');
 
   const fasesConfig = [
-    { id: 'TODOS', label: 'Todos', count: oatcs.filter(o => o.estado_proceso !== 'CANCELADO').length },
-    { id: 'EN_ESPERA', label: 'En Espera', count: oatcs.filter(o => o.estado_proceso === 'EN_ESPERA').length },
+    { id: 'TODOS', label: 'En Piso (Activas)', count: oatcs.filter(o => o.estado_proceso !== 'CANCELADO' && o.estado_proceso !== 'FINALIZADO' && o.estado_proceso !== 'FINALIZADA').length },
+    { id: 'EN_ESPERA', label: 'En Espera', count: oatcs.filter(o => o.estado_proceso === 'EN_ESPERA' || o.estado_proceso === 'ESPERA').length },
     { id: 'ASESORIA', label: 'En Asesoría', count: oatcs.filter(o => o.estado_proceso === 'ASESORIA').length },
     { id: 'EN_PROCESO', label: 'En Proceso', count: oatcs.filter(o => o.estado_proceso === 'EN_PROCESO' || o.estado_proceso === 'TRABAJANDO').length },
     { id: 'POR_COBRAR', label: 'Por Cobrar', count: oatcs.filter(o => o.estado_proceso === 'POR_COBRAR' || o.estado_proceso === 'PRE_COBRADO').length },
-    { id: 'FINALIZADO', label: 'Finalizados Hoy', count: oatcs.filter(o => o.estado_proceso === 'FINALIZADO').length },
+    { id: 'FINALIZADO', label: 'Finalizados Hoy', count: oatcs.filter(o => o.estado_proceso === 'FINALIZADO' || o.estado_proceso === 'FINALIZADA').length },
   ];
 
   const oatcsFiltradas = oatcs.filter(o => {
-    if (faseFiltro === 'TODOS') return o.estado_proceso !== 'CANCELADO';
+    if (faseFiltro === 'TODOS') return o.estado_proceso !== 'CANCELADO' && o.estado_proceso !== 'FINALIZADO' && o.estado_proceso !== 'FINALIZADA';
+    if (faseFiltro === 'EN_ESPERA') return o.estado_proceso === 'EN_ESPERA' || o.estado_proceso === 'ESPERA';
     if (faseFiltro === 'EN_PROCESO') return o.estado_proceso === 'EN_PROCESO' || o.estado_proceso === 'TRABAJANDO';
     if (faseFiltro === 'POR_COBRAR') return o.estado_proceso === 'POR_COBRAR' || o.estado_proceso === 'PRE_COBRADO';
+    if (faseFiltro === 'FINALIZADO') return o.estado_proceso === 'FINALIZADO' || o.estado_proceso === 'FINALIZADA';
     return o.estado_proceso === faseFiltro;
   });
 
@@ -172,7 +174,27 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
                         <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
                           <UserCircle2 className="w-5 h-5" />
                         </div>
-                        <span className="font-medium text-slate-700">{oatc.cliente_nombre}</span>
+                        <div>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-slate-800">{oatc.cliente_nombre}</span>
+                            {oatc.estado_pago === 'PAGADO' || oatc.estado_pago === 'Pagado' ? (
+                              <span className="px-1.5 py-0.2 text-[9px] font-black bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-full">
+                                💰 PAGADO
+                              </span>
+                            ) : oatc.estado_pago === 'PRE_COBRADO_TOTAL' ? (
+                              <span className="px-1.5 py-0.2 text-[9px] font-black bg-purple-100 text-purple-700 border border-purple-300 rounded-full">
+                                ⚡ PRE-COBRADO
+                              </span>
+                            ) : oatc.estado_pago === 'PARCIAL_ADELANTO' ? (
+                              <span className="px-1.5 py-0.2 text-[9px] font-black bg-amber-100 text-amber-700 border border-amber-300 rounded-full">
+                                🪙 ADELANTO
+                              </span>
+                            ) : null}
+                          </div>
+                          {oatc.monto_total ? (
+                            <span className="text-[10px] text-slate-400 font-mono">S/ {Number(oatc.monto_total).toFixed(2)}</span>
+                          ) : null}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-slate-600">

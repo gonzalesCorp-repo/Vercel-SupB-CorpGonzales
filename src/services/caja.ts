@@ -162,8 +162,8 @@ export async function obtenerOrdenesPorCobrar(sedeId?: string): Promise<any[]> {
   let query = supabase
     .from('oatc')
     .select('*')
-    .in('estado_proceso', ['POR_COBRAR', 'PRE_COBRADO', 'PENDIENTE_PRE_COBRO'])
-    .or('estado_pago.is.null,estado_pago.neq.Pagado,estado_pago.neq.PAGADO')
+    .not('estado_proceso', 'in', '("FINALIZADO","FINALIZADA","CANCELADO")')
+    .or('estado_pago.is.null,estado_pago.neq.Pagado,estado_pago.neq.PAGADO,estado_pago.eq.PARCIAL_ADELANTO,estado_pago.eq.NO_PAGADO')
     .order('created_at', { ascending: true });
 
   if (sedeId) {
@@ -187,7 +187,7 @@ export async function obtenerOrdenesPorCobrar(sedeId?: string): Promise<any[]> {
     return {
       ...o,
       tickets: misTickets,
-      total_oatc: totalCalculado > 0 ? totalCalculado : (o.punto_partida?.reduce((acc: number, p: any) => acc + Number(p.precio || 0), 0) || 0)
+      total_oatc: totalCalculado > 0 ? totalCalculado : (o.punto_partida?.reduce((acc: number, p: any) => acc + Number(p.precio || p.precio_venta || 0), 0) || 0)
     };
   });
 }
