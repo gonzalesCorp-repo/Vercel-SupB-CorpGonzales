@@ -24,10 +24,9 @@ test.describe('Flujo E2E: Finanzas, Tesorería & Caja y Bancos', () => {
     const heading = page.locator('h1');
     await expect(heading).toContainText(/Finanzas/i, { timeout: 10000 });
 
-    // 5. Verificar pestañas principales
+    // 5. Verificar pestañas principales de Tesorería
     await expect(page.locator('button:has-text("Cuentas & Bancos")').first()).toBeVisible();
     await expect(page.locator('button:has-text("Movimientos & Caja Chica")').first()).toBeVisible();
-    await expect(page.locator('button:has-text("Liquidaciones Staff WFM")').first()).toBeVisible();
 
     // 6. Abrir modal de Nuevo Gasto / Ingreso
     const btnNuevo = page.locator('button:has-text("Nuevo Gasto / Ingreso")').first();

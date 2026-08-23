@@ -17,22 +17,19 @@ import {
   obtenerMovimientosTesoreria, 
   aprobarRechazarEgreso 
 } from '@/services/finanzas';
-import { obtenerTodosLosAgentes } from '@/services/agentes';
 import { imprimirReciboEgresoFinanzas } from '@/services/impresionTermica';
 import { NuevaCuentaModal } from './NuevaCuentaModal';
 import { NuevoMovimientoModal } from './NuevoMovimientoModal';
 import { TransferenciaModal } from './TransferenciaModal';
-import { LiquidarStaffModal } from './LiquidarStaffModal';
 import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export function FinanzasDashboardView() {
-  const [tabActiva, setTabActiva] = useState<'CUENTAS' | 'MOVIMIENTOS' | 'LIQUIDACIONES' | 'TRANSFERENCIAS'>('CUENTAS');
+  const [tabActiva, setTabActiva] = useState<'CUENTAS' | 'MOVIMIENTOS' | 'TRANSFERENCIAS'>('CUENTAS');
   const [cuentas, setCuentas] = useState<CuentaFinanciera[]>([]);
   const [movimientos, setMovimientos] = useState<MovimientoTesoreria[]>([]);
-  const [staffList, setStaffList] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
 
   // Filtros
@@ -43,7 +40,6 @@ export function FinanzasDashboardView() {
   const [modalNuevaCuentaOpen, setModalNuevaCuentaOpen] = useState(false);
   const [modalNuevoMovimientoOpen, setModalNuevoMovimientoOpen] = useState(false);
   const [modalTransferenciaOpen, setModalTransferenciaOpen] = useState(false);
-  const [modalLiquidarStaffOpen, setModalLiquidarStaffOpen] = useState(false);
 
   const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
@@ -51,15 +47,13 @@ export function FinanzasDashboardView() {
   const cargarDatos = async () => {
     setCargando(true);
     try {
-      const [listaCuentas, listaMovs, listaAgentes] = await Promise.all([
+      const [listaCuentas, listaMovs] = await Promise.all([
         obtenerCuentasFinancieras(sedeActiva?.id),
-        obtenerMovimientosTesoreria({ sedeId: sedeActiva?.id }),
-        obtenerTodosLosAgentes()
+        obtenerMovimientosTesoreria({ sedeId: sedeActiva?.id })
       ]);
 
       setCuentas(listaCuentas || []);
       setMovimientos(listaMovs || []);
-      setStaffList((listaAgentes || []).filter((a: any) => a.estado === 'ACTIVO'));
     } catch (e) {
       console.error('Error cargando finanzas:', e);
     } finally {
@@ -151,15 +145,6 @@ export function FinanzasDashboardView() {
           >
             <ArrowRightLeft className="w-4 h-4" />
             <span>🔄 Transferir Fondos</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setModalLiquidarStaffOpen(true)}
-            className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 text-xs font-bold rounded-2xl transition border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 cursor-pointer"
-          >
-            <Award className="w-4 h-4 text-emerald-500" />
-            <span>👥 Liquidar Staff</span>
           </button>
 
           <button
@@ -263,19 +248,6 @@ export function FinanzasDashboardView() {
               {egresosPendientes.length}
             </span>
           )}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setTabActiva('LIQUIDACIONES')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-            tabActiva === 'LIQUIDACIONES'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Award className="w-4 h-4" />
-          <span>Liquidaciones Staff WFM</span>
         </button>
       </div>
 
@@ -497,56 +469,6 @@ export function FinanzasDashboardView() {
         </div>
       )}
 
-      {/* TAB 3: LIQUIDACIONES STAFF & WFM */}
-      {tabActiva === 'LIQUIDACIONES' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-slate-800 dark:text-white text-sm">
-              Colaboradores Disponibles para Liquidación
-            </h3>
-            <button
-              type="button"
-              onClick={() => setModalLiquidarStaffOpen(true)}
-              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-2xl transition shadow-sm flex items-center gap-1.5 cursor-pointer"
-            >
-              <Award className="w-4 h-4" />
-              <span>Liquidar a Especialista</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {staffList.map((st) => (
-              <div
-                key={st.id}
-                className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">
-                    {st.nombre.charAt(0)}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
-                      {st.nombre}
-                    </h4>
-                    <span className="text-[10px] text-slate-400 font-bold block">
-                      {st.rol || 'STAFF'} • {st.especialidad || 'Estilista'}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setModalLiquidarStaffOpen(true)}
-                  className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-xl transition border border-emerald-200 dark:border-emerald-800 cursor-pointer"
-                >
-                  Pagar
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* MODALES */}
       {modalNuevaCuentaOpen && (
         <NuevaCuentaModal
@@ -574,17 +496,6 @@ export function FinanzasDashboardView() {
           cuentas={cuentas}
           sedeId={sedeActiva?.id}
           onTransferenciaRealizada={cargarDatos}
-        />
-      )}
-
-      {modalLiquidarStaffOpen && (
-        <LiquidarStaffModal
-          isOpen={modalLiquidarStaffOpen}
-          onClose={() => setModalLiquidarStaffOpen(false)}
-          staffList={staffList}
-          cuentas={cuentas}
-          sedeId={sedeActiva?.id}
-          onLiquidacionCompletada={cargarDatos}
         />
       )}
 
