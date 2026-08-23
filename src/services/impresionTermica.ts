@@ -590,3 +590,46 @@ export function generarPayloadPrueba(config: ThermalPrinterConfig): ImpresionTic
     mensajePie: `Calibracion: ${config.ancho} | ${config.fuenteTipo || 'FontA'} | Offset: ${config.margenIzquierdoEspacios || 0}`
   };
 }
+
+/**
+ * Imprime un Recibo / Comprobante de Egreso o Liquidación de Caja Chica en formato térmico
+ */
+export async function imprimirReciboEgresoFinanzas(params: {
+  numeroEgreso: string;
+  categoria: string;
+  concepto: string;
+  beneficiario: string;
+  monto: number;
+  moneda?: string;
+  cuentaNombre: string;
+  registradoPor: string;
+  autorizadoPor?: string;
+  sedeNombre?: string;
+  sedeId?: string;
+  configOverride?: Partial<ThermalPrinterConfig>;
+}): Promise<{ ok: boolean; error?: string }> {
+  const payload: ImpresionTicketPayload = {
+    sedeNombre: params.sedeNombre || 'VAIKUNTHA SALON & SPA',
+    tipoComprobante: 'TICKET PROFORMA',
+    serieNumero: `EGRESO-${params.numeroEgreso.substring(0, 8).toUpperCase()}`,
+    fechaHora: new Date().toLocaleString('es-PE'),
+    clienteNombre: params.beneficiario || 'Beneficiario / Proveedor',
+    cajeroNombre: params.registradoPor,
+    items: [
+      {
+        nombre: `[${params.categoria}] ${params.concepto}`,
+        cantidad: 1,
+        precioUnitario: Number(params.monto),
+        total: Number(params.monto)
+      }
+    ],
+    subtotal: Number(params.monto),
+    igv: 0,
+    total: Number(params.monto),
+    pagos: [{ metodo: params.cuentaNombre, monto: Number(params.monto) }],
+    mensajePie: `Firma: _________________________\nBeneficiario: ${params.beneficiario}\nAutorizado por: ${params.autorizadoPor || params.registradoPor}`
+  };
+
+  const res = await imprimirTicketUniversal(payload, params.configOverride, params.sedeId);
+  return { ok: res.success, error: res.error };
+}

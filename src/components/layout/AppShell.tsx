@@ -8,7 +8,7 @@ import {
   Menu, LogOut, LayoutDashboard, Inbox, UserCircle, Briefcase, FileText, 
   Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, 
   User, PackageSearch, ArrowRightLeft, Layers, Download, BarChart3, 
-  Database, Sliders, Calculator, Zap, Calendar, Users, Award, Sparkles
+  Database, Sliders, Calculator, Zap, Calendar, Users, Award, Sparkles, Landmark
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
@@ -39,7 +39,8 @@ const ICON_MAP: Record<string, any> = {
   Settings,
   Shield,
   Database,
-  Sparkles
+  Sparkles,
+  Landmark
 };
 
 const NavItem = ({ href, icon: Icon, label, disabled = false, pathname, isExpanded, badge }: any) => {
@@ -431,7 +432,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <NavItem href="/wfm" icon={Activity} label="Mapa WFM" pathname={pathname} />
               </NavSection>
 
-              <NavSection title="Finanzas" isExpanded={isExpanded}>
+              <NavSection title="Finanzas & Bancos" isExpanded={isExpanded}>
+                <NavItem href="/finanzas" icon={Landmark} label="Caja & Bancos / Tesorería" pathname={pathname} badge="Nuevo" />
                 <NavItem href="/caja/arqueo" icon={Calculator} label="Arqueo Ciego" pathname={pathname} />
                 <NavItem href="/caja/productividad" icon={Activity} label="Productividad" pathname={pathname} />
                 <NavItem href="/caja/comprobantes" icon={FileText} label="Comprobantes SUNAT" pathname={pathname} />

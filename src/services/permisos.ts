@@ -38,6 +38,7 @@ export const CATALOGO_HERRAMIENTAS: HerramientaDefinicion[] = [
   { key: 'crm_oatc_historial', nombre: 'Historial de OATCs', descripcion: 'Consulta de órdenes pasadas', categoria: 'CRM', ruta: '/recepcion/historial', icono: 'FileText' },
 
   // FINANZAS
+  { key: 'finanzas_tesoreria', nombre: 'Finanzas, Tesorería & Bancos', descripcion: 'Control de cuentas bancarias, caja chica, egresos y liquidación staff', categoria: 'FINANZAS', ruta: '/finanzas', icono: 'Landmark' },
   { key: 'caja_arqueo', nombre: 'Arqueo Ciego de Caja', descripcion: 'Conteo físico de billetes y vouchers', categoria: 'FINANZAS', ruta: '/caja/arqueo', icono: 'Calculator' },
   { key: 'caja_reportes', nombre: 'Reportes de Facturación', descripcion: 'Resumen financiero por sede', categoria: 'FINANZAS', ruta: '/caja/reportes', icono: 'BarChart3' },
 
