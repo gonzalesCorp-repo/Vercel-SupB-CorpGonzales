@@ -609,3 +609,123 @@ export async function obtenerInconsistenciasMarcacion(): Promise<any[]> {
   }
 }
 
+export interface DetalleTurnoColaborador {
+  horaIngreso: string | null;
+  horaInicioRefrigerio: string | null;
+  horaFinRefrigerio: string | null;
+  horaSalida: string | null;
+  metodoIngreso: string | null;
+  enPausaRefrigerio: boolean;
+  turnoFinalizado: boolean;
+  // Métricas reales de OATC del día
+  totalAtencionesHoy: number;
+  atencionesPorTurno: number;
+  atencionesDirectas: number;
+  atencionesCanceladas: number;
+  atencionesEnCurso: number;
+  atencionesFinalizadas: number;
+}
+
+/**
+ * Consulta en vivo en Supabase las marcaciones reales del día y las OATCs asignadas a un colaborador
+ */
+export async function obtenerDetalleTurnoColaborador(agenteId: string, agenteNombre?: string): Promise<DetalleTurnoColaborador> {
+  const supabase = createClient();
+  const inicioDiaIso = obtenerInicioDiaLimaIso();
+
+  try {
+    // 1. Obtener todas las marcaciones de asistencia de hoy para este agente
+    let queryAsist = supabase
+      .from('asistencias_turnos')
+      .select('*')
+      .gte('timestamp_registro', inicioDiaIso)
+      .order('timestamp_registro', { ascending: true });
+
+    if (agenteId && agenteNombre) {
+      queryAsist = queryAsist.or(`agente_id.eq.${agenteId},agente_nombre.ilike.%${agenteNombre}%`);
+    } else if (agenteId) {
+      queryAsist = queryAsist.eq('agente_id', agenteId);
+    }
+
+    const { data: asistencias } = await queryAsist;
+
+    let horaIngreso: string | null = null;
+    let horaInicioRefrigerio: string | null = null;
+    let horaFinRefrigerio: string | null = null;
+    let horaSalida: string | null = null;
+    let metodoIngreso: string | null = null;
+
+    if (asistencias && asistencias.length > 0) {
+      for (const m of asistencias) {
+        const horaFmt = formatearHoraLima(m.timestamp_registro);
+        if (m.tipo_movimiento === 'ENTRADA' && !horaIngreso) {
+          horaIngreso = horaFmt;
+          metodoIngreso = m.metadatos?.metodo === 'MANUAL_SUPERVISOR' ? 'Manual Supervisor' : (m.nfc_tag_id ? 'Validado NFC' : 'Marcación Web');
+        } else if (m.tipo_movimiento === 'INICIO_REFRIGERIO') {
+          horaInicioRefrigerio = horaFmt;
+        } else if (m.tipo_movimiento === 'FIN_REFRIGERIO') {
+          horaFinRefrigerio = horaFmt;
+        } else if (m.tipo_movimiento === 'SALIDA') {
+          horaSalida = horaFmt;
+        }
+      }
+    }
+
+    // 2. Obtener OATCs reales de hoy para este agente
+    let queryOatc = supabase
+      .from('oatc')
+      .select('id, tipo_demanda, estado_proceso, created_at')
+      .gte('created_at', inicioDiaIso);
+
+    if (agenteId && agenteNombre) {
+      queryOatc = queryOatc.or(`agente_id.eq.${agenteId},agente_nombre.ilike.%${agenteNombre}%`);
+    } else if (agenteId) {
+      queryOatc = queryOatc.eq('agente_id', agenteId);
+    }
+
+    const { data: oatcs } = await queryOatc;
+
+    const misOatcs: any[] = oatcs || [];
+    const atencionesCanceladas = misOatcs.filter((o: any) => o.estado_proceso === 'CANCELADO').length;
+    const atencionesFinalizadas = misOatcs.filter((o: any) => o.estado_proceso === 'FINALIZADO' || o.estado_proceso === 'FINALIZADA').length;
+    const atencionesEnCurso = misOatcs.filter((o: any) => o.estado_proceso !== 'CANCELADO' && o.estado_proceso !== 'FINALIZADO' && o.estado_proceso !== 'FINALIZADA').length;
+    const atencionesPorTurno = misOatcs.filter((o: any) => !o.tipo_demanda || String(o.tipo_demanda).toLowerCase().includes('turno') || String(o.tipo_demanda).toLowerCase().includes('cola') || o.tipo_demanda === 'NORMAL').length;
+    const atencionesDirectas = misOatcs.filter((o: any) => o.tipo_demanda && (String(o.tipo_demanda).toLowerCase().includes('cliente') || String(o.tipo_demanda).toLowerCase().includes('cita') || String(o.tipo_demanda).toLowerCase().includes('directo'))).length;
+
+    const ultimaMarcacion = asistencias && asistencias.length > 0 ? asistencias[asistencias.length - 1] : null;
+
+    return {
+      horaIngreso,
+      horaInicioRefrigerio,
+      horaFinRefrigerio,
+      horaSalida,
+      metodoIngreso,
+      enPausaRefrigerio: ultimaMarcacion?.tipo_movimiento === 'INICIO_REFRIGERIO',
+      turnoFinalizado: ultimaMarcacion?.tipo_movimiento === 'SALIDA',
+      totalAtencionesHoy: misOatcs.length,
+      atencionesPorTurno,
+      atencionesDirectas,
+      atencionesCanceladas,
+      atencionesEnCurso,
+      atencionesFinalizadas
+    };
+  } catch (e) {
+    console.error('Error calculando detalle del turno:', e);
+    return {
+      horaIngreso: null,
+      horaInicioRefrigerio: null,
+      horaFinRefrigerio: null,
+      horaSalida: null,
+      metodoIngreso: null,
+      enPausaRefrigerio: false,
+      turnoFinalizado: false,
+      totalAtencionesHoy: 0,
+      atencionesPorTurno: 0,
+      atencionesDirectas: 0,
+      atencionesCanceladas: 0,
+      atencionesEnCurso: 0,
+      atencionesFinalizadas: 0
+    };
+  }
+}
+
