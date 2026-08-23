@@ -22,8 +22,9 @@ import StaffAgendaTab from '@/components/mobile/staff/StaffAgendaTab';
 import StaffHistoricoView from '@/components/mobile/staff/StaffHistoricoView';
 import StaffMetricasView from '@/components/mobile/staff/StaffMetricasView';
 import StaffPerfilView from '@/components/mobile/staff/StaffPerfilView';
+import StaffLiquidacionesTab from '@/components/mobile/staff/StaffLiquidacionesTab';
 import StaffColegasModal from '@/components/mobile/staff/StaffColegasModal';
-import FloatingBottomDock from '@/components/mobile/ui/FloatingBottomDock';
+import FloatingBottomDock, { SecondaryViewType } from '@/components/mobile/ui/FloatingBottomDock';
 
 interface OATCExtended extends OATC {
   codigo_ticket?: string;
@@ -37,7 +38,7 @@ interface StaffMobileViewProps {
 
 export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps) {
   const [mainTab, setMainTab] = useState<'inicio' | 'turno' | 'clientes' | 'agenda'>('inicio');
-  const [activeSecondaryView, setActiveSecondaryView] = useState<'historico' | 'metricas' | 'perfil' | null>(null);
+  const [activeSecondaryView, setActiveSecondaryView] = useState<SecondaryViewType>(null);
 
   const [inicioSubTab, setInicioSubTab] = useState<'alertas' | 'bar'>('alertas');
   const [estadoActual, setEstadoActual] = useState<string>('DISPONIBLE');
@@ -168,6 +169,7 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
   const miPosicionEnCola = agente ? misColegasEnCola.findIndex(c => c.id === agente.id) + 1 : 1;
 
   const renderSecondaryView = () => {
+    if (activeSecondaryView === 'liquidaciones') return <StaffLiquidacionesTab agente={agente} sedeId={sedeId} />;
     if (activeSecondaryView === 'historico') return <StaffHistoricoView onClose={() => setActiveSecondaryView(null)} fechaDesde={fechaDesde} setFechaDesde={setFechaDesde} fechaHasta={fechaHasta} setFechaHasta={setFechaHasta} isLoading={isLoading} onRefresh={cargarDatosMobile} agente={agente} />;
     if (activeSecondaryView === 'metricas') return <StaffMetricasView onClose={() => setActiveSecondaryView(null)} agente={agente} />;
     if (activeSecondaryView === 'perfil') return <StaffPerfilView onClose={() => setActiveSecondaryView(null)} agente={agente} gamProfile={gamProfile} hallOfFame={hallOfFame} setShowKudosModal={setShowKudosModal} setKudosTargetId={setKudosTargetId} setKudosTargetName={setKudosTargetName} />;

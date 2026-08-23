@@ -633,3 +633,63 @@ export async function imprimirReciboEgresoFinanzas(params: {
   const res = await imprimirTicketUniversal(payload, params.configOverride, params.sedeId);
   return { ok: res.success, error: res.error };
 }
+
+/**
+ * Imprime un Voucher Térmico Detallado de Liquidación de Comisiones & Remuneración
+ */
+export async function imprimirVoucherLiquidacionPersonal(params: {
+  numeroCorrelativo: string;
+  colaboradorNombre: string;
+  rol: string;
+  periodoInicio: string;
+  periodoFin: string;
+  tipoRemuneracion: string;
+  sueldoBase: number;
+  comisionServicios: number;
+  comisionProductos: number;
+  propinas: number;
+  adelantosDeducidos: number;
+  totalNeto: number;
+  cuentaPagoNombre: string;
+  aprobadoPor: string;
+  itemsCount?: number;
+  sedeNombre?: string;
+  sedeId?: string;
+  configOverride?: Partial<ThermalPrinterConfig>;
+}): Promise<{ ok: boolean; error?: string }> {
+  const itemsTicket: ItemTicketImpresion[] = [];
+
+  if (params.sueldoBase > 0) {
+    itemsTicket.push({ nombre: 'Sueldo Base Acordado', cantidad: 1, precioUnitario: params.sueldoBase, total: params.sueldoBase });
+  }
+  if (params.comisionServicios > 0) {
+    itemsTicket.push({ nombre: `Comision Servicios (${params.itemsCount || 1} serv)`, cantidad: 1, precioUnitario: params.comisionServicios, total: params.comisionServicios });
+  }
+  if (params.comisionProductos > 0) {
+    itemsTicket.push({ nombre: 'Comision Ventas Retail', cantidad: 1, precioUnitario: params.comisionProductos, total: params.comisionProductos });
+  }
+  if (params.propinas > 0) {
+    itemsTicket.push({ nombre: 'Propinas Recaudadas', cantidad: 1, precioUnitario: params.propinas, total: params.propinas });
+  }
+  if (params.adelantosDeducidos > 0) {
+    itemsTicket.push({ nombre: '(-) Adelantos Descontados', cantidad: 1, precioUnitario: -params.adelantosDeducidos, total: -params.adelantosDeducidos });
+  }
+
+  const payload: ImpresionTicketPayload = {
+    sedeNombre: params.sedeNombre || 'VAIKUNTHA SALON & SPA',
+    tipoComprobante: 'TICKET PROFORMA',
+    serieNumero: params.numeroCorrelativo,
+    fechaHora: new Date().toLocaleString('es-PE'),
+    clienteNombre: `${params.colaboradorNombre} (${params.rol})`,
+    cajeroNombre: params.aprobadoPor,
+    items: itemsTicket.length > 0 ? itemsTicket : [{ nombre: 'Liquidacion Neta', cantidad: 1, precioUnitario: params.totalNeto, total: params.totalNeto }],
+    subtotal: params.totalNeto,
+    igv: 0,
+    total: params.totalNeto,
+    pagos: [{ metodo: params.cuentaPagoNombre, monto: params.totalNeto }],
+    mensajePie: `Periodo: ${params.periodoInicio} al ${params.periodoFin}\nFirma Colaborador: _________________\nFirma Pagador: ____________________`
+  };
+
+  const res = await imprimirTicketUniversal(payload, params.configOverride, params.sedeId);
+  return { ok: res.success, error: res.error };
+}

@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Zap, Users, Calendar, Plus, History, BarChart2, User } from 'lucide-react';
+import { Bell, Zap, Users, Calendar, Plus, History, BarChart2, User, DollarSign } from 'lucide-react';
 
 export type MainTabType = 'inicio' | 'turno' | 'clientes' | 'agenda';
-export type SecondaryViewType = 'historico' | 'metricas' | 'perfil' | null;
+export type SecondaryViewType = 'historico' | 'metricas' | 'perfil' | 'liquidaciones' | null;
 
 export interface FloatingBottomDockProps {
   mainTab: MainTabType;
@@ -60,8 +60,25 @@ export default function FloatingBottomDock({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 30, scale: 0.8 }}
                 transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-                className="flex items-end justify-center gap-5 mb-2"
+                className="flex items-end justify-center gap-3 mb-2 flex-wrap max-w-xs"
               >
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => {
+                    setIsFabOpen(false);
+                    setActiveSecondaryView('liquidaciones');
+                  }}
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                >
+                  <div className="w-13 h-13 rounded-full bg-slate-900 border-2 border-emerald-500/50 text-emerald-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
+                    <DollarSign className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
+                    Comisiones
+                  </span>
+                </motion.button>
+
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -71,10 +88,10 @@ export default function FloatingBottomDock({
                   }}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer"
                 >
-                  <div className="w-14 h-14 rounded-full bg-slate-900 border-2 border-indigo-500/50 text-indigo-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
-                    <History className="w-6 h-6" />
+                  <div className="w-13 h-13 rounded-full bg-slate-900 border-2 border-indigo-500/50 text-indigo-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
+                    <History className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-lg">
+                  <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
                     Historial
                   </span>
                 </motion.button>
@@ -86,12 +103,12 @@ export default function FloatingBottomDock({
                     setIsFabOpen(false);
                     setActiveSecondaryView('metricas');
                   }}
-                  className="flex flex-col items-center gap-1.5 group cursor-pointer -translate-y-4"
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer"
                 >
-                  <div className="w-16 h-16 rounded-full bg-slate-900 border-2 border-purple-500/50 text-purple-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
-                    <BarChart2 className="w-7 h-7" />
+                  <div className="w-13 h-13 rounded-full bg-slate-900 border-2 border-purple-500/50 text-purple-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
+                    <BarChart2 className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-lg">
+                  <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
                     Métricas
                   </span>
                 </motion.button>
@@ -105,10 +122,10 @@ export default function FloatingBottomDock({
                   }}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer"
                 >
-                  <div className="w-14 h-14 rounded-full bg-slate-900 border-2 border-pink-500/50 text-pink-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
-                    <User className="w-6 h-6" />
+                  <div className="w-13 h-13 rounded-full bg-slate-900 border-2 border-pink-500/50 text-pink-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
+                    <User className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-lg">
+                  <span className="text-[10px] font-black text-slate-100 bg-slate-900/90 border border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
                     Perfil
                   </span>
                 </motion.button>

@@ -38,7 +38,9 @@ export const CATALOGO_HERRAMIENTAS: HerramientaDefinicion[] = [
   { key: 'crm_oatc_historial', nombre: 'Historial de OATCs', descripcion: 'Consulta de órdenes pasadas', categoria: 'CRM', ruta: '/recepcion/historial', icono: 'FileText' },
 
   // FINANZAS
-  { key: 'finanzas_tesoreria', nombre: 'Finanzas, Tesorería & Bancos', descripcion: 'Control de cuentas bancarias, caja chica, egresos y liquidación staff', categoria: 'FINANZAS', ruta: '/finanzas', icono: 'Landmark' },
+  { key: 'finanzas_tesoreria', nombre: 'Finanzas, Tesorería & Bancos', descripcion: 'Control de cuentas bancarias, caja chica, egresos y transferencias', categoria: 'FINANZAS', ruta: '/finanzas', icono: 'Landmark' },
+  { key: 'finanzas_liquidaciones_staff', nombre: 'Liquidaciones Staff (Caja / Piso)', descripcion: 'Gestión y pago de liquidaciones de estilistas, comisiones y vouchers', categoria: 'FINANZAS', ruta: '/finanzas/liquidaciones-staff', icono: 'Scissors' },
+  { key: 'finanzas_liquidaciones_soporte', nombre: 'Liquidaciones Soporte (Admin)', descripcion: 'Gestión de sueldos base, quincenas y pagos de personal administrativo', categoria: 'FINANZAS', ruta: '/finanzas/liquidaciones-soporte', icono: 'ShieldCheck' },
   { key: 'caja_arqueo', nombre: 'Arqueo Ciego de Caja', descripcion: 'Conteo físico de billetes y vouchers', categoria: 'FINANZAS', ruta: '/caja/arqueo', icono: 'Calculator' },
   { key: 'caja_reportes', nombre: 'Reportes de Facturación', descripcion: 'Resumen financiero por sede', categoria: 'FINANZAS', ruta: '/caja/reportes', icono: 'BarChart3' },
 
