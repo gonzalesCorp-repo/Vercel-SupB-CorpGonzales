@@ -1,9 +1,29 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const supabaseAdmin = createClient(
+    // 0. Validar autenticación y rol de Administrador
+    const supabaseServer = await createServerClient();
+    const { data: { user }, error: authUserErr } = await supabaseServer.auth.getUser();
+
+    if (authUserErr || !user) {
+      return NextResponse.json({ error: 'No autorizado. Se requiere sesión activa.' }, { status: 401 });
+    }
+
+    const { data: callerAgente } = await supabaseServer
+      .from('agentes')
+      .select('rol')
+      .eq('id', user.id)
+      .single();
+
+    const esAdmin = callerAgente?.rol === 'SUPERADMIN' || callerAgente?.rol === 'ADMIN';
+    if (!esAdmin) {
+      return NextResponse.json({ error: 'Acceso denegado. Se requiere rol de Administrador.' }, { status: 403 });
+    }
+
+    const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
@@ -45,10 +65,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     // 2. Sincronizar sedes
-    // Primero borramos las existentes
     await supabaseAdmin.from('sedes_usuarios').delete().eq('agente_id', userId);
 
-    // Luego insertamos las nuevas
     if (sedes_ids && sedes_ids.length > 0) {
       const sedesToInsert = sedes_ids.map((sede_id: string) => ({
         agente_id: userId,

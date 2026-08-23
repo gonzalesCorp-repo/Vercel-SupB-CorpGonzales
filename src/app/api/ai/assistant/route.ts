@@ -1,11 +1,22 @@
 import { streamText } from 'ai';
 import { google } from '@ai-sdk/google';
+import { createClient } from '@/lib/supabase/server';
 
-// Configuración de la API Route con Vercel AI Gateway / Vercel AI SDK
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
+    // 0. Proteger con sesión activa
+    const supabase = await createClient();
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+
+    if (authErr || !user) {
+      return new Response(JSON.stringify({ error: 'No autorizado. Se requiere sesión activa para usar V.AI Copilot.' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const { messages, context } = await req.json();
 
     const systemPrompt = `
@@ -18,6 +29,7 @@ Tu rol es ayudar a administradores, recepcionistas y operarios de piso con:
 Información del contexto actual en vivo:
 - Sede Activa: ${context?.sedeNombre || 'General'}
 - Usuario / Rol: ${context?.userRol || 'OPERARIO'}
+- Usuario Email: ${user.email}
 
 Responde de forma concisa, profesional, empática y orientada a la eficiencia operativa.
 `;

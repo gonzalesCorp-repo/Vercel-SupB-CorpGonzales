@@ -1,10 +1,31 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    // Inicializar cliente dentro del handler para evitar errores en build time de Next.js
-    const supabaseAdmin = createClient(
+    // 0. Validar autenticación y rol de Administrador
+    const supabaseServer = await createServerClient();
+    const { data: { user }, error: authUserErr } = await supabaseServer.auth.getUser();
+
+    if (authUserErr || !user) {
+      return NextResponse.json({ error: 'No autorizado. Se requiere sesión activa.' }, { status: 401 });
+    }
+
+    // Verificar si el usuario solicitante tiene rol de ADMIN o SUPERADMIN
+    const { data: callerAgente } = await supabaseServer
+      .from('agentes')
+      .select('rol, estado')
+      .eq('id', user.id)
+      .single();
+
+    const esAdmin = callerAgente?.rol === 'SUPERADMIN' || callerAgente?.rol === 'ADMIN';
+    if (!esAdmin) {
+      return NextResponse.json({ error: 'Acceso denegado. Se requiere rol de Administrador.' }, { status: 403 });
+    }
+
+    // Inicializar cliente con service role para la creación del usuario en Auth
+    const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
@@ -42,7 +63,7 @@ export async function POST(request: Request) {
     const { error: agenteError } = await supabaseAdmin
       .from('agentes')
       .insert([{
-        id: userId, // Forzamos el mismo UUID
+        id: userId,
         nombre: nombre.trim(),
         email: email.trim(),
         rol,
@@ -59,7 +80,6 @@ export async function POST(request: Request) {
 
     if (agenteError) {
       console.error("Error insertando en agentes:", agenteError);
-      // Rollback opcional: borrar el auth.user si falla el perfil
       await supabaseAdmin.auth.admin.deleteUser(userId);
       return NextResponse.json({ error: 'Error creando perfil de agente' }, { status: 500 });
     }
