@@ -87,7 +87,8 @@ export function CajaPosFlexibleView() {
     cargarDatos();
 
     const supabase = createClient();
-    const channel = supabase.channel('realtime-caja-pos')
+    const sedeKey = sedeActiva?.id || 'default';
+    const channel = supabase.channel(`realtime-caja-pos-${sedeKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarDatos())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc_tickets' }, () => cargarDatos())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sesiones_caja' }, () => cargarDatos())
@@ -96,7 +97,7 @@ export function CajaPosFlexibleView() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [sedeActiva?.id]);
 
   // Calcular ítems consolidados de las órdenes seleccionadas
   const ordenesSeleccionadas = ordenes.filter(o => oatcSeleccionadasIds.includes(o.id));

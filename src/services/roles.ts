@@ -38,7 +38,7 @@ export async function obtenerRolesSistema(): Promise<RolSistema[]> {
     }
 
     return data;
-  } catch (e) {
+  } catch {
     return [
       { id: '1', codigo: 'SUPERADMIN', nombre: 'Super Administrador', descripcion: 'Control total y debug', es_sistema: true, created_at: '' },
       { id: '2', codigo: 'ADMIN', nombre: 'Administrador de Sede', descripcion: 'Gestión y delegación', es_sistema: true, created_at: '' },

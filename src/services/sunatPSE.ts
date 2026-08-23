@@ -105,21 +105,34 @@ export async function emitirComprobanteSunatPSE(
   const igv = Math.round((totalBaseConDescuento - subtotal) * 100) / 100;
   const totalFinal = Number((totalBaseConDescuento + propina).toFixed(2));
 
-  // Obtener último correlativo de la serie en Supabase
+  // Obtener siguiente correlativo atómicamente con Advisory Lock
   let correlativo = 1;
-  const { data: lastComp } = await supabase
-    .from('comprobantes')
-    .select('correlativo')
-    .eq('sede_id', sedeId)
-    .eq('serie', serie)
-    .order('correlativo', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  try {
+    const { data: rpcCorr, error: rpcErr } = await supabase.rpc('rpc_siguiente_correlativo_comprobante', {
+      p_sede_id: sedeId,
+      p_serie: serie
+    });
+    if (!rpcErr && rpcCorr !== null) {
+      correlativo = Number(rpcCorr);
+    } else {
+      throw rpcErr || new Error('RPC no disponible');
+    }
+  } catch {
+    // Fallback secuencial estricto
+    const { data: lastComp } = await supabase
+      .from('comprobantes')
+      .select('correlativo')
+      .eq('sede_id', sedeId)
+      .eq('serie', serie)
+      .order('correlativo', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  if (lastComp && lastComp.correlativo) {
-    correlativo = Number(lastComp.correlativo) + 1;
-  } else {
-    correlativo = Math.floor(1000 + Math.random() * 9000);
+    if (lastComp && lastComp.correlativo) {
+      correlativo = Number(lastComp.correlativo) + 1;
+    } else {
+      correlativo = 1; // Iniciar en 1 rigurosamente
+    }
   }
 
   const correlativoStr = String(correlativo).padStart(8, '0');
@@ -210,8 +223,9 @@ export async function emitirComprobanteSunatPSE(
         respuestaPSE.enlaceCdr = json.enlace_del_cdr || respuestaPSE.enlaceCdr;
         respuestaPSE.cadenaQrLegal = json.cadena_para_codigo_qr || respuestaPSE.cadenaQrLegal;
       }
-    } catch (err: any) {
-      console.warn('[SUNAT PSE API] No se pudo conectar a PSE remoto, usando emisión firmada local:', err?.message);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.warn('[SUNAT PSE API] No se pudo conectar a PSE remoto, usando emisión firmada local:', errMsg);
     }
   }
 
@@ -271,7 +285,7 @@ export async function emitirComprobanteSunatPSE(
           .in('id', validOatcIds);
 
         if (oatcsData) {
-          const agenteIds = oatcsData.map((o: any) => o.agente_id).filter(Boolean);
+          const agenteIds = (oatcsData as Array<{ agente_id?: string }>).map((o) => o.agente_id).filter(Boolean);
           if (agenteIds.length > 0) {
             await supabase
               .from('agentes')

@@ -15,7 +15,7 @@ export interface ItemTicket {
   precio_final: number;
   es_cortesia?: boolean;
   cantidad: number;
-  atributos?: Record<string, any>;
+  atributos?: Record<string, unknown>;
 }
 
 export interface OatcTicket {
@@ -174,7 +174,7 @@ export async function cambiarFaseOatc(
   nuevaFase: 'EN_ESPERA' | 'ASESORIA' | 'EN_PROCESO' | 'POR_COBRAR' | 'FINALIZADO' | 'CANCELADO'
 ): Promise<boolean> {
   const supabase = createClient();
-  const updatePayload: any = { estado_proceso: nuevaFase };
+  const updatePayload: { estado_proceso: string; hora_inicio_atencion?: string; hora_fin_atencion?: string } = { estado_proceso: nuevaFase };
 
   if (nuevaFase === 'EN_PROCESO') {
     updatePayload.hora_inicio_atencion = new Date().toISOString();
@@ -426,7 +426,7 @@ export async function iniciarTiempoExposicionTicket(params: {
   estacionNombre?: string;
 }): Promise<boolean> {
   const supabase = createClient();
-  const { ticketId, oatcId, agenteId, agenteNombre, minutos, motivo, estacionNombre } = params;
+  const { ticketId, oatcId, agenteId, agenteNombre, minutos, motivo } = params;
 
   // 1. Actualizar el ticket individual a EN_EXPOSICION
   const { error: errTicket } = await supabase
@@ -463,7 +463,7 @@ export async function iniciarTiempoExposicionTicket(params: {
     .eq('oatc_id', oatcId)
     .neq('id', ticketId);
 
-  const hayOtrosEnServicio = (otrosTickets || []).some((t: any) => t.estado_ticket === 'EN_PROCESO');
+  const hayOtrosEnServicio = (otrosTickets || []).some((t: { id: string; estado_ticket: string }) => t.estado_ticket === 'EN_PROCESO');
 
   if (!hayOtrosEnServicio) {
     await supabase
@@ -492,7 +492,7 @@ export async function reanudarServicioTicket(params: {
   estacionNombre?: string;
 }): Promise<boolean> {
   const supabase = createClient();
-  const { ticketId, oatcId, agenteId, agenteNombre, estacionNombre } = params;
+  const { ticketId, oatcId, agenteId, agenteNombre } = params;
 
   // 1. Actualizar el ticket a EN_PROCESO
   await supabase
@@ -562,7 +562,7 @@ export async function finalizarTicketIndividual(params: {
     .eq('oatc_id', oatcId);
 
   const activosRestantes = (todosLosTickets || []).filter(
-    (t: any) => t.id !== ticketId && ['EN_PROCESO', 'EN_EXPOSICION', 'PENDIENTE_VALIDACION'].includes(t.estado_ticket)
+    (t: { id: string; estado_ticket: string }) => t.id !== ticketId && ['EN_PROCESO', 'EN_EXPOSICION', 'PENDIENTE_VALIDACION'].includes(t.estado_ticket)
   );
 
   const todosFinalizados = activosRestantes.length === 0;
@@ -611,8 +611,11 @@ export async function finalizarTicketIndividual(params: {
 }
 
 // Aliases de compatibilidad legacy
-export const iniciarTiempoExposicion = (p: any) => iniciarTiempoExposicionTicket({ ...p, ticketId: p.ticketId || p.oatcId });
-export const reanudarServicioExposicion = (p: any) => reanudarServicioTicket({ ...p, ticketId: p.ticketId || p.oatcId });
+export const iniciarTiempoExposicion = (p: { ticketId?: string; oatcId: string; agenteId?: string; agenteNombre: string; minutos: number; motivo: string }) => 
+  iniciarTiempoExposicionTicket({ ...p, ticketId: p.ticketId || p.oatcId });
+
+export const reanudarServicioExposicion = (p: { ticketId?: string; oatcId: string; agenteId?: string; agenteNombre: string }) => 
+  reanudarServicioTicket({ ...p, ticketId: p.ticketId || p.oatcId });
 
 
 

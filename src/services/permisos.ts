@@ -92,7 +92,7 @@ export async function obtenerHerramientasAgente(agenteId: string): Promise<strin
     }
 
     return keys;
-  } catch (e) {
+  } catch {
     return [];
   }
 }
@@ -142,7 +142,7 @@ export async function concederHerramienta(agenteId: string, herramientaKey: stri
 
     await registrarLog('SISTEMA', `Concedió herramienta ${herramientaKey}`, { agente_id: agenteId });
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -170,7 +170,7 @@ export async function revocarHerramienta(agenteId: string, herramientaKey: strin
 
     await registrarLog('SISTEMA', `Revocó herramienta ${herramientaKey}`, { agente_id: agenteId });
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

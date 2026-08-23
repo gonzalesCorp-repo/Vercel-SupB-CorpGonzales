@@ -280,7 +280,7 @@ export function TabEstacion({
       if (item.atributos?.requiere_exposicion) {
         requiereExpo = true;
         if (item.atributos?.tiempo_exposicion_sugerido_min) {
-          minutosSugeridos = item.atributos.tiempo_exposicion_sugerido_min;
+          minutosSugeridos = Number(item.atributos.tiempo_exposicion_sugerido_min);
         }
         motivoSugerido = item.nombre;
       }

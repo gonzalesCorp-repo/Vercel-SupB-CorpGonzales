@@ -293,46 +293,70 @@ export async function despacharInsumoConBalanzaIoT(params: {
     estadoMerma = 'SUB_DOSIFICACION';
   }
 
-  // Descontar stock de laboratorio
-  const { data: labStock } = await supabase
-    .from('almacen_laboratorio')
-    .select('id, stock_actual')
-    .eq('sede_id', sedeId)
-    .eq('bien_id', params.bienId)
-    .maybeSingle();
+  // Descontar stock y registrar Kardex atómicamente en PostgreSQL
+  try {
+    const { error: rpcErr } = await supabase.rpc('rpc_despachar_stock_laboratorio', {
+      p_sede_id: sedeId,
+      p_bien_id: params.bienId,
+      p_cantidad: pesoNetoGramos,
+      p_tipo_movimiento: 'DESPACHO_ODI_IOT',
+      p_descripcion: `Pesaje IoT: Teórico ${pesoTeorico}g vs Real ${pesoNetoGramos}g (Delta: ${deltaGramos > 0 ? '+' : ''}${deltaGramos}g / ${deltaPorcentaje}%)`,
+      p_oatc_id: params.oatcId ? `OATC: ${params.oatcId.slice(0, 8)}` : 'ESTACION_PISO',
+      p_agente_id: params.agenteId || null,
+      p_metadata: {
+        peso_bruto: params.pesoBrutoMedidoGramos,
+        tara_envase: tara,
+        densidad,
+        volumen_ml: volumenNetoMl,
+        tolerancia_porcentaje: tolerancia,
+        estado_merma: estadoMerma,
+        delta_gramos: deltaGramos
+      }
+    });
 
-  if (labStock) {
-    const nuevoStock = Math.max(0, Number(labStock.stock_actual) - pesoNetoGramos);
-    await supabase
+    if (rpcErr) throw rpcErr;
+  } catch (rpcEx) {
+    console.warn('RPC rpc_despachar_stock_laboratorio no disponible, usando fallback:', rpcEx);
+    // Fallback
+    const { data: labStock } = await supabase
       .from('almacen_laboratorio')
-      .update({ stock_actual: nuevoStock, updated_at: new Date().toISOString() })
-      .eq('id', labStock.id);
-  }
+      .select('id, stock_actual')
+      .eq('sede_id', sedeId)
+      .eq('bien_id', params.bienId)
+      .maybeSingle();
 
-  // Registrar en Kardex con Auditoría de Mermas
-  await supabase.from('inventario_movimientos').insert([{
-    sede_id: sedeId,
-    tipo_movimiento: 'DESPACHO_ODI_IOT',
-    bien_id: params.bienId,
-    descripcion: `Pesaje IoT: Teórico ${pesoTeorico}g vs Real ${pesoNetoGramos}g (Delta: ${deltaGramos > 0 ? '+' : ''}${deltaGramos}g / ${deltaPorcentaje}%)`,
-    cantidad: pesoNetoGramos,
-    cantidad_teorica: pesoTeorico,
-    cantidad_real: pesoNetoGramos,
-    merma_delta_gramos: deltaGramos,
-    merma_delta_porcentaje: deltaPorcentaje,
-    estado_merma: estadoMerma,
-    costo_unitario: bien.costo_base || 0,
-    origen: 'LABORATORIO',
-    destino: params.oatcId ? `OATC: ${params.oatcId.slice(0, 8)}` : 'ESTACION_PISO',
-    agente_id: params.agenteId || null,
-    metadata_iot: {
-      peso_bruto: params.pesoBrutoMedidoGramos,
-      tara_envase: tara,
-      densidad,
-      volumen_ml: volumenNetoMl,
-      tolerancia_porcentaje: tolerancia
+    if (labStock) {
+      const nuevoStock = Math.max(0, Number(labStock.stock_actual) - pesoNetoGramos);
+      await supabase
+        .from('almacen_laboratorio')
+        .update({ stock_actual: nuevoStock, updated_at: new Date().toISOString() })
+        .eq('id', labStock.id);
     }
-  }]);
+
+    await supabase.from('inventario_movimientos').insert([{
+      sede_id: sedeId,
+      tipo_movimiento: 'DESPACHO_ODI_IOT',
+      bien_id: params.bienId,
+      descripcion: `Pesaje IoT: Teórico ${pesoTeorico}g vs Real ${pesoNetoGramos}g (Delta: ${deltaGramos > 0 ? '+' : ''}${deltaGramos}g / ${deltaPorcentaje}%)`,
+      cantidad: pesoNetoGramos,
+      cantidad_teorica: pesoTeorico,
+      cantidad_real: pesoNetoGramos,
+      merma_delta_gramos: deltaGramos,
+      merma_delta_porcentaje: deltaPorcentaje,
+      estado_merma: estadoMerma,
+      costo_unitario: bien.costo_base || 0,
+      origen: 'LABORATORIO',
+      destino: params.oatcId ? `OATC: ${params.oatcId.slice(0, 8)}` : 'ESTACION_PISO',
+      agente_id: params.agenteId || null,
+      metadata_iot: {
+        peso_bruto: params.pesoBrutoMedidoGramos,
+        tara_envase: tara,
+        densidad,
+        volumen_ml: volumenNetoMl,
+        tolerancia_porcentaje: tolerancia
+      }
+    }]);
+  }
 
   return {
     bien,

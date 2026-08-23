@@ -61,20 +61,21 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
     
     const timer = setInterval(() => setTick(t => t + 1), 60000);
     
-    // Suscripciones en tiempo real a todas las fuentes operativas
-    const channelAsistencias = supabase.channel('realtime-asistencias-queue')
+    const sedeKey = sedeActiva?.id || 'default';
+    // Suscripciones en tiempo real a todas las fuentes operativas con namespace por sede
+    const channelAsistencias = supabase.channel(`realtime-asistencias-queue-${sedeKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'asistencias_turnos' }, () => cargarDatos())
       .subscribe();
 
-    const channelOatc = supabase.channel('realtime-oatc-queue')
+    const channelOatc = supabase.channel(`realtime-oatc-queue-${sedeKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarDatos())
       .subscribe();
 
-    const channelAgentes = supabase.channel('realtime-agentes-queue')
+    const channelAgentes = supabase.channel(`realtime-agentes-queue-${sedeKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'agentes' }, () => cargarDatos())
       .subscribe();
       
-    const channelPeticiones = supabase.channel('realtime-peticiones-queue')
+    const channelPeticiones = supabase.channel(`realtime-peticiones-queue-${sedeKey}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'cola_peticiones' }, () => cargarDatos())
       .subscribe();
       

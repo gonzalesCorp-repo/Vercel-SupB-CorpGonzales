@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
-import { OATC, Bien } from './recepcion';
+import { OATC, ServicioOATCItem } from './recepcion';
 import { registrarLog } from './logger';
 import { registrarVisitaCliente } from '@/lib/gamification/clientEngine';
 import { otorgarXP } from '@/lib/gamification/engine';
@@ -12,7 +12,7 @@ export interface PedidoInsumo {
   id?: string;
   oatc_id: string;
   agente_id: string;
-  insumos_solicitados: any;
+  insumos_solicitados: unknown;
   estado?: string;
   created_at?: string;
 }
@@ -141,7 +141,7 @@ export async function pedirInsumo(pedido: PedidoInsumo): Promise<boolean> {
 }
 
 // 4. Actualizar servicios directamente en la OATC
-export async function actualizarServiciosOatc(oatcId: string, nuevosServicios: any[]): Promise<boolean> {
+export async function actualizarServiciosOatc(oatcId: string, nuevosServicios: ServicioOATCItem[]): Promise<boolean> {
   const { error } = await supabase
     .from('oatc')
     .update({ 
@@ -158,7 +158,7 @@ export async function actualizarServiciosOatc(oatcId: string, nuevosServicios: a
   return true;
 }
 
-// 5. Solicitar inicio de atencin
+// 5. Solicitar inicio de atención
 export async function solicitarInicioAtencion(oatcId: string, userRol?: string): Promise<boolean> {
   const rolUpper = userRol ? userRol.toUpperCase() : '';
   const isAutoApproved = rolUpper === 'ADMIN' || rolUpper === 'RECEPCION' || rolUpper === 'SUPERADMIN';
@@ -174,8 +174,8 @@ export async function solicitarInicioAtencion(oatcId: string, userRol?: string):
   return true;
 }
 
-// 6. Solicitar fin de atencin
-export async function solicitarFinAtencion(oatc: any, userRol?: string): Promise<boolean> {
+// 6. Solicitar fin de atención
+export async function solicitarFinAtencion(oatc: OATC, userRol?: string): Promise<boolean> {
   const isPrepaid = oatc.estado_pago === 'Pagado' || oatc.estado_pago === 'COBRADO' || oatc.estado_pago === 'PRE_COBRADO';
   const rolUpper = userRol ? userRol.toUpperCase() : '';
   const isAutoApproved = rolUpper === 'ADMIN' || rolUpper === 'RECEPCION' || rolUpper === 'SUPERADMIN';
@@ -208,7 +208,8 @@ export async function solicitarFinAtencion(oatc: any, userRol?: string): Promise
 
     // 🎮 Octalysis: XP y visita para el CLIENTE
     if (oatc.cliente_id) {
-      await registrarVisitaCliente(oatc.cliente_id, oatc.servicio_nombre || undefined);
+      const primerServicio = oatc.punto_partida && oatc.punto_partida.length > 0 ? oatc.punto_partida[0].nombre : undefined;
+      await registrarVisitaCliente(oatc.cliente_id, primerServicio);
     }
   }
 

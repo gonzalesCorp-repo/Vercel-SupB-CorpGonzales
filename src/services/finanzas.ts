@@ -72,6 +72,39 @@ export async function crearCuentaFinanciera(params: Omit<CuentaFinanciera, 'id' 
 // 2. MOVIMIENTOS DE TESORERÍA (INGRESOS & EGRESOS NO-VENTA)
 // ============================================================================
 
+// Helper Atómico para actualizar saldos con Row-Level Locking
+export async function aplicarDeltaSaldoCuenta(cuentaId: string, deltaMonto: number): Promise<number> {
+  try {
+    const { data, error } = await supabase.rpc('rpc_actualizar_saldo_cuenta', {
+      p_cuenta_id: cuentaId,
+      p_monto_delta: deltaMonto
+    });
+
+    if (!error && data !== null) {
+      return Number(data);
+    }
+  } catch (rpcErr) {
+    console.warn('RPC rpc_actualizar_saldo_cuenta no disponible, usando fallback:', rpcErr);
+  }
+
+  // Fallback con lectura y actualización
+  const { data: cuenta } = await supabase
+    .from('cuentas_financieras')
+    .select('saldo_actual')
+    .eq('id', cuentaId)
+    .single();
+
+  if (cuenta) {
+    const nuevoSaldo = Number(cuenta.saldo_actual || 0) + deltaMonto;
+    await supabase
+      .from('cuentas_financieras')
+      .update({ saldo_actual: nuevoSaldo, updated_at: new Date().toISOString() })
+      .eq('id', cuentaId);
+    return nuevoSaldo;
+  }
+  return 0;
+}
+
 export async function registrarMovimientoTesoreria(params: {
   cuentaId: string;
   tipoMovimiento: TipoMovimientoTesoreria;
@@ -116,28 +149,10 @@ export async function registrarMovimientoTesoreria(params: {
 
   if (movErr) throw movErr;
 
-  // 2. Si está aprobado inmediatamente, actualizar el saldo de la cuenta
+  // 2. Si está aprobado inmediatamente, actualizar el saldo de la cuenta atómicamente
   if (estadoAprobacion === 'APROBADO') {
-    const { data: cuenta } = await supabase
-      .from('cuentas_financieras')
-      .select('saldo_actual')
-      .eq('id', params.cuentaId)
-      .single();
-
-    if (cuenta) {
-      const saldoActual = Number(cuenta.saldo_actual || 0);
-      const nuevoSaldo = params.tipoMovimiento === 'INGRESO'
-        ? saldoActual + montoNum
-        : saldoActual - montoNum;
-
-      await supabase
-        .from('cuentas_financieras')
-        .update({ 
-          saldo_actual: nuevoSaldo,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', params.cuentaId);
-    }
+    const delta = params.tipoMovimiento === 'INGRESO' ? montoNum : -montoNum;
+    await aplicarDeltaSaldoCuenta(params.cuentaId, delta);
   }
 
   await registrarLog('FINANZAS_MOVIMIENTO', `${params.tipoMovimiento} de S/ ${montoNum.toFixed(2)} [${params.categoria}]: ${params.descripcion}`, {
@@ -208,24 +223,9 @@ export async function aprobarRechazarEgreso(
 
   if (error) throw error;
 
-  // Si fue aprobado, debitar el saldo de la cuenta
+  // Si fue aprobado, debitar el saldo de la cuenta atómicamente
   if (decision === 'APROBADO') {
-    const { data: cuenta } = await supabase
-      .from('cuentas_financieras')
-      .select('saldo_actual')
-      .eq('id', mov.cuenta_id)
-      .single();
-
-    if (cuenta) {
-      const nuevoSaldo = Number(cuenta.saldo_actual || 0) - Number(mov.monto);
-      await supabase
-        .from('cuentas_financieras')
-        .update({ 
-          saldo_actual: nuevoSaldo,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', mov.cuenta_id);
-    }
+    await aplicarDeltaSaldoCuenta(mov.cuenta_id, -Number(mov.monto));
   }
 
   await registrarLog('FINANZAS_AUTORIZACION', `Egreso ${movimientoId} fue ${decision} por ${adminNombre}`, {
@@ -295,13 +295,10 @@ export async function ejecutarTransferenciaCuentas(params: {
 
   if (transfErr) throw transfErr;
 
-  // 3. Actualizar saldos atómicamente
-  const nuevoSaldoOrigen = Number(ctaOrigen.saldo_actual) - (montoNum + comisionNum);
-  const nuevoSaldoDestino = Number(ctaDestino.saldo_actual) + montoNum;
-
+  // 3. Actualizar saldos atómicamente con Row-Level Locking
   await Promise.all([
-    supabase.from('cuentas_financieras').update({ saldo_actual: nuevoSaldoOrigen }).eq('id', params.cuentaOrigenId),
-    supabase.from('cuentas_financieras').update({ saldo_actual: nuevoSaldoDestino }).eq('id', params.cuentaDestinoId)
+    aplicarDeltaSaldoCuenta(params.cuentaOrigenId, -(montoNum + comisionNum)),
+    aplicarDeltaSaldoCuenta(params.cuentaDestinoId, montoNum)
   ]);
 
   await registrarLog('FINANZAS_TRANSFERENCIA', `Transferencia de S/ ${montoNum.toFixed(2)} desde ${ctaOrigen.nombre} hacia ${ctaDestino.nombre}`, {
