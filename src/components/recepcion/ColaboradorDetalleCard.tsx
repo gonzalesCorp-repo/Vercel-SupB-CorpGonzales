@@ -3,11 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { 
   User, Clock, CheckCircle2, XCircle, Coffee, Shield, Activity, 
-  Sparkles, Award, Scissors, UserCheck, AlertTriangle, Wifi, UserX, AlertCircle, RefreshCw
+  Sparkles, Award, Scissors, UserCheck, AlertTriangle, Wifi, UserX, AlertCircle, RefreshCw, LogOut
 } from 'lucide-react';
 import { Agente, EstadoOperativoTurno } from '@/services/recepcion';
 import { darDeBajaColaborador } from '@/services/agentes';
-import { obtenerDetalleTurnoColaborador, DetalleTurnoColaborador } from '@/services/asistencias';
+import { 
+  obtenerDetalleTurnoColaborador, 
+  DetalleTurnoColaborador,
+  registrarMarcacionManualExcepcion 
+} from '@/services/asistencias';
 import { Modal } from '@/components/ui/Modal';
 import { useUIStore } from '@/store/useUIStore';
 
@@ -20,33 +24,61 @@ interface ColaboradorDetalleCardProps {
 export default function ColaboradorDetalleCard({ agente, onClose, onAgenteActualizado }: ColaboradorDetalleCardProps) {
   const [modalBajaOpen, setModalBajaOpen] = useState(false);
   const [motivoBaja, setMotivoBaja] = useState('Fin de contrato / Cese voluntario');
+  const [confirmaCheckBaja, setConfirmaCheckBaja] = useState(false);
   const [isSubmittingBaja, setIsSubmittingBaja] = useState(false);
+  const [isSubmittingSalida, setIsSubmittingSalida] = useState(false);
+
   const [isLoadingDetalle, setIsLoadingDetalle] = useState(true);
   const [detalle, setDetalle] = useState<DetalleTurnoColaborador | null>(null);
 
   const { showAlert } = useUIStore();
   const isStaff = agente.rol === 'STAFF' || !agente.rol;
 
-  useEffect(() => {
-    async function cargarDetalle() {
-      setIsLoadingDetalle(true);
-      try {
-        const res = await obtenerDetalleTurnoColaborador(agente.id, agente.nombre);
-        setDetalle(res);
-      } catch (e) {
-        console.error('Error cargando detalle de turno:', e);
-      } finally {
-        setIsLoadingDetalle(false);
-      }
+  const cargarDetalle = async () => {
+    setIsLoadingDetalle(true);
+    try {
+      const res = await obtenerDetalleTurnoColaborador(agente.id, agente.nombre);
+      setDetalle(res);
+    } catch (e) {
+      console.error('Error cargando detalle de turno:', e);
+    } finally {
+      setIsLoadingDetalle(false);
     }
+  };
+
+  useEffect(() => {
     cargarDetalle();
   }, [agente.id, agente.nombre]);
 
+  // Handler: Registrar Salida Diaria de Hoy
+  const handleRegistrarSalidaHoy = async () => {
+    setIsSubmittingSalida(true);
+    try {
+      await registrarMarcacionManualExcepcion({
+        agenteId: agente.id,
+        agenteNombre: agente.nombre,
+        supervisorNombre: 'Recepción Central',
+        tipoMovimiento: 'SALIDA',
+        motivoExcepcion: 'Salida de jornada registrada por Supervisor en Recepción',
+        sedeId: (agente as any).sede_id
+      });
+      showAlert(`¡Salida de hoy registrada exitosamente para ${agente.nombre}!`, 'success');
+      await cargarDetalle();
+      if (onAgenteActualizado) onAgenteActualizado();
+    } catch (e: any) {
+      showAlert('Error al registrar salida: ' + e.message, 'error');
+    } finally {
+      setIsSubmittingSalida(false);
+    }
+  };
+
+  // Handler: Cese Laboral Definitivo
   const handleConfirmarBaja = async () => {
+    if (!confirmaCheckBaja) return;
     setIsSubmittingBaja(true);
     try {
       await darDeBajaColaborador(agente.id, motivoBaja, 'Administración');
-      showAlert(`Colaborador ${agente.nombre} dado de baja exitosamente.`, 'success');
+      showAlert(`Colaborador ${agente.nombre} dado de baja definitivamente.`, 'success');
       setModalBajaOpen(false);
       if (onAgenteActualizado) onAgenteActualizado();
       if (onClose) onClose();
@@ -212,66 +244,115 @@ export default function ColaboradorDetalleCard({ agente, onClose, onAgenteActual
         </div>
       )}
 
-      {/* Footer de Acciones & Baja Laboral */}
-      <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-        <button
-          onClick={() => setModalBajaOpen(true)}
-          className="px-3 py-2 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-xl border border-rose-200 dark:border-rose-900/50 transition flex items-center gap-1.5 cursor-pointer"
-          title="Dar de baja o cesar al colaborador administrativamente"
-        >
-          <UserX className="w-3.5 h-3.5" />
-          <span>Dar de Baja</span>
-        </button>
+      {/* Footer de Acciones: Salida Diaria vs Cese Laboral */}
+      <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        
+        {/* Acciones de Operación Diaria */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Botón: Registrar Salida de Hoy */}
+          <button
+            type="button"
+            onClick={handleRegistrarSalidaHoy}
+            disabled={isSubmittingSalida || detalle?.turnoFinalizado || agente.estadoOperativo === 'FUERA_DE_TURNO'}
+            className="flex-1 sm:flex-none px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            title="Concluir el turno laboral de hoy y marcar salida en asistencias"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>{isSubmittingSalida ? 'Registrando...' : (detalle?.turnoFinalizado ? 'Salida ya Registrada' : 'Registrar Salida de Hoy')}</span>
+          </button>
 
+          {/* Botón Rojo Peligroso: Cese Laboral Definitivo */}
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmaCheckBaja(false);
+              setModalBajaOpen(true);
+            }}
+            className="px-3 py-2 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-xl border border-rose-200 dark:border-rose-900/50 transition flex items-center gap-1.5 cursor-pointer"
+            title="Cese laboral definitivo o desactivación de contrato"
+          >
+            <UserX className="w-3.5 h-3.5" />
+            <span>Cese Laboral</span>
+          </button>
+        </div>
+
+        {/* Botón Cerrar */}
         <button
+          type="button"
           onClick={onClose}
-          className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
+          className="w-full sm:w-auto px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
         >
           Cerrar
         </button>
       </div>
 
-      {/* MODAL DE CONFIRMACIÓN DE BAJA LABORAL */}
+      {/* MODAL DE CONFIRMACIÓN DE CESE LABORAL DEFINITIVO */}
       {modalBajaOpen && (
         <Modal
           isOpen={modalBajaOpen}
           onClose={() => setModalBajaOpen(false)}
-          title={`Confirmar Baja Laboral`}
+          title={`⚠️ Confirmar Cese Laboral Definitivo`}
         >
           <div className="space-y-4 text-slate-800 dark:text-slate-100">
-            <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 rounded-xl flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>
-                Al dar de baja a <strong>{agente.nombre}</strong>, su estado laboral pasará a <strong>INACTIVO</strong>, se bloqueará su acceso al login y dejará de figurar en el monitor de disponibilidad.
-              </span>
+            {/* Alerta Destacada de Advertencia */}
+            <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-3 text-xs text-rose-700 dark:text-rose-300">
+              <AlertTriangle className="w-5 h-5 shrink-0 text-rose-500 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-bold text-rose-600 dark:text-rose-400 text-sm">
+                  ¡Atención! Acción Administrativa Permanente
+                </p>
+                <p className="leading-relaxed">
+                  Estás a punto de dar de baja definitiva a <strong>{agente.nombre}</strong>. Su contrato pasará a estado <strong>INACTIVO</strong> y se le bloqueará el acceso al login del ERP.
+                </p>
+                <p className="text-[11px] text-rose-600/80 font-medium">
+                  💡 <em>Si solo deseas finalizar su turno diario de hoy, usa la opción <strong>"Registrar Salida de Hoy"</strong> en la ventana anterior.</em>
+                </p>
+              </div>
             </div>
 
+            {/* Input de Motivo */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Motivo de Cese / Baja</label>
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Motivo de Cese / Despido / Renuncia</label>
               <input
                 type="text"
                 value={motivoBaja}
                 onChange={(e) => setMotivoBaja(e.target.value)}
                 placeholder="Ej. Fin de contrato, renuncia voluntaria..."
-                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none focus:border-rose-500"
               />
             </div>
 
+            {/* Checkbox de Confirmación Obligatorio */}
+            <div className="p-3 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+              <label className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={confirmaCheckBaja}
+                  onChange={(e) => setConfirmaCheckBaja(e.target.checked)}
+                  className="mt-0.5 rounded border-slate-400 text-rose-600 focus:ring-0 cursor-pointer"
+                />
+                <span className="font-semibold">
+                  He verificado que deseo cesar el contrato de <strong>{agente.nombre}</strong> permanentemente.
+                </span>
+              </label>
+            </div>
+
+            {/* Botones de Acción */}
             <div className="pt-2 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setModalBajaOpen(false)}
-                className="px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer"
+                className="px-3.5 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmarBaja}
-                disabled={isSubmittingBaja}
-                className="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
+                disabled={isSubmittingBaja || !confirmaCheckBaja}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-rose-600/20"
               >
-                {isSubmittingBaja ? 'Procesando...' : 'Confirmar Cese'}
+                {isSubmittingBaja ? 'Procesando Cese...' : 'Confirmar Cese Definitivo'}
               </button>
             </div>
           </div>
