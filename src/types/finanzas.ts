@@ -48,6 +48,9 @@ export interface MovimientoTesoreria {
   registrado_por: string;
   sede_id?: string;
   fecha_movimiento: string;
+  incluido_en_cuadre?: boolean;
+  fecha_cuadre_dia?: string;
+  aceptado_por_cuadre?: string;
   created_at?: string;
 }
 

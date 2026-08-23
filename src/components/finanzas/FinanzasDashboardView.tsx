@@ -23,13 +23,14 @@ import { NuevoMovimientoModal } from './NuevoMovimientoModal';
 import { TransferenciaModal } from './TransferenciaModal';
 import { ConfiguracionPasarelasModal } from './pasarelas/ConfiguracionPasarelasModal';
 import { ConciliacionLotesPosModal } from './pasarelas/ConciliacionLotesPosModal';
+import { FacturasComprasView } from './compras/FacturasComprasView';
 import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export function FinanzasDashboardView() {
-  const [tabActiva, setTabActiva] = useState<'CUENTAS' | 'MOVIMIENTOS' | 'TRANSFERENCIAS'>('CUENTAS');
+  const [tabActiva, setTabActiva] = useState<'CUENTAS' | 'MOVIMIENTOS' | 'COMPRAS'>('CUENTAS');
   const [cuentas, setCuentas] = useState<CuentaFinanciera[]>([]);
   const [movimientos, setMovimientos] = useState<MovimientoTesoreria[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -136,8 +137,12 @@ export function FinanzasDashboardView() {
           <button
             type="button"
             onClick={() => setModalNuevoMovimientoOpen(true)}
-            className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-2xl transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-2xl transition shadow-sm flex items-center gap-1.5 cursor-pointer relative"
           >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+            </span>
             <ArrowDownCircle className="w-4 h-4" />
             <span>➕ Nuevo Gasto / Ingreso</span>
           </button>
@@ -272,6 +277,19 @@ export function FinanzasDashboardView() {
               {egresosPendientes.length}
             </span>
           )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setTabActiva('COMPRAS')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+            tabActiva === 'COMPRAS'
+              ? 'bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <Building2 className="w-4 h-4" />
+          <span>Facturas de Compras & AP</span>
         </button>
       </div>
 
@@ -491,6 +509,17 @@ export function FinanzasDashboardView() {
             )}
           </div>
         </div>
+      )}
+
+      {/* TAB 3: FACTURAS DE COMPRAS, CALENDARIO & CUADRE DEL DÍA */}
+      {tabActiva === 'COMPRAS' && (
+        <FacturasComprasView
+          cuentas={cuentas}
+          movimientos={movimientos}
+          sedeId={sedeActiva?.id}
+          adminNombre="Superadmin"
+          onMovimientoActualizado={cargarDatos}
+        />
       )}
 
       {/* MODALES */}
