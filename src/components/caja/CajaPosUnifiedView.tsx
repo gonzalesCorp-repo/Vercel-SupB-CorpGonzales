@@ -7,8 +7,9 @@ import {
   Printer, ArrowRight, X, Plus, RefreshCw, Sparkles, Scale,
   Scissors, Package, FileText, Check, Percent, Heart, Search,
   ExternalLink, ShoppingBag, Eye, UserPlus, SlidersHorizontal,
-  Wallet 
+  Wallet, Calendar 
 } from 'lucide-react';
+import { format, subDays } from 'date-fns';
 import { 
   SesionCaja, ComprobantePago, PagoDetalle, 
   obtenerSesionCajaActiva, abrirSesionCaja, cerrarSesionCajaCiega, 
@@ -80,8 +81,12 @@ export function CajaPosUnifiedView() {
   const [isProcessingCobro, setIsProcessingCobro] = useState(false);
 
   // Historial de comprobantes emitidos
+  const hoyStr = format(new Date(), 'yyyy-MM-dd');
+  const ayerStr = format(subDays(new Date(), 1), 'yyyy-MM-dd');
   const [comprobantesRecientes, setComprobantesRecientes] = useState<any[]>([]);
   const [filtroCpeDrawer, setFiltroCpeDrawer] = useState('');
+  const [filtroModoFechaCpe, setFiltroModoFechaCpe] = useState<'HOY' | 'AYER' | 'TODOS' | 'CUSTOM'>('HOY');
+  const [filtroFechaCpe, setFiltroFechaCpe] = useState<string>(hoyStr);
 
   const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
@@ -379,12 +384,32 @@ export function CajaPosUnifiedView() {
     o.secuencia?.toString().includes(filtroCola)
   );
 
-  const cpesFiltrados = comprobantesRecientes.filter(c =>
-    !filtroCpeDrawer ||
-    c.serie.toLowerCase().includes(filtroCpeDrawer.toLowerCase()) ||
-    c.correlativo.toString().includes(filtroCpeDrawer) ||
-    (c.metadata_fiscal?.cliente_nombre && c.metadata_fiscal.cliente_nombre.toLowerCase().includes(filtroCpeDrawer.toLowerCase()))
-  );
+  const cpesFiltrados = comprobantesRecientes.filter(c => {
+    // 1. Filtro por fecha (fecha_emision o created_at)
+    if (filtroModoFechaCpe !== 'TODOS') {
+      const targetFecha = filtroModoFechaCpe === 'HOY'
+        ? hoyStr
+        : filtroModoFechaCpe === 'AYER'
+        ? ayerStr
+        : filtroFechaCpe;
+
+      const compFecha = (c.fecha_emision || c.created_at || '').split('T')[0];
+      if (compFecha && compFecha !== targetFecha) {
+        return false;
+      }
+    }
+
+    // 2. Filtro por texto
+    if (!filtroCpeDrawer) return true;
+    const q = filtroCpeDrawer.toLowerCase();
+    return (
+      c.serie?.toLowerCase().includes(q) ||
+      c.correlativo?.toString().includes(q) ||
+      (c.metadata_fiscal?.cliente_nombre && c.metadata_fiscal.cliente_nombre.toLowerCase().includes(q))
+    );
+  });
+
+  const totalCpesFiltrados = cpesFiltrados.reduce((acc, c) => acc + Number(c.total || 0), 0);
 
   return (
     <div className="space-y-4 max-w-7xl mx-auto font-sans p-2 md:p-4 animate-in fade-in">
@@ -771,17 +796,17 @@ export function CajaPosUnifiedView() {
 
       </div>
 
-      {/* DRAWER / MODAL: CPEs Emitidos Hoy */}
+      {/* DRAWER / MODAL: CPEs Emitidos con Filtro de Fecha */}
       {modalDrawerCpesOpen && (
         <div className="fixed inset-0 z-[120] bg-slate-950/85 backdrop-blur-md flex items-center justify-end p-0 animate-in fade-in">
-          <div className="bg-slate-900 border-l border-slate-800 w-full max-w-md h-full p-5 space-y-4 shadow-2xl flex flex-col text-slate-100">
+          <div className="bg-slate-900 border-l border-slate-800 w-full max-w-md h-full p-5 space-y-3.5 shadow-2xl flex flex-col text-slate-100">
             
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-emerald-400" />
                 <div>
-                  <h3 className="text-sm font-black text-white">CPEs Emitidos en el Turno</h3>
-                  <p className="text-[10px] text-slate-400">{comprobantesRecientes.length} comprobantes registrados</p>
+                  <h3 className="text-sm font-black text-white">CPEs Emitidos</h3>
+                  <p className="text-[10px] text-slate-400">Comprobantes fiscales electrónicos SUNAT</p>
                 </div>
               </div>
               <button onClick={() => setModalDrawerCpesOpen(false)} className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl">
@@ -789,6 +814,58 @@ export function CajaPosUnifiedView() {
               </button>
             </div>
 
+            {/* Selector de Rango de Fecha */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {(['HOY', 'AYER', 'TODOS', 'CUSTOM'] as const).map(modo => (
+                  <button
+                    key={modo}
+                    type="button"
+                    onClick={() => {
+                      setFiltroModoFechaCpe(modo);
+                      if (modo === 'HOY') setFiltroFechaCpe(hoyStr);
+                      if (modo === 'AYER') setFiltroFechaCpe(ayerStr);
+                    }}
+                    className={`px-3 py-1 text-xs font-bold rounded-xl transition cursor-pointer ${
+                      filtroModoFechaCpe === modo
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    }`}
+                  >
+                    {modo === 'HOY' ? '📅 Hoy' : modo === 'AYER' ? '📅 Ayer' : modo === 'TODOS' ? '🌐 Todos' : '📆 Fecha'}
+                  </button>
+                ))}
+              </div>
+
+              {filtroModoFechaCpe === 'CUSTOM' && (
+                <div className="flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800 animate-in fade-in">
+                  <Calendar className="w-4 h-4 text-emerald-400" />
+                  <input
+                    type="date"
+                    value={filtroFechaCpe}
+                    onChange={(e) => setFiltroFechaCpe(e.target.value)}
+                    className="bg-transparent text-xs font-bold text-white outline-none w-full cursor-pointer"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Resumen de Total Facturado */}
+            <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">
+                  {filtroModoFechaCpe === 'HOY' ? 'Facturado Hoy' : filtroModoFechaCpe === 'AYER' ? 'Facturado Ayer' : filtroModoFechaCpe === 'TODOS' ? 'Total Histórico' : `Facturado (${filtroFechaCpe})`}
+                </span>
+                <span className="text-xs text-slate-400">
+                  {cpesFiltrados.length} comprobante(s) emitidos
+                </span>
+              </div>
+              <strong className="text-sm font-black text-emerald-400">
+                S/ {totalCpesFiltrados.toFixed(2)}
+              </strong>
+            </div>
+
+            {/* Buscador de Texto */}
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
               <input
