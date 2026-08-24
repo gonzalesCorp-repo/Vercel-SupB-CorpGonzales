@@ -6,7 +6,8 @@ import {
   AlertCircle, Users, Split, ShieldCheck, Lock, Unlock, 
   Printer, ArrowRight, X, Plus, RefreshCw, Sparkles, Scale,
   Scissors, Package, FileText, Check, Percent, Heart, Search,
-  ExternalLink, ShoppingBag, Eye, UserPlus, SlidersHorizontal 
+  ExternalLink, ShoppingBag, Eye, UserPlus, SlidersHorizontal,
+  Wallet 
 } from 'lucide-react';
 import { 
   SesionCaja, ComprobantePago, PagoDetalle, 
@@ -20,6 +21,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
 import { imprimirTicketTermicoHtml, DatosTicketTermico } from '@/lib/hardware/thermalPrinter';
+import { OperacionesCajaDrawer } from './operaciones/OperacionesCajaDrawer';
 
 const supabase = createClient();
 
@@ -39,6 +41,7 @@ export function CajaPosUnifiedView() {
   const [modalCierreCiegoOpen, setModalCierreCiegoOpen] = useState(false);
   const [modalRetailOpen, setModalRetailOpen] = useState(false);
   const [modalDrawerCpesOpen, setModalDrawerCpesOpen] = useState(false);
+  const [modalOperacionesCajaOpen, setModalOperacionesCajaOpen] = useState(false);
   
   // Modal de Previsualización Térmica
   const [comprobantePreview, setComprobantePreview] = useState<any | null>(null);
@@ -446,6 +449,17 @@ export function CajaPosUnifiedView() {
             <span className="bg-emerald-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full ml-0.5">
               {comprobantesRecientes.length}
             </span>
+          </button>
+
+          {/* Botón Operaciones Diarias de Caja (Abre Drawer Lateral) */}
+          <button
+            type="button"
+            onClick={() => setModalOperacionesCajaOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900 text-amber-700 dark:text-amber-300 rounded-2xl text-xs font-bold transition border border-amber-200 dark:border-amber-800 cursor-pointer"
+            title="Registrar gastos menores de caja chica, compras urgentes e ingresos del turno"
+          >
+            <Wallet className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <span>💼 Operaciones de Caja</span>
           </button>
 
           <button
@@ -1029,6 +1043,15 @@ export function CajaPosUnifiedView() {
           </form>
         </div>
       )}
+
+      {/* Drawer Lateral de Operaciones Diarias & Gastos Menores */}
+      <OperacionesCajaDrawer
+        isOpen={modalOperacionesCajaOpen}
+        onClose={() => setModalOperacionesCajaOpen(false)}
+        sedeId={sedeActiva?.id}
+        cajeroNombre={sesionActiva?.cajero_nombre || 'Cajero POS'}
+        onOperacionCompletada={cargarDatos}
+      />
 
     </div>
   );
