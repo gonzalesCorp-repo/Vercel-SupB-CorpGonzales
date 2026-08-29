@@ -117,7 +117,7 @@ export default function DevPage() {
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Carga inicial de sedes y estructura del sistema.</p>
             <div className="flex flex-wrap items-center gap-2.5 pt-1">
-              <BulkUploader tableName="sedes" title="Importar Sedes Excel" />
+              <BulkUploader tableName="sedes" title="Importar Sedes Excel" allowTableSelection={true} />
               <TemplateDownloader />
             </div>
           </div>
