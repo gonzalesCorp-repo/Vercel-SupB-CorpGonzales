@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { BulkUploader } from '@/components/ui/BulkUploader';
+import { TemplateDownloader } from '@/components/ui/TemplateDownloader';
 
 export default function DevPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -115,7 +116,10 @@ export default function DevPage() {
               <Activity className="w-5 h-5 text-amber-500" /> Gestión de Entorno
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Carga inicial de sedes y estructura del sistema.</p>
-            <BulkUploader tableName="sedes" title="Importar Sedes Excel" />
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              <BulkUploader tableName="sedes" title="Importar Sedes Excel" />
+              <TemplateDownloader />
+            </div>
           </div>
 
           <div className="bg-indigo-500/10 border border-indigo-500/30 p-5 rounded-3xl text-xs space-y-2 text-indigo-700 dark:text-indigo-300">
