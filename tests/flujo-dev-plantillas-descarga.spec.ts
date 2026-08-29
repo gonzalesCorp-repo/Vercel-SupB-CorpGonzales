@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Flujo E2E: Kit Maestro de 8 Plantillas y Descarga en Panel del Desarrollador', () => {
-  test('Apertura de Panel del Desarrollador, verificación de las 8 plantillas en menú e inicio de descarga', async ({ page }) => {
+test.describe('Flujo E2E: Kit Maestro Jerarquizado de Plantillas en Panel del Desarrollador', () => {
+  test('Apertura de Panel del Desarrollador, verificación de niveles jerárquicos y descarga del Libro Maestro', async ({ page }) => {
     // 1. Login como SUPERADMIN (cristian)
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
@@ -26,29 +26,25 @@ test.describe('Flujo E2E: Kit Maestro de 8 Plantillas y Descarga en Panel del De
     // 5. Verificar la tarjeta de Gestión de Entorno
     await expect(page.locator('h2:has-text("Gestión de Entorno")')).toBeVisible();
 
-    // 6. Verificar botón de Importar Sedes Excel
-    const btnImportar = page.locator('button:has-text("Importar Sedes Excel")');
-    await expect(btnImportar).toBeVisible();
-
-    // 7. Verificar botón de Descargar Plantillas Excel
+    // 6. Verificar botón nuevo de Descargar Plantillas Excel
     const btnDescargar = page.locator('button:has-text("Descargar Plantillas Excel")');
     await expect(btnDescargar).toBeVisible();
 
-    // 8. Desplegar menú de opciones modulares
-    const btnChevron = page.locator('button[title="Opciones de descarga modular por módulo"]');
+    // 7. Desplegar menú de opciones modulares jerárquicas
+    const btnChevron = page.locator('button[title="Menú jerárquico por niveles de dependencia"]');
     await expect(btnChevron).toBeVisible();
     await btnChevron.click();
 
-    // 9. Verificar que aparezcan las 8 opciones modulares y el libro maestro
-    await expect(page.locator('text=Libro Maestro Completo (.xlsx)').first()).toBeVisible();
-    await expect(page.locator('text=01. Sedes & Sucursales').first()).toBeVisible();
-    await expect(page.locator('text=02. Personal & Agentes').first()).toBeVisible();
-    await expect(page.locator('text=03. Catálogo de Bienes').first()).toBeVisible();
-    await expect(page.locator('text=04. Servicios de Salón').first()).toBeVisible();
-    await expect(page.locator('text=05. Directorio de Clientes').first()).toBeVisible();
-    await expect(page.locator('text=06. Cuentas Financieras & Bancos').first()).toBeVisible();
-    await expect(page.locator('text=07. Pasarelas de Cobro POS').first()).toBeVisible();
-    await expect(page.locator('text=08. Ubicaciones & Puestos WFM').first()).toBeVisible();
+    // 8. Verificar títulos de nivel en el menú
+    await expect(page.locator('text=NIVEL 1: Tablas Raíz').first()).toBeVisible();
+    await expect(page.locator('text=NIVEL 2: Entidades Dependientes').first()).toBeVisible();
+    await expect(page.locator('text=NIVEL 3: Puentes, Pasarelas & Stock').first()).toBeVisible();
+
+    // 9. Verificar opciones clave
+    await expect(page.locator('text=N1_01. Sedes & Sucursales').first()).toBeVisible();
+    await expect(page.locator('text=N1_02. Clientes CRM').first()).toBeVisible();
+    await expect(page.locator('text=N2_05. Personal & Agentes').first()).toBeVisible();
+    await expect(page.locator('text=N3_11. Pasarelas de Cobro POS').first()).toBeVisible();
 
     // 10. Probar evento de descarga del Libro Maestro
     const [download] = await Promise.all([

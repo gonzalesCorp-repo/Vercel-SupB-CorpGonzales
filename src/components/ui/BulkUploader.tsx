@@ -2,18 +2,38 @@
 
 import React, { useState, useRef } from "react";
 import * as XLSX from "xlsx";
-import { Upload, X, CheckCircle2, AlertCircle, Loader2, Database, ChevronDown } from "lucide-react";
+import { 
+  Upload, X, CheckCircle2, AlertCircle, Loader2, Database, 
+  ChevronDown, AlertTriangle, Layers 
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAppStore } from "@/store/useAppStore";
 
-export const TABLAS_IMPORTACION_DISPONIBLES = [
-  { id: 'sedes', label: '01. Sedes & Sucursales (sedes)', icon: '🏢' },
-  { id: 'agentes', label: '02. Personal & Agentes (agentes)', icon: '👥' },
-  { id: 'bienes', label: '03. Catálogo de Bienes & Insumos (bienes)', icon: '📦' },
-  { id: 'clientes', label: '05. Directorio de Clientes (clientes)', icon: '👤' },
-  { id: 'cuentas_financieras', label: '06. Cuentas Financieras & Bancos (cuentas_financieras)', icon: '🏦' },
-  { id: 'config_pasarelas_pago', label: '07. Pasarelas de Cobro POS (config_pasarelas_pago)', icon: '💳' },
-  { id: 'ubicaciones', label: '08. Ubicaciones & Puestos WFM (ubicaciones)', icon: '💺' },
+export interface TablaJerarquica {
+  id: string;
+  label: string;
+  nivel: 'NIVEL_1' | 'NIVEL_2' | 'NIVEL_3';
+  icono: string;
+}
+
+export const TABLAS_JERARQUICAS_DISPONIBLES: TablaJerarquica[] = [
+  // NIVEL 1: Tablas Raíz (Cero dependencias)
+  { id: 'sedes', label: 'N1_01. Sedes & Sucursales (sedes)', nivel: 'NIVEL_1', icono: '🏢' },
+  { id: 'clientes', label: 'N1_02. Directorio de Clientes (clientes)', nivel: 'NIVEL_1', icono: '👤' },
+  { id: 'config_roles', label: 'N1_03. Configuración de Roles (config_roles)', nivel: 'NIVEL_1', icono: '🛡️' },
+  { id: 'emisores', label: 'N1_04. Emisores Fiscales SUNAT (emisores)', nivel: 'NIVEL_1', icono: '🧾' },
+
+  // NIVEL 2: Entidades Dependientes
+  { id: 'agentes', label: 'N2_05. Personal & Agentes (agentes)', nivel: 'NIVEL_2', icono: '👥' },
+  { id: 'bienes', label: 'N2_06. Catálogo de Bienes & Insumos (bienes)', nivel: 'NIVEL_2', icono: '📦' },
+  { id: 'ubicaciones', label: 'N2_08. Ubicaciones & Puestos WFM (ubicaciones)', nivel: 'NIVEL_2', icono: '💺' },
+  { id: 'cuentas_financieras', label: 'N2_09. Cuentas Financieras & Bancos (cuentas_financieras)', nivel: 'NIVEL_2', icono: '🏦' },
+  { id: 'emisores_series', label: 'N2_10. Series de Facturación SUNAT (emisores_series)', nivel: 'NIVEL_2', icono: '📑' },
+
+  // NIVEL 3: Tablas Puente & Configuración
+  { id: 'config_pasarelas_pago', label: 'N3_11. Pasarelas de Cobro POS (config_pasarelas_pago)', nivel: 'NIVEL_3', icono: '💳' },
+  { id: 'agente_configuracion_remunerativa', label: 'N3_12. Esquemas de Remuneración (agente_configuracion_remunerativa)', nivel: 'NIVEL_3', icono: '⚙️' },
+  { id: 'almacen_principal', label: 'N3_13. Inventario Inicial por Sede (almacen_principal)', nivel: 'NIVEL_3', icono: '📊' },
 ];
 
 interface BulkUploaderProps {
@@ -51,6 +71,8 @@ export function BulkUploader({
   
   // Solo ADMIN o SUPERADMIN pueden ver esto
   if (userRol !== 'ADMIN' && userRol !== 'SUPERADMIN') return null;
+
+  const currentTableInfo = TABLAS_JERARQUICAS_DISPONIBLES.find(t => t.id === targetTable);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -213,7 +235,7 @@ export function BulkUploader({
                     Carga Masiva de Datos ({targetTable})
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5 font-medium">
-                    Importa archivos Excel (.xlsx, .xls) o CSV con mapeo automático de columnas.
+                    Importador con detección y orden jerárquico anti-conflictos de Foreign Key.
                   </p>
                 </div>
               </div>
@@ -227,28 +249,51 @@ export function BulkUploader({
               </button>
             </div>
 
-            {/* Selector de Tabla Destino (Si está habilitado) */}
+            {/* Selector de Tabla Destino Jerarquizado (optgroup) */}
             {allowTableSelection && (
-              <div className="px-6 py-3.5 bg-slate-50 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0">
-                  Tabla Destino:
-                </label>
-                <select
-                  value={targetTable}
-                  onChange={(e) => {
-                    setTargetTable(e.target.value);
-                    setData([]);
-                    setHeaders([]);
-                    setError(null);
-                  }}
-                  className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer w-full max-w-md"
-                >
-                  {TABLAS_IMPORTACION_DISPONIBLES.map(t => (
-                    <option key={t.id} value={t.id}>
-                      {t.icon} {t.label}
-                    </option>
-                  ))}
-                </select>
+              <div className="px-6 py-3.5 bg-slate-50 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-800 space-y-2">
+                <div className="flex items-center gap-3">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0 flex items-center gap-1">
+                    <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                    Tabla Destino:
+                  </label>
+                  <select
+                    value={targetTable}
+                    onChange={(e) => {
+                      setTargetTable(e.target.value);
+                      setData([]);
+                      setHeaders([]);
+                      setError(null);
+                    }}
+                    className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer w-full max-w-lg"
+                  >
+                    <optgroup label="⭐ NIVEL 1: Tablas Raíz (Cero Dependencias - Cargar Primero)">
+                      {TABLAS_JERARQUICAS_DISPONIBLES.filter(t => t.nivel === 'NIVEL_1').map(t => (
+                        <option key={t.id} value={t.id}>{t.label}</option>
+                      ))}
+                    </optgroup>
+
+                    <optgroup label="🔹 NIVEL 2: Entidades Dependientes de Sede & Catálogo">
+                      {TABLAS_JERARQUICAS_DISPONIBLES.filter(t => t.nivel === 'NIVEL_2').map(t => (
+                        <option key={t.id} value={t.id}>{t.label}</option>
+                      ))}
+                    </optgroup>
+
+                    <optgroup label="🔗 NIVEL 3: Tablas Puente, Pasarelas & Inventario">
+                      {TABLAS_JERARQUICAS_DISPONIBLES.filter(t => t.nivel === 'NIVEL_3').map(t => (
+                        <option key={t.id} value={t.id}>{t.label}</option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
+
+                {/* Banner de Advertencia Jerárquica */}
+                <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/80 rounded-xl text-[11px] text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
+                  <span>
+                    <strong>Regla de Jerarquía:</strong> Si cargas tablas de Nivel 2 o 3, verifica que sus tablas padre (Nivel 1) ya hayan sido insertadas para no violar restricciones de clave foránea.
+                  </span>
+                </div>
               </div>
             )}
 
@@ -270,17 +315,17 @@ export function BulkUploader({
                     <Upload className="w-8 h-8" />
                   </div>
                   <p className="text-sm font-bold text-slate-800 dark:text-white">
-                    Haz clic para seleccionar o arrastra tu archivo Excel
+                    Haz clic para seleccionar o arrastra tu archivo Excel para '{targetTable}'
                   </p>
                   <p className="text-xs text-slate-400 mt-1">
-                    Formatos admitidos: .xlsx, .xls, .csv (Se recomienda usar las plantillas oficiales)
+                    Formatos admitidos: .xlsx, .xls, .csv (Descarga la plantilla correspondiente en el botón adyacente)
                   </p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4 flex-1 min-h-0">
                   <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      Vista Previa: <strong>{data.length}</strong> fila(s) detectadas
+                      Vista Previa: <strong>{data.length}</strong> fila(s) listas para insertar en <strong>{targetTable}</strong>
                     </span>
                     <button 
                       type="button"

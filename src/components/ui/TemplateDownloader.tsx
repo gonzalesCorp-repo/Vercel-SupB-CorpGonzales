@@ -5,14 +5,119 @@ import * as XLSX from "xlsx";
 import { 
   Download, FileSpreadsheet, ChevronDown, Check, 
   Building2, Users, Package, Scissors, Sparkles, Layers,
-  CreditCard, Landmark, Armchair, UserCheck
+  CreditCard, Landmark, Armchair, UserCheck, Shield,
+  Receipt, Sliders, AlertTriangle, BookOpen
 } from "lucide-react";
 
 // ==============================================================================
-// DATASETS OFICIALES DE LAS 8 PLANTILLAS OPERATIVAS VAIKUNTHA ERP
+// 00. GUÍA DE JERARQUÍA RELACIONAL DE INGESTA (EXPLICACIÓN TÉCNICA EN EXCEL)
+// ==============================================================================
+const HOJA_GUIA_JERARQUIA = [
+  {
+    Paso_Orden: "00",
+    Nivel: "INSTRUCCIÓN MAESTRA",
+    Tabla_Destino: "TODAS",
+    Descripcion: "Para evitar errores de 'Foreign Key Constraint Violation', las tablas deben importarse respetando este orden numérico estricto.",
+    Dependencias_Requeridas: "Ninguna"
+  },
+  {
+    Paso_Orden: "01",
+    Nivel: "NIVEL 1 - Raíz",
+    Tabla_Destino: "public.sedes",
+    Descripcion: "Sucursales físicas y virtuales de la corporación. Contiene RUC y razón social.",
+    Dependencias_Requeridas: "Cero dependencias. Cargar primero."
+  },
+  {
+    Paso_Orden: "02",
+    Nivel: "NIVEL 1 - Raíz",
+    Tabla_Destino: "public.clientes",
+    Descripcion: "Directorio de clientes y cartera CRM con DNI y celular.",
+    Dependencias_Requeridas: "Cero dependencias."
+  },
+  {
+    Paso_Orden: "03",
+    Nivel: "NIVEL 1 - Raíz",
+    Tabla_Destino: "public.config_roles",
+    Descripcion: "Matriz de roles y niveles de autorización del sistema.",
+    Dependencias_Requeridas: "Cero dependencias."
+  },
+  {
+    Paso_Orden: "04",
+    Nivel: "NIVEL 1 - Raíz",
+    Tabla_Destino: "public.emisores",
+    Descripcion: "Entidades fiscales emisoras de comprobantes SUNAT.",
+    Dependencias_Requeridas: "Cero dependencias."
+  },
+  {
+    Paso_Orden: "05",
+    Nivel: "NIVEL 2 - Dependientes",
+    Tabla_Destino: "public.agentes",
+    Descripcion: "Colaboradores, estilistas staff, cajeros y recepción.",
+    Dependencias_Requeridas: "Requiere N1_01_Sedes y N1_03_Config_Roles."
+  },
+  {
+    Paso_Orden: "06",
+    Nivel: "NIVEL 2 - Dependientes",
+    Tabla_Destino: "public.bienes (Productos)",
+    Descripcion: "Catálogo de productos retail para venta al público e insumos de taller.",
+    Dependencias_Requeridas: "Cero dependencias de sede directa."
+  },
+  {
+    Paso_Orden: "07",
+    Nivel: "NIVEL 2 - Dependientes",
+    Tabla_Destino: "public.bienes (Servicios)",
+    Descripcion: "Servicios profesionales de salón (corte, balayage, tratamientos).",
+    Dependencias_Requeridas: "Cero dependencias de sede directa."
+  },
+  {
+    Paso_Orden: "08",
+    Nivel: "NIVEL 2 - Dependientes",
+    Tabla_Destino: "public.ubicaciones",
+    Descripcion: "Puestos físicos de trabajo WFM (sillones, lavaderos, cabinas).",
+    Dependencias_Requeridas: "Requiere N1_01_Sedes."
+  },
+  {
+    Paso_Orden: "09",
+    Nivel: "NIVEL 2 - Dependientes",
+    Tabla_Destino: "public.cuentas_financieras",
+    Descripcion: "Cuentas bancarias (BCP, BBVA), caja chica y billeteras Yape.",
+    Dependencias_Requeridas: "Requiere N1_01_Sedes."
+  },
+  {
+    Paso_Orden: "10",
+    Nivel: "NIVEL 2 - Dependientes",
+    Tabla_Destino: "public.emisores_series",
+    Descripcion: "Series electrónicas SUNAT (B001, F001, NV01).",
+    Dependencias_Requeridas: "Requiere N1_04_Emisores_SUNAT."
+  },
+  {
+    Paso_Orden: "11",
+    Nivel: "NIVEL 3 - Puentes",
+    Tabla_Destino: "public.config_pasarelas_pago",
+    Descripcion: "Terminales POS (Izipay, Niubiz) y cálculo de comisiones.",
+    Dependencias_Requeridas: "Requiere N1_01_Sedes y N2_09_Cuentas_Financieras."
+  },
+  {
+    Paso_Orden: "12",
+    Nivel: "NIVEL 3 - Puentes",
+    Tabla_Destino: "public.agente_configuracion_remunerativa",
+    Descripcion: "Esquemas de comisiones %, sueldos base y frecuencias de liquidación.",
+    Dependencias_Requeridas: "Requiere N2_05_Personal_Agentes."
+  },
+  {
+    Paso_Orden: "13",
+    Nivel: "NIVEL 3 - Puentes",
+    Tabla_Destino: "public.almacen_principal",
+    Descripcion: "Inventario y stock inicial de insumos y productos por sede.",
+    Dependencias_Requeridas: "Requiere N1_01_Sedes y N2_06_Catalogo_Bienes."
+  }
+];
+
+// ==============================================================================
+// NIVEL 1: TABLAS RAÍZ (CERO DEPENDENCIAS)
 // ==============================================================================
 
-// 01. Sedes & Sucursales
+// N1_01. Sedes & Sucursales
 const PLANTILLA_SEDES = [
   {
     nombre: "Sede Miraflores - Flagship",
@@ -43,7 +148,93 @@ const PLANTILLA_SEDES = [
   }
 ];
 
-// 02. Personal & Agentes
+// N1_02. Clientes & Directorio CRM
+const PLANTILLA_CLIENTES = [
+  {
+    nombre: "Mariana Alarcón Vega",
+    dni: "47891234",
+    celular: "+51 984 123 456",
+    email: "mariana.alarcon@gmail.com"
+  },
+  {
+    nombre: "Claudia Zegarra Ponce",
+    dni: "71234567",
+    celular: "+51 976 543 210",
+    email: "claudia.zegarra@outlook.com"
+  },
+  {
+    nombre: "Valeria Benavides Miroquesada",
+    dni: "44567890",
+    celular: "+51 998 765 432",
+    email: "valeria.benavides@empresa.com"
+  },
+  {
+    nombre: "Diego Bustamante Prado",
+    dni: "10987654",
+    celular: "+51 955 443 322",
+    email: "diego.bustamante@gmail.com"
+  }
+];
+
+// N1_03. Configuración de Roles
+const PLANTILLA_ROLES = [
+  {
+    rol_codigo: "SUPERADMIN",
+    nombre_visible: "Super Administrador Corporativo",
+    nivel_acceso: 100,
+    descripcion: "Acceso ilimitado a todas las sedes, desarrollador y finanzas"
+  },
+  {
+    rol_codigo: "ADMIN",
+    nombre_visible: "Administrador de Sede",
+    nivel_acceso: 80,
+    descripcion: "Gestión operativa, reportes, caja y arqueos de sede"
+  },
+  {
+    rol_codigo: "RECEPCION",
+    nombre_visible: "Recepción & Hostess",
+    nivel_acceso: 40,
+    descripcion: "Agenda CRM, check-in de clientes y creación de OATC"
+  },
+  {
+    rol_codigo: "CAJA",
+    nombre_visible: "Cajero POS SUNAT",
+    nivel_acceso: 50,
+    descripcion: "Cobro de tickets, emisión de comprobantes SUNAT y caja chica"
+  },
+  {
+    rol_codigo: "STAFF",
+    nombre_visible: "Estilista / Especialista Staff",
+    nivel_acceso: 20,
+    descripcion: "Atención de servicios, pedidos a taller y comisiones"
+  },
+  {
+    rol_codigo: "SOPORTE",
+    nombre_visible: "Asistente Técnico / Soporte",
+    nivel_acceso: 10,
+    descripcion: "Lavado de cabello, preparación de mezclas y soporte a staff"
+  }
+];
+
+// N1_04. Emisores SUNAT
+const PLANTILLA_EMISORES = [
+  {
+    ruc: "20608945123",
+    razon_social: "VAIKUNTHA SALON & SPA S.A.C.",
+    direccion_fiscal: "Av. José Larco 850, Miraflores, Lima",
+    ubigeo: "150122",
+    usuario_sol: "MODDATOS",
+    clave_sol: "MODDATOS",
+    certificado_digital_nombre: "cert_sunat_20608945123.pfx",
+    modo_produccion: false
+  }
+];
+
+// ==============================================================================
+// NIVEL 2: ENTIDADES DEPENDIENTES DE NIVEL 1
+// ==============================================================================
+
+// N2_05. Personal & Agentes
 const PLANTILLA_AGENTES = [
   {
     nombre: "Jean Pierre Valdivia",
@@ -87,7 +278,7 @@ const PLANTILLA_AGENTES = [
   }
 ];
 
-// 03. Catálogo de Bienes (Retail e Insumos de Taller)
+// N2_06. Catálogo de Bienes (Retail e Insumos)
 const PLANTILLA_BIENES = [
   {
     nombre: "Shampoo Serie Expert Absolut Repair 300ml",
@@ -131,7 +322,7 @@ const PLANTILLA_BIENES = [
   }
 ];
 
-// 04. Servicios de Salón
+// N2_07. Servicios de Salón
 const PLANTILLA_SERVICIOS = [
   {
     nombre: "Balayage Signature & Matización Gloss",
@@ -163,35 +354,41 @@ const PLANTILLA_SERVICIOS = [
   }
 ];
 
-// 05. Clientes & Directorio CRM
-const PLANTILLA_CLIENTES = [
+// N2_08. Ubicaciones WFM
+const PLANTILLA_UBICACIONES = [
   {
-    nombre: "Mariana Alarcón Vega",
-    dni: "47891234",
-    celular: "+51 984 123 456",
-    email: "mariana.alarcon@gmail.com"
+    nombre: "Recepción / Lobby Principal",
+    tipo: "en_espera",
+    estado: "LIBRE"
   },
   {
-    nombre: "Claudia Zegarra Ponce",
-    dni: "71234567",
-    celular: "+51 976 543 210",
-    email: "claudia.zegarra@outlook.com"
+    nombre: "Sillón Estilismo 1 (Master)",
+    tipo: "silla",
+    estado: "LIBRE"
   },
   {
-    nombre: "Valeria Benavides Miroquesada",
-    dni: "44567890",
-    celular: "+51 998 765 432",
-    email: "valeria.benavides@empresa.com"
+    nombre: "Sillón Estilismo 2",
+    tipo: "silla",
+    estado: "LIBRE"
   },
   {
-    nombre: "Diego Bustamante Prado",
-    dni: "10987654",
-    celular: "+51 955 443 322",
-    email: "diego.bustamante@gmail.com"
+    nombre: "Sillón Barbería & Barba",
+    tipo: "sillón",
+    estado: "LIBRE"
+  },
+  {
+    nombre: "Lavacabezas Ergonómico 1",
+    tipo: "lavadero",
+    estado: "LIBRE"
+  },
+  {
+    nombre: "Cabina Estética & Spa Facial",
+    tipo: "cabina",
+    estado: "LIBRE"
   }
 ];
 
-// 06. Cuentas Financieras & Fondos de Sede
+// N2_09. Cuentas Financieras
 const PLANTILLA_CUENTAS_FINANCIERAS = [
   {
     nombre: "Caja Chica de Mostrador (Fondo Fijo)",
@@ -231,7 +428,36 @@ const PLANTILLA_CUENTAS_FINANCIERAS = [
   }
 ];
 
-// 07. Pasarelas de Cobro POS & Tasas de Comisión
+// N2_10. Emisores Series SUNAT
+const PLANTILLA_EMISORES_SERIES = [
+  {
+    emisor_ruc: "20608945123",
+    tipo_comprobante: "BOLETA",
+    serie: "B001",
+    correlativo_actual: 1,
+    activo: true
+  },
+  {
+    emisor_ruc: "20608945123",
+    tipo_comprobante: "FACTURA",
+    serie: "F001",
+    correlativo_actual: 1,
+    activo: true
+  },
+  {
+    emisor_ruc: "20608945123",
+    tipo_comprobante: "NOTA_VENTA",
+    serie: "NV01",
+    correlativo_actual: 1,
+    activo: true
+  }
+];
+
+// ==============================================================================
+// NIVEL 3: TABLAS PUENTE, PASARELAS & INVENTARIO INICIAL
+// ==============================================================================
+
+// N3_11. Pasarelas de Cobro POS
 const PLANTILLA_PASARELAS_POS = [
   {
     nombre: "Izipay Terminal Mostrador 1",
@@ -275,47 +501,62 @@ const PLANTILLA_PASARELAS_POS = [
   }
 ];
 
-// 08. Ubicaciones Físicas de Sede (WFM Puestos)
-const PLANTILLA_UBICACIONES = [
+// N3_12. Esquemas Remunerativos
+const PLANTILLA_ESQUEMAS_REMUNERACION = [
   {
-    nombre: "Recepción / Lobby Principal",
-    tipo: "en_espera",
-    estado: "LIBRE"
+    agente_email: "jean.pierre@vaikuntha.pe",
+    tipo_remuneracion: "SUELDO_BASE_MAS_COMISIONES",
+    sueldo_base: 1500.00,
+    porcentaje_comision_servicios: 45.00,
+    porcentaje_comision_productos: 10.00,
+    frecuencia_corte: "QUINCENAL",
+    permite_solicitud_manual: true
   },
   {
-    nombre: "Sillón Estilismo 1 (Master)",
-    tipo: "silla",
-    estado: "LIBRE"
+    agente_email: "carla.mendoza@vaikuntha.pe",
+    tipo_remuneracion: "SOLO_COMISIONES",
+    sueldo_base: 0.00,
+    porcentaje_comision_servicios: 40.00,
+    porcentaje_comision_productos: 10.00,
+    frecuencia_corte: "DIARIA",
+    permite_solicitud_manual: true
   },
   {
-    nombre: "Sillón Estilismo 2",
-    tipo: "silla",
-    estado: "LIBRE"
+    agente_email: "rodrigo.morales@vaikuntha.pe",
+    tipo_remuneracion: "SOLO_SUELDO_BASE",
+    sueldo_base: 1350.00,
+    porcentaje_comision_servicios: 0.00,
+    porcentaje_comision_productos: 5.00,
+    frecuencia_corte: "MENSUAL",
+    permite_solicitud_manual: false
+  }
+];
+
+// N3_13. Inventario Inicial (Almacén Principal)
+const PLANTILLA_INVENTARIO_INICIAL = [
+  {
+    sede_nombre: "Sede Miraflores - Flagship",
+    sku_bien: "LOR-SH-ABS-300",
+    proveedor: "L'Oréal Perú S.A.",
+    marca: "L'Oréal Professionnel",
+    linea: "Serie Expert",
+    presentacion: "Frasco 300ml",
+    stock_inicial: 24,
+    stock_minimo: 6,
+    costo_unitario: 45.00,
+    ubicacion_anaquel: "A-01-RETAIL"
   },
   {
-    nombre: "Sillón Barbería & Barba",
-    tipo: "sillón",
-    estado: "LIBRE"
-  },
-  {
-    nombre: "Lavacabezas Ergonómico 1",
-    tipo: "lavadero",
-    estado: "LIBRE"
-  },
-  {
-    nombre: "Lavacabezas Ergonómico 2",
-    tipo: "lavadero",
-    estado: "LIBRE"
-  },
-  {
-    nombre: "Cabina Estética & Spa Facial",
-    tipo: "cabina",
-    estado: "LIBRE"
-  },
-  {
-    nombre: "Tocador Makeup & Peinados",
-    tipo: "tocador",
-    estado: "LIBRE"
+    sede_nombre: "Sede Miraflores - Flagship",
+    sku_bien: "LOR-INO-60G-60",
+    proveedor: "L'Oréal Perú S.A.",
+    marca: "Inoa",
+    linea: "Coloración Sin Amoníaco",
+    presentacion: "Tubo 60g",
+    stock_inicial: 50,
+    stock_minimo: 10,
+    costo_unitario: 24.00,
+    ubicacion_anaquel: "B-03-LAB"
   }
 ];
 
@@ -344,88 +585,62 @@ export function TemplateDownloader() {
           key.length,
           ...data.map((row) => String(row[key] || "").length)
         );
-        return { wch: Math.min(Math.max(maxLen + 4, 12), 40) };
+        return { wch: Math.min(Math.max(maxLen + 4, 14), 45) };
       });
     }
     return ws;
   };
 
-  // Descarga del Libro Maestro Multi-Pestaña (8 Hojas)
+  // Descarga del Libro Maestro Multi-Pestaña con Jerarquía Oficial
   const descargarLibroMaestro = () => {
     const wb = XLSX.utils.book_new();
 
-    const wsSedes = formatWorksheet(PLANTILLA_SEDES);
-    const wsAgentes = formatWorksheet(PLANTILLA_AGENTES);
-    const wsBienes = formatWorksheet(PLANTILLA_BIENES);
-    const wsServicios = formatWorksheet(PLANTILLA_SERVICIOS);
-    const wsClientes = formatWorksheet(PLANTILLA_CLIENTES);
-    const wsCuentas = formatWorksheet(PLANTILLA_CUENTAS_FINANCIERAS);
-    const wsPasarelas = formatWorksheet(PLANTILLA_PASARELAS_POS);
-    const wsUbicaciones = formatWorksheet(PLANTILLA_UBICACIONES);
+    // 00. Hoja de Guía Jerárquica
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(HOJA_GUIA_JERARQUIA), "00_GUIA_JERARQUIA");
 
-    XLSX.utils.book_append_sheet(wb, wsSedes, "01_Sedes");
-    XLSX.utils.book_append_sheet(wb, wsAgentes, "02_Personal_Agentes");
-    XLSX.utils.book_append_sheet(wb, wsBienes, "03_Catalogo_Bienes");
-    XLSX.utils.book_append_sheet(wb, wsServicios, "04_Servicios");
-    XLSX.utils.book_append_sheet(wb, wsClientes, "05_Clientes");
-    XLSX.utils.book_append_sheet(wb, wsCuentas, "06_Cuentas_Financieras");
-    XLSX.utils.book_append_sheet(wb, wsPasarelas, "07_Pasarelas_POS");
-    XLSX.utils.book_append_sheet(wb, wsUbicaciones, "08_Ubicaciones_WFM");
+    // NIVEL 1
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SEDES), "N1_01_Sedes");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_CLIENTES), "N1_02_Clientes");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_ROLES), "N1_03_Config_Roles");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_EMISORES), "N1_04_Emisores_SUNAT");
+
+    // NIVEL 2
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_AGENTES), "N2_05_Personal_Agentes");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_BIENES), "N2_06_Catalogo_Bienes");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SERVICIOS), "N2_07_Servicios_Salon");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_UBICACIONES), "N2_08_Ubicaciones_WFM");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_CUENTAS_FINANCIERAS), "N2_09_Cuentas_Financieras");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_EMISORES_SERIES), "N2_10_Emisores_Series");
+
+    // NIVEL 3
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_PASARELAS_POS), "N3_11_Pasarelas_POS");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_ESQUEMAS_REMUNERACION), "N3_12_Esquemas_Remuneracion");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_INVENTARIO_INICIAL), "N3_13_Inventario_Inicial");
 
     XLSX.writeFile(wb, "Plantilla_Maestra_Aprovisionamiento_Sede_Vaikuntha.xlsx");
     setDropdownOpen(false);
   };
 
-  // Descargas individuales modulares (8 Módulos)
-  const descargarModulo = (tipo: 'SEDES' | 'AGENTES' | 'BIENES' | 'SERVICIOS' | 'CLIENTES' | 'CUENTAS' | 'PASARELAS' | 'UBICACIONES') => {
+  // Descargas individuales modulares prefijadas
+  const descargarModulo = (
+    nombreArchivo: string, 
+    nombreHoja: string, 
+    dataset: any[]
+  ) => {
     const wb = XLSX.utils.book_new();
-
-    switch (tipo) {
-      case 'SEDES':
-        XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SEDES), "Sedes");
-        XLSX.writeFile(wb, "Plantilla_01_Sedes.xlsx");
-        break;
-      case 'AGENTES':
-        XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_AGENTES), "Personal_Agentes");
-        XLSX.writeFile(wb, "Plantilla_02_Personal_Agentes.xlsx");
-        break;
-      case 'BIENES':
-        XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_BIENES), "Catalogo_Bienes");
-        XLSX.writeFile(wb, "Plantilla_03_Catalogo_Bienes.xlsx");
-        break;
-      case 'SERVICIOS':
-        XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SERVICIOS), "Servicios");
-        XLSX.writeFile(wb, "Plantilla_04_Servicios.xlsx");
-        break;
-      case 'CLIENTES':
-        XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_CLIENTES), "Clientes");
-        XLSX.writeFile(wb, "Plantilla_05_Clientes.xlsx");
-        break;
-      case 'CUENTAS':
-        XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_CUENTAS_FINANCIERAS), "Cuentas_Financieras");
-        XLSX.writeFile(wb, "Plantilla_06_Cuentas_Financieras.xlsx");
-        break;
-      case 'PASARELAS':
-        XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_PASARELAS_POS), "Pasarelas_POS");
-        XLSX.writeFile(wb, "Plantilla_07_Pasarelas_POS.xlsx");
-        break;
-      case 'UBICACIONES':
-        XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_UBICACIONES), "Ubicaciones_WFM");
-        XLSX.writeFile(wb, "Plantilla_08_Ubicaciones_WFM.xlsx");
-        break;
-    }
-
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(dataset), nombreHoja);
+    XLSX.writeFile(wb, `${nombreArchivo}.xlsx`);
     setDropdownOpen(false);
   };
 
   return (
     <div className="relative inline-flex items-center" ref={dropdownRef}>
-      {/* Botón Principal: Descargar Libro Maestro de 8 Hojas */}
+      {/* Botón Principal: Descargar Libro Maestro Jerarquizado */}
       <button
         type="button"
         onClick={descargarLibroMaestro}
         className="flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-l-xl shadow-xs text-xs font-bold transition cursor-pointer"
-        title="Descargar Kit Maestro con las 8 plantillas operativas oficiales"
+        title="Descargar Kit Maestro Jerarquizado con Guía de Ingesta (13 Hojas Ordenadas)"
       >
         <Download className="w-3.5 h-3.5" />
         <span>Descargar Plantillas Excel</span>
@@ -436,141 +651,188 @@ export function TemplateDownloader() {
         type="button"
         onClick={() => setDropdownOpen(!dropdownOpen)}
         className="px-2 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-r-xl border-l border-emerald-500/40 shadow-xs transition cursor-pointer"
-        title="Opciones de descarga modular por módulo"
+        title="Menú jerárquico por niveles de dependencia"
       >
         <ChevronDown className={`w-3.5 h-3.5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Menú Desplegable Modular (8 Módulos) */}
+      {/* Menú Desplegable Estructurado por Niveles */}
       {dropdownOpen && (
-        <div className="absolute left-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 space-y-1 max-h-96 overflow-y-auto">
+        <div className="absolute left-0 top-full mt-2 w-84 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 space-y-1.5 max-h-[460px] overflow-y-auto">
+          
           <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800">
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
-              Kit Maestro de Aprovisionamiento (8 Plantillas)
-            </span>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              Descarga el libro completo o la plantilla individual de cada área:
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                Jerarquía Oficial de Ingesta
+              </span>
+              <span className="text-[9px] font-bold text-slate-400">13 Plantillas</span>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-0.5">
+              Carga en orden numérico para evitar fallos de Foreign Key en PostgreSQL.
             </p>
           </div>
 
-          {/* Opción Libro Maestro 8 Hojas */}
+          {/* Opción Libro Maestro */}
           <button
             type="button"
             onClick={descargarLibroMaestro}
-            className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-left transition cursor-pointer group border border-emerald-200/60 dark:border-emerald-800/60"
+            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/40 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/60 text-left transition cursor-pointer border border-emerald-200/80 dark:border-emerald-800/80"
           >
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition" />
+              <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <div>
                 <strong className="text-xs font-bold text-slate-800 dark:text-white block">
                   Libro Maestro Completo (.xlsx)
                 </strong>
-                <span className="text-[10px] text-slate-500">8 hojas operativas oficiales Vaikuntha</span>
+                <span className="text-[10px] text-slate-500">13 hojas + Hoja 00 de Guía Jerárquica</span>
               </div>
             </div>
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 uppercase">
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-600 text-white uppercase shrink-0">
               Oficial
             </span>
           </button>
 
-          <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+          {/* ================= SECCIÓN NIVEL 1 ================= */}
+          <div className="pt-1">
+            <span className="text-[9px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 px-2 block">
+              ⭐ NIVEL 1: Tablas Raíz (Cargar Primero)
+            </span>
+            <div className="space-y-0.5 mt-1">
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N1_01_Sedes', 'N1_01_Sedes', PLANTILLA_SEDES)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Building2 className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span className="truncate">N1_01. Sedes & Sucursales</span>
+              </button>
 
-          {/* Opciones Modulares (8 Tablas) */}
-          <button
-            type="button"
-            onClick={() => descargarModulo('SEDES')}
-            className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer"
-          >
-            <Building2 className="w-3.5 h-3.5 text-amber-500" />
-            <div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">01. Sedes & Sucursales</span>
-              <span className="text-[10px] text-slate-400">RUC, razón social, dirección, ciudad</span>
-            </div>
-          </button>
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N1_02_Clientes', 'N1_02_Clientes', PLANTILLA_CLIENTES)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span className="truncate">N1_02. Clientes CRM</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => descargarModulo('AGENTES')}
-            className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer"
-          >
-            <Users className="w-3.5 h-3.5 text-indigo-500" />
-            <div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">02. Personal & Agentes</span>
-              <span className="text-[10px] text-slate-400">Staff, soporte, roles y estados</span>
-            </div>
-          </button>
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N1_03_Config_Roles', 'N1_03_Config_Roles', PLANTILLA_ROLES)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Shield className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span className="truncate">N1_03. Configuración de Roles</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => descargarModulo('BIENES')}
-            className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer"
-          >
-            <Package className="w-3.5 h-3.5 text-cyan-500" />
-            <div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">03. Catálogo de Bienes</span>
-              <span className="text-[10px] text-slate-400">Retail e insumos de taller, SKU, costos</span>
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N1_04_Emisores_SUNAT', 'N1_04_Emisores_SUNAT', PLANTILLA_EMISORES)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Receipt className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span className="truncate">N1_04. Emisores Fiscales SUNAT</span>
+              </button>
             </div>
-          </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => descargarModulo('SERVICIOS')}
-            className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer"
-          >
-            <Scissors className="w-3.5 h-3.5 text-pink-500" />
-            <div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">04. Servicios de Salón</span>
-              <span className="text-[10px] text-slate-400">Precios de lista y categorías de servicio</span>
-            </div>
-          </button>
+          {/* ================= SECCIÓN NIVEL 2 ================= */}
+          <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+            <span className="text-[9px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 px-2 block">
+              🔹 NIVEL 2: Entidades Dependientes
+            </span>
+            <div className="space-y-0.5 mt-1">
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N2_05_Personal_Agentes', 'N2_05_Personal_Agentes', PLANTILLA_AGENTES)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Users className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                <span className="truncate">N2_05. Personal & Agentes</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => descargarModulo('CLIENTES')}
-            className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer"
-          >
-            <UserCheck className="w-3.5 h-3.5 text-emerald-500" />
-            <div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">05. Directorio de Clientes</span>
-              <span className="text-[10px] text-slate-400">DNI, nombres, celular y email</span>
-            </div>
-          </button>
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N2_06_Catalogo_Bienes', 'N2_06_Catalogo_Bienes', PLANTILLA_BIENES)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Package className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                <span className="truncate">N2_06. Catálogo de Bienes & Insumos</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => descargarModulo('CUENTAS')}
-            className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer"
-          >
-            <Landmark className="w-3.5 h-3.5 text-blue-500" />
-            <div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">06. Cuentas Financieras & Bancos</span>
-              <span className="text-[10px] text-slate-400">Caja chica, BCP, BBVA, Yape y saldos iniciales</span>
-            </div>
-          </button>
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N2_07_Servicios_Salon', 'N2_07_Servicios_Salon', PLANTILLA_SERVICIOS)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Scissors className="w-3.5 h-3.5 text-pink-500 shrink-0" />
+                <span className="truncate">N2_07. Servicios de Salón</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => descargarModulo('PASARELAS')}
-            className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer"
-          >
-            <CreditCard className="w-3.5 h-3.5 text-purple-500" />
-            <div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">07. Pasarelas de Cobro POS</span>
-              <span className="text-[10px] text-slate-400">Izipay, Niubiz, comisiones %, D+1</span>
-            </div>
-          </button>
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N2_08_Ubicaciones_WFM', 'N2_08_Ubicaciones_WFM', PLANTILLA_UBICACIONES)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Armchair className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                <span className="truncate">N2_08. Ubicaciones & Puestos WFM</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => descargarModulo('UBICACIONES')}
-            className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer"
-          >
-            <Armchair className="w-3.5 h-3.5 text-orange-500" />
-            <div>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 block">08. Ubicaciones & Puestos WFM</span>
-              <span className="text-[10px] text-slate-400">Sillones, lavaderos, cabinas de estética</span>
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N2_09_Cuentas_Financieras', 'N2_09_Cuentas_Financieras', PLANTILLA_CUENTAS_FINANCIERAS)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Landmark className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                <span className="truncate">N2_09. Cuentas Financieras & Bancos</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N2_10_Emisores_Series', 'N2_10_Emisores_Series', PLANTILLA_EMISORES_SERIES)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Receipt className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <span className="truncate">N2_10. Series de Facturación SUNAT</span>
+              </button>
             </div>
-          </button>
+          </div>
+
+          {/* ================= SECCIÓN NIVEL 3 ================= */}
+          <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+            <span className="text-[9px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 px-2 block">
+              🔗 NIVEL 3: Puentes, Pasarelas & Stock
+            </span>
+            <div className="space-y-0.5 mt-1">
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N3_11_Pasarelas_POS', 'N3_11_Pasarelas_POS', PLANTILLA_PASARELAS_POS)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <CreditCard className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                <span className="truncate">N3_11. Pasarelas de Cobro POS</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N3_12_Esquemas_Remuneracion', 'N3_12_Esquemas_Remuneracion', PLANTILLA_ESQUEMAS_REMUNERACION)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Sliders className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                <span className="truncate">N3_12. Esquemas de Remuneración</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N3_13_Inventario_Inicial', 'N3_13_Inventario_Inicial', PLANTILLA_INVENTARIO_INICIAL)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
+              >
+                <Package className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <span className="truncate">N3_13. Inventario & Stock Inicial</span>
+              </button>
+            </div>
+          </div>
+
         </div>
       )}
     </div>
