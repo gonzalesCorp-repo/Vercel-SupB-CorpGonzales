@@ -42,21 +42,28 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     // 1. Actualizar tabla agentes
+    const estadoLimpio = estado === 'INACTIVO' ? 'INACTIVO' : 'ACTIVO';
+    const updatePayload: any = {
+      nombre: nombre?.trim(),
+      email: email?.trim(),
+      rol,
+      especialidad: especialidad?.trim() || null,
+      estado: estadoLimpio,
+      regimen_laboral: regimen_laboral || 'HONORARIOS_RHE',
+      sueldo_base: Number(sueldo_base || 0),
+      tipo_pension: tipo_pension || 'AFP',
+      asignacion_familiar: Boolean(asignacion_familiar),
+      porcentaje_comision: Number(porcentaje_comision || 40),
+      tarifa_hora: Number(tarifa_hora || 0)
+    };
+
+    if (estadoLimpio === 'INACTIVO') {
+      updatePayload.estado_operativo = 'FUERA_DE_TURNO';
+    }
+
     const { error: agenteError } = await supabaseAdmin
       .from('agentes')
-      .update({
-        nombre: nombre?.trim(),
-        email: email?.trim(),
-        rol,
-        especialidad: especialidad?.trim() || null,
-        estado,
-        regimen_laboral: regimen_laboral || 'HONORARIOS_RHE',
-        sueldo_base: Number(sueldo_base || 0),
-        tipo_pension: tipo_pension || 'AFP',
-        asignacion_familiar: Boolean(asignacion_familiar),
-        porcentaje_comision: Number(porcentaje_comision || 40),
-        tarifa_hora: Number(tarifa_hora || 0)
-      })
+      .update(updatePayload)
       .eq('id', userId);
 
     if (agenteError) {

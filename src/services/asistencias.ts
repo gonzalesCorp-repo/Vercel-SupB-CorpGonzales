@@ -504,7 +504,7 @@ export async function ejecutarResetDiarioAgentes(sedeId?: string): Promise<{ age
         await supabase
           .from('agentes')
           .update({
-            estado_operativo: 'FUERA_TURNO',
+            estado_operativo: 'FUERA_DE_TURNO',
             ultimo_cambio_estado: new Date().toISOString()
           })
           .eq('id', ag.id);
@@ -562,7 +562,7 @@ export async function cerrarJornadaMasivaSede(sedeId: string, adminNombre: strin
       await supabase
         .from('agentes')
         .update({
-          estado_operativo: 'FUERA_TURNO',
+          estado_operativo: 'FUERA_DE_TURNO',
           ultimo_cambio_estado: new Date().toISOString()
         })
         .eq('id', ag.id);

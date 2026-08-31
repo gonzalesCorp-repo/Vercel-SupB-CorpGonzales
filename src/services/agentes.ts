@@ -50,6 +50,7 @@ export async function darDeBajaColaborador(agenteId: string, motivo: string, adm
     .from('agentes')
     .update({ 
       estado: 'INACTIVO',
+      estado_operativo: 'FUERA_DE_TURNO',
       ultimo_cambio_estado: new Date().toISOString()
     })
     .eq('id', agenteId);
@@ -80,6 +81,7 @@ export async function reactivarColaborador(agenteId: string, adminNombre: string
     .from('agentes')
     .update({ 
       estado: 'ACTIVO',
+      estado_operativo: 'FUERA_DE_TURNO',
       ultimo_cambio_estado: new Date().toISOString()
     })
     .eq('id', agenteId);

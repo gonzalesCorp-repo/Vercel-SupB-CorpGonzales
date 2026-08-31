@@ -198,7 +198,7 @@ export async function obtenerAgentesDisponibles(): Promise<Agente[]> {
           .from('agentes')
           .select('*')
           .in('id', agenteIds)
-          .neq('estado', 'INACTIVO')
+          .eq('estado', 'ACTIVO')
           .order('nombre');
         agentesData = data || [];
       }
@@ -206,7 +206,7 @@ export async function obtenerAgentesDisponibles(): Promise<Agente[]> {
       const { data } = await supabase
         .from('agentes')
         .select('*')
-        .neq('estado', 'INACTIVO')
+        .eq('estado', 'ACTIVO')
         .order('nombre');
       agentesData = data || [];
     }

@@ -52,7 +52,7 @@ const HOJA_GUIA_JERARQUIA = [
     Paso_Orden: "05",
     Nivel: "NIVEL 2 - Dependientes",
     Tabla_Destino: "public.agentes",
-    Descripcion: "Personal con roles canónicos (ADMIN, SOPORTE, STAFF), especialidad y sede_principal.",
+    Descripcion: "Personal con roles canónicos (ADMIN, SOPORTE, STAFF). estado='ACTIVO'/'INACTIVO' (laboral) y estado_operativo='FUERA_DE_TURNO'/'DISPONIBLE' (piso).",
     Dependencias_Requeridas: "Requiere N1_01_Sedes y N1_03_Config_Roles."
   },
   {
@@ -246,6 +246,7 @@ const PLANTILLA_EMISORES = [
 // ==============================================================================
 
 // N2_05. Personal & Agentes (Roles Canónicos: ADMIN, SOPORTE, STAFF + Sede Principal)
+// NOTA CANÓNICA: 'estado' es el vínculo laboral (ACTIVO / INACTIVO). 'estado_operativo' es disponibilidad en piso (FUERA_DE_TURNO, DISPONIBLE, etc.)
 const PLANTILLA_AGENTES = [
   {
     nombre: "Jean Pierre Valdivia",
@@ -253,8 +254,8 @@ const PLANTILLA_AGENTES = [
     rol: "STAFF",
     especialidad: "Master Colorista & Balayage",
     sede_principal: "Sede Miraflores - Flagship",
-    estado: "DISPONIBLE",
-    estado_operativo: "DISPONIBLE"
+    estado: "ACTIVO",
+    estado_operativo: "FUERA_DE_TURNO"
   },
   {
     nombre: "Carla Mendoza Reyes",
@@ -262,8 +263,8 @@ const PLANTILLA_AGENTES = [
     rol: "STAFF",
     especialidad: "Estilista Senior & Peinados",
     sede_principal: "Sede Miraflores - Flagship",
-    estado: "DISPONIBLE",
-    estado_operativo: "DISPONIBLE"
+    estado: "ACTIVO",
+    estado_operativo: "FUERA_DE_TURNO"
   },
   {
     nombre: "Rodrigo Morales Alva",
@@ -271,8 +272,8 @@ const PLANTILLA_AGENTES = [
     rol: "SOPORTE",
     especialidad: "Asistente de Lavado, Taller & Caja",
     sede_principal: "Sede Miraflores - Flagship",
-    estado: "DISPONIBLE",
-    estado_operativo: "DISPONIBLE"
+    estado: "ACTIVO",
+    estado_operativo: "FUERA_DE_TURNO"
   },
   {
     nombre: "Luciana Salazar Peña",
@@ -280,8 +281,8 @@ const PLANTILLA_AGENTES = [
     rol: "SOPORTE",
     especialidad: "Anfitriona de Recepción & Atención al Cliente",
     sede_principal: "Sede Miraflores - Flagship",
-    estado: "DISPONIBLE",
-    estado_operativo: "DISPONIBLE"
+    estado: "ACTIVO",
+    estado_operativo: "FUERA_DE_TURNO"
   },
   {
     nombre: "Martín Vizcarra Flores",
@@ -289,8 +290,8 @@ const PLANTILLA_AGENTES = [
     rol: "ADMIN",
     especialidad: "Administrador de Sede Miraflores",
     sede_principal: "Sede Miraflores - Flagship",
-    estado: "DISPONIBLE",
-    estado_operativo: "DISPONIBLE"
+    estado: "ACTIVO",
+    estado_operativo: "FUERA_DE_TURNO"
   }
 ];
 

@@ -143,6 +143,29 @@ export function BulkUploader({
       }
     }
 
+    // Saneamiento Canónico para la tabla AGENTES:
+    // 'estado' es vínculo laboral ('ACTIVO' / 'INACTIVO').
+    // 'estado_operativo' es disponibilidad en piso ('FUERA_DE_TURNO', 'DISPONIBLE', etc.)
+    if (activeTable === 'agentes') {
+      const estadoUpper = String(cleanRow.estado || "").toUpperCase().trim();
+      if (estadoUpper === 'INACTIVO' || estadoUpper === 'CESADO' || estadoUpper === 'BAJA') {
+        cleanRow.estado = 'INACTIVO';
+        cleanRow.estado_operativo = 'FUERA_DE_TURNO';
+      } else {
+        cleanRow.estado = 'ACTIVO';
+      }
+
+      const opUpper = String(cleanRow.estado_operativo || "").toUpperCase().trim();
+      const validosOp = ['DISPONIBLE', 'OCUPADO', 'EN_REFRIGERIO', 'FUERA_DE_TURNO', 'EN_DESCANSO'];
+      if (validosOp.includes(opUpper)) {
+        cleanRow.estado_operativo = opUpper;
+      } else if (opUpper === 'FUERA_TURNO') {
+        cleanRow.estado_operativo = 'FUERA_DE_TURNO';
+      } else {
+        cleanRow.estado_operativo = 'FUERA_DE_TURNO';
+      }
+    }
+
     return cleanRow;
   };
 
