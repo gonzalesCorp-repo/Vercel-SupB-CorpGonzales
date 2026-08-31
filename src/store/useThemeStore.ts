@@ -4,13 +4,16 @@ import { createClient } from '@/lib/supabase/client';
 import { SKINS_CATALOG, getSkinById } from '@/config/themes';
 
 export type ThemeMode = 'light' | 'dark';
-export type FontSize = 'small' | 'normal' | 'large';
+export type FontSize = 'small' | 'normal' | 'large' | 'extra-large' | 'huge';
+export type FontFamily = 'inter' | 'jakarta' | 'hyperlegible' | 'mono';
 export type KioskTheme = 'lumina' | 'eva-01' | 'cyberpunk' | 'luxury';
 
 interface ThemeState {
   themeMode: ThemeMode;
   primaryColor: string;
   fontSize: FontSize;
+  fontFamily: FontFamily;
+  uppercaseMode: boolean;
   nervProtocolEnabled: boolean;
   evaTheme: string;
   kioskTheme: KioskTheme;
@@ -20,6 +23,8 @@ interface ThemeState {
   setThemeMode: (mode: ThemeMode, userId?: string) => Promise<void>;
   setPrimaryColor: (color: string, userId?: string) => Promise<void>;
   setFontSize: (size: FontSize, userId?: string) => Promise<void>;
+  setFontFamily: (font: FontFamily, userId?: string) => Promise<void>;
+  setUppercaseMode: (enabled: boolean, userId?: string) => Promise<void>;
   setNervProtocolEnabled: (enabled: boolean, userId?: string) => Promise<void>;
   setEvaTheme: (theme: string, userId?: string) => Promise<void>;
   setHoudiniGlowEnabled: (enabled: boolean, userId?: string) => Promise<void>;
@@ -59,6 +64,8 @@ export const useThemeStore = create<ThemeState>()(
       themeMode: 'dark',
       primaryColor: DEFAULT_COLOR,
       fontSize: 'normal',
+      fontFamily: 'inter',
+      uppercaseMode: false,
       nervProtocolEnabled: false,
       evaTheme: 'none',
       kioskTheme: 'lumina',
@@ -78,6 +85,16 @@ export const useThemeStore = create<ThemeState>()(
       setFontSize: async (size, userId) => {
         set({ fontSize: size });
         await syncToSupabase(userId, { fontSize: size });
+      },
+
+      setFontFamily: async (font, userId) => {
+        set({ fontFamily: font });
+        await syncToSupabase(userId, { fontFamily: font });
+      },
+
+      setUppercaseMode: async (enabled, userId) => {
+        set({ uppercaseMode: enabled });
+        await syncToSupabase(userId, { uppercaseMode: enabled });
       },
 
       setNervProtocolEnabled: async (enabled, userId) => {
@@ -136,6 +153,8 @@ export const useThemeStore = create<ThemeState>()(
               themeMode: prefs.themeMode || state.themeMode,
               primaryColor: prefs.primaryColor || state.primaryColor,
               fontSize: prefs.fontSize || state.fontSize,
+              fontFamily: prefs.fontFamily || state.fontFamily,
+              uppercaseMode: prefs.uppercaseMode !== undefined ? prefs.uppercaseMode : state.uppercaseMode,
               nervProtocolEnabled: prefs.nervProtocolEnabled !== undefined ? prefs.nervProtocolEnabled : (prefs.evaTheme && prefs.evaTheme !== 'none'),
               evaTheme: prefs.evaTheme || state.evaTheme,
               kioskTheme: prefs.kioskTheme || state.kioskTheme,
@@ -152,6 +171,8 @@ export const useThemeStore = create<ThemeState>()(
         themeMode: 'dark', 
         primaryColor: DEFAULT_COLOR, 
         fontSize: 'normal', 
+        fontFamily: 'inter',
+        uppercaseMode: false,
         nervProtocolEnabled: false,
         evaTheme: 'none',
         kioskTheme: 'lumina',

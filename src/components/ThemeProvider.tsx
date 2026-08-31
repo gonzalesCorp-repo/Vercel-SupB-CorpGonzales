@@ -9,6 +9,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     themeMode, 
     primaryColor, 
     fontSize, 
+    fontFamily,
+    uppercaseMode,
     nervProtocolEnabled, 
     evaTheme, 
     houdiniGlowEnabled,
@@ -70,12 +72,33 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const effectiveGlowOpacity = houdiniGlowEnabled ? (glowOpacity ?? 0.6) : 0;
     root.style.setProperty('--glow-opacity', effectiveGlowOpacity.toString());
 
-    // 4. Ajustar font size base
+    // 4. Ajustar font size base (5 Niveles de Accesibilidad)
     if (fontSize === 'small') root.style.fontSize = '14px';
     else if (fontSize === 'large') root.style.fontSize = '18px';
+    else if (fontSize === 'extra-large') root.style.fontSize = '20px';
+    else if (fontSize === 'huge') root.style.fontSize = '22px';
     else root.style.fontSize = '16px';
+
+    // 5. Ajustar Familia Tipográfica
+    let fontStack = 'var(--font-inter), system-ui, -apple-system, sans-serif';
+    if (fontFamily === 'jakarta') {
+      fontStack = 'var(--font-plus-jakarta), system-ui, sans-serif';
+    } else if (fontFamily === 'hyperlegible') {
+      fontStack = "'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif";
+    } else if (fontFamily === 'mono') {
+      fontStack = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+    }
+    root.style.setProperty('--active-font-family', fontStack);
+    root.style.fontFamily = fontStack;
+
+    // 6. Ajustar Modo Todo en MAYÚSCULAS
+    if (uppercaseMode) {
+      root.setAttribute('data-uppercase', 'true');
+    } else {
+      root.removeAttribute('data-uppercase');
+    }
     
-  }, [themeMode, primaryColor, fontSize, nervProtocolEnabled, evaTheme, houdiniGlowEnabled, glowOpacity, mounted]);
+  }, [themeMode, primaryColor, fontSize, fontFamily, uppercaseMode, nervProtocolEnabled, evaTheme, houdiniGlowEnabled, glowOpacity, mounted]);
 
   return <>{children}</>;
 }

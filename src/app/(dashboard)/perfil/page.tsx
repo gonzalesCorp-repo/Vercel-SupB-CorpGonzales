@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { 
   User, Shield, KeyRound, Palette, MapPin, Volume2, 
   VolumeX, Check, Save, Eye, EyeOff, Sparkles, Moon, Sun, 
-  Building2, CheckCircle2 
+  Building2, CheckCircle2, Type, Glasses, ZoomIn, CaseSensitive
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
@@ -22,6 +22,10 @@ export default function PerfilPage() {
     setPrimaryColor, 
     fontSize, 
     setFontSize,
+    fontFamily,
+    setFontFamily,
+    uppercaseMode,
+    setUppercaseMode,
     cargarPreferenciasNube 
   } = useThemeStore();
 
@@ -297,33 +301,165 @@ export default function PerfilPage() {
                 </div>
               </div>
 
-              {/* Selector de Tamaño de Fuente */}
-              <div>
-                <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-2">
-                  Tamaño de Letra
-                </label>
-                <div className="flex gap-2">
-                  {(['small', 'normal', 'large'] as const).map((size) => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => setFontSize(size, agente?.id)}
-                      className={`flex-1 py-1.5 rounded-xl border text-xs font-black transition-all capitalize cursor-pointer ${
-                        fontSize === size
-                          ? 'border-transparent text-white shadow-md'
-                          : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                      }`}
-                      style={fontSize === size ? { backgroundColor: primaryColor } : {}}
-                    >
-                      {size === 'small' ? 'Pequeño' : size === 'large' ? 'Grande' : 'Normal'}
-                    </button>
-                  ))}
-                </div>
+              {/* Resumen de Ajustes Visuales */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-600 dark:text-slate-400">Tamaño actual:</span>
+                <span className="font-black text-slate-900 dark:text-white capitalize">
+                  {fontSize === 'small' ? '14px (Pequeño)' : fontSize === 'normal' ? '16px (Normal)' : fontSize === 'large' ? '18px (Grande)' : fontSize === 'extra-large' ? '20px (Extra Grande)' : '22px (Gigante)'}
+                </span>
               </div>
             </div>
           </motion.div>
 
         </div>
+
+        {/* ♿ ACCESIBILIDAD & LEGIBILIDAD VISUAL */}
+        <motion.div 
+          variants={itemVariants} 
+          className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl p-6 md:p-8 space-y-6"
+        >
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-500">
+                  <Glasses className="w-5 h-5" />
+                </div>
+                <h3 className="font-black text-lg text-slate-900 dark:text-white">
+                  Accesibilidad & Legibilidad Visual
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Personaliza el tamaño, la tipografía y transforma el texto a MAYÚSCULAS para una lectura cómoda sin fatiga visual.
+              </p>
+            </div>
+
+            {/* Switch Rápido: Modo Todo en MAYÚSCULAS */}
+            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-950 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-2 pl-2">
+                <CaseSensitive className="w-4 h-4 text-indigo-500" />
+                <span className="text-xs font-black text-slate-700 dark:text-slate-300">
+                  Todo en MAYÚSCULAS
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUppercaseMode(!uppercaseMode, agente?.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  uppercaseMode
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                {uppercaseMode ? 'ACTIVADO' : 'Desactivado'}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Control 1: Tamaño de Letra (5 Niveles) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <ZoomIn className="w-4 h-4 text-emerald-500" />
+                  <span>Tamaño de Letra (Zoom UI)</span>
+                </label>
+                <span className="text-[11px] font-bold text-slate-400">
+                  {fontSize === 'small' ? '14px (Pequeño)' : fontSize === 'normal' ? '16px (Normal)' : fontSize === 'large' ? '18px (Grande)' : fontSize === 'extra-large' ? '20px (Extra Grande)' : '22px (Gigante)'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-5 gap-1.5">
+                {[
+                  { id: 'small', label: '14px', title: 'Pequeño' },
+                  { id: 'normal', label: '16px', title: 'Normal' },
+                  { id: 'large', label: '18px', title: 'Grande' },
+                  { id: 'extra-large', label: '20px', title: 'Extra' },
+                  { id: 'huge', label: '22px', title: 'Gigante' },
+                ].map((s) => {
+                  const isSelected = fontSize === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setFontSize(s.id as any, agente?.id)}
+                      className={`py-2 px-1 rounded-xl border text-xs font-black transition-all flex flex-col items-center justify-center cursor-pointer ${
+                        isSelected
+                          ? 'border-transparent text-white shadow-md'
+                          : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                      style={isSelected ? { backgroundColor: primaryColor } : {}}
+                    >
+                      <span>{s.label}</span>
+                      <span className="text-[9px] opacity-75 font-normal">{s.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Control 2: Familia Tipográfica */}
+            <div className="space-y-3">
+              <label className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Type className="w-4 h-4 text-indigo-500" />
+                <span>Tipografía del Sistema</span>
+              </label>
+
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'inter', label: 'Inter (Sans)', desc: 'Moderna y limpia', style: { fontFamily: 'var(--font-inter), sans-serif' } },
+                  { id: 'jakarta', label: 'Plus Jakarta', desc: 'Geométrica corporativa', style: { fontFamily: 'var(--font-plus-jakarta), sans-serif' } },
+                  { id: 'hyperlegible', label: 'Alta Legibilidad', desc: 'Atkinson (Baja visión)', style: { fontFamily: "'Atkinson Hyperlegible', sans-serif" } },
+                  { id: 'mono', label: 'Monoespaciada', desc: 'Cajeros y números', style: { fontFamily: 'ui-monospace, monospace' } },
+                ].map((f) => {
+                  const isSelected = fontFamily === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setFontFamily(f.id as any, agente?.id)}
+                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                        isSelected
+                          ? 'border-transparent text-white shadow-md'
+                          : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                      style={isSelected ? { backgroundColor: primaryColor } : {}}
+                    >
+                      <span className="block text-xs font-black" style={f.style}>
+                        {f.label}
+                      </span>
+                      <span className="block text-[10px] opacity-75 mt-0.5">
+                        {f.desc}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Caja de Vista Previa Interactiva */}
+          <div className="p-4 bg-slate-50 dark:bg-slate-950/80 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+            <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <span>Vista Previa en Tiempo Real de Orden de Mostrador</span>
+              <span>Ajustes Aplicados</span>
+            </div>
+
+            <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1 shadow-xs">
+              <div className="flex justify-between items-center">
+                <span className="font-black text-slate-900 dark:text-white">
+                  OATC #1042 — BALAYAGE VIP & CORTE SENIOR
+                </span>
+                <span className="font-black text-emerald-600 dark:text-emerald-400">
+                  S/ 280.00
+                </span>
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 text-xs">
+                Clienta: Mariana Valdez • Estilista: Jean Pierre • Puesto: Sillón #04 • Estado: En Atención
+              </p>
+            </div>
+          </div>
+
+        </motion.div>
 
         {/* PREFERENCIAS OPERATIVAS: SEDE PREDETERMINADA & SONIDO */}
         <motion.div 
