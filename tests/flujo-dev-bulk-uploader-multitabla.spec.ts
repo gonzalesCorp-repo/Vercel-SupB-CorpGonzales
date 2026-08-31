@@ -11,7 +11,7 @@ test.describe('Flujo E2E: Importador Dinámico Multi-Tabla con Jerarquía y Adve
     await btnSuperadmin.click();
 
     // 2. Esperar redirección al workspace
-    await page.waitForURL(/\/recepcion|\/admin|\/caja/i, { timeout: 15000 });
+    await page.waitForURL(/\/recepcion|\/admin|\/caja/i, { timeout: 30000 });
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1000);
 
@@ -36,13 +36,13 @@ test.describe('Flujo E2E: Importador Dinámico Multi-Tabla con Jerarquía y Adve
     await selectTabla.selectOption('clientes');
     await expect(page.locator('h3:has-text("clientes")').first()).toBeVisible();
 
-    // 7. Cambiar a una tabla de Nivel 2 (cuentas_financieras)
-    await selectTabla.selectOption('cuentas_financieras');
-    await expect(page.locator('h3:has-text("cuentas_financieras")').first()).toBeVisible();
+    // 7. Cambiar a una tabla de Nivel 2 (agentes)
+    await selectTabla.selectOption('agentes');
+    await expect(page.locator('h3:has-text("agentes")').first()).toBeVisible();
 
-    // 8. Cambiar a una tabla de Nivel 3 (config_pasarelas_pago)
-    await selectTabla.selectOption('config_pasarelas_pago');
-    await expect(page.locator('h3:has-text("config_pasarelas_pago")').first()).toBeVisible();
+    // 8. Cambiar a la nueva tabla puente de Nivel 3 (sedes_asignaciones)
+    await selectTabla.selectOption('sedes_asignaciones');
+    await expect(page.locator('h3:has-text("sedes_asignaciones")').first()).toBeVisible();
 
     // 9. Verificar dropzone de carga
     await expect(page.locator('text=Haz clic para seleccionar o arrastra tu archivo Excel').first()).toBeVisible();

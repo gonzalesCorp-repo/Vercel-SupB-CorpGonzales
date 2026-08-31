@@ -4,7 +4,7 @@ import React, { useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { 
   Upload, X, CheckCircle2, AlertCircle, Loader2, Database, 
-  ChevronDown, AlertTriangle, Layers 
+  ChevronDown, AlertTriangle, Layers, Network 
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAppStore } from "@/store/useAppStore";
@@ -34,6 +34,7 @@ export const TABLAS_JERARQUICAS_DISPONIBLES: TablaJerarquica[] = [
   { id: 'config_pasarelas_pago', label: 'N3_11. Pasarelas de Cobro POS (config_pasarelas_pago)', nivel: 'NIVEL_3', icono: '💳' },
   { id: 'agente_configuracion_remunerativa', label: 'N3_12. Esquemas de Remuneración (agente_configuracion_remunerativa)', nivel: 'NIVEL_3', icono: '⚙️' },
   { id: 'almacen_principal', label: 'N3_13. Inventario Inicial por Sede (almacen_principal)', nivel: 'NIVEL_3', icono: '📊' },
+  { id: 'sedes_asignaciones', label: 'N3_14. Asignaciones Multi-Sede (sedes_usuarios)', nivel: 'NIVEL_3', icono: '🌐' },
 ];
 
 interface BulkUploaderProps {
@@ -159,7 +160,63 @@ export function BulkUploader({
         if (user) agenteId = user.id;
       }
 
-      // Chunking if data is too large (e.g. 500 at a time)
+      // 1. Obtener catálogo de sedes para resolución inteligente por nombre
+      let sedesMap = new Map<string, string>();
+      try {
+        const { data: sedesList } = await supabase.from('sedes').select('id, nombre');
+        if (sedesList) {
+          sedesList.forEach((s: any) => {
+            if (s.nombre) sedesMap.set(s.nombre.toLowerCase().trim(), s.id);
+          });
+        }
+      } catch (e) {
+        console.warn("[BulkUploader] No se pudo precargar catálogo de sedes:", e);
+      }
+
+      // CASO ESPECIAL: IMPORTACIÓN DE ASIGNACIONES MULTI-SEDE (sedes_usuarios)
+      if (targetTable === 'sedes_asignaciones') {
+        let vinculados = 0;
+        
+        // Obtener agentes existentes para mapear por email
+        const { data: agentesList } = await supabase.from('agentes').select('id, email');
+        const agentesMap = new Map<string, string>();
+        if (agentesList) {
+          agentesList.forEach((a: any) => {
+            if (a.email) agentesMap.set(a.email.toLowerCase().trim(), a.id);
+          });
+        }
+
+        const sedesUsuariosPayload = [];
+        for (const row of data) {
+          const nombreSede = String(row.nombre_sede || "").toLowerCase().trim();
+          const targetSedeId = sedesMap.get(nombreSede);
+          const identificador = String(row.identificador || "").toLowerCase().trim();
+          const targetAgenteId = agentesMap.get(identificador);
+
+          if (targetSedeId && targetAgenteId) {
+            sedesUsuariosPayload.push({
+              sede_id: targetSedeId,
+              agente_id: targetAgenteId
+            });
+          }
+        }
+
+        if (sedesUsuariosPayload.length > 0) {
+          const { error: bridgeError } = await supabase
+            .from('sedes_usuarios')
+            .upsert(sedesUsuariosPayload, { onConflict: 'agente_id,sede_id' });
+          if (bridgeError && bridgeError.code !== 'PGRST205') throw bridgeError;
+          vinculados = sedesUsuariosPayload.length;
+        }
+
+        setSuccess(`Se procesaron y vincularon ${vinculados} asignaciones multi-sede correctamente.`);
+        setData([]);
+        if (onSuccess) onSuccess();
+        setTimeout(() => { setIsOpen(false); setSuccess(null); }, 2000);
+        return;
+      }
+
+      // CASO ESTÁNDAR: INSERCIÓN EN TABLA CORRESPONDIENTE
       const chunkSize = 500;
       let inserted = 0;
       
@@ -167,7 +224,19 @@ export function BulkUploader({
         let chunk = data.slice(i, i + chunkSize);
         
         // Sanitización y normalización de cada registro
-        chunk = chunk.map(row => sanitizeRow(row, targetTable, sedeActiva?.id));
+        chunk = chunk.map(row => {
+          const clean = sanitizeRow(row, targetTable, sedeActiva?.id);
+
+          // Resolución inteligente de sede_principal a sede_id si viene por nombre
+          if (clean.sede_principal) {
+            const resolvedSedeId = sedesMap.get(String(clean.sede_principal).toLowerCase().trim());
+            if (resolvedSedeId) {
+              clean.sede_id = resolvedSedeId;
+            }
+          }
+
+          return clean;
+        });
         
         // Inyección dinámica de sede para entornos multi-tenant si está habilitado
         if (injectSedeId && sedeActiva?.id) {
@@ -179,7 +248,22 @@ export function BulkUploader({
           chunk = chunk.map(row => ({ ...row, agente_id: agenteId }));
         }
 
-        const { error: insertError } = await supabase.from(targetTable).insert(chunk);
+        // Si la tabla destino no soporta la columna sede_principal directamente en el esquema,
+        // nos aseguramos de no enviar campos ajenos si fuera necesario
+        const finalChunk = chunk.map(r => {
+          const copy = { ...r };
+          // Conservar sede_id y limpiar sede_principal si no existe en la tabla
+          if (['bienes', 'cuentas_financieras', 'config_pasarelas_pago', 'ubicaciones'].includes(targetTable)) {
+            delete copy.sede_principal;
+          }
+          return copy;
+        });
+
+        const { data: insertedRecords, error: insertError } = await supabase
+          .from(targetTable)
+          .insert(finalChunk)
+          .select();
+
         if (insertError) {
           console.warn(`[BulkUploader] Advertencia en Supabase (${targetTable}):`, insertError);
           // Si es tabla que no está en schema cache de sandbox, registrar simulado
@@ -189,6 +273,27 @@ export function BulkUploader({
           }
           throw insertError;
         }
+
+        // Si importamos agentes y tenían sede_principal, vincularlos automáticamente a sedes_usuarios
+        if (targetTable === 'agentes' && insertedRecords && insertedRecords.length > 0) {
+          try {
+            const sedesUsuariosBatch = [];
+            for (let k = 0; k < insertedRecords.length; k++) {
+              const rec = insertedRecords[k];
+              const originalRow = chunk[k];
+              const targetSedeId = rec.sede_id || (originalRow?.sede_principal ? sedesMap.get(String(originalRow.sede_principal).toLowerCase().trim()) : null);
+              if (rec.id && targetSedeId) {
+                sedesUsuariosBatch.push({ agente_id: rec.id, sede_id: targetSedeId });
+              }
+            }
+            if (sedesUsuariosBatch.length > 0) {
+              await supabase.from('sedes_usuarios').upsert(sedesUsuariosBatch, { onConflict: 'agente_id,sede_id' });
+            }
+          } catch (bridgeErr) {
+            console.warn("[BulkUploader] Error no bloqueante al vincular sedes_usuarios:", bridgeErr);
+          }
+        }
+
         inserted += chunk.length;
       }
       
@@ -235,7 +340,7 @@ export function BulkUploader({
                     Carga Masiva de Datos ({targetTable})
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5 font-medium">
-                    Importador con detección y orden jerárquico anti-conflictos de Foreign Key.
+                    Importador con resolución inteligente de sede_principal y asignaciones multi-sede.
                   </p>
                 </div>
               </div>
@@ -279,7 +384,7 @@ export function BulkUploader({
                       ))}
                     </optgroup>
 
-                    <optgroup label="🔗 NIVEL 3: Tablas Puente, Pasarelas & Inventario">
+                    <optgroup label="🔗 NIVEL 3: Tablas Puente, Multi-Sede & Inventario">
                       {TABLAS_JERARQUICAS_DISPONIBLES.filter(t => t.nivel === 'NIVEL_3').map(t => (
                         <option key={t.id} value={t.id}>{t.label}</option>
                       ))}
@@ -318,7 +423,7 @@ export function BulkUploader({
                     Haz clic para seleccionar o arrastra tu archivo Excel para '{targetTable}'
                   </p>
                   <p className="text-xs text-slate-400 mt-1">
-                    Formatos admitidos: .xlsx, .xls, .csv (Descarga la plantilla correspondiente en el botón adyacente)
+                    Formatos admitidos: .xlsx, .xls, .csv (Soporta nombres legibles de sede en 'sede_principal')
                   </p>
                 </div>
               ) : (

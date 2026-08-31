@@ -6,7 +6,7 @@ import {
   Download, FileSpreadsheet, ChevronDown, Check, 
   Building2, Users, Package, Scissors, Sparkles, Layers,
   CreditCard, Landmark, Armchair, UserCheck, Shield,
-  Receipt, Sliders, AlertTriangle, BookOpen
+  Receipt, Sliders, AlertTriangle, BookOpen, Network
 } from "lucide-react";
 
 // ==============================================================================
@@ -31,14 +31,14 @@ const HOJA_GUIA_JERARQUIA = [
     Paso_Orden: "02",
     Nivel: "NIVEL 1 - Raíz",
     Tabla_Destino: "public.clientes",
-    Descripcion: "Directorio de clientes y cartera CRM con DNI y celular.",
-    Dependencias_Requeridas: "Cero dependencias."
+    Descripcion: "Directorio de clientes y cartera CRM con DNI, celular y sede_principal.",
+    Dependencias_Requeridas: "Requiere N1_01_Sedes para validar sede_principal."
   },
   {
     Paso_Orden: "03",
     Nivel: "NIVEL 1 - Raíz",
     Tabla_Destino: "public.config_roles",
-    Descripcion: "Matriz de roles y niveles de autorización del sistema.",
+    Descripcion: "Catálogo oficial de los 6 roles canónicos del sistema Vaikuntha ERP.",
     Dependencias_Requeridas: "Cero dependencias."
   },
   {
@@ -52,7 +52,7 @@ const HOJA_GUIA_JERARQUIA = [
     Paso_Orden: "05",
     Nivel: "NIVEL 2 - Dependientes",
     Tabla_Destino: "public.agentes",
-    Descripcion: "Colaboradores, estilistas staff, cajeros y recepción.",
+    Descripcion: "Personal con roles canónicos (ADMIN, SOPORTE, STAFF), especialidad y sede_principal.",
     Dependencias_Requeridas: "Requiere N1_01_Sedes y N1_03_Config_Roles."
   },
   {
@@ -110,6 +110,13 @@ const HOJA_GUIA_JERARQUIA = [
     Tabla_Destino: "public.almacen_principal",
     Descripcion: "Inventario y stock inicial de insumos y productos por sede.",
     Dependencias_Requeridas: "Requiere N1_01_Sedes y N2_06_Catalogo_Bienes."
+  },
+  {
+    Paso_Orden: "14",
+    Nivel: "NIVEL 3 - Puentes",
+    Tabla_Destino: "public.sedes_usuarios (Multi-Sede)",
+    Descripcion: "Asignaciones adicionales de muchos a muchos para agentes y clientes a múltiples sedes.",
+    Dependencias_Requeridas: "Requiere N1_01_Sedes, N1_02_Clientes y N2_05_Personal_Agentes."
   }
 ];
 
@@ -148,71 +155,75 @@ const PLANTILLA_SEDES = [
   }
 ];
 
-// N1_02. Clientes & Directorio CRM
+// N1_02. Clientes & Directorio CRM (con Sede Principal)
 const PLANTILLA_CLIENTES = [
   {
     nombre: "Mariana Alarcón Vega",
     dni: "47891234",
     celular: "+51 984 123 456",
-    email: "mariana.alarcon@gmail.com"
+    email: "mariana.alarcon@gmail.com",
+    sede_principal: "Sede Miraflores - Flagship"
   },
   {
     nombre: "Claudia Zegarra Ponce",
     dni: "71234567",
     celular: "+51 976 543 210",
-    email: "claudia.zegarra@outlook.com"
+    email: "claudia.zegarra@outlook.com",
+    sede_principal: "Sede San Isidro - El Polo"
   },
   {
     nombre: "Valeria Benavides Miroquesada",
     dni: "44567890",
     celular: "+51 998 765 432",
-    email: "valeria.benavides@empresa.com"
+    email: "valeria.benavides@empresa.com",
+    sede_principal: "Sede Miraflores - Flagship"
   },
   {
     nombre: "Diego Bustamante Prado",
     dni: "10987654",
     celular: "+51 955 443 322",
-    email: "diego.bustamante@gmail.com"
+    email: "diego.bustamante@gmail.com",
+    sede_principal: "Sede Surco - Chacarilla"
   }
 ];
 
-// N1_03. Configuración de Roles
+// N1_03. Configuración de Roles (Catálogo Canónico Limpio de 6 Roles)
 const PLANTILLA_ROLES = [
   {
     rol_codigo: "SUPERADMIN",
-    nombre_visible: "Super Administrador Corporativo",
+    nombre_visible: "Super Administrador (Owner Único)",
     nivel_acceso: 100,
-    descripcion: "Acceso ilimitado a todas las sedes, desarrollador y finanzas"
+    descripcion: "Owner exclusivo de la plataforma. Control de arquitectura, /dev, alta de sedes y admins."
   },
   {
     rol_codigo: "ADMIN",
     nombre_visible: "Administrador de Sede",
     nivel_acceso: 80,
-    descripcion: "Gestión operativa, reportes, caja y arqueos de sede"
-  },
-  {
-    rol_codigo: "RECEPCION",
-    nombre_visible: "Recepción & Hostess",
-    nivel_acceso: 40,
-    descripcion: "Agenda CRM, check-in de clientes y creación de OATC"
-  },
-  {
-    rol_codigo: "CAJA",
-    nombre_visible: "Cajero POS SUNAT",
-    nivel_acceso: 50,
-    descripcion: "Cobro de tickets, emisión de comprobantes SUNAT y caja chica"
-  },
-  {
-    rol_codigo: "STAFF",
-    nombre_visible: "Estilista / Especialista Staff",
-    nivel_acceso: 20,
-    descripcion: "Atención de servicios, pedidos a taller y comisiones"
+    descripcion: "Gestión operativa de sede, compras, finanzas y alta exclusiva de Soporte y Staff con delegación."
   },
   {
     rol_codigo: "SOPORTE",
-    nombre_visible: "Asistente Técnico / Soporte",
-    nivel_acceso: 10,
-    descripcion: "Lavado de cabello, preparación de mezclas y soporte a staff"
+    nombre_visible: "Personal de Apoyo (Workspaces)",
+    nivel_acceso: 30,
+    descripcion: "Equipo de apoyo multifuncional. Opera en Workspaces (Recepción, Venta, Taller) con herramientas progresivas."
+  },
+  {
+    rol_codigo: "STAFF",
+    nombre_visible: "Especialista Staff Operativo",
+    nivel_acceso: 20,
+    descripcion: "Operador directo del servicio en móvil/tablet. Órdenes OATC, tickets anidados, insumos y pre-cobro."
+  },
+  {
+    rol_codigo: "KIOSK",
+    nombre_visible: "Tótem Kiosko Dedicado",
+    nivel_acceso: 0,
+    descripcion: "Terminal interactiva fija en lobby para autoservicio del cliente y marcación rápida WFM por PIN."
+  },
+  {
+    rol_codigo: "CLIENTE",
+    nombre_visible: "Consumidor Final (Portal Web/Móvil)",
+    nivel_acceso: 0,
+    descripcion: "Interfaz para autogestión de citas, seguimiento en vivo de servicios y consulta de puntos."
   }
 ];
 
@@ -234,13 +245,14 @@ const PLANTILLA_EMISORES = [
 // NIVEL 2: ENTIDADES DEPENDIENTES DE NIVEL 1
 // ==============================================================================
 
-// N2_05. Personal & Agentes
+// N2_05. Personal & Agentes (Roles Canónicos: ADMIN, SOPORTE, STAFF + Sede Principal)
 const PLANTILLA_AGENTES = [
   {
     nombre: "Jean Pierre Valdivia",
     email: "jean.pierre@vaikuntha.pe",
     rol: "STAFF",
     especialidad: "Master Colorista & Balayage",
+    sede_principal: "Sede Miraflores - Flagship",
     estado: "DISPONIBLE",
     estado_operativo: "DISPONIBLE"
   },
@@ -249,6 +261,7 @@ const PLANTILLA_AGENTES = [
     email: "carla.mendoza@vaikuntha.pe",
     rol: "STAFF",
     especialidad: "Estilista Senior & Peinados",
+    sede_principal: "Sede Miraflores - Flagship",
     estado: "DISPONIBLE",
     estado_operativo: "DISPONIBLE"
   },
@@ -256,23 +269,26 @@ const PLANTILLA_AGENTES = [
     nombre: "Rodrigo Morales Alva",
     email: "rodrigo.morales@vaikuntha.pe",
     rol: "SOPORTE",
-    especialidad: "Asistente de Lavado & Masajes Capilares",
+    especialidad: "Asistente de Lavado, Taller & Caja",
+    sede_principal: "Sede Miraflores - Flagship",
     estado: "DISPONIBLE",
     estado_operativo: "DISPONIBLE"
   },
   {
     nombre: "Luciana Salazar Peña",
     email: "luciana.salazar@vaikuntha.pe",
-    rol: "RECEPCION",
-    especialidad: "Atención al Cliente & Agenda",
+    rol: "SOPORTE",
+    especialidad: "Anfitriona de Recepción & Atención al Cliente",
+    sede_principal: "Sede Miraflores - Flagship",
     estado: "DISPONIBLE",
     estado_operativo: "DISPONIBLE"
   },
   {
-    nombre: "Tales de Mileto",
-    email: "tales@vaikuntha.com",
-    rol: "CAJA",
-    especialidad: "Cajero POS & Facturación SUNAT",
+    nombre: "Martín Vizcarra Flores",
+    email: "martin.admin@vaikuntha.pe",
+    rol: "ADMIN",
+    especialidad: "Administrador de Sede Miraflores",
+    sede_principal: "Sede Miraflores - Flagship",
     estado: "DISPONIBLE",
     estado_operativo: "DISPONIBLE"
   }
@@ -560,6 +576,42 @@ const PLANTILLA_INVENTARIO_INICIAL = [
   }
 ];
 
+// N3_14. Asignaciones Multi-Sede Puente (Muchos a Muchos: Agentes y Clientes)
+const PLANTILLA_SEDES_ASIGNACIONES = [
+  {
+    tipo_entidad: "AGENTE",
+    identificador: "jean.pierre@vaikuntha.pe",
+    nombre_sede: "Sede San Isidro - El Polo",
+    rol_en_sede: "STAFF",
+    es_sede_principal: false,
+    notas: "Atención VIP los días sábados"
+  },
+  {
+    tipo_entidad: "AGENTE",
+    identificador: "martin.admin@vaikuntha.pe",
+    nombre_sede: "Sede San Isidro - El Polo",
+    rol_en_sede: "ADMIN",
+    es_sede_principal: false,
+    notas: "Supervisión regional de sedes Lima Oeste"
+  },
+  {
+    tipo_entidad: "AGENTE",
+    identificador: "rodrigo.morales@vaikuntha.pe",
+    nombre_sede: "Sede Surco - Chacarilla",
+    rol_en_sede: "SOPORTE",
+    es_sede_principal: false,
+    notas: "Rotación quincenal para cobertura de inventario"
+  },
+  {
+    tipo_entidad: "CLIENTE",
+    identificador: "47891234",
+    nombre_sede: "Sede San Isidro - El Polo",
+    rol_en_sede: "CLIENTE",
+    es_sede_principal: false,
+    notas: "Clienta frecuente de colorimetría en ambas sedes"
+  }
+];
+
 export function TemplateDownloader() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -591,20 +643,20 @@ export function TemplateDownloader() {
     return ws;
   };
 
-  // Descarga del Libro Maestro Multi-Pestaña con Jerarquía Oficial
+  // Descarga del Libro Maestro Multi-Pestaña con Jerarquía Oficial (15 Hojas)
   const descargarLibroMaestro = () => {
     const wb = XLSX.utils.book_new();
 
     // 00. Hoja de Guía Jerárquica
     XLSX.utils.book_append_sheet(wb, formatWorksheet(HOJA_GUIA_JERARQUIA), "00_GUIA_JERARQUIA");
 
-    // NIVEL 1
+    // NIVEL 1: Raíz
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SEDES), "N1_01_Sedes");
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_CLIENTES), "N1_02_Clientes");
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_ROLES), "N1_03_Config_Roles");
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_EMISORES), "N1_04_Emisores_SUNAT");
 
-    // NIVEL 2
+    // NIVEL 2: Dependientes
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_AGENTES), "N2_05_Personal_Agentes");
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_BIENES), "N2_06_Catalogo_Bienes");
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SERVICIOS), "N2_07_Servicios_Salon");
@@ -612,10 +664,11 @@ export function TemplateDownloader() {
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_CUENTAS_FINANCIERAS), "N2_09_Cuentas_Financieras");
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_EMISORES_SERIES), "N2_10_Emisores_Series");
 
-    // NIVEL 3
+    // NIVEL 3: Puentes & Configuración
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_PASARELAS_POS), "N3_11_Pasarelas_POS");
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_ESQUEMAS_REMUNERACION), "N3_12_Esquemas_Remuneracion");
     XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_INVENTARIO_INICIAL), "N3_13_Inventario_Inicial");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SEDES_ASIGNACIONES), "N3_14_Sedes_Asignaciones");
 
     XLSX.writeFile(wb, "Plantilla_Maestra_Aprovisionamiento_Sede_Vaikuntha.xlsx");
     setDropdownOpen(false);
@@ -640,7 +693,7 @@ export function TemplateDownloader() {
         type="button"
         onClick={descargarLibroMaestro}
         className="flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-l-xl shadow-xs text-xs font-bold transition cursor-pointer"
-        title="Descargar Kit Maestro Jerarquizado con Guía de Ingesta (13 Hojas Ordenadas)"
+        title="Descargar Kit Maestro Jerarquizado con Guía de Ingesta (15 Hojas Ordenadas)"
       >
         <Download className="w-3.5 h-3.5" />
         <span>Descargar Plantillas Excel</span>
@@ -658,17 +711,17 @@ export function TemplateDownloader() {
 
       {/* Menú Desplegable Estructurado por Niveles */}
       {dropdownOpen && (
-        <div className="absolute left-0 top-full mt-2 w-84 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 space-y-1.5 max-h-[460px] overflow-y-auto">
+        <div className="absolute left-0 top-full mt-2 w-88 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 space-y-1.5 max-h-[480px] overflow-y-auto">
           
           <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Jerarquía Oficial de Ingesta
+                Jerarquía Oficial Multi-Sede
               </span>
-              <span className="text-[9px] font-bold text-slate-400">13 Plantillas</span>
+              <span className="text-[9px] font-bold text-slate-400">15 Plantillas</span>
             </div>
             <p className="text-[10px] text-slate-500 mt-0.5">
-              Carga en orden numérico para evitar fallos de Foreign Key en PostgreSQL.
+              Carga en orden numérico. Soporta sede_principal y asignaciones múltiples.
             </p>
           </div>
 
@@ -684,7 +737,7 @@ export function TemplateDownloader() {
                 <strong className="text-xs font-bold text-slate-800 dark:text-white block">
                   Libro Maestro Completo (.xlsx)
                 </strong>
-                <span className="text-[10px] text-slate-500">13 hojas + Hoja 00 de Guía Jerárquica</span>
+                <span className="text-[10px] text-slate-500">14 hojas operativas + Hoja 00 de Guía</span>
               </div>
             </div>
             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-600 text-white uppercase shrink-0">
@@ -713,7 +766,7 @@ export function TemplateDownloader() {
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
               >
                 <UserCheck className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span className="truncate">N1_02. Clientes CRM</span>
+                <span className="truncate">N1_02. Clientes CRM (con Sede Principal)</span>
               </button>
 
               <button
@@ -722,7 +775,7 @@ export function TemplateDownloader() {
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
               >
                 <Shield className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span className="truncate">N1_03. Configuración de Roles</span>
+                <span className="truncate">N1_03. Configuración de Roles (6 Roles Canónicos)</span>
               </button>
 
               <button
@@ -748,7 +801,7 @@ export function TemplateDownloader() {
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs"
               >
                 <Users className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                <span className="truncate">N2_05. Personal & Agentes</span>
+                <span className="truncate">N2_05. Personal & Agentes (ADMIN, SOPORTE, STAFF)</span>
               </button>
 
               <button
@@ -801,7 +854,7 @@ export function TemplateDownloader() {
           {/* ================= SECCIÓN NIVEL 3 ================= */}
           <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
             <span className="text-[9px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 px-2 block">
-              🔗 NIVEL 3: Puentes, Pasarelas & Stock
+              🔗 NIVEL 3: Puentes, Multi-Sede & Stock
             </span>
             <div className="space-y-0.5 mt-1">
               <button
@@ -829,6 +882,15 @@ export function TemplateDownloader() {
               >
                 <Package className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                 <span className="truncate">N3_13. Inventario & Stock Inicial</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => descargarModulo('Plantilla_N3_14_Sedes_Asignaciones', 'N3_14_Sedes_Asignaciones', PLANTILLA_SEDES_ASIGNACIONES)}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition cursor-pointer text-xs font-bold text-purple-600 dark:text-purple-300"
+              >
+                <Network className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                <span className="truncate">N3_14. Asignaciones Multi-Sede (Puente)</span>
               </button>
             </div>
           </div>

@@ -38,13 +38,13 @@ test.describe('Flujo E2E: Kit Maestro Jerarquizado de Plantillas en Panel del De
     // 8. Verificar títulos de nivel en el menú
     await expect(page.locator('text=NIVEL 1: Tablas Raíz').first()).toBeVisible();
     await expect(page.locator('text=NIVEL 2: Entidades Dependientes').first()).toBeVisible();
-    await expect(page.locator('text=NIVEL 3: Puentes, Pasarelas & Stock').first()).toBeVisible();
+    await expect(page.locator('text=NIVEL 3: Puentes, Multi-Sede & Stock').first()).toBeVisible();
 
     // 9. Verificar opciones clave
     await expect(page.locator('text=N1_01. Sedes & Sucursales').first()).toBeVisible();
     await expect(page.locator('text=N1_02. Clientes CRM').first()).toBeVisible();
     await expect(page.locator('text=N2_05. Personal & Agentes').first()).toBeVisible();
-    await expect(page.locator('text=N3_11. Pasarelas de Cobro POS').first()).toBeVisible();
+    await expect(page.locator('text=N3_14. Asignaciones Multi-Sede').first()).toBeVisible();
 
     // 10. Probar evento de descarga del Libro Maestro
     const [download] = await Promise.all([
