@@ -80,16 +80,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     else root.style.fontSize = '16px';
 
     // 5. Ajustar Familia Tipográfica
-    let fontStack = 'var(--font-inter), system-ui, -apple-system, sans-serif';
-    if (fontFamily === 'jakarta') {
-      fontStack = 'var(--font-plus-jakarta), system-ui, sans-serif';
-    } else if (fontFamily === 'hyperlegible') {
+    const activeFont = fontFamily || 'inter';
+    root.setAttribute('data-font', activeFont);
+    let fontStack = "'Inter', var(--font-geist-sans), system-ui, -apple-system, sans-serif";
+    if (activeFont === 'jakarta') {
+      fontStack = "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
+    } else if (activeFont === 'hyperlegible') {
       fontStack = "'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif";
-    } else if (fontFamily === 'mono') {
-      fontStack = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+    } else if (activeFont === 'mono') {
+      fontStack = "'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace";
     }
     root.style.setProperty('--active-font-family', fontStack);
     root.style.fontFamily = fontStack;
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.style.fontFamily = fontStack;
+    }
 
     // 6. Ajustar Modo Todo en MAYÚSCULAS
     if (uppercaseMode) {

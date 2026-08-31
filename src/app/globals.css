@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -254,14 +254,45 @@ input[type="email"],
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--active-font-family, var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif);
+  --font-mono: var(--active-font-mono, var(--font-geist-mono), ui-monospace, monospace);
+}
+
+:root {
+  --active-font-family: 'Inter', var(--font-geist-sans), system-ui, sans-serif;
 }
 
 html, body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--active-font-family);
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ===================================================
+   🔤 CONMUTACIÓN ACTIVA DE FAMILIAS TIPOGRÁFICAS
+   =================================================== */
+html[data-font="inter"],
+html[data-font="inter"] body,
+html[data-font="inter"] *:not(.lucide):not(svg):not(.keep-font) {
+  font-family: 'Inter', var(--font-geist-sans), system-ui, -apple-system, sans-serif !important;
+}
+
+html[data-font="jakarta"],
+html[data-font="jakarta"] body,
+html[data-font="jakarta"] *:not(.lucide):not(svg):not(.keep-font) {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+}
+
+html[data-font="hyperlegible"],
+html[data-font="hyperlegible"] body,
+html[data-font="hyperlegible"] *:not(.lucide):not(svg):not(.keep-font) {
+  font-family: 'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif !important;
+}
+
+html[data-font="mono"],
+html[data-font="mono"] body,
+html[data-font="mono"] *:not(.lucide):not(svg):not(.keep-font) {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace !important;
 }

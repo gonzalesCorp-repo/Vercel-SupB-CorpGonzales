@@ -406,10 +406,10 @@ export default function PerfilPage() {
 
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { id: 'inter', label: 'Inter (Sans)', desc: 'Moderna y limpia', style: { fontFamily: 'var(--font-inter), sans-serif' } },
-                  { id: 'jakarta', label: 'Plus Jakarta', desc: 'Geométrica corporativa', style: { fontFamily: 'var(--font-plus-jakarta), sans-serif' } },
+                  { id: 'inter', label: 'Inter (Sans)', desc: 'Moderna y limpia', style: { fontFamily: "'Inter', sans-serif" } },
+                  { id: 'jakarta', label: 'Plus Jakarta', desc: 'Geométrica corporativa', style: { fontFamily: "'Plus Jakarta Sans', sans-serif" } },
                   { id: 'hyperlegible', label: 'Alta Legibilidad', desc: 'Atkinson (Baja visión)', style: { fontFamily: "'Atkinson Hyperlegible', sans-serif" } },
-                  { id: 'mono', label: 'Monoespaciada', desc: 'Cajeros y números', style: { fontFamily: 'ui-monospace, monospace' } },
+                  { id: 'mono', label: 'Monoespaciada', desc: 'Cajeros y números', style: { fontFamily: "'JetBrains Mono', monospace" } },
                 ].map((f) => {
                   const isSelected = fontFamily === f.id;
                   return (
@@ -441,21 +441,31 @@ export default function PerfilPage() {
           <div className="p-4 bg-slate-50 dark:bg-slate-950/80 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
             <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               <span>Vista Previa en Tiempo Real de Orden de Mostrador</span>
-              <span>Ajustes Aplicados</span>
+              <span>Fuente activa: {fontFamily === 'jakarta' ? 'Plus Jakarta' : fontFamily === 'hyperlegible' ? 'Atkinson Hyperlegible' : fontFamily === 'mono' ? 'JetBrains Mono' : 'Inter (Sans)'}</span>
             </div>
 
-            <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1 shadow-xs">
+            <div 
+              className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2 shadow-xs transition-all"
+              style={{
+                fontFamily: fontFamily === 'jakarta' ? "'Plus Jakarta Sans', sans-serif" : fontFamily === 'hyperlegible' ? "'Atkinson Hyperlegible', sans-serif" : fontFamily === 'mono' ? "'JetBrains Mono', monospace" : "'Inter', sans-serif"
+              }}
+            >
               <div className="flex justify-between items-center">
-                <span className="font-black text-slate-900 dark:text-white">
+                <span className="font-black text-slate-900 dark:text-white text-sm md:text-base">
                   OATC #1042 — BALAYAGE VIP & CORTE SENIOR
                 </span>
-                <span className="font-black text-emerald-600 dark:text-emerald-400">
+                <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm md:text-base">
                   S/ 280.00
                 </span>
               </div>
-              <p className="text-slate-500 dark:text-slate-400 text-xs">
+              <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm">
                 Clienta: Mariana Valdez • Estilista: Jean Pierre • Puesto: Sillón #04 • Estado: En Atención
               </p>
+              <div className="pt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-bold">
+                  Muestra de caracteres: ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789
+                </span>
+              </div>
             </div>
           </div>
 
