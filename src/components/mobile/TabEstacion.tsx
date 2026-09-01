@@ -1011,7 +1011,73 @@ export function TabEstacion({
         </div>
       )}
 
-      {/* 2. Vista: Bar & Cafetería */}
+      
+      {/* 2. Sub-Tab: Control de Turno & Asistencia Permanente */}
+      {subTab === 'turno' && (
+        <div className="space-y-4 animate-in fade-in w-full">
+          <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4 backdrop-blur-xl transition-colors">
+            <div className="text-center space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-500/30">
+                WFM • Control de Jornada
+              </span>
+              <h3 className="text-base font-black text-slate-900 dark:text-white mt-2">
+                Control de Turno & Asistencia
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+                Registra tu presencia en tiempo real para activar la recepción de órdenes en salón.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <button type="button"
+                onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Llegada / Inicio de Turno')}
+                className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-200 dark:border-emerald-500/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-xs group"
+              >
+                <span className="text-3xl block group-hover:scale-110 transition-transform">👋</span>
+                <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 block tracking-wide">YA LLEGUÉ</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Inicio de Turno</span>
+              </button>
+
+              <button type="button"
+                onClick={() => onMarcarAsistencia?.('REFRIGERIO', 'Pausa Refrigerio')}
+                className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-xs group"
+              >
+                <span className="text-3xl block group-hover:scale-110 transition-transform">🍕</span>
+                <span className="text-xs font-black text-amber-700 dark:text-amber-300 block tracking-wide">VOY A COMER</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Pausa Refrigerio</span>
+              </button>
+
+              <button type="button"
+                onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Retorno de Refrigerio')}
+                className="p-4 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-xs group"
+              >
+                <span className="text-3xl block group-hover:scale-110 transition-transform">🔄</span>
+                <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 block tracking-wide">REGRESÉ</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Fin de Refrigerio</span>
+              </button>
+
+              <button type="button"
+                onClick={() => onMarcarAsistencia?.('FUERA_DE_TURNO', 'Fin de Jornada')}
+                className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-xs group"
+              >
+                <span className="text-3xl block group-hover:scale-110 transition-transform">🏁</span>
+                <span className="text-xs font-black text-rose-700 dark:text-rose-300 block tracking-wide">ACABÓ MI DÍA</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Salida del Salón</span>
+              </button>
+            </div>
+
+            <button type="button"
+              onClick={() => setModalNfcOpen(true)}
+              className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer border border-slate-200 dark:border-slate-700"
+            >
+              <Wifi className="w-4 h-4 text-indigo-500" /> Validar con Tag NFC de Sede
+            </button>
+          </div>
+        </div>
+      )}
+
+
+      {/* 3. Vista: Bar & Cafetería */}
       {subTab === 'bar' && (
         <div className="animate-in fade-in">
           <TabBar clienteNombre={oatcActiva?.cliente_nombre} />

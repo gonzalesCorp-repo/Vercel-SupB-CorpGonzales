@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Coffee, Sparkles, CheckCircle2, Send, RefreshCw } from 'lucide-react';
+import { Coffee, Sparkles, CheckCircle2, Send } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -69,43 +69,43 @@ export function TabBar({ clienteNombre }: TabBarProps) {
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-4 animate-in fade-in duration-200 w-full">
       
       {/* Cabecera */}
       <div className="text-center py-1">
-        <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+        <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-500/30">
           Servicio de Cortesía
         </span>
         <h3 className="text-sm font-black text-slate-900 dark:text-white mt-2">🍹 Bar & Cafetería</h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Ordena bebidas de cortesía para {clienteNombre ? <strong>{clienteNombre}</strong> : 'tu cliente'}.
+          Ordena bebidas de cortesía para {clienteNombre ? <strong className="text-slate-900 dark:text-white">{clienteNombre}</strong> : 'tu cliente'}.
         </p>
       </div>
 
       {enviadoExitoso && (
-        <div className="p-3 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold rounded-2xl flex items-center gap-2 animate-in zoom-in-95">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="p-3.5 bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-2xl flex items-center gap-2 animate-in zoom-in-95 shadow-sm">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>¡Pedido enviado al Bar! Tu orden está en preparación.</span>
         </div>
       )}
 
-      {/* Lista de Bebidas */}
+      {/* Lista de Bebidas con Dual Theme */}
       <div className="space-y-2.5">
         
         {/* Café */}
-        <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl">
-          <span className="text-xs font-bold text-slate-900 dark:text-slate-200 flex items-center gap-2">
+        <div className="flex items-center justify-between bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-3.5 rounded-2xl shadow-xs">
+          <span className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             ☕ Café Expreso / Americano
           </span>
           <div className="flex items-center gap-2.5">
             <button onClick={() => modificarCantidad('cafe', -1)}
-              className="w-7 h-7 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center hover:bg-slate-700 active:scale-95"
+              className="w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer"
             >
               -
             </button>
-            <span className="text-xs font-mono font-black text-white w-4 text-center">{pedido.cafe}</span>
+            <span className="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{pedido.cafe}</span>
             <button onClick={() => modificarCantidad('cafe', 1)}
-              className="w-7 h-7 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center hover:bg-slate-700 active:scale-95"
+              className="w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer"
             >
               +
             </button>
@@ -113,20 +113,20 @@ export function TabBar({ clienteNombre }: TabBarProps) {
         </div>
 
         {/* Infusión */}
-        <div className="bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl space-y-2">
+        <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-3.5 rounded-2xl space-y-2 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-900 dark:text-slate-200 flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               🍵 Infusión Caliente
             </span>
             <div className="flex items-center gap-2.5">
               <button onClick={() => modificarCantidad('infusion', -1)}
-                className="w-7 h-7 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center hover:bg-slate-700 active:scale-95"
+                className="w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer"
               >
                 -
               </button>
-              <span className="text-xs font-mono font-black text-white w-4 text-center">{pedido.infusion}</span>
+              <span className="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{pedido.infusion}</span>
               <button onClick={() => modificarCantidad('infusion', 1)}
-                className="w-7 h-7 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center hover:bg-slate-700 active:scale-95"
+                className="w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer"
               >
                 +
               </button>
@@ -149,25 +149,25 @@ export function TabBar({ clienteNombre }: TabBarProps) {
           )}
         </div>
 
-        {/* Bebida del Día */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-purple-950/30 to-slate-900 border border-purple-500/20 p-3 rounded-2xl">
+        {/* Bebida del Día (Consistente con modo claro y oscuro) */}
+        <div className="flex items-center justify-between bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-500/30 p-3.5 rounded-2xl shadow-xs">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+            <span className="text-xs font-bold text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
               🍹 Bebida del Día
             </span>
-            <span className="text-[9px] bg-purple-500/20 text-purple-300 font-bold px-1.5 py-0.5 rounded-md">
+            <span className="text-[9px] bg-purple-200/60 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 font-bold px-1.5 py-0.5 rounded-md">
               Especial
             </span>
           </div>
           <div className="flex items-center gap-2.5">
             <button onClick={() => modificarCantidad('bebidaDia', -1)}
-              className="w-7 h-7 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center hover:bg-slate-700 active:scale-95"
+              className="w-8 h-8 bg-purple-100 dark:bg-slate-800 text-purple-900 dark:text-slate-200 rounded-xl font-bold flex items-center justify-center hover:bg-purple-200 dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer"
             >
               -
             </button>
-            <span className="text-xs font-mono font-black text-white w-4 text-center">{pedido.bebidaDia}</span>
+            <span className="text-xs font-mono font-black text-purple-950 dark:text-white w-4 text-center">{pedido.bebidaDia}</span>
             <button onClick={() => modificarCantidad('bebidaDia', 1)}
-              className="w-7 h-7 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center hover:bg-slate-700 active:scale-95"
+              className="w-8 h-8 bg-purple-100 dark:bg-slate-800 text-purple-900 dark:text-slate-200 rounded-xl font-bold flex items-center justify-center hover:bg-purple-200 dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer"
             >
               +
             </button>
@@ -175,19 +175,19 @@ export function TabBar({ clienteNombre }: TabBarProps) {
         </div>
 
         {/* Agua Mineral */}
-        <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl">
-          <span className="text-xs font-bold text-slate-900 dark:text-slate-200 flex items-center gap-2">
+        <div className="flex items-center justify-between bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-3.5 rounded-2xl shadow-xs">
+          <span className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             💧 Agua Mineral / Con Gas
           </span>
           <div className="flex items-center gap-2.5">
             <button onClick={() => modificarCantidad('agua', -1)}
-              className="w-7 h-7 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center hover:bg-slate-700 active:scale-95"
+              className="w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer"
             >
               -
             </button>
-            <span className="text-xs font-mono font-black text-white w-4 text-center">{pedido.agua}</span>
+            <span className="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{pedido.agua}</span>
             <button onClick={() => modificarCantidad('agua', 1)}
-              className="w-7 h-7 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center hover:bg-slate-700 active:scale-95"
+              className="w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition cursor-pointer"
             >
               +
             </button>
