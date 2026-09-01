@@ -20,7 +20,7 @@ export function SuperAdminNav({ activeTab, onSelectTab, onLogout }: SuperAdminNa
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-800/90 px-3 py-2 max-w-md mx-auto select-none transition-colors">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-800/90 px-3 py-2  select-none transition-colors">
       <div className="flex items-center justify-around">
         {tabs.map((tab) => {
           const Icon = tab.icon;

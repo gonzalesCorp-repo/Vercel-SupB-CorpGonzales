@@ -134,7 +134,7 @@ export default function MobileAdminPage() {
   const staffFuera = colaboradores.filter((c: any) => c.estado_operativo === 'FUERA_DE_TURNO' || !c.estado_operativo);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-start max-w-md mx-auto pb-24 font-sans select-none transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-start w-full  pb-24 font-sans select-none transition-colors duration-200">
       
       {/* 📱 TOP BAR EJECUTIVO CON LOGO DE MARCA */}
       <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 transition-colors">
@@ -392,7 +392,7 @@ export default function MobileAdminPage() {
       </main>
 
       {/* 🧭 BOTTOM NAVIGATION BAR MÓVIL */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 max-w-md mx-auto px-2 py-1.5 transition-colors">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 w-full  px-2 py-1.5 transition-colors">
         <div className="grid grid-cols-5 gap-1">
           <button onClick={() => setActiveTab('mando')}
             className={`py-2 flex flex-col items-center justify-center rounded-xl transition cursor-pointer ${

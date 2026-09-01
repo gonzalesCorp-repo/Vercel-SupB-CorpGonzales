@@ -155,7 +155,7 @@ export default function MobileSuperAdminPage() {
 
       {/* Header Fijo SuperAdmin */}
       <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 transition-colors">
-        <div className="max-w-md mx-auto flex items-center justify-between">
+        <div className="w-full  flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30">
               <ShieldCheck className="w-4 h-4 text-white" />
@@ -183,7 +183,7 @@ export default function MobileSuperAdminPage() {
       </header>
 
       {/* Contenido Principal según Pestaña Activa */}
-      <main className="max-w-md mx-auto p-4">
+      <main className="w-full  p-4">
         {activeTab === 'mando' && (
           <TabKpisMando
             sedeActivaNombre={sedeActiva?.nombre || 'Sede Principal'}
@@ -220,7 +220,7 @@ export default function MobileSuperAdminPage() {
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              className="bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-[32px] sm:rounded-3xl w-full max-w-md p-6 space-y-4 shadow-2xl transition-colors"
+              className="bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-[32px] sm:rounded-3xl w-full w-full p-6 space-y-4 shadow-2xl transition-colors"
             >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-200 dark:border-slate-800">
                 <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">

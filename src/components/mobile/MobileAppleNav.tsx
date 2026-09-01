@@ -14,7 +14,7 @@ interface MobileAppleNavProps {
 
 export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-900 px-2 sm:px-4 pt-2 pb-2.5 safe-bottom w-full max-w-lg mx-auto select-none shadow-2xl transition-colors duration-200">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-900 px-3 sm:px-6 pt-2 pb-2.5 safe-bottom w-full  select-none shadow-2xl transition-colors duration-200">
       <div className="flex items-center justify-around">
         
         {/* 1. Agenda */}

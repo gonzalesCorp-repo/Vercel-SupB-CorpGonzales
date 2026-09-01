@@ -610,7 +610,7 @@ export function TabEstacion({
                   WFM & Control Horario
                 </span>
                 <h3 className="text-base font-black text-slate-900 dark:text-white mt-2">Botonera de Asistencia y Turno</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-[280px] mx-auto">
+                <p className="text-xs text-slate-500 dark:text-slate-400 w-full mx-auto">
                   Valida tu estado para activar tu estación de trabajo y recibir atenciones en tiempo real.
                 </p>
               </div>
@@ -982,13 +982,13 @@ export function TabEstacion({
               </div>
               <div>
                 <h4 className="text-sm font-black text-slate-900 dark:text-white">Sin órdenes asignadas</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-[280px] mx-auto leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 w-full mx-auto leading-relaxed">
                   Tu turno está activo. Puedes solicitar el próximo cliente de la cola de recepción o consultar la lista de espera.
                 </p>
               </div>
 
               {/* Botonera de Gestión de Órdenes */}
-              <div className="space-y-2 pt-2 max-w-[300px] mx-auto">
+              <div className="space-y-2 pt-2 w-full mx-auto">
                 <button type="button"
                   onClick={() => setModalNfcOpen(true)}
                   className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30 active:scale-95 transition cursor-pointer"

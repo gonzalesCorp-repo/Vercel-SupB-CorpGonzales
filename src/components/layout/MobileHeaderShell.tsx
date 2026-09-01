@@ -34,7 +34,7 @@ export function MobileHeaderShell({
   onOpenCuenta,
 }: MobileHeaderShellProps) {
   return (
-    <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 space-y-1.5 font-sans transition-colors">
+    <header className="sticky top-0 z-30 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 py-2.5 space-y-1.5 font-sans transition-colors">
       <div className="flex items-center justify-between gap-3">
         {/* Colaborador Avatar & Info */}
         <div

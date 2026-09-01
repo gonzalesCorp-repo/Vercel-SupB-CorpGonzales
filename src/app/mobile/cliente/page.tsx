@@ -123,7 +123,7 @@ export default function MobileClientePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between max-w-md mx-auto p-5 font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between w-full  p-5 font-sans transition-colors duration-200">
       {/* Header Cliente */}
       <div className="space-y-4">
         <div className="flex items-center justify-between pt-2">
