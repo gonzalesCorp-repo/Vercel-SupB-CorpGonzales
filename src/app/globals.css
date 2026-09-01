@@ -17,10 +17,15 @@
 [data-uppercase="true"] td:not(.keep-case),
 [data-uppercase="true"] label,
 [data-uppercase="true"] nav a,
+[data-uppercase="true"] a:not(.keep-case),
 [data-uppercase="true"] .uppercase-target,
 [data-uppercase="true"] p:not(.keep-case),
 [data-uppercase="true"] span:not(.font-mono):not(.keep-case),
 [data-uppercase="true"] div[role="button"],
+[data-uppercase="true"] small,
+[data-uppercase="true"] strong,
+[data-uppercase="true"] em,
+[data-uppercase="true"] b,
 [data-uppercase="true"] li:not(.keep-case) {
   text-transform: uppercase !important;
   letter-spacing: 0.02em;

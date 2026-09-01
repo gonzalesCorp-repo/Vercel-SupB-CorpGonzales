@@ -7,7 +7,16 @@ export default function DedicatedMobileViewPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/mobile/operacion');
+    const rol = typeof window !== 'undefined' ? (localStorage.getItem('vaikuntha_user_rol') || '').toUpperCase() : '';
+    if (rol === 'SUPERADMIN') {
+      router.replace('/mobile/superadmin');
+    } else if (rol === 'ADMIN') {
+      router.replace('/mobile/admin');
+    } else if (rol === 'SOPORTE' || rol === 'RECEPCION' || rol === 'CAJA') {
+      router.replace('/mobile/soporte');
+    } else {
+      router.replace('/mobile/operacion');
+    }
   }, [router]);
 
   return (

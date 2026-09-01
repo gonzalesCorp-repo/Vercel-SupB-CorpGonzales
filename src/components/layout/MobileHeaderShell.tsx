@@ -34,7 +34,7 @@ export function MobileHeaderShell({
   onOpenCuenta,
 }: MobileHeaderShellProps) {
   return (
-    <header className="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-xl border-b border-slate-900 px-4 py-2.5 space-y-1.5 font-sans">
+    <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 space-y-1.5 font-sans transition-colors">
       <div className="flex items-center justify-between gap-3">
         {/* Colaborador Avatar & Info */}
         <div
@@ -47,15 +47,15 @@ export function MobileHeaderShell({
             </div>
             {/* Status Dot */}
             <span
-              className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-950 ${badgeDot}`}
+              className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-slate-950 ${badgeDot}`}
             />
           </div>
 
           <div className="leading-tight">
-            <h1 className="text-xs font-black text-white truncate max-w-[130px] sm:max-w-[200px]">
+            <h1 className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-[200px]">
               {agenteNombre}
             </h1>
-            <p className="text-[10px] text-slate-400 truncate max-w-[130px] sm:max-w-[200px]">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[130px] sm:max-w-[200px]">
               {estacionNombre}
             </p>
           </div>

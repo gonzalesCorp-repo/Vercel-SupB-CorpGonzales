@@ -10,6 +10,7 @@ import { BADGE_CATALOG, calcularFinCiclo } from '@/lib/gamification/config';
 import { useUIStore } from '@/store/useUIStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { createClient } from '@/lib/supabase/client';
+import { MobileAccessibilityCard } from '@/components/mobile/MobileAccessibilityCard';
 
 export interface StaffPerfilViewProps {
   agente?: any;
@@ -150,17 +151,17 @@ export default function StaffPerfilView({
       )}
 
       {/* Card Principal de Perfil */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
-        <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl transition-colors">
+        <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-3">
           <div>
-            <h3 className="text-xl font-black text-white">{agente?.nombre || 'Especialista Staff'}</h3>
-            <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-              Turno: ⏰ 9:00 am - 8:00 pm • <span className="text-indigo-400 font-bold">ROL: {agente?.rol || 'STAFF'}</span>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white">{agente?.nombre || 'Especialista Staff'}</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+              Turno: ⏰ 9:00 am - 8:00 pm • <span className="text-indigo-600 dark:text-indigo-400 font-bold">ROL: {agente?.rol || 'STAFF'}</span>
             </p>
           </div>
           <button 
             onClick={() => setModalApodoOpen(true)}
-            className="px-3 py-1.5 bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-xl text-xs font-bold hover:bg-indigo-600/30 transition cursor-pointer"
+            className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 rounded-xl text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-600/30 transition cursor-pointer"
           >
             Editar
           </button>
@@ -170,88 +171,37 @@ export default function StaffPerfilView({
         <div className="space-y-2 text-xs">
           <div 
             onClick={() => setModalApodoOpen(true)}
-            className="flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 cursor-pointer transition"
+            className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition"
           >
-            <span className="font-bold text-slate-400">APODO / NOMBRE EN COMANDAS</span>
-            <span className="font-black text-white flex items-center gap-1">
-              {agente?.nombre || 'Staff'} <Edit3 className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="font-bold text-slate-500 dark:text-slate-400">APODO / NOMBRE EN COMANDAS</span>
+            <span className="font-black text-slate-900 dark:text-white flex items-center gap-1">
+              {agente?.nombre || 'Staff'} <Edit3 className="w-3.5 h-3.5 text-indigo-500" />
             </span>
           </div>
 
           <div 
             onClick={() => setModalPinOpen(true)}
-            className="flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-pink-500/40 cursor-pointer transition"
+            className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-pink-500/40 cursor-pointer transition"
           >
-            <span className="font-bold text-slate-400">PIN SECRETO DE PISO</span>
-            <span className="font-black text-pink-400 tracking-widest flex items-center gap-1">
-              {agente?.pin ? '••••' : 'Configurar'} <Edit3 className="w-3.5 h-3.5 text-pink-400" />
+            <span className="font-bold text-slate-500 dark:text-slate-400">PIN SECRETO DE PISO</span>
+            <span className="font-black text-pink-500 tracking-widest flex items-center gap-1">
+              {agente?.pin ? '••••' : 'Configurar'} <Edit3 className="w-3.5 h-3.5 text-pink-500" />
             </span>
           </div>
 
-          <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-slate-800">
-            <span className="font-bold text-slate-400">DÍA DE DESCANSO HABITUAL</span>
-            <span className="font-black text-emerald-400">Lunes</span>
+          <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+            <span className="font-bold text-slate-500 dark:text-slate-400">DÍA DE DESCANSO HABITUAL</span>
+            <span className="font-black text-emerald-600 dark:text-emerald-400">Lunes</span>
           </div>
 
-          <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-slate-800">
-            <span className="font-bold text-slate-400">CORREO / USUARIO</span>
-            <span className="font-medium text-slate-300 truncate max-w-[180px]">{agente?.email || 'staff@empresa.com'}</span>
+          <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+            <span className="font-bold text-slate-500 dark:text-slate-400">CORREO / USUARIO</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[180px]">{agente?.email || 'staff@empresa.com'}</span>
           </div>
         </div>
 
-        {/* Selector de Modo de Tema (Claro / Oscuro) */}
-        <div className="pt-2 border-t border-slate-800">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
-            <Sun className="w-3.5 h-3.5 text-amber-400" /> Modo Visual (Tema)
-          </label>
-          <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-2xl border border-slate-800">
-            <button
-              type="button"
-              onClick={() => setThemeMode('light', agente?.id)}
-              className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
-                themeMode === 'light'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Sun className="w-4 h-4 text-amber-400" />
-              <span>Modo Claro</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setThemeMode('dark', agente?.id)}
-              className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
-                themeMode === 'dark'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Moon className="w-4 h-4 text-indigo-300" />
-              <span>Modo Oscuro</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Selector Rápido de Color de Acento Móvil */}
-        <div className="pt-2 border-t border-slate-800">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
-            <Palette className="w-3.5 h-3.5 text-indigo-400" /> Color de Acento Móvil
-          </label>
-          <div className="flex items-center gap-3">
-            {colors.map((c) => (
-              <button
-                key={c.value}
-                onClick={() => setPrimaryColor(c.value)}
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-                  primaryColor === c.value ? 'scale-125 ring-2 ring-white shadow-lg' : 'opacity-70 hover:opacity-100'
-                }`}
-                style={{ backgroundColor: c.value }}
-              >
-                {primaryColor === c.value && <Check className="w-3.5 h-3.5 text-white" />}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Tarjeta Completa de Accesibilidad y Legibilidad Visual */}
+        <MobileAccessibilityCard userId={agente?.id} />
 
         {/* Botón Enviar Kudos */}
         <button 

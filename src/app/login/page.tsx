@@ -91,9 +91,15 @@ export default function LoginPage() {
         targetRoute = '/kiosk';
       } else if (userRol === 'SUPERADMIN' && isMobileDevice) {
         targetRoute = '/mobile/superadmin';
+      } else if (userRol === 'ADMIN' && isMobileDevice) {
+        targetRoute = '/mobile/admin';
       } else if (userRol === 'SOPORTE' && isMobileDevice) {
         targetRoute = '/mobile/soporte';
-      } else if (isMobileDevice || userRol === 'STAFF' || userRol === 'OPERACION') {
+      } else if ((userRol === 'STAFF' || userRol === 'OPERACION') && isMobileDevice) {
+        targetRoute = '/mobile/operacion';
+      } else if (isMobileDevice) {
+        targetRoute = '/mobile/operacion';
+      } else if (userRol === 'STAFF' || userRol === 'OPERACION') {
         targetRoute = '/mobile/operacion';
       } else if (userRol === 'CAJA') {
         targetRoute = '/caja';

@@ -78,11 +78,11 @@ export default function MobileCuentaPage() {
   // 2. Si es STAFF operario
   if (userRol?.toUpperCase() === 'STAFF') {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 p-4 pb-24 font-sans">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 pb-24 font-sans transition-colors duration-200">
         <div className="mb-4">
           <Link
-            href="/operaciones"
-            className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl"
+            href="/mobile/operacion"
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-xs"
           >
             <ArrowLeft className="w-4 h-4" /> Volver a Operaciones
           </Link>
@@ -93,14 +93,16 @@ export default function MobileCuentaPage() {
   }
 
   // 3. Si es Superadmin, Admin o Soporte en Móvil: Renderiza la suite responsive
+  const backRoute = userRol?.toUpperCase() === 'ADMIN' ? '/mobile/admin' : userRol?.toUpperCase() === 'SOPORTE' ? '/mobile/soporte' : '/mobile/operacion';
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-20 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-20 font-sans transition-colors duration-200">
       <div className="p-4">
         <Link
-          href="/mobile/operacion"
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl"
+          href={backRoute}
+          className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-xl shadow-xs"
         >
-          <ArrowLeft className="w-4 h-4" /> Volver al Menú
+          <ArrowLeft className="w-4 h-4" /> Volver al Panel
         </Link>
       </div>
       <MiPerfilPage />
