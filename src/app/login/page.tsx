@@ -23,20 +23,18 @@ export default function LoginPage() {
     setIsLoading(true);
     setError('');
 
-    const isSandboxAccount = loginEmail.includes('@vaikuntha.com') || loginEmail.includes('@gonzales.page');
+    const isSandboxAccount = loginEmail.includes('@vaikuntha.com') || loginEmail.includes('@gonzales.page') || loginEmail.includes('@gloss.pe');
 
     try {
       // 1. Determinar rol inicial por email para sandbox instantáneo
       let userRol = 'STAFF';
       if (loginEmail.includes('cristian')) userRol = 'SUPERADMIN';
-      else if (loginEmail.includes('platon')) userRol = 'ADMIN';
+      else if (loginEmail.includes('platon') || loginEmail.includes('diana') || loginEmail.includes('joseph') || loginEmail.includes('erick') || loginEmail.includes('adriano')) userRol = 'ADMIN';
       else if (loginEmail.includes('socrates')) userRol = 'SOPORTE';
       else if (loginEmail.includes('tales')) userRol = 'CAJA';
-      else if (loginEmail.includes('democrito')) userRol = 'STAFF';
-      else if (loginEmail.includes('diogenes')) userRol = 'STAFF';
-      else if (loginEmail.includes('parmenides')) userRol = 'STAFF';
       else if (loginEmail.includes('pitagoras')) userRol = 'JEFE_OPERATIVO';
       else if (loginEmail.includes('kiosko') || loginEmail.includes('kiosk')) userRol = 'KIOSKO';
+      else userRol = 'STAFF';
 
       // 2. Intento de autenticación con timeout seguro
       const authPromise = supabase.auth.signInWithPassword({
@@ -263,6 +261,46 @@ export default function LoginPage() {
             >
               🪪 TÓTEM KIOSKO (Autoservicio)
             </button>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <p className="text-[10px] text-pink-600 font-black mb-2 text-center uppercase tracking-widest flex items-center justify-center gap-1">
+              <span>🌸</span> Gloss Salón and Relax — Acceso Directo
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() => quickSandboxLogin('diana.laiza@gloss.pe', 'Gloss2026!')}
+                className="p-2.5 bg-pink-50 hover:bg-pink-100 text-pink-700 rounded-xl border border-pink-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
+              >
+                🏢 Diana Laiza (ADMIN)
+              </button>
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() => quickSandboxLogin('jeferson.ayala@gloss.pe', 'Gloss2026!')}
+                className="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
+              >
+                ✂️ Jeferson (ESTILISMO)
+              </button>
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() => quickSandboxLogin('yoncivis.colina@gloss.pe', 'Gloss2026!')}
+                className="p-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl border border-purple-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
+              >
+                💇 Yovi (ESTILISMO)
+              </button>
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() => quickSandboxLogin('iriana.roa@gloss.pe', 'Gloss2026!')}
+                className="p-2.5 bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-700 rounded-xl border border-fuchsia-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
+              >
+                💆 Iriana (COSMIATRÍA)
+              </button>
+            </div>
           </div>
         </div>
       </div>
