@@ -168,8 +168,7 @@ export default function MobileAdminPage() {
 
           {/* Perfil Admin y Refresh */}
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={cargarDatosSede}
+            <button onClick={cargarDatosSede}
               className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               title="Refrescar datos"
             >
@@ -259,8 +258,7 @@ export default function MobileAdminPage() {
                 Módulos de Mostrador
               </span>
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setActiveTab('recepcion')}
+                <button onClick={() => setActiveTab('recepcion')}
                   className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-pink-400 text-left transition active:scale-98 shadow-sm flex items-center gap-3 cursor-pointer"
                 >
                   <div className="w-9 h-9 rounded-xl bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 flex items-center justify-center font-bold shrink-0">
@@ -272,8 +270,7 @@ export default function MobileAdminPage() {
                   </div>
                 </button>
 
-                <button
-                  onClick={() => setActiveTab('caja')}
+                <button onClick={() => setActiveTab('caja')}
                   className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-400 text-left transition active:scale-98 shadow-sm flex items-center gap-3 cursor-pointer"
                 >
                   <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
@@ -309,8 +306,7 @@ export default function MobileAdminPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between pb-1">
               <h3 className="text-sm font-black text-slate-900 dark:text-white">Personal en Sede ({colaboradores.length})</h3>
-              <button 
-                onClick={cargarDatosSede} 
+              <button onClick={cargarDatosSede} 
                 className="text-xs text-indigo-500 hover:underline flex items-center gap-1 font-bold cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Actualizar
@@ -375,8 +371,7 @@ export default function MobileAdminPage() {
                 <p className="text-pink-600 dark:text-pink-400 font-bold text-[10px] mt-1">ROL: {agente?.rol || 'ADMIN'}</p>
               </div>
 
-              <button 
-                onClick={async () => {
+              <button onClick={async () => {
                   await supabase.auth.signOut();
                   if (typeof window !== 'undefined') {
                     localStorage.removeItem('vaikuntha_user_email');
@@ -399,8 +394,7 @@ export default function MobileAdminPage() {
       {/* 🧭 BOTTOM NAVIGATION BAR MÓVIL */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 max-w-md mx-auto px-2 py-1.5 transition-colors">
         <div className="grid grid-cols-5 gap-1">
-          <button
-            onClick={() => setActiveTab('mando')}
+          <button onClick={() => setActiveTab('mando')}
             className={`py-2 flex flex-col items-center justify-center rounded-xl transition cursor-pointer ${
               activeTab === 'mando'
                 ? 'text-pink-600 dark:text-pink-400 font-black'
@@ -411,8 +405,7 @@ export default function MobileAdminPage() {
             <span className="text-[9px] mt-0.5">Mando</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('recepcion')}
+          <button onClick={() => setActiveTab('recepcion')}
             className={`py-2 flex flex-col items-center justify-center rounded-xl transition cursor-pointer ${
               activeTab === 'recepcion'
                 ? 'text-pink-600 dark:text-pink-400 font-black'
@@ -423,8 +416,7 @@ export default function MobileAdminPage() {
             <span className="text-[9px] mt-0.5">Recepción</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('caja')}
+          <button onClick={() => setActiveTab('caja')}
             className={`py-2 flex flex-col items-center justify-center rounded-xl transition cursor-pointer ${
               activeTab === 'caja'
                 ? 'text-pink-600 dark:text-pink-400 font-black'
@@ -435,8 +427,7 @@ export default function MobileAdminPage() {
             <span className="text-[9px] mt-0.5">Caja</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('personal')}
+          <button onClick={() => setActiveTab('personal')}
             className={`py-2 flex flex-col items-center justify-center rounded-xl transition cursor-pointer ${
               activeTab === 'personal'
                 ? 'text-pink-600 dark:text-pink-400 font-black'
@@ -447,8 +438,7 @@ export default function MobileAdminPage() {
             <span className="text-[9px] mt-0.5">Personal</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('ajustes')}
+          <button onClick={() => setActiveTab('ajustes')}
             className={`py-2 flex flex-col items-center justify-center rounded-xl transition cursor-pointer ${
               activeTab === 'ajustes'
                 ? 'text-pink-600 dark:text-pink-400 font-black'
@@ -464,7 +454,7 @@ export default function MobileAdminPage() {
       {/* 🏢 MODAL CAMBIO DE SEDE */}
       <AnimatePresence>
         {showSedesModal && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -478,8 +468,7 @@ export default function MobileAdminPage() {
 
               <div className="space-y-2">
                 {misSedes.map((s) => (
-                  <button
-                    key={s.id}
+                  <button key={s.id}
                     onClick={() => {
                       setSedeActiva(s);
                       setShowSedesModal(false);

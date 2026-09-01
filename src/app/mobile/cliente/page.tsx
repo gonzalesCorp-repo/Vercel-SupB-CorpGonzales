@@ -165,8 +165,7 @@ export default function MobileClientePage() {
                 />
               </div>
 
-              <button
-                type="submit"
+              <button type="submit"
                 disabled={buscando || !dni}
                 className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-pink-600/20 disabled:opacity-50 text-sm flex items-center justify-center gap-2 cursor-pointer"
               >
@@ -209,15 +208,13 @@ export default function MobileClientePage() {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => setMostrarRegistro(false)}
                   className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition cursor-pointer"
                 >
                   Volver
                 </button>
-                <button
-                  type="submit"
+                <button type="submit"
                   disabled={buscando}
                   className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl transition shadow-lg text-xs cursor-pointer"
                 >

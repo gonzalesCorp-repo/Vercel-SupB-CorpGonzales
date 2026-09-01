@@ -27,13 +27,13 @@ export function ModalTiempoExposicion({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[60] bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
         
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-amber-400" />
-            <h4 className="text-sm font-black text-white">Tiempo de Exposición</h4>
+            <h4 className="text-sm font-black text-slate-900 dark:text-white">Tiempo de Exposición</h4>
           </div>
           <button onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
@@ -50,8 +50,7 @@ export function ModalTiempoExposicion({
             <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Tiempo de Pose (Minutos):</label>
             <div className="grid grid-cols-4 gap-1.5">
               {[15, 20, 30, 45].map((m) => (
-                <button
-                  key={m}
+                <button key={m}
                   type="button"
                   onClick={() => setMinutos(m)}
                   className={`py-2 rounded-xl text-xs font-mono font-bold transition ${
@@ -92,15 +91,13 @@ export function ModalTiempoExposicion({
           </div>
 
           <div className="pt-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
-            <button
-              type="button"
+            <button type="button"
               onClick={onClose}
               className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl cursor-pointer"
             >
               Cancelar
             </button>
-            <button
-              type="button"
+            <button type="button"
               onClick={onIniciarExposicion}
               disabled={isProcessing}
               className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/30 flex items-center gap-1.5 active:scale-95 disabled:opacity-50 cursor-pointer"

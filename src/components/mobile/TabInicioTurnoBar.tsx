@@ -26,9 +26,8 @@ export function TabInicioTurnoBar({
     <div className="space-y-4 animate-in fade-in duration-200">
       
       {/* Segmented Toggle Superior Rápido (Estilo iOS) */}
-      <div className="flex gap-1.5 p-1 bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-slate-800 shadow-inner">
-        <button
-          type="button"
+      <div className="flex gap-1.5 p-1 bg-slate-100 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-slate-800 shadow-inner">
+        <button type="button"
           onClick={() => setSeccionActiva('asistencia')}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
             seccionActiva === 'asistencia'
@@ -40,8 +39,7 @@ export function TabInicioTurnoBar({
           <span>🚨 Asistencia NFC</span>
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           onClick={() => setSeccionActiva('bar')}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
             seccionActiva === 'bar'

@@ -66,8 +66,7 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
           <Sun className="w-3.5 h-3.5 text-amber-500" /> Modo Visual (Tema)
         </label>
         <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
-          <button
-            type="button"
+          <button type="button"
             onClick={() => setThemeMode('light', userId)}
             className={`py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
               themeMode === 'light'
@@ -78,8 +77,7 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
             <Sun className="w-4 h-4 text-amber-500" />
             <span>Modo Claro</span>
           </button>
-          <button
-            type="button"
+          <button type="button"
             onClick={() => setThemeMode('dark', userId)}
             className={`py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
               themeMode === 'dark'
@@ -107,14 +105,13 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
           {fontSizes.map((item) => {
             const isSelected = (fontSize || 'normal') === item.id;
             return (
-              <button
-                key={item.id}
+              <button key={item.id}
                 type="button"
                 onClick={() => setFontSize(item.id, userId)}
                 className={`py-2 rounded-xl text-center transition cursor-pointer flex flex-col items-center justify-center ${
                   isSelected
                     ? 'bg-indigo-600 text-white shadow-md font-black'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-100 dark:bg-slate-800/50'
                 }`}
               >
                 <span className="text-xs font-bold leading-tight">{item.label}</span>
@@ -134,8 +131,7 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
           {fontFamilies.map((f) => {
             const isSelected = (fontFamily || 'inter') === f.id;
             return (
-              <button
-                key={f.id}
+              <button key={f.id}
                 type="button"
                 onClick={() => setFontFamily(f.id, userId)}
                 className={`p-2.5 rounded-2xl border text-left transition cursor-pointer flex items-center justify-between ${
@@ -165,8 +161,7 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
             Convierte automáticamente todos los textos para una lectura clara y nítida.
           </span>
         </div>
-        <button
-          type="button"
+        <button type="button"
           onClick={() => setUppercaseMode(!uppercaseMode, userId)}
           className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer shrink-0 ${
             uppercaseMode ? 'bg-indigo-600 justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'
@@ -183,8 +178,7 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
         </label>
         <div className="flex items-center justify-between gap-2 px-1">
           {colors.map((c) => (
-            <button
-              key={c.value}
+            <button key={c.value}
               type="button"
               onClick={() => setPrimaryColor(c.value, userId)}
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${

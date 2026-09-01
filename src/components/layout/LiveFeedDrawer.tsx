@@ -146,20 +146,18 @@ export function LiveFeedDrawer({ isOpen, onClose, sedeId }: LiveFeedDrawerProps)
 
               <div className="flex items-center gap-2">
                 {/* Sound Toggle Button */}
-                <button
-                  onClick={handleToggleSound}
+                <button onClick={handleToggleSound}
                   title={soundEnabled ? 'Silenciar notificaciones sonoras' : 'Activar sonido en vivo'}
                   className={`p-2.5 rounded-xl border transition-all ${
                     soundEnabled
                       ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400'
                       : 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-400'
-                  }`}
+                  } cursor-pointer`}
                 >
                   {soundEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
                 </button>
 
-                <button
-                  onClick={onClose}
+                <button onClick={onClose}
                   className="p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer"
                 >
                   <X className="w-5 h-5" />
@@ -176,8 +174,7 @@ export function LiveFeedDrawer({ isOpen, onClose, sedeId }: LiveFeedDrawerProps)
                 { id: 'PETICION', label: '🛎️ Peticiones', count: items.filter(i => i.tipo === 'PETICION').length },
                 { id: 'ESPERA', label: '⏳ Esperas', count: items.filter(i => i.tipo === 'ESPERA').length }
               ].map(f => (
-                <button
-                  key={f.id}
+                <button key={f.id}
                   onClick={() => setFiltroTipo(f.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
                     filtroTipo === f.id

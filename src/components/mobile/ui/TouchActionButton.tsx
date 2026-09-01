@@ -29,11 +29,11 @@ export default function TouchActionButton({
     primary:
       'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-lg shadow-indigo-600/25 border border-indigo-400/30 hover:shadow-indigo-600/40',
     secondary:
-      'bg-slate-900/90 text-slate-900 dark:text-slate-200 border border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800 shadow-md backdrop-blur-xl',
+      'bg-slate-100 dark:bg-slate-900/90 text-slate-900 dark:text-slate-200 border border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800 shadow-md backdrop-blur-xl',
     danger:
       'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-600/25 border border-red-400/30 hover:shadow-red-600/40',
     ghost:
-      'bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent',
+      'bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800/50 border border-transparent',
   };
 
   const renderIcon = () => {
@@ -44,13 +44,12 @@ export default function TouchActionButton({
   };
 
   return (
-    <motion.button
-      type={type}
+    <motion.button type={type}
       onClick={onClick}
       disabled={disabled}
       whileTap={disabled ? undefined : { scale: 0.95 }}
       whileHover={disabled ? undefined : { scale: 1.02 }}
-      className={`${baseStyles} ${variantStyles[variant]} ${className}`}
+      className={`${baseStyles} ${variantStyles[variant]} ${className} cursor-pointer`}
     >
       {renderIcon()}
       <span>{children}</span>

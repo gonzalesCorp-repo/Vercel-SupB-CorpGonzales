@@ -163,8 +163,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
           <h3 className="text-sm font-black text-slate-900 dark:text-white">Citas & Bloqueos de Horario</h3>
         </div>
 
-        <button
-          onClick={() => setModalNuevoOpen(true)}
+        <button onClick={() => setModalNuevoOpen(true)}
           className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-indigo-600/20 active:scale-95 transition"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -191,7 +190,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
                   ? 'bg-amber-950/20 border-amber-500/30 text-amber-200'
                   : item.estado === 'EN_CURSO'
                   ? 'bg-indigo-950/40 border-indigo-500/40 text-white shadow-lg shadow-indigo-950/50'
-                  : 'bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
+                  : 'bg-slate-100 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -199,7 +198,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
                   {isBloqueo ? <ShieldAlert className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-white">{item.clienteNombre}</h4>
+                  <h4 className="font-bold text-xs text-slate-900 dark:text-white">{item.clienteNombre}</h4>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">{item.servicio}</p>
                 </div>
               </div>
@@ -219,7 +218,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
 
       {/* Modal Nuevo Registro */}
       {modalNuevoOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-black text-slate-900 dark:text-white">Nuevo Registro en Agenda</h3>
@@ -230,8 +229,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
 
             {/* Selector Tipo */}
             <div className="flex gap-2 p-1 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => setTipoRegistro('CITA')}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition ${
                   tipoRegistro === 'CITA' ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-slate-400'
@@ -239,8 +237,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
               >
                 📅 Cita con Cliente
               </button>
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => setTipoRegistro('BLOQUEO')}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition ${
                   tipoRegistro === 'BLOQUEO' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-500 dark:text-slate-400'
@@ -302,15 +299,13 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
               </div>
 
               <div className="pt-2 flex gap-2">
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => setModalNuevoOpen(false)}
                   className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-xs transition cursor-pointer"
                 >
                   Cancelar
                 </button>
-                <button
-                  type="submit"
+                <button type="submit"
                   className={`flex-1 py-2.5 rounded-xl font-bold text-xs text-white shadow-lg transition cursor-pointer ${
                     tipoRegistro === 'CITA'
                       ? 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30'

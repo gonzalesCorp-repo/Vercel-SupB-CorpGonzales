@@ -114,16 +114,14 @@ export default function StaffAgendaTab({
         <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
           CITAS AGENDADAS: <span className="text-purple-600 dark:text-purple-400">{citas.length}</span>
         </span>
-        <button 
-          onClick={() => { cargarCitas(); if (cargarDatosMobile) cargarDatosMobile(); }}
+        <button onClick={() => { cargarCitas(); if (cargarDatosMobile) cargarDatosMobile(); }}
           className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-purple-600 dark:text-purple-400 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition cursor-pointer shadow-xs"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refrescar
         </button>
       </div>
 
-      <button 
-        onClick={() => setShowAddCitaModal(true)}
+      <button onClick={() => setShowAddCitaModal(true)}
         className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs shadow-lg shadow-purple-600/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
       >
         <Sparkles className="w-4 h-4" /> Agendar Nueva Cita
@@ -176,7 +174,7 @@ export default function StaffAgendaTab({
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div 
               initial={{ scale: 0.95 }}
@@ -242,8 +240,7 @@ export default function StaffAgendaTab({
                   </div>
                 </div>
 
-                <button 
-                  type="submit"
+                <button type="submit"
                   className="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs shadow-lg shadow-purple-600/30 active:scale-95 transition-all mt-2 cursor-pointer"
                 >
                   Confirmar y Agendar

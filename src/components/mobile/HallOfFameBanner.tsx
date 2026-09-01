@@ -46,7 +46,7 @@ export default function HallOfFameBanner({ hallOfFame, currentAgenteId, cicloFin
       case 0: return 'bg-gradient-to-br from-yellow-500/20 to-yellow-700/20 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.2)]'
       case 1: return 'bg-gradient-to-br from-slate-300/20 to-slate-500/20 border-slate-300/50'
       case 2: return 'bg-gradient-to-br from-amber-600/20 to-amber-800/20 border-amber-600/50'
-      default: return 'bg-slate-800/50 border-slate-700'
+      default: return 'bg-slate-100 dark:bg-slate-800/50 border-slate-700'
     }
   }
 

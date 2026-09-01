@@ -72,8 +72,7 @@ export function StaffProximityAlert({ sedeId, agenteId, agenteNombre }: StaffPro
             {alerta.zona === 'EN_PUERTA' ? '🚪 Cliente en Puerta' : `📍 Cliente a ${alerta.distanciaMetros}m`}
           </span>
 
-          <button
-            type="button"
+          <button type="button"
             onClick={() => setAlerta(null)}
             className="p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg transition"
           >
@@ -86,7 +85,7 @@ export function StaffProximityAlert({ sedeId, agenteId, agenteNombre }: StaffPro
             {alerta.clienteNombre.charAt(0)}
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="text-xs font-black text-white truncate">{alerta.clienteNombre}</h4>
+            <h4 className="text-xs font-black text-slate-900 dark:text-white truncate">{alerta.clienteNombre}</h4>
             <p className="text-[10px] text-slate-300 truncate">
               {alerta.servicioNombre || 'Servicio de Cita'} • Cita {alerta.horaCita || 'Hoy'}
             </p>

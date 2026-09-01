@@ -94,8 +94,7 @@ export function PwaInstallButton() {
           </div>
         </div>
 
-        <button
-          onClick={handleInstallClick}
+        <button onClick={handleInstallClick}
           className="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
         >
           <Download className="w-3.5 h-3.5" /> Instalar

@@ -129,7 +129,7 @@ export function ModalCatalogoPicker({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[60] bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl max-h-[85vh] flex flex-col justify-between">
         
         {/* Cabecera del Modal */}
@@ -142,8 +142,7 @@ export function ModalCatalogoPicker({
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Catálogo Oficial Vaikuntha</span>
               </div>
             </div>
-            <button 
-              onClick={onClose}
+            <button onClick={onClose}
               className="p-1 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800 transition cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -152,8 +151,7 @@ export function ModalCatalogoPicker({
 
           {/* Pestañas de Navegación: Exclusivamente Servicios y Retail Oficiales */}
           <div className="grid grid-cols-2 gap-1.5 bg-slate-50 dark:bg-slate-950 p-1 rounded-2xl border border-slate-200 dark:border-slate-800">
-            <button
-              type="button"
+            <button type="button"
               onClick={() => { setTipoActivo('servicio'); setCategoriaChip('TODOS'); }}
               className={`py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 ${
                 tipoActivo === 'servicio' 
@@ -165,8 +163,7 @@ export function ModalCatalogoPicker({
               <span>✂️ Servicios ({catalogo.filter(c => c.tipo_bien === 'servicio').length})</span>
             </button>
 
-            <button
-              type="button"
+            <button type="button"
               onClick={() => { setTipoActivo('producto'); setCategoriaChip('TODOS'); }}
               className={`py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 ${
                 tipoActivo === 'producto' 
@@ -194,8 +191,7 @@ export function ModalCatalogoPicker({
               className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none focus:border-indigo-500 font-medium"
             />
             {busqueda && (
-              <button
-                onClick={() => setBusqueda('')}
+              <button onClick={() => setBusqueda('')}
                 className="absolute right-3 top-2.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs"
               >
                 <X className="w-3.5 h-3.5" />
@@ -207,8 +203,7 @@ export function ModalCatalogoPicker({
           {categoriasChips.length > 1 && (
             <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar text-[11px]">
               {categoriasChips.map((cat, idx) => (
-                <button
-                  key={idx}
+                <button key={idx}
                   type="button"
                   onClick={() => setCategoriaChip(cat)}
                   className={`px-3 py-1 rounded-full whitespace-nowrap font-bold transition ${

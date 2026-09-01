@@ -97,15 +97,13 @@ export default function MobileSoportePage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => router.push('/mobile/soporte')}
+          <button onClick={() => router.push('/mobile/soporte')}
             className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 dark:bg-slate-800 rounded-xl transition cursor-pointer"
             title="Recargar"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
-          <button
-            onClick={handleLogout}
+          <button onClick={handleLogout}
             className="p-2 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 rounded-xl transition cursor-pointer"
             title="Cerrar Sesión"
           >
@@ -117,8 +115,7 @@ export default function MobileSoportePage() {
       {/* Selector de Herramientas de Soporte (Segmented Control) */}
       <div className="flex gap-1.5 bg-slate-100 dark:bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 mb-4 shadow-md">
         {herramientas.includes('recepcion') && (
-          <button
-            onClick={() => setActiveTab('recepcion')}
+          <button onClick={() => setActiveTab('recepcion')}
             className={`flex-1 py-2 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
               activeTab === 'recepcion'
                 ? 'bg-indigo-600 text-white shadow-md'
@@ -131,8 +128,7 @@ export default function MobileSoportePage() {
         )}
 
         {herramientas.includes('caja') && (
-          <button
-            onClick={() => setActiveTab('caja')}
+          <button onClick={() => setActiveTab('caja')}
             className={`flex-1 py-2 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
               activeTab === 'caja'
                 ? 'bg-emerald-600 text-white shadow-md'
@@ -145,8 +141,7 @@ export default function MobileSoportePage() {
         )}
 
         {herramientas.includes('despacho') && (
-          <button
-            onClick={() => setActiveTab('despacho')}
+          <button onClick={() => setActiveTab('despacho')}
             className={`flex-1 py-2 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
               activeTab === 'despacho'
                 ? 'bg-amber-600 text-white shadow-md'
@@ -158,8 +153,7 @@ export default function MobileSoportePage() {
           </button>
         )}
 
-        <button
-          onClick={() => setActiveTab('ajustes')}
+        <button onClick={() => setActiveTab('ajustes')}
           className={`flex-1 py-2 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
             activeTab === 'ajustes'
               ? 'bg-pink-600 text-white shadow-md'

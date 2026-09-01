@@ -144,8 +144,7 @@ export function TabCola({ miNombre }: TabColaProps) {
 
       {/* Filtros de Especialidad Claros y Estándar */}
       <div className="flex gap-1.5 p-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <button
-          onClick={() => setFiltro('Todos')}
+        <button onClick={() => setFiltro('Todos')}
           className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
             filtro === 'Todos'
               ? 'bg-indigo-600 text-white shadow-md'
@@ -155,8 +154,7 @@ export function TabCola({ miNombre }: TabColaProps) {
           Todos
         </button>
 
-        <button
-          onClick={() => setFiltro('Estilismo')}
+        <button onClick={() => setFiltro('Estilismo')}
           className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${
             filtro === 'Estilismo'
               ? 'bg-indigo-600 text-white shadow-md'
@@ -166,8 +164,7 @@ export function TabCola({ miNombre }: TabColaProps) {
           <span>✂️ Estilismo</span>
         </button>
 
-        <button
-          onClick={() => setFiltro('Cosmiatria')}
+        <button onClick={() => setFiltro('Cosmiatria')}
           className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${
             filtro === 'Cosmiatria'
               ? 'bg-indigo-600 text-white shadow-md'
@@ -184,8 +181,7 @@ export function TabCola({ miNombre }: TabColaProps) {
           <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">
             Compañeros en Piso ({filtrados.length})
           </span>
-          <button
-            type="button"
+          <button type="button"
             onClick={cargarColaEnVivo}
             className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 cursor-pointer"
           >
@@ -215,7 +211,7 @@ export function TabCola({ miNombre }: TabColaProps) {
                 className={`p-3.5 rounded-2xl border flex items-center justify-between transition-all ${
                   esTu
                     ? 'bg-indigo-950/40 border-indigo-500/50 shadow-md shadow-indigo-500/10'
-                    : 'bg-slate-900/80 border-slate-200 dark:border-slate-800'
+                    : 'bg-slate-100 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-3">

@@ -107,8 +107,7 @@ export default function MobileConfigPage() {
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
+        <button onClick={handleSave}
           disabled={saving}
           className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center gap-1.5 disabled:opacity-50 active:scale-95 transition cursor-pointer"
         >
@@ -120,8 +119,7 @@ export default function MobileConfigPage() {
       {/* Segmented Tab Controls */}
       <div className="px-4 pt-3 pb-1">
         <div className="grid grid-cols-4 bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 text-[11px] font-bold transition-colors">
-          <button
-            type="button"
+          <button type="button"
             onClick={() => setActiveTab('OPERATIVO')}
             className={`py-2 rounded-xl transition flex flex-col items-center gap-0.5 cursor-pointer ${
               activeTab === 'OPERATIVO' 
@@ -133,8 +131,7 @@ export default function MobileConfigPage() {
             <span>Módulos</span>
           </button>
 
-          <button
-            type="button"
+          <button type="button"
             onClick={() => setActiveTab('CRONJOBS')}
             className={`py-2 rounded-xl transition flex flex-col items-center gap-0.5 cursor-pointer ${
               activeTab === 'CRONJOBS' 
@@ -146,8 +143,7 @@ export default function MobileConfigPage() {
             <span>Cronjobs</span>
           </button>
 
-          <button
-            type="button"
+          <button type="button"
             onClick={() => setActiveTab('LUMINA')}
             className={`py-2 rounded-xl transition flex flex-col items-center gap-0.5 cursor-pointer ${
               activeTab === 'LUMINA' 
@@ -159,8 +155,7 @@ export default function MobileConfigPage() {
             <span>Lumina</span>
           </button>
 
-          <button
-            type="button"
+          <button type="button"
             onClick={() => setActiveTab('SUNAT')}
             className={`py-2 rounded-xl transition flex flex-col items-center gap-0.5 cursor-pointer ${
               activeTab === 'SUNAT' 
@@ -404,8 +399,7 @@ export default function MobileConfigPage() {
 
       {/* Floating Save Action on Mobile */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 flex gap-2 z-40 transition-colors">
-        <button
-          type="button"
+        <button type="button"
           onClick={handleSave}
           disabled={saving}
           className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-2xl shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2 active:scale-98 transition disabled:opacity-50 cursor-pointer"

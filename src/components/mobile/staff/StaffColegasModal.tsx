@@ -35,7 +35,7 @@ export default function StaffColegasModal({
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/60 dark:bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-4"
         >
           <motion.div 
             initial={{ y: 50, scale: 0.95 }}
@@ -61,8 +61,7 @@ export default function StaffColegasModal({
             {/* Filtro por Especialidades */}
             <div className="flex gap-1.5 overflow-x-auto custom-scrollbar pb-2">
               {['TODAS', 'COLORIMETRIA', 'CORTE', 'PEINADOS', 'MANICURE'].map(esp => (
-                <button
-                  key={esp}
+                <button key={esp}
                   onClick={() => setFiltroEspecialidad(esp)}
                   className={`px-3 py-1.5 rounded-xl font-bold text-[10px] uppercase whitespace-nowrap transition-all ${
                     filtroEspecialidad === esp 
@@ -88,7 +87,7 @@ export default function StaffColegasModal({
                       className={`p-3.5 rounded-2xl border flex items-center justify-between transition-all ${
                         isSelf 
                           ? 'bg-indigo-950/60 border-indigo-500/50 shadow-md' 
-                          : 'bg-black/60 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800'
+                          : 'bg-slate-50 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center gap-3">

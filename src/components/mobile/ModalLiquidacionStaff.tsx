@@ -56,7 +56,7 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900 dark:text-slate-100 animate-in zoom-in-95">
         
         {/* Header Modal */}
@@ -121,7 +121,7 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
             return (
               <div
                 key={tx.id}
-                className="p-3 bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex items-center justify-between text-xs"
+                className="p-3 bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex items-center justify-between text-xs"
               >
                 <div className="space-y-0.5 pr-2">
                   <p className="font-bold text-slate-900 dark:text-slate-200">{tx.concepto}</p>
@@ -143,8 +143,7 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
 
         {/* Botón de Solicitud de Liquidación */}
         <div className="pt-2 border-t border-slate-200 dark:border-slate-800 shrink-0">
-          <button
-            onClick={handleSolicitar}
+          <button onClick={handleSolicitar}
             disabled={solicitando || balance <= 0}
             className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-600/30 transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer"
           >

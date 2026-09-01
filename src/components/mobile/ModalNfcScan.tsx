@@ -208,23 +208,21 @@ export function ModalNfcScan({ isOpen, onClose, onSuccess, tipoAccion = 'Validac
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[70] bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
         className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-2xl relative select-none"
       >
-        <button
-          onClick={onClose}
+        <button onClick={onClose}
           className="absolute top-4 right-4 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white p-2 rounded-full bg-slate-100 dark:bg-slate-800 transition cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Radar NFC Animado / Botón Táctil de Activación */}
-        <button
-          type="button"
+        <button type="button"
           onClick={isSupported ? iniciarEscanerNfc : handleMarcacionDigital}
           className="relative w-24 h-24 mx-auto flex items-center justify-center pt-2 group outline-none cursor-pointer"
         >
@@ -250,7 +248,7 @@ export function ModalNfcScan({ isOpen, onClose, onSuccess, tipoAccion = 'Validac
           }`}>
             {tipoAccion} • {isSupported ? 'Sensor NFC' : 'Modo Digital'}
           </span>
-          <h3 className="text-lg font-black text-white mt-2">
+          <h3 className="text-lg font-black text-slate-900 dark:text-white mt-2">
             {isSupported ? 'Aproxime el Tag NFC' : 'Confirmar Marcación Digital'}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -261,8 +259,7 @@ export function ModalNfcScan({ isOpen, onClose, onSuccess, tipoAccion = 'Validac
         </div>
 
         {/* Botón Principal de Envío de Solicitud de Asistencia al Local */}
-        <button
-          type="button"
+        <button type="button"
           onClick={handleMarcacionDigital}
           className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 active:scale-95 transition cursor-pointer"
         >
@@ -272,7 +269,7 @@ export function ModalNfcScan({ isOpen, onClose, onSuccess, tipoAccion = 'Validac
 
         {/* Temporizador Regresivo (Si NFC está activo) */}
         {isSupported && (
-          <div className="bg-slate-800/60 p-2.5 rounded-2xl border border-slate-300 dark:border-slate-700/60 flex items-center justify-center gap-3">
+          <div className="bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-2xl border border-slate-300 dark:border-slate-700/60 flex items-center justify-center gap-3">
             <span className="text-xl font-black font-mono text-indigo-400">
               {segundos}s
             </span>

@@ -253,8 +253,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <nav className="fixed top-0 left-0 right-0 z-50 h-16 mx-4 mt-4 lg:ml-24 lg:mr-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl transition-all duration-300">
         <div className="h-full px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
               className="lg:hidden p-2 text-gray-500 rounded-xl hover:bg-gray-100/50 transition-colors"
             >
               <Menu className="w-5 h-5" />
@@ -266,8 +265,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {/* Sede Selector */}
             {sedeActiva && misSedes.length > 0 && (
               <div className="relative">
-                <button 
-                  onClick={() => setShowSedesDropdown(!showSedesDropdown)}
+                <button onClick={() => setShowSedesDropdown(!showSedesDropdown)}
                   className="flex items-center gap-2 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-gray-100/50 dark:border-slate-700 text-gray-700 dark:text-slate-200 text-sm font-bold px-4 py-2 rounded-xl shadow-sm transition-all"
                 >
                   <MapPin className="w-4 h-4 text-indigo-600" />
@@ -284,8 +282,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       className="absolute right-0 mt-3 w-56 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-slate-700 overflow-hidden z-50 p-2"
                     >
                       {misSedes.map(sede => (
-                        <button
-                          key={sede.id}
+                        <button key={sede.id}
                           onClick={() => { setSedeActiva(sede); setShowSedesDropdown(false); }}
                           className={`w-full text-left px-4 py-2.5 text-sm rounded-xl transition-colors flex items-center gap-2 ${sede.id === sedeActiva.id ? 'bg-indigo-600 text-white font-bold' : 'text-gray-700 hover:bg-gray-100/50'}`}
                         >

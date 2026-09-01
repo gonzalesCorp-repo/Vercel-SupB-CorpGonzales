@@ -52,7 +52,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
       <motion.div
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
@@ -73,8 +73,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
 
           <div className="flex items-center gap-2">
             {onToggleIpodMode && (
-              <button
-                onClick={onToggleIpodMode}
+              <button onClick={onToggleIpodMode}
                 title="Cambiar a modo iPod Click Wheel"
                 className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs flex items-center gap-1 font-bold transition cursor-pointer"
               >
@@ -83,8 +82,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
               </button>
             )}
 
-            <button
-              onClick={onClose}
+            <button onClick={onClose}
               className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl transition cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -143,8 +141,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
           {items.map((item) => {
             const Icon = item.icon;
             return (
-              <button
-                key={item.id}
+              <button key={item.id}
                 onClick={() => {
                   onSelectOption(item.id);
                   onClose();
@@ -171,8 +168,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
         {/* Cerrar Sesión */}
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs">
           <span className="text-[10px] text-slate-500 dark:text-slate-400 dark:text-slate-500">Vaikuntha Staff OS v2.0</span>
-          <button
-            type="button"
+          <button type="button"
             onClick={onLogout || (() => { window.location.href = '/login'; })}
             className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-bold flex items-center gap-1 px-3 py-1.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer active:scale-95"
           >

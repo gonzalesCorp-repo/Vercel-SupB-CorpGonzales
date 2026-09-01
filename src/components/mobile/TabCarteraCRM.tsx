@@ -195,8 +195,7 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
           <h3 className="text-sm font-black text-slate-900 dark:text-white">Clientes de {agenteNombre.split(' ')[0]}</h3>
         </div>
 
-        <button
-          onClick={() => setModalRegistroOpen(true)}
+        <button onClick={() => setModalRegistroOpen(true)}
           className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-md shadow-emerald-600/20 active:scale-95"
         >
           <UserPlus className="w-3.5 h-3.5" />
@@ -229,7 +228,7 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
           Cargando tu cartera e insignias ganadas...
         </div>
       ) : filtrados.length === 0 ? (
-        <div className="p-8 text-center bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+        <div className="p-8 text-center bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
           <Users className="w-8 h-8 text-slate-700 mx-auto" />
           <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">No tienes clientes que coincidan con la búsqueda</p>
           <p className="text-[10px] text-slate-500">Registra un nuevo cliente con el botón + Nuevo.</p>
@@ -241,7 +240,7 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
               <div
                 key={c.id}
                 onClick={() => setClienteSeleccionado(c)}
-                className="p-3.5 bg-slate-900/80 hover:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:border-slate-700 transition cursor-pointer space-y-2.5 shadow-sm active:scale-[0.99]"
+                className="p-3.5 bg-slate-100 dark:bg-slate-900/80 hover:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:border-slate-700 transition cursor-pointer space-y-2.5 shadow-sm active:scale-[0.99]"
               >
                 {/* Header Cliente */}
                 <div className="flex items-center justify-between">
@@ -302,7 +301,7 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
 
       {/* Modal Ficha Detalle del Cliente */}
       {clienteSeleccionado && (
-        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl animate-in zoom-in-95">
             
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -311,7 +310,7 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
                   {clienteSeleccionado.nombre.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h4 className="text-sm font-black text-white">{clienteSeleccionado.nombre}</h4>
+                  <h4 className="text-sm font-black text-slate-900 dark:text-white">{clienteSeleccionado.nombre}</h4>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">Ficha CRM & Fidelización</p>
                 </div>
               </div>
@@ -372,7 +371,7 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
             {/* Notas Técnicas / Antecedentes */}
             <div className="space-y-1">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Notas Técnicas de Bolsillo</span>
-              <p className="p-3 bg-black/60 dark:bg-slate-950/80 rounded-2xl border border-slate-200 dark:border-slate-800/80 text-xs text-slate-700 dark:text-slate-300 italic">
+              <p className="p-3 bg-slate-50 dark:bg-slate-950/80 rounded-2xl border border-slate-200 dark:border-slate-800/80 text-xs text-slate-700 dark:text-slate-300 italic">
                 "{clienteSeleccionado.notasTecnicas}"
               </p>
             </div>
@@ -409,12 +408,12 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
 
       {/* Modal Crear Nuevo Cliente */}
       {modalRegistroOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-emerald-400" />
-                <h4 className="text-sm font-black text-white">Nuevo Cliente en Cartera</h4>
+                <h4 className="text-sm font-black text-slate-900 dark:text-white">Nuevo Cliente en Cartera</h4>
               </div>
               <button onClick={() => setModalRegistroOpen(false)} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                 <X className="w-4 h-4" />
@@ -469,15 +468,13 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
               </div>
 
               <div className="pt-2 flex items-center justify-end gap-2">
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => setModalRegistroOpen(false)}
                   className="px-3.5 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 >
                   Cancelar
                 </button>
-                <button
-                  type="submit"
+                <button type="submit"
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition active:scale-95 cursor-pointer"
                 >
                   Guardar en Mi Cartera

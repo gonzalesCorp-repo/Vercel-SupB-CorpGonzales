@@ -27,8 +27,7 @@ export function MobileBottomNav({ activeTab, onSelectTab }: MobileBottomNavProps
           const isActive = activeTab === tab.id;
 
           return (
-            <button
-              key={tab.id}
+            <button key={tab.id}
               onClick={() => onSelectTab(tab.id)}
               className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
                 isActive

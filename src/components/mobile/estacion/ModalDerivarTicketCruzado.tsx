@@ -43,11 +43,11 @@ export function ModalDerivarTicketCruzado({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
         
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-          <h4 className="text-sm font-black text-white">+ Añadir Ticket / Cross-Selling</h4>
+          <h4 className="text-sm font-black text-slate-900 dark:text-white">+ Añadir Ticket / Cross-Selling</h4>
           <button onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
@@ -59,8 +59,7 @@ export function ModalDerivarTicketCruzado({
           <div className="space-y-1">
             <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Destino de la atención:</label>
             <div className="grid grid-cols-3 gap-1.5 bg-slate-50 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => setDestinoTicket('PROPIO')}
                 className={`py-1.5 rounded-lg text-[10px] font-bold transition ${
                   destinoTicket === 'PROPIO' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 dark:text-slate-400'
@@ -68,8 +67,7 @@ export function ModalDerivarTicketCruzado({
               >
                 Para Mí
               </button>
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => setDestinoTicket('COLEGA')}
                 className={`py-1.5 rounded-lg text-[10px] font-bold transition ${
                   destinoTicket === 'COLEGA' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 dark:text-slate-400'
@@ -77,8 +75,7 @@ export function ModalDerivarTicketCruzado({
               >
                 A Colega
               </button>
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => setDestinoTicket('RECEPCION')}
                 className={`py-1.5 rounded-lg text-[10px] font-bold transition ${
                   destinoTicket === 'RECEPCION' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 dark:text-slate-400'
@@ -116,8 +113,7 @@ export function ModalDerivarTicketCruzado({
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Servicio o Producto:</label>
-              <button
-                type="button"
+              <button type="button"
                 onClick={onAbrirCatalogo}
                 className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 bg-indigo-950/60 px-2 py-0.5 rounded-lg border border-indigo-800/60 transition active:scale-95 cursor-pointer"
               >
@@ -160,15 +156,13 @@ export function ModalDerivarTicketCruzado({
           </div>
 
           <div className="pt-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
-            <button
-              type="button"
+            <button type="button"
               onClick={onClose}
               className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl cursor-pointer"
             >
               Cancelar
             </button>
-            <button
-              type="submit"
+            <button type="submit"
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30 cursor-pointer"
             >
               {destinoTicket === 'COLEGA' ? 'Enviar a Colega' : destinoTicket === 'RECEPCION' ? 'Enviar a Recepción' : 'Añadir a OATC'}

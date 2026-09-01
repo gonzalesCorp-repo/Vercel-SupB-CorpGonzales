@@ -45,7 +45,7 @@ export default function KudosModal({ isOpen, onClose, receiverId, receiverName, 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 dark:bg-slate-950/80 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-slate-50 dark:bg-slate-950/80 backdrop-blur-sm z-[100]"
           />
           <motion.div
             initial={{ y: '100%' }}
@@ -54,7 +54,7 @@ export default function KudosModal({ isOpen, onClose, receiverId, receiverName, 
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed bottom-0 left-0 right-0 z-[101] bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-[2rem] p-6 pb-8 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"
           >
-            <button onClick={onClose} className="absolute top-4 right-4 p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200 bg-slate-800/50 rounded-full cursor-pointer">
+            <button onClick={onClose} className="absolute top-4 right-4 p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/50 rounded-full cursor-pointer">
               <X size={20} />
             </button>
             
@@ -82,13 +82,12 @@ export default function KudosModal({ isOpen, onClose, receiverId, receiverName, 
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-3">
                   {KUDOS_TYPES.map((kudo) => (
-                    <button
-                      key={kudo.id}
+                    <button key={kudo.id}
                       onClick={() => setSelectedType(kudo.id)}
                       className={`flex flex-col items-center p-4 rounded-2xl border transition-all ${
                         selectedType === kudo.id 
                           ? 'bg-indigo-500/20 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)] scale-105' 
-                          : 'bg-slate-800/50 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800'
+                          : 'bg-slate-100 dark:bg-slate-800/50 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800'
                       }`}
                     >
                       <span className="text-4xl mb-2">{kudo.emoji}</span>
@@ -109,8 +108,7 @@ export default function KudosModal({ isOpen, onClose, receiverId, receiverName, 
                       onChange={(e) => setMessage(e.target.value)}
                       className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-slate-900 dark:text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-h-[100px] resize-none"
                     />
-                    <button
-                      onClick={handleSend}
+                    <button onClick={handleSend}
                       className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 shadow-[0_0_20px_rgba(99,102,241,0.4)] cursor-pointer"
                     >
                       <span>Enviar Kudos</span>

@@ -64,8 +64,7 @@ export function MobileHeaderShell({
         {/* Toolbar de Acciones Rápidas */}
         <div className="flex items-center gap-2">
           {/* Badge Estado */}
-          <button
-            onClick={onOpenTurno}
+          <button onClick={onOpenTurno}
             className={`px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${badgeBg}`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${badgeDot} animate-pulse`} />

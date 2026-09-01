@@ -236,8 +236,7 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
                     {/* Selector de Método de Pago */}
                     <div className="grid grid-cols-3 gap-1.5 pt-1">
                       {['YAPE', 'TARJETA', 'EFECTIVO'].map((met) => (
-                        <button
-                          key={met}
+                        <button key={met}
                           onClick={() => setMetodoPagoSeleccionado({ ...metodoPagoSeleccionado, [o.id]: met })}
                           className={`py-1.5 px-2 rounded-xl text-[10px] font-bold border transition ${
                             metodoActual === met
@@ -252,8 +251,7 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
                       ))}
                     </div>
 
-                    <button
-                      onClick={() => handleCobrar(o)}
+                    <button onClick={() => handleCobrar(o)}
                       className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-950 flex items-center justify-center gap-2 text-xs transition"
                     >
                       <CheckCircle2 className="w-4 h-4" /> Cobrar S/ {total.toFixed(2)} ({metodoActual})
@@ -277,15 +275,15 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
             </div>
 
             <div className="space-y-2.5 pt-2">
-              <div className="flex justify-between items-center bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
+              <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
                 <span className="text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2"><Banknote className="w-4 h-4 text-emerald-400" /> Efectivo</span>
                 <span className="font-bold text-xs text-white">S/ {metricasArqueo.efectivo.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
+              <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
                 <span className="text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2"><CreditCard className="w-4 h-4 text-blue-400" /> Tarjetas / POS</span>
                 <span className="font-bold text-xs text-white">S/ {metricasArqueo.tarjeta.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
+              <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
                 <span className="text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2"><QrCode className="w-4 h-4 text-purple-400" /> Yape / Plin</span>
                 <span className="font-bold text-xs text-white">S/ {metricasArqueo.yape.toFixed(2)}</span>
               </div>

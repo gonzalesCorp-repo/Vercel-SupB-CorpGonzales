@@ -91,7 +91,7 @@ export default function StaffInicioTab({
 
       {/* SECCIÓN ALERTAS INMEDIATAS */}
       {inicioSubTab === 'alertas' && (
-        <div className="bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-2xl backdrop-blur-xl">
+        <div className="bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-2xl backdrop-blur-xl">
           <div className="text-center space-y-1">
             <span className="px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-1">
               🚨 PANEL DE ALERTAS INMEDIATAS
@@ -102,8 +102,7 @@ export default function StaffInicioTab({
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-2">
-            <motion.button 
-              whileTap={{ scale: 0.95 }}
+            <motion.button whileTap={{ scale: 0.95 }}
               onClick={() => handleAlertaRapidaWFM('YA LLEGUÉ', 'DISPONIBLE')}
               className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-300 dark:border-slate-700/80 hover:border-emerald-500/50 flex flex-col items-center justify-center gap-2 shadow-lg transition-all group cursor-pointer"
             >
@@ -111,8 +110,7 @@ export default function StaffInicioTab({
               <span className="font-black text-xs text-slate-900 dark:text-slate-100 tracking-wider">YA LLEGUÉ</span>
             </motion.button>
 
-            <motion.button 
-              whileTap={{ scale: 0.95 }}
+            <motion.button whileTap={{ scale: 0.95 }}
               onClick={() => handleAlertaRapidaWFM('VOY A COMER', 'PAUSA')}
               className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-300 dark:border-slate-700/80 hover:border-amber-500/50 flex flex-col items-center justify-center gap-2 shadow-lg transition-all group cursor-pointer"
             >
@@ -120,8 +118,7 @@ export default function StaffInicioTab({
               <span className="font-black text-xs text-slate-900 dark:text-slate-100 tracking-wider">VOY A COMER</span>
             </motion.button>
 
-            <motion.button 
-              whileTap={{ scale: 0.95 }}
+            <motion.button whileTap={{ scale: 0.95 }}
               onClick={() => handleAlertaRapidaWFM('REGRESÉ', 'DISPONIBLE')}
               className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-300 dark:border-slate-700/80 hover:border-blue-500/50 flex flex-col items-center justify-center gap-2 shadow-lg transition-all group cursor-pointer"
             >
@@ -129,8 +126,7 @@ export default function StaffInicioTab({
               <span className="font-black text-xs text-slate-900 dark:text-slate-100 tracking-wider">REGRESÉ</span>
             </motion.button>
 
-            <motion.button 
-              whileTap={{ scale: 0.95 }}
+            <motion.button whileTap={{ scale: 0.95 }}
               onClick={() => handleAlertaRapidaWFM('ACABÓ MI DÍA', 'INACTIVO')}
               className="p-5 rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-300 dark:border-slate-700/80 hover:border-red-500/50 flex flex-col items-center justify-center gap-2 shadow-lg transition-all group cursor-pointer"
             >
@@ -154,7 +150,7 @@ export default function StaffInicioTab({
 
       {/* SECCIÓN BAR */}
       {inicioSubTab === 'bar' && (
-        <div className="bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-2xl backdrop-blur-xl">
+        <div className="bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-2xl backdrop-blur-xl">
           <div className="text-center space-y-1">
             <span className="px-3 py-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-1">
               🍹 SECCIÓN BAR
@@ -165,7 +161,7 @@ export default function StaffInicioTab({
           </div>
 
           <div className="space-y-3 pt-2">
-            <div className="p-4 rounded-2xl bg-black/60 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">☕</span>
                 <span className="font-bold text-sm text-slate-900 dark:text-slate-200">Café</span>
@@ -177,7 +173,7 @@ export default function StaffInicioTab({
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-black/60 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">🍵</span>
                 <span className="font-bold text-sm text-slate-900 dark:text-slate-200">Infusión</span>
@@ -189,7 +185,7 @@ export default function StaffInicioTab({
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-black/60 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">💧</span>
                 <span className="font-bold text-sm text-slate-900 dark:text-slate-200">Agua</span>
@@ -202,7 +198,7 @@ export default function StaffInicioTab({
             </div>
 
             {isWeekendSpecial && (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 to-slate-950/80 border border-purple-500/20 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 to-slate-50 dark:from-purple-950/40 dark:to-slate-950/80 border border-purple-500/20 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🍹</span>
                   <div>

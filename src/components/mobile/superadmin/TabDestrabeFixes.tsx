@@ -160,7 +160,7 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
             <Wrench className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-sm font-black text-white">Destrabe Quirúrgico Remoto</h2>
+            <h2 className="text-sm font-black text-slate-900 dark:text-white">Destrabe Quirúrgico Remoto</h2>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">Acciones de desbloqueo inmediato para piso y caja</p>
           </div>
         </div>
@@ -173,8 +173,7 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
             <Unlock className="w-4 h-4 text-cyan-400" /> Estaciones de Piso ({estaciones.length})
           </h3>
 
-          <button
-            onClick={handleLiberarTodasEstaciones}
+          <button onClick={handleLiberarTodasEstaciones}
             disabled={loadingAction === 'liberar_todas' || estaciones.length === 0}
             className="text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-1 rounded-xl hover:bg-rose-500/30 active:scale-95 transition flex items-center gap-1 cursor-pointer disabled:opacity-50"
           >
@@ -184,7 +183,7 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
 
         <div className="space-y-2">
           {estaciones.length === 0 ? (
-            <p className="text-xs text-slate-500 p-3 bg-slate-950/50 rounded-2xl text-center">
+            <p className="text-xs text-slate-500 p-3 bg-slate-50 dark:bg-slate-950/50 rounded-2xl text-center">
               No hay estaciones configuradas en esta sede.
             </p>
           ) : (
@@ -193,7 +192,7 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
               return (
                 <div
                   key={est.id}
-                  className="bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 flex items-center justify-between"
+                  className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 flex items-center justify-between"
                 >
                   <div>
                     <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -210,8 +209,7 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
                   </div>
 
                   {estaOcupada && (
-                    <button
-                      onClick={() => handleLiberarEstacion(est.id, est.nombre || `Estación #${est.numero}`)}
+                    <button onClick={() => handleLiberarEstacion(est.id, est.nombre || `Estación #${est.numero}`)}
                       disabled={loadingAction === `estacion_${est.id}`}
                       className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 font-bold text-[10px] active:scale-95 transition cursor-pointer"
                     >
@@ -233,18 +231,18 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
 
         <div className="space-y-2">
           {oatcsActivas.length === 0 ? (
-            <p className="text-xs text-slate-500 p-3 bg-slate-950/50 rounded-2xl text-center">
+            <p className="text-xs text-slate-500 p-3 bg-slate-50 dark:bg-slate-950/50 rounded-2xl text-center">
               No hay órdenes activas pendientes en esta sede.
             </p>
           ) : (
             oatcsActivas.map((o) => (
               <div
                 key={o.id}
-                className="bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 space-y-2"
+                className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 space-y-2"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-white">{o.cliente_nombre || 'Cliente'}</h4>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{o.cliente_nombre || 'Cliente'}</h4>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400">
                       Staff: {o.agente_nombre || 'Sin asignar'} • Fase: <span className="text-purple-300 font-bold">{o.estado_proceso}</span>
                     </p>
@@ -255,17 +253,15 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
                 </div>
 
                 {/* Botones de acción rápida */}
-                <div className="flex items-center gap-2 pt-1 border-t border-slate-900">
-                  <button
-                    onClick={() => handleForzarCierreOatc(o.id, o.cliente_nombre)}
+                <div className="flex items-center gap-2 pt-1 border-t border-slate-200 dark:border-slate-900">
+                  <button onClick={() => handleForzarCierreOatc(o.id, o.cliente_nombre)}
                     disabled={loadingAction === `oatc_${o.id}`}
                     className="flex-1 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[10px] hover:bg-emerald-500/20 active:scale-95 transition cursor-pointer flex items-center justify-center gap-1"
                   >
                     <CheckCircle2 className="w-3 h-3" /> Forzar Cierre
                   </button>
 
-                  <button
-                    onClick={() => handleForzarCancelarOatc(o.id, o.cliente_nombre)}
+                  <button onClick={() => handleForzarCancelarOatc(o.id, o.cliente_nombre)}
                     disabled={loadingAction === `cancel_${o.id}`}
                     className="flex-1 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold text-[10px] hover:bg-rose-500/20 active:scale-95 transition cursor-pointer flex items-center justify-center gap-1"
                   >

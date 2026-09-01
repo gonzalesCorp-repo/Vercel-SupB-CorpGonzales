@@ -46,7 +46,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
   );
 
   return (
-    <div className="fixed inset-0 z-[140] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[140] bg-slate-50 dark:bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xl my-auto text-slate-900 dark:text-slate-100 animate-in zoom-in-95">
         
         {/* Header Modal */}
@@ -56,7 +56,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
               🧾
             </div>
             <div>
-              <h3 className="text-sm font-black text-white">Comprobante de Liquidación</h3>
+              <h3 className="text-sm font-black text-slate-900 dark:text-white">Comprobante de Liquidación</h3>
               <p className="text-[10px] font-mono text-emerald-400">{comprobante.codigoLiquidacion}</p>
             </div>
           </div>
@@ -140,7 +140,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
               </div>
             )}
 
-            <div className="flex justify-between text-sm font-black pt-2 border-t-2 border-slate-900 text-slate-900">
+            <div className="flex justify-between text-sm font-black pt-2 border-t-2 border-slate-200 dark:border-slate-900 text-slate-900">
               <span>NETO A LIQUIDAR:</span>
               <span>S/. {comprobante.montoNetoPagar.toFixed(2)}</span>
             </div>
@@ -173,8 +173,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
 
         {/* Acciones de Conectividad & Exportación */}
         <div className="grid grid-cols-3 gap-2 pt-1">
-          <button
-            onClick={handleImprimirTermica}
+          <button onClick={handleImprimirTermica}
             disabled={imprimiendo}
             className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold text-xs rounded-2xl border border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
           >
@@ -192,8 +191,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
             <span className="text-[10px]">WhatsApp</span>
           </a>
 
-          <button
-            onClick={handleDescargarPDF}
+          <button onClick={handleDescargarPDF}
             className="p-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-2xl flex flex-col items-center justify-center gap-1 transition active:scale-95 shadow-lg shadow-indigo-600/20 cursor-pointer"
           >
             <Download className="w-4 h-4" />

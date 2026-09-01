@@ -540,8 +540,7 @@ export function TabEstacion({
       
       {/* 3 Sub-Tabs Principales en Estación: Silla, Bar y Cola */}
       <div className="flex gap-1 bg-slate-100 dark:bg-slate-900/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner transition-colors">
-        <button
-          type="button"
+        <button type="button"
           onClick={() => setSubTab('silla')}
           className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'silla'
@@ -553,8 +552,7 @@ export function TabEstacion({
           <span>{esFueraDeTurno ? '⏰ Mi Turno' : '🛋️ Mi Silla'}</span>
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           onClick={() => setSubTab('bar')}
           className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'bar'
@@ -566,8 +564,7 @@ export function TabEstacion({
           <span>🍹 Bar & Café</span>
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           onClick={() => setSubTab('cola')}
           className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'cola'
@@ -605,8 +602,7 @@ export function TabEstacion({
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Llegada / Inicio de Turno')}
                   className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-200 dark:border-emerald-500/50 hover:bg-emerald-900/50 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-emerald-950/50 group"
                 >
@@ -615,8 +611,7 @@ export function TabEstacion({
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Inicio de Turno</span>
                 </button>
 
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => onMarcarAsistencia?.('REFRIGERIO', 'Pausa Refrigerio')}
                   className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-amber-950/50 group"
                 >
@@ -625,8 +620,7 @@ export function TabEstacion({
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Pausa Refrigerio</span>
                 </button>
 
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Retorno de Refrigerio')}
                   className="p-4 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-indigo-950/50 group"
                 >
@@ -635,8 +629,7 @@ export function TabEstacion({
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Fin de Refrigerio</span>
                 </button>
 
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => onMarcarAsistencia?.('FUERA_DE_TURNO', 'Fin de Jornada')}
                   className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/30 hover:bg-rose-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-rose-950/50 group"
                 >
@@ -646,8 +639,7 @@ export function TabEstacion({
                 </button>
               </div>
 
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => setModalNfcOpen(true)}
                 className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer border border-slate-300 dark:border-slate-700"
               >
@@ -664,14 +656,12 @@ export function TabEstacion({
                     Estación Física de Trabajo
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => setModalSelectorEstacionOpen(true)}
+                    <button onClick={() => setModalSelectorEstacionOpen(true)}
                       className="text-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-slate-200 font-bold px-2.5 py-1 rounded-full flex items-center gap-1 transition"
                     >
                       Cambiar
                     </button>
-                    <button
-                      onClick={() => setModalNfcOpen(true)}
+                    <button onClick={() => setModalNfcOpen(true)}
                       className="text-[10px] bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 font-bold px-2.5 py-1 rounded-full flex items-center gap-1 transition-all active:scale-95"
                     >
                       <Wifi className="w-3 h-3" /> NFC
@@ -691,7 +681,7 @@ export function TabEstacion({
                   <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 flex items-center gap-1">
                     <UserCheck className="w-3.5 h-3.5 text-emerald-400" /> Viaje del Cliente (#OATC-{oatcActiva.id.slice(0, 4)})
                   </span>
-                  <h3 className="text-xl font-black text-white mt-0.5">{oatcActiva.cliente_nombre}</h3>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white mt-0.5">{oatcActiva.cliente_nombre}</h3>
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">Tiempo</span>
@@ -700,7 +690,7 @@ export function TabEstacion({
               </div>
 
               {/* Stepper Cromático de 4 Fases */}
-              <div className="bg-black/60 dark:bg-slate-950/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
+              <div className="bg-slate-50 dark:bg-slate-950/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
                 <OatcPhaseStepper
                   faseActual={faseActual}
                   tiempoMinutos={tiempoTranscurrido}
@@ -720,8 +710,7 @@ export function TabEstacion({
                       </span>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400">Pacta con el cliente el servicio, tiempo y presupuesto:</p>
                     </div>
-                    <button
-                      type="button"
+                    <button type="button"
                       onClick={() => {
                         setContextoCatalogo('proforma');
                         setModalCatalogoOpen(true);
@@ -737,7 +726,7 @@ export function TabEstacion({
                     {(proformaItems.length > 0 ? proformaItems : [{ nombre: 'Corte Clásico & Peinado', precio_final: 45, tipo: 'servicio' } as any]).map((item, idx) => (
                       <div 
                         key={idx} 
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-black/60 dark:bg-slate-950/80 border border-purple-900/50 text-xs"
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-purple-900/50 text-xs"
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           {item.tipo === 'producto' ? <Package className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Scissors className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
@@ -750,8 +739,7 @@ export function TabEstacion({
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            type="button"
+                          <button type="button"
                             onClick={() => {
                               setEditItemTarget({ itemIndex: idx, item, esProforma: true });
                               setNuevoPrecioInput(item.precio_final);
@@ -764,8 +752,7 @@ export function TabEstacion({
                           </button>
 
                           {proformaItems.length > 1 && (
-                            <button
-                              type="button"
+                            <button type="button"
                               onClick={() => handleEliminarItemProforma(idx)}
                               className="p-1 text-slate-500 hover:text-rose-400 transition"
                               title="Eliminar de proforma"
@@ -788,17 +775,15 @@ export function TabEstacion({
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5">
-                      <button
-                        type="button"
+                      <button type="button"
                         onClick={() => setModalRechazoOpen(true)}
                         disabled={isProcessing}
-                        className="p-3 bg-slate-800/90 hover:bg-rose-950/40 text-slate-700 dark:text-slate-300 hover:text-rose-300 border border-slate-300 dark:border-slate-700 hover:border-rose-800/60 font-bold rounded-2xl text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95 disabled:opacity-50"
+                        className="p-3 bg-slate-100 dark:bg-slate-800/90 hover:bg-rose-950/40 text-slate-700 dark:text-slate-300 hover:text-rose-300 border border-slate-300 dark:border-slate-700 hover:border-rose-800/60 font-bold rounded-2xl text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95 disabled:opacity-50"
                       >
                         <UserX className="w-4 h-4 text-rose-400" /> No Acepta Proforma
                       </button>
 
-                      <button
-                        type="button"
+                      <button type="button"
                         onClick={handleComenzarServicio}
                         disabled={isProcessing}
                         className="p-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 active:scale-95 disabled:opacity-50 cursor-pointer"
@@ -820,8 +805,7 @@ export function TabEstacion({
                     <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Tickets de Servicio & Venta ({tickets.length})
                     </span>
-                    <button
-                      type="button"
+                    <button type="button"
                       onClick={() => setModalAddTicketOpen(true)}
                       className="text-[10px] bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 font-bold px-2.5 py-1 rounded-xl flex items-center gap-1 transition active:scale-95"
                     >
@@ -881,7 +865,7 @@ export function TabEstacion({
                           {t.items?.map((item, iIdx) => (
                             <div 
                               key={iIdx} 
-                              className="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-200 dark:border-slate-800/60 text-xs hover:border-slate-300 dark:border-slate-700 transition"
+                              className="flex items-center justify-between p-2 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/60 text-xs hover:border-slate-300 dark:border-slate-700 transition"
                             >
                               <div className="flex items-center gap-2 min-w-0">
                                 {item.tipo === 'producto' ? <Package className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Scissors className="w-3.5 h-3.5 text-sky-400 shrink-0" />}
@@ -893,8 +877,7 @@ export function TabEstacion({
                                 )}
                               </div>
 
-                              <button
-                                type="button"
+                              <button type="button"
                                 onClick={() => {
                                   setEditItemTarget({ ticketId: t.id, itemIndex: iIdx, item, esProforma: false });
                                   setNuevoPrecioInput(item.precio_final);
@@ -911,10 +894,9 @@ export function TabEstacion({
 
                         {/* Acciones Contextuales del Ticket para el especialista */}
                         {esMiTicket && t.estado_ticket !== 'FINALIZADO' && (
-                          <div className="pt-2 border-t border-slate-900 flex items-center justify-between gap-2">
+                          <div className="pt-2 border-t border-slate-200 dark:border-slate-900 flex items-center justify-between gap-2">
                             {t.estado_ticket === 'EN_EXPOSICION' ? (
-                              <button
-                                type="button"
+                              <button type="button"
                                 onClick={() => handleReanudarServicioTicket(t)}
                                 disabled={isProcessing}
                                 className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition"
@@ -924,8 +906,7 @@ export function TabEstacion({
                             ) : (
                               <div className="flex items-center gap-1.5 w-full flex-wrap">
                                 {infoTicket.requiereInsumos && (
-                                  <button
-                                    type="button"
+                                  <button type="button"
                                     onClick={() => setModalLabOpen(true)}
                                     className="flex-1 py-2 bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold rounded-xl text-xs flex items-center justify-center gap-1 active:scale-95 transition whitespace-nowrap"
                                   >
@@ -934,8 +915,7 @@ export function TabEstacion({
                                 )}
 
                                 {infoTicket.requiereExpo && (
-                                  <button
-                                    type="button"
+                                  <button type="button"
                                     onClick={() => handleAbrirModalExposicion(t)}
                                     className="flex-1 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold rounded-xl text-xs flex items-center justify-center gap-1 active:scale-95 transition whitespace-nowrap"
                                   >
@@ -943,8 +923,7 @@ export function TabEstacion({
                                   </button>
                                 )}
 
-                                <button
-                                  type="button"
+                                <button type="button"
                                   onClick={() => handleFinalizarTicketIndividual(t)}
                                   disabled={isProcessing}
                                   className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1 shadow-md active:scale-95 transition whitespace-nowrap disabled:opacity-50"
@@ -981,18 +960,17 @@ export function TabEstacion({
             </div>
           ) : (
             /* Estado Libre */
-            <div className="bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-6 text-center space-y-3">
+            <div className="bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-6 text-center space-y-3">
               <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl mx-auto text-slate-500 dark:text-slate-400">
                 🛋️
               </div>
               <div>
-                <h4 className="text-sm font-black text-white">Estación Libre</h4>
+                <h4 className="text-sm font-black text-slate-900 dark:text-white">Estación Libre</h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-[260px] mx-auto leading-relaxed">
                   No tienes una orden de atención activa en este momento. La próxima atención asignada desde Recepción o la Cola de Piso aparecerá automáticamente aquí.
                 </p>
               </div>
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => setSubTab('cola')}
                 className="px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-bold transition inline-flex items-center gap-1.5"
               >

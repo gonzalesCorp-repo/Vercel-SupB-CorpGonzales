@@ -90,8 +90,7 @@ export default function StaffHistoricoView({
           <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5" /> FILTRAR RANGO DE PRODUCCIÓN
           </span>
-          <button 
-            onClick={handleLimpiarFiltro}
+          <button onClick={handleLimpiarFiltro}
             className="text-[10px] font-bold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-500/10 border border-pink-200 dark:border-pink-500/20 px-2.5 py-1 rounded-full hover:bg-pink-100 dark:hover:bg-pink-500/20 transition cursor-pointer"
           >
             Hoy
@@ -124,8 +123,7 @@ export default function StaffHistoricoView({
         <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
           TOTAL DE REGISTROS: <span className="text-indigo-600 dark:text-indigo-400">{registros.length}</span>
         </span>
-        <button 
-          onClick={cargarHistorico} 
+        <button onClick={cargarHistorico} 
           className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refrescar

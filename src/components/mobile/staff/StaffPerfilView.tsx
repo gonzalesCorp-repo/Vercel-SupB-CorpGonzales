@@ -161,8 +161,7 @@ export default function StaffPerfilView({
               Turno: ⏰ {formatHorarioAgente(agente?.atributos)} • <span className="text-indigo-600 dark:text-indigo-400 font-bold">ROL: {agente?.rol || 'STAFF'}</span>
             </p>
           </div>
-          <button 
-            onClick={() => setModalApodoOpen(true)}
+          <button onClick={() => setModalApodoOpen(true)}
             className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 rounded-xl text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-600/30 transition cursor-pointer"
           >
             Editar
@@ -209,8 +208,7 @@ export default function StaffPerfilView({
         <MobileAccessibilityCard userId={agente?.id} />
 
         {/* Botón Enviar Kudos */}
-        <button 
-          onClick={() => {
+        <button onClick={() => {
             if (setKudosTargetId && setKudosTargetName && setShowKudosModal) {
               setKudosTargetId(agente?.id || '');
               setKudosTargetName(agente?.nombre || 'Compañero');
@@ -233,8 +231,7 @@ export default function StaffPerfilView({
         )}
 
         {/* Botón Cerrar Sesión */}
-        <button 
-          onClick={async () => {
+        <button onClick={async () => {
             const { createClient } = await import('@/lib/supabase/client');
             const supabase = createClient();
             await supabase.auth.signOut();
@@ -267,7 +264,7 @@ export default function StaffPerfilView({
       {/* MODAL CAMBIAR PIN */}
       <AnimatePresence>
         {modalPinOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -279,7 +276,7 @@ export default function StaffPerfilView({
               </div>
 
               <div>
-                <h3 className="text-base font-black text-white">Cambiar PIN Secreto</h3>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">Cambiar PIN Secreto</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Ingresa un PIN numérico de 4 dígitos para desbloquear tus autorizaciones de piso.</p>
               </div>
 
@@ -296,15 +293,13 @@ export default function StaffPerfilView({
                 />
 
                 <div className="flex gap-2">
-                  <button
-                    type="button"
+                  <button type="button"
                     onClick={() => setModalPinOpen(false)}
                     className="w-1/2 py-3 bg-slate-100 dark:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition cursor-pointer"
                   >
                     Cancelar
                   </button>
-                  <button
-                    type="submit"
+                  <button type="submit"
                     disabled={guardandoPin || nuevoPin.length !== 4}
                     className="w-1/2 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl text-xs font-black shadow-lg disabled:opacity-50 transition cursor-pointer"
                   >
@@ -320,7 +315,7 @@ export default function StaffPerfilView({
       {/* MODAL CAMBIAR APODO */}
       <AnimatePresence>
         {modalApodoOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -332,7 +327,7 @@ export default function StaffPerfilView({
               </div>
 
               <div>
-                <h3 className="text-base font-black text-white">Editar Apodo</h3>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">Editar Apodo</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Este nombre aparecerá en las comandas de clientes y reportes de producción.</p>
               </div>
 
@@ -348,15 +343,13 @@ export default function StaffPerfilView({
                 />
 
                 <div className="flex gap-2">
-                  <button
-                    type="button"
+                  <button type="button"
                     onClick={() => setModalApodoOpen(false)}
                     className="w-1/2 py-3 bg-slate-100 dark:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition cursor-pointer"
                   >
                     Cancelar
                   </button>
-                  <button
-                    type="submit"
+                  <button type="submit"
                     disabled={guardandoApodo || !nuevoApodo.trim()}
                     className="w-1/2 py-3 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg disabled:opacity-50 transition cursor-pointer"
                   >

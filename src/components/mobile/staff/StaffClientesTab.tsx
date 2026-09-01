@@ -46,8 +46,7 @@ export default function StaffClientesTab({
         </span>
       </div>
 
-      <button 
-        onClick={() => setShowAddClienteModal(true)}
+      <button onClick={() => setShowAddClienteModal(true)}
         className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-sm shadow-xl shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
       >
         <Sparkles className="w-4 h-4" /> Agregar nuevo cliente
@@ -84,7 +83,7 @@ export default function StaffClientesTab({
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div 
               initial={{ scale: 0.95 }}
@@ -133,8 +132,7 @@ export default function StaffClientesTab({
                     className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
-                <button 
-                  type="submit"
+                <button type="submit"
                   className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-xs shadow-lg shadow-emerald-500/30 active:scale-95 transition-all mt-2 cursor-pointer"
                 >
                   Guardar Cliente

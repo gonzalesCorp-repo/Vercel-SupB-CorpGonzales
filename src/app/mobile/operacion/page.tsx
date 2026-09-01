@@ -417,8 +417,7 @@ export default function MobileOperacionPage() {
                   <AnimatedNumber value={agente.comisionesHoy} prefix="S/ " decimals={2} />
                 </div>
               </div>
-              <button
-                onClick={() => setModalLiquidacionOpen(true)}
+              <button onClick={() => setModalLiquidacionOpen(true)}
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition cursor-pointer"
               >
                 Ver Comprobantes
@@ -447,7 +446,7 @@ export default function MobileOperacionPage() {
 
       {/* MODAL CONTROL DE ASISTENCIA / TURNO */}
       {modalTurnoOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl transition-colors duration-200 animate-in slide-in-from-bottom">
             <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
@@ -460,8 +459,7 @@ export default function MobileOperacionPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleMarcarAsistenciaManual('DISPONIBLE', 'Llegada / Inicio de Turno')}
+              <button onClick={() => handleMarcarAsistenciaManual('DISPONIBLE', 'Llegada / Inicio de Turno')}
                 className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
               >
                 <span className="text-2xl block">👋</span>
@@ -469,8 +467,7 @@ export default function MobileOperacionPage() {
                 <span className="text-[10px] text-slate-500 dark:text-slate-400">Inicio de Turno</span>
               </button>
 
-              <button
-                onClick={() => handleMarcarAsistenciaManual('REFRIGERIO', 'Pausa Refrigerio')}
+              <button onClick={() => handleMarcarAsistenciaManual('REFRIGERIO', 'Pausa Refrigerio')}
                 className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
               >
                 <span className="text-2xl block">🍕</span>
@@ -478,8 +475,7 @@ export default function MobileOperacionPage() {
                 <span className="text-[10px] text-slate-500 dark:text-slate-400">Pausa Refrigerio</span>
               </button>
 
-              <button
-                onClick={() => handleMarcarAsistenciaManual('DISPONIBLE', 'Retorno de Refrigerio')}
+              <button onClick={() => handleMarcarAsistenciaManual('DISPONIBLE', 'Retorno de Refrigerio')}
                 className="p-4 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
               >
                 <span className="text-2xl block">🔄</span>
@@ -487,8 +483,7 @@ export default function MobileOperacionPage() {
                 <span className="text-[10px] text-slate-500 dark:text-slate-400">Fin de Refrigerio</span>
               </button>
 
-              <button
-                onClick={() => handleMarcarAsistenciaManual('FUERA_DE_TURNO', 'Fin de Jornada')}
+              <button onClick={() => handleMarcarAsistenciaManual('FUERA_DE_TURNO', 'Fin de Jornada')}
                 className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
               >
                 <span className="text-2xl block">🏁</span>

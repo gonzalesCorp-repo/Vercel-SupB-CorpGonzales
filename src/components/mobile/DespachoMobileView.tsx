@@ -172,8 +172,7 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleDespacharPedido(item)}
+                  <button onClick={() => handleDespacharPedido(item)}
                     className="w-full mt-2 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-amber-950 flex items-center justify-center gap-2 transition"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" /> Marcar Despachado / Entregado

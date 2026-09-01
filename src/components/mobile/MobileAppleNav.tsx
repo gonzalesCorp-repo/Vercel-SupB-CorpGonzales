@@ -17,8 +17,7 @@ export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) 
       <div className="flex items-center justify-around">
         
         {/* 1. Agenda */}
-        <button
-          onClick={() => onSelectHub('agenda')}
+        <button onClick={() => onSelectHub('agenda')}
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'agenda'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
@@ -37,8 +36,7 @@ export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) 
         </button>
 
         {/* 2. Cartera CRM */}
-        <button
-          onClick={() => onSelectHub('cartera')}
+        <button onClick={() => onSelectHub('cartera')}
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'cartera'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
@@ -57,8 +55,7 @@ export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) 
         </button>
 
         {/* 3. ESTACIÓN (Hero Central Elevado) */}
-        <button
-          onClick={() => onSelectHub('estacion')}
+        <button onClick={() => onSelectHub('estacion')}
           className="flex flex-col items-center -mt-5 relative group cursor-pointer"
         >
           <div className={`w-13 h-13 rounded-2xl flex items-center justify-center text-white shadow-xl transition-all ${
@@ -76,8 +73,7 @@ export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) 
         </button>
 
         {/* 4. Liquidación */}
-        <button
-          onClick={() => onSelectHub('liquidacion')}
+        <button onClick={() => onSelectHub('liquidacion')}
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'liquidacion'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
@@ -96,8 +92,7 @@ export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) 
         </button>
 
         {/* 5. Mi Cuenta */}
-        <button
-          onClick={() => onSelectHub('cuenta')}
+        <button onClick={() => onSelectHub('cuenta')}
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'cuenta'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'

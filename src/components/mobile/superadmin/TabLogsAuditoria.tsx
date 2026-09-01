@@ -59,13 +59,12 @@ export function TabLogsAuditoria({ sedeId }: TabLogsAuditoriaProps) {
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-white">Auditoría en Tiempo Real</h2>
+              <h2 className="text-sm font-black text-slate-900 dark:text-white">Auditoría en Tiempo Real</h2>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">Trazabilidad de operaciones y acciones críticas</p>
             </div>
           </div>
 
-          <button
-            onClick={cargarLogs}
+          <button onClick={cargarLogs}
             disabled={loading}
             className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/20 active:scale-95 transition cursor-pointer"
           >
@@ -88,8 +87,7 @@ export function TabLogsAuditoria({ sedeId }: TabLogsAuditoriaProps) {
         {/* Pestañas de Filtro por Módulo */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {modulos.map((m) => (
-            <button
-              key={m}
+            <button key={m}
               onClick={() => setFiltroModulo(m)}
               className={`px-3 py-1.5 rounded-xl text-[10px] font-bold shrink-0 transition ${
                 filtroModulo === m
@@ -113,7 +111,7 @@ export function TabLogsAuditoria({ sedeId }: TabLogsAuditoriaProps) {
           logsFiltrados.map((log) => (
             <div
               key={log.id}
-              className="bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 space-y-1.5"
+              className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 space-y-1.5"
             >
               <div className="flex items-center justify-between">
                 <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
@@ -129,7 +127,7 @@ export function TabLogsAuditoria({ sedeId }: TabLogsAuditoriaProps) {
                 {log.accion}
               </p>
 
-              <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-900">
+              <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200 dark:border-slate-900">
                 <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
                   <User className="w-3 h-3 text-slate-500" /> {log.usuario_email}
                 </span>
@@ -141,7 +139,7 @@ export function TabLogsAuditoria({ sedeId }: TabLogsAuditoriaProps) {
               </div>
 
               {log.detalles && Object.keys(log.detalles).length > 0 && (
-                <div className="bg-slate-900/80 p-2 rounded-xl text-[10px] font-mono text-slate-500 dark:text-slate-400 overflow-x-auto">
+                <div className="bg-slate-100 dark:bg-slate-900/80 p-2 rounded-xl text-[10px] font-mono text-slate-500 dark:text-slate-400 overflow-x-auto">
                   {JSON.stringify(log.detalles)}
                 </div>
               )}

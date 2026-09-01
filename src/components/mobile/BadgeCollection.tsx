@@ -21,7 +21,7 @@ export default function BadgeCollection({ earnedBadges, allBadges }: BadgeCollec
   const [selectedBadge, setSelectedBadge] = useState<BadgeDef | null>(null)
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-3xl p-5">
+    <div className="bg-slate-100 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-3xl p-5">
       <h3 className="text-slate-900 dark:text-slate-100 font-black text-lg mb-4">Insignias</h3>
       
       <div className="grid grid-cols-4 gap-4">
@@ -47,7 +47,7 @@ export default function BadgeCollection({ earnedBadges, allBadges }: BadgeCollec
               >
                 {badge.icono}
                 {!isEarned && (
-                  <div className="absolute inset-0 bg-slate-900/60 rounded-full flex items-center justify-center">
+                  <div className="absolute inset-0 bg-slate-100 dark:bg-slate-900/60 rounded-full flex items-center justify-center">
                     <Lock className="text-slate-500 dark:text-slate-400 w-6 h-6" />
                   </div>
                 )}

@@ -61,8 +61,7 @@ export default function SedeGuard({ children }: SedeGuardProps) {
           ) : sedes.length > 0 ? (
             <div className="space-y-3 mb-6 max-h-60 overflow-y-auto pr-1">
               {sedes.map((s) => (
-                <button
-                  key={s.id}
+                <button key={s.id}
                   onClick={() => setSedeActiva(s)}
                   className="w-full flex items-center justify-between bg-slate-800/80 hover:bg-emerald-600/20 border border-slate-700 hover:border-emerald-500/50 p-4 rounded-xl text-left transition-all text-slate-200 hover:text-white group"
                 >

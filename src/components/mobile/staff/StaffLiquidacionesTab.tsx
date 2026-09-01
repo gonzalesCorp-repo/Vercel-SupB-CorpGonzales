@@ -124,8 +124,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
         </span>
 
         <div className="grid grid-cols-4 gap-1.5 text-xs font-bold">
-          <button
-            type="button"
+          <button type="button"
             onClick={() => handleCambiarPeriodo('HOY')}
             className={`py-2 rounded-xl transition cursor-pointer ${
               periodoFiltro === 'HOY' 
@@ -135,8 +134,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
           >
             Hoy
           </button>
-          <button
-            type="button"
+          <button type="button"
             onClick={() => handleCambiarPeriodo('AYER')}
             className={`py-2 rounded-xl transition cursor-pointer ${
               periodoFiltro === 'AYER' 
@@ -146,8 +144,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
           >
             Ayer
           </button>
-          <button
-            type="button"
+          <button type="button"
             onClick={() => handleCambiarPeriodo('SEMANA')}
             className={`py-2 rounded-xl transition cursor-pointer ${
               periodoFiltro === 'SEMANA' 
@@ -157,8 +154,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
           >
             Semana
           </button>
-          <button
-            type="button"
+          <button type="button"
             onClick={() => handleCambiarPeriodo('MES')}
             className={`py-2 rounded-xl transition cursor-pointer ${
               periodoFiltro === 'MES' 
@@ -201,8 +197,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
         </div>
 
         {/* Botón de Solicitud */}
-        <button
-          type="button"
+        <button type="button"
           disabled={solicitando || (ventasPendientes.length === 0 && config?.tipo_remuneracion === 'SOLO_COMISIONES')}
           onClick={handleSolicitar}
           className="w-full py-3 bg-white hover:bg-slate-50 text-indigo-700 text-xs font-black rounded-2xl transition shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
@@ -214,7 +209,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
 
       {/* Detalle de Atenciones: Pendientes vs Ya Liquidados */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm space-y-3">
-        <h3 className="font-bold text-slate-800 dark:text-white text-xs uppercase tracking-wider flex items-center justify-between">
+        <h3 className="font-bold text-slate-800 dark:text-slate-900 dark:text-white text-xs uppercase tracking-wider flex items-center justify-between">
           <span>Auditoría de Servicios ({ventas.length})</span>
           <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Antiduplicidad activa</span>
         </h3>
@@ -273,7 +268,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
 
       {/* Historial de Mis Solicitudes de Liquidación */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm space-y-2.5">
-        <h3 className="font-bold text-slate-800 dark:text-white text-xs uppercase tracking-wider">
+        <h3 className="font-bold text-slate-800 dark:text-slate-900 dark:text-white text-xs uppercase tracking-wider">
           Mis Liquidaciones Anteriores ({misLiquidaciones.length})
         </h3>
 

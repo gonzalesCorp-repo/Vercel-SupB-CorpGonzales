@@ -154,7 +154,7 @@ export default function MobileSuperAdminPage() {
       <GlobalUI />
 
       {/* Header Fijo SuperAdmin */}
-      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-50 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 transition-colors">
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 transition-colors">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30">
@@ -172,8 +172,7 @@ export default function MobileSuperAdminPage() {
           </div>
 
           {/* Selector de Sede */}
-          <button
-            onClick={() => setShowSedesModal(true)}
+          <button onClick={() => setShowSedesModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-purple-500/40 transition active:scale-95 shadow-sm cursor-pointer"
           >
             <MapPin className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
@@ -216,7 +215,7 @@ export default function MobileSuperAdminPage() {
       {/* Modal Selector de Sede */}
       <AnimatePresence>
         {showSedesModal && (
-          <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-end justify-center p-0 sm:p-4">
+          <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 backdrop-blur-sm flex items-end justify-center p-0 sm:p-4">
             <motion.div
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
@@ -227,8 +226,7 @@ export default function MobileSuperAdminPage() {
                 <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-purple-600 dark:text-purple-400" /> Cambiar Sede Activa
                 </h3>
-                <button
-                  onClick={() => setShowSedesModal(false)}
+                <button onClick={() => setShowSedesModal(false)}
                   className="text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded-xl transition cursor-pointer"
                 >
                   Cerrar
@@ -237,8 +235,7 @@ export default function MobileSuperAdminPage() {
 
               <div className="space-y-2">
                 {misSedes.map((sede) => (
-                  <button
-                    key={sede.id}
+                  <button key={sede.id}
                     onClick={() => {
                       setSedeActiva(sede);
                       setShowSedesModal(false);

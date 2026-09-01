@@ -261,8 +261,7 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
                     </div>
                     <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-1">{alerta.mensaje || alerta.detalle || 'Solicita apoyo en estación'}</p>
                   </div>
-                  <button
-                    onClick={() => handleResolverAlerta(alerta.id)}
+                  <button onClick={() => handleResolverAlerta(alerta.id)}
                     className="p-2 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-slate-900 dark:hover:text-white rounded-xl border border-emerald-500/30 transition text-xs font-bold flex items-center gap-1"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" /> Atendido

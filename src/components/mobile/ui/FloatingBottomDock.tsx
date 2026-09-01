@@ -51,7 +51,7 @@ export default function FloatingBottomDock({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsFabOpen(false)}
-              className="fixed inset-0 z-[45] bg-slate-950/70 backdrop-blur-sm"
+              className="fixed inset-0 z-[45] bg-slate-50 dark:bg-slate-950/70 backdrop-blur-sm"
             />
 
             <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[50] flex flex-col items-center">
@@ -62,8 +62,7 @@ export default function FloatingBottomDock({
                 transition={{ type: 'spring', damping: 22, stiffness: 300 }}
                 className="flex items-end justify-center gap-3 mb-2 flex-wrap max-w-xs"
               >
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
+                <motion.button whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => {
                     setIsFabOpen(false);
@@ -74,13 +73,12 @@ export default function FloatingBottomDock({
                   <div className="w-13 h-13 rounded-full bg-white dark:bg-slate-900 border-2 border-emerald-500/50 text-emerald-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
                     <DollarSign className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-black text-slate-900 dark:text-slate-100 bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
+                  <span className="text-[10px] font-black text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
                     Comisiones
                   </span>
                 </motion.button>
 
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
+                <motion.button whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => {
                     setIsFabOpen(false);
@@ -91,13 +89,12 @@ export default function FloatingBottomDock({
                   <div className="w-13 h-13 rounded-full bg-white dark:bg-slate-900 border-2 border-indigo-500/50 text-indigo-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
                     <History className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-black text-slate-900 dark:text-slate-100 bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
+                  <span className="text-[10px] font-black text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
                     Historial
                   </span>
                 </motion.button>
 
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
+                <motion.button whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => {
                     setIsFabOpen(false);
@@ -108,13 +105,12 @@ export default function FloatingBottomDock({
                   <div className="w-13 h-13 rounded-full bg-white dark:bg-slate-900 border-2 border-purple-500/50 text-purple-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
                     <BarChart2 className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-black text-slate-900 dark:text-slate-100 bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
+                  <span className="text-[10px] font-black text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
                     Métricas
                   </span>
                 </motion.button>
 
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
+                <motion.button whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => {
                     setIsFabOpen(false);
@@ -125,7 +121,7 @@ export default function FloatingBottomDock({
                   <div className="w-13 h-13 rounded-full bg-white dark:bg-slate-900 border-2 border-pink-500/50 text-pink-400 shadow-2xl flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900">
                     <User className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-black text-slate-900 dark:text-slate-100 bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
+                  <span className="text-[10px] font-black text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 rounded-full shadow-lg">
                     Perfil
                   </span>
                 </motion.button>
@@ -136,14 +132,13 @@ export default function FloatingBottomDock({
       </AnimatePresence>
 
       {/* Floating Glassmorphism Bottom Dock */}
-      <div className="fixed bottom-4 left-4 right-4 z-40 max-w-md mx-auto rounded-full bg-slate-900/90 backdrop-blur-2xl border border-slate-200 dark:border-slate-800/80 shadow-2xl p-2 flex justify-around items-center">
+      <div className="fixed bottom-4 left-4 right-4 z-40 max-w-md mx-auto rounded-full bg-slate-100 dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-200 dark:border-slate-800/80 shadow-2xl p-2 flex justify-around items-center">
         {tabsLeft.map((tab) => {
           const Icon = tab.icon;
           const isActive = mainTab === tab.id && activeSecondaryView === null;
 
           return (
-            <button
-              key={tab.id}
+            <button key={tab.id}
               onClick={() => handleTabClick(tab.id)}
               className={`relative flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-black transition-all cursor-pointer ${
                 isActive
@@ -158,8 +153,7 @@ export default function FloatingBottomDock({
         })}
 
         {/* FAB Button */}
-        <motion.button
-          onClick={() => setIsFabOpen(!isFabOpen)}
+        <motion.button onClick={() => setIsFabOpen(!isFabOpen)}
           animate={{ rotate: isFabOpen ? 135 : 0 }}
           transition={{ duration: 0.3, ease: 'backOut' }}
           whileHover={{ scale: 1.08 }}
@@ -175,8 +169,7 @@ export default function FloatingBottomDock({
           const isActive = mainTab === tab.id && activeSecondaryView === null;
 
           return (
-            <button
-              key={tab.id}
+            <button key={tab.id}
               onClick={() => handleTabClick(tab.id)}
               className={`relative flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-black transition-all cursor-pointer ${
                 isActive

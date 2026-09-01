@@ -30,7 +30,7 @@ export default function GamificationHeader({
   const progress = Math.min(100, Math.max(0, ((xp_total - xp_current_level) / (xp_next_level - xp_current_level)) * 100))
 
   return (
-    <div className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 pb-3">
+    <div className="sticky top-0 z-40 bg-slate-50 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 pb-3">
       <div className="flex items-center justify-between mb-3 gap-2">
         {/* Left: Avatar & Info */}
         <div className="flex items-center space-x-3 min-w-0">
@@ -56,7 +56,7 @@ export default function GamificationHeader({
 
         {/* Right: Streak & Coins & Logout Button */}
         <div className="flex items-center space-x-2.5 shrink-0">
-          <div className="flex items-center space-x-1 bg-slate-900/90 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900/90 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
             <motion.div
               animate={streak_asistencia > 5 ? { scale: [1, 1.2, 1] } : {}}
               transition={{ repeat: Infinity, duration: 1.5 }}
@@ -65,13 +65,12 @@ export default function GamificationHeader({
             </motion.div>
             <span className="text-slate-900 dark:text-slate-200 font-bold text-xs">{streak_asistencia}</span>
           </div>
-          <div className="flex items-center space-x-1 bg-slate-900/90 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900/90 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
             <Gem className="text-cyan-400" size={16} />
             <span className="text-slate-900 dark:text-slate-200 font-bold text-xs">{monedas}</span>
           </div>
           {onLogout && (
-            <button 
-              onClick={onLogout}
+            <button onClick={onLogout}
               className="px-2.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 active:scale-95 transition-all flex items-center gap-1 text-[11px] font-bold shrink-0 cursor-pointer"
               title="Cerrar Sesión"
             >

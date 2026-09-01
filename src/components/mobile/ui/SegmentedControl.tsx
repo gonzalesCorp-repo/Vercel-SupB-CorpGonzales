@@ -29,15 +29,14 @@ export default function SegmentedControl({
 
   return (
     <div
-      className={`relative grid p-1 bg-slate-950/80 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-inner ${className}`}
+      className={`relative grid p-1 bg-slate-50 dark:bg-slate-950/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-inner ${className}`}
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
     >
       {options.map((option) => {
         const isSelected = value === option.id;
 
         return (
-          <button
-            key={option.id}
+          <button key={option.id}
             type="button"
             onClick={() => onChange(option.id)}
             className="relative py-2.5 px-3 rounded-xl text-xs font-black transition-colors duration-200 flex items-center justify-center gap-2 select-none z-10 cursor-pointer"

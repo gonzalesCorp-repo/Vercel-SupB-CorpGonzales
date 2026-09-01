@@ -21,10 +21,10 @@ export function ModalSelectorEstacion({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-          <h4 className="text-sm font-black text-white">Seleccionar Estación Física</h4>
+          <h4 className="text-sm font-black text-slate-900 dark:text-white">Seleccionar Estación Física</h4>
           <button onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
@@ -32,8 +32,7 @@ export function ModalSelectorEstacion({
 
         <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
           {estaciones.map((est, idx) => (
-            <button
-              key={idx}
+            <button key={idx}
               onClick={() => onSeleccionarEstacion(est)}
               className={`w-full p-3 rounded-xl border text-left text-xs font-bold transition flex items-center justify-between ${
                 estacionActual === est

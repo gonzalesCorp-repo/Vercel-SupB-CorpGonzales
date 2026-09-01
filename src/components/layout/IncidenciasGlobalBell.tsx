@@ -34,8 +34,7 @@ export function IncidenciasGlobalBell() {
     <div className="relative" ref={wrapperRef}>
       
       {/* Botón de Campana / Buzón de Incidencias */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
+      <button onClick={() => setIsOpen(!isOpen)}
         title="Buzón de Incidencias Operativas (Cobertura & Insumos)"
         className="relative p-2.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-2xl transition-all border border-slate-800"
       >
@@ -98,8 +97,7 @@ export function IncidenciasGlobalBell() {
                       </div>
 
                       {!inc.leido && (
-                        <button
-                          onClick={() => marcarIncidenciaLeida(inc.id)}
+                        <button onClick={() => marcarIncidenciaLeida(inc.id)}
                           title="Marcar como atendido"
                           className="text-[10px] text-slate-400 hover:text-emerald-400 font-bold shrink-0"
                         >

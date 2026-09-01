@@ -76,8 +76,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
           <h3 className="text-sm font-black text-slate-900 dark:text-white">Historial de Operaciones</h3>
         </div>
 
-        <button
-          onClick={cargarDatos}
+        <button onClick={cargarDatos}
           className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition cursor-pointer"
           title="Recargar"
         >
@@ -87,8 +86,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
 
       {/* Segmented Control */}
       <div className="flex gap-1 p-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <button
-          type="button"
+        <button type="button"
           onClick={() => setSubTab('atenciones')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
             subTab === 'atenciones' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'
@@ -97,8 +95,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
           <Clock className="w-3.5 h-3.5" /> Atenciones ({atenciones.length})
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           onClick={() => setSubTab('insumos')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
             subTab === 'insumos' ? 'bg-sky-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'
@@ -107,8 +104,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
           <Beaker className="w-3.5 h-3.5" /> Lab & Insumos
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           onClick={() => setSubTab('precios')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
             subTab === 'precios' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'
@@ -137,7 +133,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
               Consultando historial de órdenes de atención...
             </div>
           ) : atencionesFiltradas.length === 0 ? (
-            <div className="text-center py-8 text-xs text-slate-500 dark:text-slate-400 bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <div className="text-center py-8 text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800">
               No se encontraron atenciones registradas para este colaborador.
             </div>
           ) : (
@@ -154,11 +150,11 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
               return (
                 <div
                   key={a.id}
-                  className="p-3.5 bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between shadow-md"
+                  className="p-3.5 bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between shadow-md"
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-xs text-white">{a.cliente_nombre || 'Cliente'}</h4>
+                      <h4 className="font-bold text-xs text-slate-900 dark:text-white">{a.cliente_nombre || 'Cliente'}</h4>
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
                         a.estado_proceso === 'FINALIZADO' 
                           ? 'bg-emerald-500/10 text-emerald-400' 
@@ -202,7 +198,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
           </div>
 
           {insumosList.map((i) => (
-            <div key={i.id} className="p-3.5 bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-2 shadow-md">
+            <div key={i.id} className="p-3.5 bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-2 shadow-md">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">{i.insumo_solicitado}</h4>
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${

@@ -103,8 +103,7 @@ export function TabProduccion({
       {/* Selector de Rango */}
       <div className="flex gap-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors">
         {(['Hoy', 'Ayer', 'Semana'] as const).map((r) => (
-          <button
-            key={r}
+          <button key={r}
             onClick={() => setFiltroFecha(r)}
             className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               filtroFecha === r
