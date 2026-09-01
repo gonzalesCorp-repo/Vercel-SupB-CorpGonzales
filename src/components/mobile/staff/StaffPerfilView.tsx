@@ -11,6 +11,7 @@ import { useUIStore } from '@/store/useUIStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { createClient } from '@/lib/supabase/client';
 import { MobileAccessibilityCard } from '@/components/mobile/MobileAccessibilityCard';
+import { PwaInstallButton } from '@/components/mobile/PwaInstallButton';
 
 export interface StaffPerfilViewProps {
   agente?: any;
@@ -199,6 +200,9 @@ export default function StaffPerfilView({
             <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[180px]">{agente?.email || 'staff@empresa.com'}</span>
           </div>
         </div>
+
+        {/* 📲 Botón de Instalación PWA Directa con Marca */}
+        <PwaInstallButton />
 
         {/* Tarjeta Completa de Accesibilidad y Legibilidad Visual */}
         <MobileAccessibilityCard userId={agente?.id} />

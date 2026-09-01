@@ -11,6 +11,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { createClient } from '@/lib/supabase/client';
+import { PwaInstallButton } from '@/components/mobile/PwaInstallButton';
 
 export default function PerfilPage() {
   const [agente, setAgente] = useState<any>(null);
@@ -522,6 +523,9 @@ export default function PerfilPage() {
                 {liveSoundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
               </button>
             </div>
+
+            {/* 📲 Instalación Directa PWA Multi-Marca */}
+            <PwaInstallButton />
           </div>
         </motion.div>
 

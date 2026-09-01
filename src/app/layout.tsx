@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import QueryProvider from "@/providers/QueryProvider";
+import { DynamicPwaBranding } from "@/components/branding/DynamicPwaBranding";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,22 +16,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vaikuntha ERP",
-  description: "Enterprise Resource Planning & WFM Engine",
+  title: "Gloss Salón & Vaikuntha ERP",
+  description: "Enterprise Resource Planning & WFM Engine Multi-Sede",
+  manifest: "/api/manifest",
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon.png", sizes: "192x192", type: "image/png" },
+      { url: "/api/branding/icon?size=favicon", type: "image/png" },
+      { url: "/api/branding/icon?size=192", sizes: "192x192", type: "image/png" },
     ],
     apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/api/branding/icon?size=apple", sizes: "180x180", type: "image/png" },
     ],
     shortcut: "/favicon.ico",
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Vaikuntha ERP"
+    title: "Gloss Salón"
   }
 };
 
@@ -40,7 +42,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#020617"
+  themeColor: "#18181b"
 };
 
 export default function RootLayout({
@@ -62,6 +64,7 @@ export default function RootLayout({
         />
         <QueryProvider>
           <ThemeProvider>
+            <DynamicPwaBranding />
             {children}
           </ThemeProvider>
         </QueryProvider>
