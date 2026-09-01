@@ -25,7 +25,7 @@ import {
   ClienteVipPerfil, 
   crearCliente 
 } from '@/services/clientes';
-import { getActiveBranding, getLoyaltyTier } from '@/config/branding';
+import { getActiveBranding, getBrandingForSede, getLoyaltyTier } from '@/config/branding';
 
 interface ColaboradorKiosk {
   id: string;
@@ -42,7 +42,7 @@ interface ColaboradorKiosk {
 export default function KioskoDualPage() {
   const [modo, setModo] = useState<'HOME' | 'CLIENTE' | 'STAFF'>('HOME');
   const sedeActiva = useAppStore((state) => state.sedeActiva);
-  const branding = getActiveBranding();
+  const branding = getBrandingForSede(sedeActiva);
   
   // ================= ESTADO CLIENTE VIP & KIOSK =================
   const [busquedaCliente, setBusquedaCliente] = useState('');
@@ -520,9 +520,13 @@ export default function KioskoDualPage() {
       {/* Navbar Kiosko Header */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-lg shadow-indigo-500/20">
-            <div className="w-full h-full bg-slate-950 rounded-2xl flex items-center justify-center">
-              <span className="text-white font-black text-xl">{branding.logoLetter}</span>
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-lg shadow-indigo-500/20 overflow-hidden">
+            <div className="w-full h-full bg-slate-950 rounded-2xl flex items-center justify-center overflow-hidden">
+              {branding.logoUrl ? (
+                <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover rounded-2xl" />
+              ) : (
+                <span className="text-white font-black text-xl">{branding.logoLetter}</span>
+              )}
             </div>
           </div>
           <div>

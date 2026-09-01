@@ -22,6 +22,7 @@ import { useThemeStore } from '@/store/useThemeStore';
 import { obtenerHerramientasAgente, CATALOGO_HERRAMIENTAS, HerramientaDefinicion } from '@/services/permisos';
 import { obtenerConfiguracionSede } from '@/services/sedesConfig';
 import { IncidenciasGlobalBell } from './IncidenciasGlobalBell';
+import { getBrandingForSede } from '@/config/branding';
 
 const ICON_MAP: Record<string, any> = {
   Inbox,
@@ -138,6 +139,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const setUserRol = useAppStore((state) => state.setUserRol);
   const setUserEmail = useAppStore((state) => state.setUserEmail);
   const { themeMode } = useThemeStore();
+  const branding = getBrandingForSede(sedeActiva);
   
   const [misSedes, setMisSedes] = useState<Sede[]>([]);
   const [loadingSedes, setLoadingSedes] = useState(true);
@@ -328,15 +330,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="flex items-center gap-3 px-6 h-24 border-b border-gray-100/50 dark:border-white/5">
+        <div className="flex items-center gap-3 px-5 h-24 border-b border-gray-100/50 dark:border-white/5">
           <div 
-            className="w-8 h-8 rounded-xl flex items-center justify-center shadow-lg shrink-0 transition-all"
+            className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg shrink-0 transition-all overflow-hidden border border-white/10"
             style={{ 
-              background: 'linear-gradient(135deg, var(--active-theme-primary, #4f46e5), var(--active-theme-accent, #7c3aed))',
+              background: branding.logoUrl ? 'transparent' : 'linear-gradient(135deg, var(--active-theme-primary, #4f46e5), var(--active-theme-accent, #7c3aed))',
               boxShadow: '0 4px 14px var(--active-theme-glow, rgba(79, 70, 229, 0.4))'
             }}
           >
-            <span className="text-white font-black text-lg">V</span>
+            {branding.logoUrl ? (
+              <img 
+                src={branding.logoUrl} 
+                alt={branding.brandName} 
+                className="w-full h-full object-cover rounded-2xl" 
+              />
+            ) : (
+              <span className="text-white font-black text-lg">{branding.logoLetter}</span>
+            )}
           </div>
           <AnimatePresence>
             {isExpanded && (
@@ -346,9 +356,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 exit={{ opacity: 0, x: -10 }}
                 className="flex flex-col overflow-hidden"
               >
-                <span className="text-lg font-black text-gray-900 dark:text-slate-100 tracking-tight whitespace-nowrap">Vaikuntha</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap" style={{ color: 'var(--active-theme-accent, #4f46e5)' }}>
-                  Enterprise ERP
+                <span className="text-base font-black text-gray-900 dark:text-slate-100 tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
+                  {branding.brandName}
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: 'var(--active-theme-accent, #4f46e5)' }}>
+                  {branding.tagline}
                 </span>
               </motion.div>
             )}

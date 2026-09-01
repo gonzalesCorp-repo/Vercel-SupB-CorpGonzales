@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="glossGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="50%" stop-color="#d946ef" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="50%" stop-color="#fde68a" />
+      <stop offset="100%" stop-color="#fbbf24" />
+    </linearGradient>
+    <linearGradient id="darkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Base with subtle border -->
+  <rect width="512" height="512" rx="110" fill="url(#darkBg)" />
+  <rect width="504" height="504" x="4" y="4" rx="106" fill="none" stroke="url(#glossGrad)" stroke-width="4" stroke-opacity="0.6" />
+
+  <!-- Circular Outer Aura -->
+  <circle cx="256" cy="220" r="140" fill="none" stroke="url(#glossGrad)" stroke-width="5" filter="url(#glow)" opacity="0.6" />
+  <circle cx="256" cy="220" r="140" fill="none" stroke="url(#goldGrad)" stroke-width="2" />
+
+  <!-- Stylized Luxury G Calligraphic Monogram -->
+  <g transform="translate(256, 220) scale(1.1)">
+    <!-- Outer curl of G -->
+    <path d="M 40 -50 C 20 -75 -15 -80 -50 -55 C -90 -30 -100 25 -75 68 C -50 110 15 115 58 80 C 82 60 92 30 92 8 L 10 8 C 10 22 2 32 -12 32 C -40 32 -60 12 -60 -20 C -60 -52 -35 -68 -8 -68 C 15 -68 32 -55 40 -42 Z" 
+          fill="url(#goldGrad)" 
+          filter="url(#glow)" />
+    
+    <!-- Inner Accent Sparkle Line -->
+    <path d="M 40 -50 C 20 -75 -15 -80 -50 -55 C -90 -30 -100 25 -75 68 C -50 110 15 115 58 80 C 82 60 92 30 92 8" 
+          fill="none" 
+          stroke="url(#glossGrad)" 
+          stroke-width="3.5" />
+
+    <!-- Sparkle Stars ✨ -->
+    <path d="M 65 -70 Q 65 -55 80 -55 Q 65 -55 65 -40 Q 65 -55 50 -55 Q 65 -55 65 -70 Z" fill="url(#goldGrad)" />
+    <path d="M -70 70 Q -70 80 -60 80 Q -70 80 -70 90 Q -70 80 -80 80 Q -70 80 -70 70 Z" fill="url(#glossGrad)" />
+  </g>
+
+  <!-- Typography: GLOSS -->
+  <text x="256" y="415" 
+        text-anchor="middle" 
+        font-family="'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif" 
+        font-size="44" 
+        font-weight="900" 
+        letter-spacing="10" 
+        fill="url(#goldGrad)">
+    GLOSS
+  </text>
+
+  <!-- Subtitle: SALÓN & RELAX -->
+  <text x="256" y="450" 
+        text-anchor="middle" 
+        font-family="'Inter', -apple-system, sans-serif" 
+        font-size="15" 
+        font-weight="700" 
+        letter-spacing="5" 
+        fill="#e4e4e7" 
+        opacity="0.9">
+    SALÓN &amp; RELAX
+  </text>
+</svg>
