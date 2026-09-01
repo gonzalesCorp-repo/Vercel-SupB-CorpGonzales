@@ -31,21 +31,21 @@ export function ModalSolicitarInsumosLab({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-      <div className="bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Beaker className="w-5 h-5 text-sky-400" />
             <h4 className="text-sm font-black text-white">Solicitar Insumos al Lab</h4>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">
               Fórmula / Insumos Requeridos:
             </label>
             <textarea
@@ -59,7 +59,7 @@ export function ModalSolicitarInsumosLab({
           </div>
 
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1.5 flex items-center gap-1">
+            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5 flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-sky-400" /> Fórmulas Frecuentes:
             </p>
             <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
@@ -71,7 +71,7 @@ export function ModalSolicitarInsumosLab({
                   className={`w-full text-left p-2 rounded-xl border text-[11px] font-semibold transition ${
                     insumoTexto === preset
                       ? 'bg-sky-500/20 text-sky-300 border-sky-500/40'
-                      : 'bg-slate-950/70 text-slate-400 border-slate-800/80 hover:text-slate-200'
+                      : 'bg-slate-950/70 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800/80 hover:text-slate-900 dark:text-slate-200'
                   }`}
                 >
                   {preset}
@@ -80,17 +80,17 @@ export function ModalSolicitarInsumosLab({
             </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition"
+              className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-lg shadow-sky-950 active:scale-95 transition"
+              className="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-lg shadow-sky-950 active:scale-95 transition cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" /> Enviar Pedido
             </button>

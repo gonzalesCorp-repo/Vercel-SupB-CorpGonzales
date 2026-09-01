@@ -311,7 +311,7 @@ export default function MobileAdminPage() {
               <h3 className="text-sm font-black text-slate-900 dark:text-white">Personal en Sede ({colaboradores.length})</h3>
               <button 
                 onClick={cargarDatosSede} 
-                className="text-xs text-indigo-500 hover:underline flex items-center gap-1 font-bold"
+                className="text-xs text-indigo-500 hover:underline flex items-center gap-1 font-bold cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Actualizar
               </button>

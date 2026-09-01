@@ -129,8 +129,8 @@ export function ModalCatalogoPicker({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
-      <div className="bg-slate-900 w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl max-h-[85vh] flex flex-col justify-between">
+    <div className="fixed inset-0 z-[60] bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl max-h-[85vh] flex flex-col justify-between">
         
         {/* Cabecera del Modal */}
         <div className="space-y-3">
@@ -139,26 +139,26 @@ export function ModalCatalogoPicker({
               <Sparkles className="w-5 h-5 text-indigo-400" />
               <div>
                 <h3 className="text-sm font-black text-slate-900 dark:text-white">{titulo}</h3>
-                <span className="text-[10px] text-slate-400 font-medium">Catálogo Oficial Vaikuntha</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Catálogo Oficial Vaikuntha</span>
               </div>
             </div>
             <button 
               onClick={onClose}
-              className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              className="p-1 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800 transition cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Pestañas de Navegación: Exclusivamente Servicios y Retail Oficiales */}
-          <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-2xl border border-slate-800">
+          <div className="grid grid-cols-2 gap-1.5 bg-slate-50 dark:bg-slate-950 p-1 rounded-2xl border border-slate-200 dark:border-slate-800">
             <button
               type="button"
               onClick={() => { setTipoActivo('servicio'); setCategoriaChip('TODOS'); }}
               className={`py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 ${
                 tipoActivo === 'servicio' 
                   ? 'bg-indigo-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-slate-200'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200'
               }`}
             >
               <Scissors className="w-3.5 h-3.5" />
@@ -171,7 +171,7 @@ export function ModalCatalogoPicker({
               className={`py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 ${
                 tipoActivo === 'producto' 
                   ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-slate-200'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200'
               }`}
             >
               <Package className="w-3.5 h-3.5" />
@@ -185,7 +185,7 @@ export function ModalCatalogoPicker({
           
           {/* Input de Búsqueda */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3 top-3" />
             <input
               type="text"
               placeholder={`Buscar en catálogo de ${tipoActivo === 'servicio' ? 'servicios' : 'productos retail'}...`}
@@ -196,7 +196,7 @@ export function ModalCatalogoPicker({
             {busqueda && (
               <button
                 onClick={() => setBusqueda('')}
-                className="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs"
+                className="absolute right-3 top-2.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -214,7 +214,7 @@ export function ModalCatalogoPicker({
                   className={`px-3 py-1 rounded-full whitespace-nowrap font-bold transition ${
                     categoriaChip === cat
                       ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
+                      : 'bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200 border border-slate-200 dark:border-slate-800'
                   }`}
                 >
                   {cat}
@@ -226,12 +226,12 @@ export function ModalCatalogoPicker({
           {/* Lista de Resultados del Catálogo */}
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-60 sm:max-h-72">
             {cargando ? (
-              <div className="p-8 text-center text-xs text-slate-400 flex flex-col items-center gap-2">
+              <div className="p-8 text-center text-xs text-slate-500 dark:text-slate-400 flex flex-col items-center gap-2">
                 <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                 <span>Cargando catálogo oficial...</span>
               </div>
             ) : resultadosFiltrados.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-400 space-y-2">
+              <div className="p-8 text-center text-xs text-slate-500 dark:text-slate-400 space-y-2">
                 <AlertCircle className="w-8 h-8 text-slate-500 mx-auto opacity-70" />
                 <p className="font-semibold">
                   No se encontraron {tipoActivo === 'servicio' ? 'servicios' : 'productos'} en el catálogo oficial para "{busqueda}".
@@ -245,14 +245,14 @@ export function ModalCatalogoPicker({
                 <div
                   key={item.id}
                   onClick={() => handleSeleccionarItem(item)}
-                  className="p-3 bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-indigo-500/50 rounded-2xl flex items-center justify-between text-xs transition cursor-pointer group active:scale-98"
+                  className="p-3 bg-slate-50 dark:bg-slate-950 hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 rounded-2xl flex items-center justify-between text-xs transition cursor-pointer group active:scale-98"
                 >
                   <div className="space-y-0.5 min-w-0 pr-2">
-                    <p className="font-bold text-slate-100 group-hover:text-white truncate">
+                    <p className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-slate-900 dark:hover:text-white truncate">
                       {item.nombre}
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                      <span className="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 font-semibold">
+                    <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                      <span className="bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-800 font-semibold">
                         {item.categoria}
                       </span>
                       {item.duracion_minutos && item.tipo_bien === 'servicio' && (

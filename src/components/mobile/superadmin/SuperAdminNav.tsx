@@ -60,7 +60,7 @@ export function SuperAdminNav({ activeTab, onSelectTab, onLogout }: SuperAdminNa
         <button
           onClick={onLogout}
           title="Cerrar Sesión"
-          className="flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl text-slate-500 hover:text-rose-400 transition-colors"
+          className="flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
         >
           <div className="p-1.5 rounded-xl hover:bg-rose-500/10">
             <LogOut className="w-4 h-4" />

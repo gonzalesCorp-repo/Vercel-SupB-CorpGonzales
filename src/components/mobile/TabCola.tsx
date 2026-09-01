@@ -125,7 +125,7 @@ export function TabCola({ miNombre }: TabColaProps) {
           </div>
         </div>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 text-white p-5 rounded-3xl shadow-xl relative overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-white p-5 rounded-3xl shadow-xl relative overflow-hidden">
           <div className="absolute -right-4 -top-4 w-28 h-28 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -135,7 +135,7 @@ export function TabCola({ miNombre }: TabColaProps) {
           </div>
           <div className="mt-2.5">
             <h3 className="text-sm font-black text-slate-900 dark:text-white">No estás en la cola activa</h3>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
               Actualmente figuras fuera de jornada. Para ingresar a la asignación de atenciones en piso, ve a la pestaña <strong>Mi Turno</strong> y presiona <strong>Ya Llegué</strong>.
             </p>
           </div>
@@ -143,13 +143,13 @@ export function TabCola({ miNombre }: TabColaProps) {
       )}
 
       {/* Filtros de Especialidad Claros y Estándar */}
-      <div className="flex gap-1.5 p-1 bg-slate-900 rounded-2xl border border-slate-800">
+      <div className="flex gap-1.5 p-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
         <button
           onClick={() => setFiltro('Todos')}
           className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
             filtro === 'Todos'
               ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-slate-200'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200'
           }`}
         >
           Todos
@@ -160,7 +160,7 @@ export function TabCola({ miNombre }: TabColaProps) {
           className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${
             filtro === 'Estilismo'
               ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-slate-200'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200'
           }`}
         >
           <span>✂️ Estilismo</span>
@@ -171,7 +171,7 @@ export function TabCola({ miNombre }: TabColaProps) {
           className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${
             filtro === 'Cosmiatria'
               ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-slate-200'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200'
           }`}
         >
           <span>💅 Cosmiatría</span>
@@ -181,20 +181,20 @@ export function TabCola({ miNombre }: TabColaProps) {
       {/* Lista de Turnos en Vivo */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">
             Compañeros en Piso ({filtrados.length})
           </span>
           <button
             type="button"
             onClick={cargarColaEnVivo}
-            className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1"
+            className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 cursor-pointer"
           >
             <RefreshCw className={`w-3 h-3 ${cargando ? 'animate-spin' : ''}`} /> Actualizar
           </button>
         </div>
 
         {filtrados.length === 0 ? (
-          <div className="p-6 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-center text-xs text-slate-400">
+          <div className="p-6 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-center text-xs text-slate-500 dark:text-slate-400">
             No hay colaboradores en piso para este filtro.
           </div>
         ) : (
@@ -215,17 +215,17 @@ export function TabCola({ miNombre }: TabColaProps) {
                 className={`p-3.5 rounded-2xl border flex items-center justify-between transition-all ${
                   esTu
                     ? 'bg-indigo-950/40 border-indigo-500/50 shadow-md shadow-indigo-500/10'
-                    : 'bg-slate-900/80 border-slate-800'
+                    : 'bg-slate-900/80 border-slate-200 dark:border-slate-800'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs ${
-                    esTu ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'
+                    esTu ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                   }`}>
                     {pos}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                       {c.nombre}
                       {esTu && (
                         <span className="text-[9px] bg-indigo-500/20 text-indigo-300 font-bold px-1.5 py-0.5 rounded-md">
@@ -233,7 +233,7 @@ export function TabCola({ miNombre }: TabColaProps) {
                         </span>
                       )}
                     </h4>
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">
                       {tagLabel}
                     </span>
                   </div>
@@ -246,7 +246,7 @@ export function TabCola({ miNombre }: TabColaProps) {
                     ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
                     : estadoOp === 'EN_REFRIGERIO'
                     ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700'
                 }`}>
                   {estadoOp === 'OCUPADO' ? 'EN ATENCIÓN' : estadoOp === 'EN_REFRIGERIO' ? 'EN REFRIGERIO' : 'DISPONIBLE'}
                 </span>

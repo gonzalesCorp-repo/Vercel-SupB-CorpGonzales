@@ -546,7 +546,7 @@ export function TabEstacion({
           className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'silla'
               ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -559,7 +559,7 @@ export function TabEstacion({
           className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'bar'
               ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <Coffee className="w-3.5 h-3.5" />
@@ -572,7 +572,7 @@ export function TabEstacion({
           className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'cola'
               ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <Users className="w-3.5 h-3.5" />
@@ -599,7 +599,7 @@ export function TabEstacion({
                   WFM & Control Horario
                 </span>
                 <h3 className="text-base font-black text-slate-900 dark:text-white mt-2">Botonera de Asistencia y Turno</h3>
-                <p className="text-xs text-slate-400 max-w-[280px] mx-auto">
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-[280px] mx-auto">
                   Valida tu estado para activar tu estación de trabajo y recibir atenciones en tiempo real.
                 </p>
               </div>
@@ -612,7 +612,7 @@ export function TabEstacion({
                 >
                   <span className="text-3xl block group-hover:scale-110 transition-transform">👋</span>
                   <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 block tracking-wide">YA LLEGUÉ</span>
-                  <span className="text-[10px] text-slate-400 block font-medium">Inicio de Turno</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Inicio de Turno</span>
                 </button>
 
                 <button
@@ -622,7 +622,7 @@ export function TabEstacion({
                 >
                   <span className="text-3xl block group-hover:scale-110 transition-transform">🍕</span>
                   <span className="text-xs font-black text-amber-700 dark:text-amber-300 block tracking-wide">VOY A COMER</span>
-                  <span className="text-[10px] text-slate-400 block font-medium">Pausa Refrigerio</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Pausa Refrigerio</span>
                 </button>
 
                 <button
@@ -632,7 +632,7 @@ export function TabEstacion({
                 >
                   <span className="text-3xl block group-hover:scale-110 transition-transform">🔄</span>
                   <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 block tracking-wide">REGRESÉ</span>
-                  <span className="text-[10px] text-slate-400 block font-medium">Fin de Refrigerio</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Fin de Refrigerio</span>
                 </button>
 
                 <button
@@ -642,14 +642,14 @@ export function TabEstacion({
                 >
                   <span className="text-3xl block group-hover:scale-110 transition-transform">🏁</span>
                   <span className="text-xs font-black text-rose-700 dark:text-rose-300 block tracking-wide">ACABÓ MI DÍA</span>
-                  <span className="text-[10px] text-slate-400 block font-medium">Fin de Jornada</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Fin de Jornada</span>
                 </button>
               </div>
 
               <button
                 type="button"
                 onClick={() => setModalNfcOpen(true)}
-                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer border border-slate-700"
+                className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer border border-slate-300 dark:border-slate-700"
               >
                 <Wifi className="w-3.5 h-3.5 text-indigo-400" /> Validar con Tag NFC de Sede
               </button>
@@ -660,13 +660,13 @@ export function TabEstacion({
               {/* Tarjeta de Estación Física (Híbrida: Táctil + NFC Opcional) */}
               <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm transition-colors space-y-2 backdrop-blur-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
                     Estación Física de Trabajo
                   </span>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => setModalSelectorEstacionOpen(true)}
-                      className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-2.5 py-1 rounded-full flex items-center gap-1 transition"
+                      className="text-[10px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-900 dark:text-slate-200 font-bold px-2.5 py-1 rounded-full flex items-center gap-1 transition"
                     >
                       Cambiar
                     </button>
@@ -694,13 +694,13 @@ export function TabEstacion({
                   <h3 className="text-xl font-black text-white mt-0.5">{oatcActiva.cliente_nombre}</h3>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-slate-400 block font-mono">Tiempo</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">Tiempo</span>
                   <span className="text-xs font-black text-indigo-400 font-mono">{tiempoTranscurrido} min</span>
                 </div>
               </div>
 
               {/* Stepper Cromático de 4 Fases */}
-              <div className="bg-slate-950/80 p-3 rounded-2xl border border-slate-800/80">
+              <div className="bg-black/60 dark:bg-slate-950/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
                 <OatcPhaseStepper
                   faseActual={faseActual}
                   tiempoMinutos={tiempoTranscurrido}
@@ -718,7 +718,7 @@ export function TabEstacion({
                       <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 flex items-center gap-1">
                         <Sparkles className="w-3.5 h-3.5 text-purple-400" /> 📝 Proforma en Asesoría & Diagnóstico
                       </span>
-                      <p className="text-[11px] text-slate-400">Pacta con el cliente el servicio, tiempo y presupuesto:</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">Pacta con el cliente el servicio, tiempo y presupuesto:</p>
                     </div>
                     <button
                       type="button"
@@ -737,11 +737,11 @@ export function TabEstacion({
                     {(proformaItems.length > 0 ? proformaItems : [{ nombre: 'Corte Clásico & Peinado', precio_final: 45, tipo: 'servicio' } as any]).map((item, idx) => (
                       <div 
                         key={idx} 
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/80 border border-purple-900/50 text-xs"
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-black/60 dark:bg-slate-950/80 border border-purple-900/50 text-xs"
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           {item.tipo === 'producto' ? <Package className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Scissors className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
-                          <span className="font-semibold text-slate-200 truncate">{item.nombre}</span>
+                          <span className="font-semibold text-slate-900 dark:text-slate-200 truncate">{item.nombre}</span>
                           {item.es_cortesia && (
                             <span className="text-[8px] bg-amber-500/20 text-amber-400 font-bold px-1.5 py-0.2 rounded border border-amber-500/30 shrink-0">
                               Cortesía
@@ -781,7 +781,7 @@ export function TabEstacion({
                   {/* Total Proforma & Botones de Acción de Asesoría */}
                   <div className="pt-3 border-t border-purple-900/60 space-y-3">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-300 font-bold">Total Presupuesto Proforma:</span>
+                      <span className="text-slate-700 dark:text-slate-300 font-bold">Total Presupuesto Proforma:</span>
                       <span className="text-lg font-black text-purple-300 font-mono">
                         S/ {totalProforma.toFixed(2)}
                       </span>
@@ -792,7 +792,7 @@ export function TabEstacion({
                         type="button"
                         onClick={() => setModalRechazoOpen(true)}
                         disabled={isProcessing}
-                        className="p-3 bg-slate-800/90 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-800/60 font-bold rounded-2xl text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95 disabled:opacity-50"
+                        className="p-3 bg-slate-800/90 hover:bg-rose-950/40 text-slate-700 dark:text-slate-300 hover:text-rose-300 border border-slate-300 dark:border-slate-700 hover:border-rose-800/60 font-bold rounded-2xl text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95 disabled:opacity-50"
                       >
                         <UserX className="w-4 h-4 text-rose-400" /> No Acepta Proforma
                       </button>
@@ -801,7 +801,7 @@ export function TabEstacion({
                         type="button"
                         onClick={handleComenzarServicio}
                         disabled={isProcessing}
-                        className="p-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 active:scale-95 disabled:opacity-50"
+                        className="p-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 active:scale-95 disabled:opacity-50 cursor-pointer"
                       >
                         <Scissors className="w-4 h-4" /> Comenzar Servicio
                       </button>
@@ -817,7 +817,7 @@ export function TabEstacion({
               {faseActual !== 'ASESORIA' && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Tickets de Servicio & Venta ({tickets.length})
                     </span>
                     <button
@@ -834,7 +834,7 @@ export function TabEstacion({
                     const infoTicket = getInfoTicket(t);
 
                     return (
-                      <div key={t.id} className="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2.5">
+                      <div key={t.id} className="p-3.5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2.5">
                         
                         {/* Header del Ticket */}
                         <div className="flex items-center justify-between">
@@ -843,7 +843,7 @@ export function TabEstacion({
                               #{tIdx + 1}
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                              <p className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                                 <span>{t.agente_nombre}</span>
                                 {esMiTicket && (
                                   <span className="text-[9px] bg-indigo-500/20 text-indigo-300 font-bold px-1.5 py-0.2 rounded border border-indigo-500/30">
@@ -851,7 +851,7 @@ export function TabEstacion({
                                   </span>
                                 )}
                               </p>
-                              <span className="text-[9px] text-slate-400">{t.estacion_nombre || 'Estación'}</span>
+                              <span className="text-[9px] text-slate-500 dark:text-slate-400">{t.estacion_nombre || 'Estación'}</span>
                             </div>
                           </div>
 
@@ -863,7 +863,7 @@ export function TabEstacion({
                               : t.estado_ticket === 'EN_PROCESO'
                               ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                               : t.estado_ticket === 'FINALIZADO'
-                              ? 'bg-slate-800 text-slate-400 border-slate-700'
+                              ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700'
                               : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
                           }`}>
                             {t.requiere_validacion 
@@ -881,11 +881,11 @@ export function TabEstacion({
                           {t.items?.map((item, iIdx) => (
                             <div 
                               key={iIdx} 
-                              className="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-800/60 text-xs hover:border-slate-700 transition"
+                              className="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-200 dark:border-slate-800/60 text-xs hover:border-slate-300 dark:border-slate-700 transition"
                             >
                               <div className="flex items-center gap-2 min-w-0">
                                 {item.tipo === 'producto' ? <Package className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Scissors className="w-3.5 h-3.5 text-sky-400 shrink-0" />}
-                                <span className="font-semibold text-slate-200 truncate">{item.nombre}</span>
+                                <span className="font-semibold text-slate-900 dark:text-slate-200 truncate">{item.nombre}</span>
                                 {item.es_cortesia && (
                                   <span className="text-[8px] bg-amber-500/20 text-amber-400 font-bold px-1.5 py-0.2 rounded border border-amber-500/30 shrink-0">
                                     Cortesía S/ 0.00
@@ -968,8 +968,8 @@ export function TabEstacion({
                   })}
 
                   {/* Consolidado OATC Limpio (Sin duplicados) */}
-                  <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                    <span className="text-slate-400 font-bold">Total Consolidado OATC:</span>
+                  <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+                    <span className="text-slate-500 dark:text-slate-400 font-bold">Total Consolidado OATC:</span>
                     <span className="text-lg font-black text-emerald-400 font-mono">
                       S/ {totalConsolidadoOatc.toFixed(2)}
                     </span>
@@ -981,13 +981,13 @@ export function TabEstacion({
             </div>
           ) : (
             /* Estado Libre */
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-2xl mx-auto text-slate-400">
+            <div className="bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-6 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl mx-auto text-slate-500 dark:text-slate-400">
                 🛋️
               </div>
               <div>
                 <h4 className="text-sm font-black text-white">Estación Libre</h4>
-                <p className="text-xs text-slate-400 mt-1 max-w-[260px] mx-auto leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-[260px] mx-auto leading-relaxed">
                   No tienes una orden de atención activa en este momento. La próxima atención asignada desde Recepción o la Cola de Piso aparecerá automáticamente aquí.
                 </p>
               </div>

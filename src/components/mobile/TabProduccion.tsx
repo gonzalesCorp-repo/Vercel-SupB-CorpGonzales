@@ -109,7 +109,7 @@ export function TabProduccion({
             className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               filtroFecha === r
                 ? 'bg-amber-500 text-slate-950 shadow-md font-black'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             {r}
@@ -124,10 +124,10 @@ export function TabProduccion({
         </span>
 
         {loading ? (
-          <div className="p-6 text-center text-xs text-slate-400 animate-pulse">Cargando producción...</div>
+          <div className="p-6 text-center text-xs text-slate-500 dark:text-slate-400 animate-pulse">Cargando producción...</div>
         ) : items.length === 0 ? (
           <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-2 shadow-xs transition-colors">
-            <Scissors className="w-8 h-8 text-slate-400 mx-auto opacity-50" />
+            <Scissors className="w-8 h-8 text-slate-500 dark:text-slate-400 mx-auto opacity-50" />
             <h4 className="font-bold text-xs text-slate-700 dark:text-slate-300">Sin atenciones en este período</h4>
             <p className="text-[10px] text-slate-500 dark:text-slate-400">Los servicios finalizados en el período seleccionado aparecerán listados aquí.</p>
           </div>
@@ -140,7 +140,7 @@ export function TabProduccion({
               <div>
                 <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">{item.cliente}</h4>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{item.servicio}</p>
-                <span className="text-[9px] text-slate-400 font-mono mt-1 block">{item.hora}</span>
+                <span className="text-[9px] text-slate-500 dark:text-slate-400 font-mono mt-1 block">{item.hora}</span>
               </div>
 
               <div className="text-right">

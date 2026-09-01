@@ -118,10 +118,10 @@ export default function ClientePerfilView({
     <div className="space-y-5 max-w-md mx-auto font-sans pb-12">
       
       {/* Header Cliente */}
-      <div className="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-3xl shadow-xl">
+      <div className="flex justify-between items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-3xl shadow-xl">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500 p-[2px]">
-            <div className="w-full h-full bg-slate-950 rounded-2xl flex items-center justify-center">
+            <div className="w-full h-full bg-slate-50 dark:bg-slate-950 rounded-2xl flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-pink-400" />
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function ClientePerfilView({
         {onCerrarSesion && (
           <button 
             onClick={onCerrarSesion}
-            className="p-2 text-slate-400 hover:text-rose-400 bg-slate-800 hover:bg-slate-700 rounded-xl transition cursor-pointer"
+            className="p-2 text-slate-500 dark:text-slate-400 hover:text-rose-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 rounded-xl transition cursor-pointer"
             title="Cerrar Sesión"
           >
             <LogOut className="w-4 h-4" />
@@ -159,7 +159,7 @@ export default function ClientePerfilView({
                 {rango}
               </span>
               <h3 className="text-xl font-black mt-2 tracking-tight">{cliente.nombre}</h3>
-              <p className="text-xs text-slate-300 font-mono">DNI: {cliente.dni || 'Sin registrar'}</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300 font-mono">DNI: {cliente.dni || 'Sin registrar'}</p>
             </div>
 
             <button 
@@ -173,16 +173,16 @@ export default function ClientePerfilView({
 
           <div className="flex justify-between items-end pt-2 border-t border-white/10">
             <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Saldo de Fidelidad</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block">Saldo de Fidelidad</span>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <Sparkles className="w-5 h-5 text-amber-400" />
                 <span className="text-2xl font-black text-amber-300">{puntosLumina}</span>
-                <span className="text-xs font-bold text-slate-300">LuminaCoins</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">LuminaCoins</span>
               </div>
             </div>
 
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Beneficio Activo</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block">Beneficio Activo</span>
               <span className="text-xs font-bold text-emerald-400">10% Off en Retail</span>
             </div>
           </div>
@@ -190,21 +190,21 @@ export default function ClientePerfilView({
       </motion.div>
 
       {/* 🏆 INSIGNIAS Y REGLAS DE FIDELIZACIÓN (Desde admin/reglas-clientes) */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Award className="w-4 h-4 text-amber-400" />
             <h3 className="text-xs font-black text-white uppercase tracking-wider">
               Tus Insignias & Logros de Consumo
             </h3>
           </div>
-          <span className="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold">
+          <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2.5 py-0.5 rounded-full font-bold">
             {insignias.length} ganadas
           </span>
         </div>
 
         {insignias.length === 0 ? (
-          <div className="text-center py-4 text-xs text-slate-400">
+          <div className="text-center py-4 text-xs text-slate-500 dark:text-slate-400">
             <Gift className="w-8 h-8 mx-auto mb-2 text-slate-600" />
             <p>¡Realiza tu próxima visita para desbloquear tus primeras medallas VIP!</p>
           </div>
@@ -213,14 +213,14 @@ export default function ClientePerfilView({
             {insignias.map(ins => (
               <div 
                 key={ins.id}
-                className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center gap-2.5 shadow-sm"
+                className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 shadow-sm"
               >
                 <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
                   <Star className="w-4 h-4" />
                 </div>
                 <div className="overflow-hidden">
                   <h4 className="text-xs font-bold text-white truncate">{ins.nombre}</h4>
-                  <p className="text-[10px] text-slate-400 truncate">{ins.descripcion || 'Regla cumplida'}</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{ins.descripcion || 'Regla cumplida'}</p>
                 </div>
               </div>
             ))}
@@ -229,8 +229,8 @@ export default function ClientePerfilView({
       </div>
 
       {/* 📋 DATOS PERSONALES & CUMPLEAÑOS */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-pink-400" />
             <h3 className="text-xs font-black text-white uppercase tracking-wider">
@@ -249,34 +249,34 @@ export default function ClientePerfilView({
         {editandoDatos ? (
           <form onSubmit={handleGuardarDatos} className="space-y-3">
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">WhatsApp / Teléfono</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">WhatsApp / Teléfono</label>
               <input 
                 type="tel"
                 value={telefono}
                 onChange={e => setTelefono(e.target.value)}
                 placeholder="+51 999 999 999"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-pink-500"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-pink-500"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Fecha de Cumpleaños (Regalos VIP)</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Fecha de Cumpleaños (Regalos VIP)</label>
               <input 
                 type="date"
                 value={fechaNacimiento}
                 onChange={e => setFechaNacimiento(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-pink-500"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-pink-500"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Correo Electrónico</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Correo Electrónico</label>
               <input 
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="tu@correo.com"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-pink-500"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-pink-500"
               />
             </div>
 
@@ -290,15 +290,15 @@ export default function ClientePerfilView({
           </form>
         ) : (
           <div className="space-y-2 text-xs">
-            <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-slate-800">
-              <span className="font-bold text-slate-400 flex items-center gap-1.5">
+            <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+              <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5 text-slate-500" /> WhatsApp
               </span>
               <span className="font-black text-white">{cliente.telefono || 'No registrado'}</span>
             </div>
 
-            <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-slate-800">
-              <span className="font-bold text-slate-400 flex items-center gap-1.5">
+            <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+              <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                 <Gift className="w-3.5 h-3.5 text-pink-400" /> Cumpleaños
               </span>
               <span className="font-black text-pink-300">{cliente.fecha_nacimiento || 'Regístralo para tu regalo'}</span>
@@ -308,8 +308,8 @@ export default function ClientePerfilView({
       </div>
 
       {/* 🕒 ÚLTIMAS ATENCIONES */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-indigo-400" />
             <h3 className="text-xs font-black text-white uppercase tracking-wider">
@@ -325,12 +325,12 @@ export default function ClientePerfilView({
         ) : (
           <div className="space-y-2.5">
             {historialAtenciones.map(oatc => (
-              <div key={oatc.id} className="p-3 bg-slate-950 rounded-2xl border border-slate-800 flex justify-between items-center">
+              <div key={oatc.id} className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 flex justify-between items-center">
                 <div>
                   <h4 className="text-xs font-bold text-white">
                     {oatc.agente_nombre ? `Atendido por ${oatc.agente_nombre}` : 'Servicio en Salón'}
                   </h4>
-                  <span className="text-[10px] text-slate-400 font-mono">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                     {new Date(oatc.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </span>
                 </div>
@@ -354,7 +354,7 @@ export default function ClientePerfilView({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-xs w-full text-center space-y-4 shadow-2xl"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-xs w-full text-center space-y-4 shadow-2xl"
             >
               <div className="w-12 h-12 rounded-2xl bg-pink-500/20 text-pink-400 flex items-center justify-center mx-auto">
                 <QrCode className="w-7 h-7" />
@@ -362,12 +362,12 @@ export default function ClientePerfilView({
 
               <div>
                 <h3 className="text-base font-black text-white">Tu Pase de Auto-Checkin</h3>
-                <p className="text-xs text-slate-400 mt-1">Muestra este código ante la cámara del Kiosko al llegar para ingresar a la cola.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Muestra este código ante la cámara del Kiosko al llegar para ingresar a la cola.</p>
               </div>
 
               {/* QR Render Visual */}
               <div className="bg-white p-4 rounded-2xl inline-block shadow-inner">
-                <div className="w-44 h-44 border-4 border-slate-900 rounded-xl flex flex-col items-center justify-center bg-slate-950 text-white font-mono p-2">
+                <div className="w-44 h-44 border-4 border-slate-900 rounded-xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-white font-mono p-2">
                   <QrCode className="w-24 h-24 text-white mb-2" />
                   <span className="text-[10px] font-black tracking-widest text-pink-400">DNI:{cliente.dni}</span>
                 </div>
@@ -375,7 +375,7 @@ export default function ClientePerfilView({
 
               <button 
                 onClick={() => setShowQrModal(false)}
-                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl text-xs font-bold transition cursor-pointer"
+                className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-white rounded-2xl text-xs font-bold transition cursor-pointer"
               >
                 Cerrar Pase
               </button>

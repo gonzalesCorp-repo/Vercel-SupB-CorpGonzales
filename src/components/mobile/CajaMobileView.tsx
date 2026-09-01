@@ -212,7 +212,7 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando órdenes por cobrar...</div>
             ) : oatcs.length === 0 ? (
-              <div className="text-center text-slate-400 py-10 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
+              <div className="text-center text-slate-500 dark:text-slate-400 py-10 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 ✨ No hay tickets pendientes de cobro en este momento
               </div>
             ) : (
@@ -223,12 +223,12 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
                   <div key={o.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors shadow-lg space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="text-[10px] text-slate-400 font-mono">ID: {o.id.slice(0, 8)}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">ID: {o.id.slice(0, 8)}</p>
                         <p className="font-bold text-sm text-white">{o.cliente_nombre || 'Cliente General'}</p>
                         <p className="text-[10px] text-indigo-300">Atendido por: {o.agente_nombre || 'Especialista'}</p>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-bold text-slate-400">Total</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total</span>
                         <p className="text-emerald-400 font-black text-xl">S/ {total.toFixed(2)}</p>
                       </div>
                     </div>
@@ -242,7 +242,7 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
                           className={`py-1.5 px-2 rounded-xl text-[10px] font-bold border transition ${
                             metodoActual === met
                               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                              : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                              : 'bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           {met === 'YAPE' && '📱 Yape/Plin'}
@@ -267,9 +267,9 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
 
         {/* TAB 2: ARQUEO DE CAJA EN VIVO */}
         {tab === 'arqueo' && (
-          <div className="bg-slate-900 p-5 rounded-3xl border border-slate-800 space-y-4 shadow-xl">
-            <div className="text-center pb-3 border-b border-slate-800">
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider">Recaudación Real de Hoy</p>
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl">
+            <div className="text-center pb-3 border-b border-slate-200 dark:border-slate-800">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider">Recaudación Real de Hoy</p>
               <p className="text-3xl font-black text-white mt-1">S/ {metricasArqueo.total.toFixed(2)}</p>
               <p className="text-xs text-emerald-400 font-bold mt-1">
                 {metricasArqueo.transacciones} comprobantes emitidos
@@ -277,16 +277,16 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
             </div>
 
             <div className="space-y-2.5 pt-2">
-              <div className="flex justify-between items-center bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                <span className="text-xs text-slate-300 flex items-center gap-2"><Banknote className="w-4 h-4 text-emerald-400" /> Efectivo</span>
+              <div className="flex justify-between items-center bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
+                <span className="text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2"><Banknote className="w-4 h-4 text-emerald-400" /> Efectivo</span>
                 <span className="font-bold text-xs text-white">S/ {metricasArqueo.efectivo.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                <span className="text-xs text-slate-300 flex items-center gap-2"><CreditCard className="w-4 h-4 text-blue-400" /> Tarjetas / POS</span>
+              <div className="flex justify-between items-center bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
+                <span className="text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2"><CreditCard className="w-4 h-4 text-blue-400" /> Tarjetas / POS</span>
                 <span className="font-bold text-xs text-white">S/ {metricasArqueo.tarjeta.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                <span className="text-xs text-slate-300 flex items-center gap-2"><QrCode className="w-4 h-4 text-purple-400" /> Yape / Plin</span>
+              <div className="flex justify-between items-center bg-slate-950/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800/80">
+                <span className="text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2"><QrCode className="w-4 h-4 text-purple-400" /> Yape / Plin</span>
                 <span className="font-bold text-xs text-white">S/ {metricasArqueo.yape.toFixed(2)}</span>
               </div>
             </div>
@@ -299,7 +299,7 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando comprobantes emitidos...</div>
             ) : historialComprobantes.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
+              <div className="text-center text-slate-500 dark:text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay pagos registrados hoy en esta sede
               </div>
             ) : (
@@ -310,7 +310,7 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
                       <Receipt className="w-3.5 h-3.5 text-emerald-400" />
                       <p className="font-bold text-xs text-white">{comp.cliente_nombre || 'Cliente General'}</p>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                       {comp.serie}-{comp.correlativo} • {comp.metodo_pago || 'PAGO'}
                     </p>
                   </div>

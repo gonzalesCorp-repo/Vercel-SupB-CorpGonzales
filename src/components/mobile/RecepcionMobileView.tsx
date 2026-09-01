@@ -127,7 +127,7 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando cola de piso...</div>
             ) : agentes.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
+              <div className="text-center text-slate-500 dark:text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay colaboradores activos en esta sede
               </div>
             ) : (
@@ -141,13 +141,13 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
                       <span className="font-mono text-xs text-slate-500 font-bold">#{i + 1}</span>
                       <div>
                         <p className="font-bold text-xs text-white">{a.nombre}</p>
-                        <p className="text-[10px] text-slate-400">{a.especialidad || a.rol}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400">{a.especialidad || a.rol}</p>
                       </div>
                     </div>
                     <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${
                       isLibre ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
                       isOcupado ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                      'bg-slate-800 text-slate-400 border-slate-700'
+                      'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700'
                     }`}>
                       {opStatus}
                     </span>
@@ -162,7 +162,7 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
         {tab === 'clientes' && (
           <div className="space-y-3">
             <div className="relative">
-              <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500 dark:text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar por nombre, DNI o celular..."
@@ -171,14 +171,14 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
                   setBusquedaCliente(e.target.value);
                   fetchClientes(e.target.value);
                 }}
-                className="w-full bg-slate-900 border border-slate-800 text-white rounded-2xl py-3 pl-10 pr-4 text-xs placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 shadow-inner"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-white rounded-2xl py-3 pl-10 pr-4 text-xs placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 shadow-inner"
               />
             </div>
 
             {loading ? (
               <div className="text-center text-slate-500 py-6 text-xs font-bold">Buscando clientes...</div>
             ) : clientes.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
+              <div className="text-center text-slate-500 dark:text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No se encontraron clientes registrados
               </div>
             ) : (
@@ -193,7 +193,7 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-[10px] text-slate-400">
+                    <div className="flex items-center gap-3 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
                       {c.celular && <span className="flex items-center gap-1"><Phone className="w-2.5 h-2.5" /> {c.celular}</span>}
                       {c.dni && <span>DNI: {c.dni}</span>}
                     </div>
@@ -215,7 +215,7 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando agenda del día...</div>
             ) : citas.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
+              <div className="text-center text-slate-500 dark:text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay citas agendadas para hoy
               </div>
             ) : (
@@ -232,8 +232,8 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
                       {cita.estado || 'CONFIRMADA'}
                     </span>
                   </div>
-                  <p className="text-xs font-bold text-slate-200">{cita.cliente_nombre || 'Cliente agendado'}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Especialista: {cita.agente_nombre || 'Por asignar'}</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-slate-200">{cita.cliente_nombre || 'Cliente agendado'}</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Especialista: {cita.agente_nombre || 'Por asignar'}</p>
                 </div>
               ))
             )}
@@ -246,7 +246,7 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando peticiones de piso...</div>
             ) : alertas.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
+              <div className="text-center text-slate-500 dark:text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay peticiones pendientes en este momento
               </div>
             ) : (
@@ -259,11 +259,11 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
                       </span>
                       <p className="text-xs font-bold text-slate-900 dark:text-white">{alerta.solicitante_nombre || 'Staff'}</p>
                     </div>
-                    <p className="text-[11px] text-slate-300 mt-1">{alerta.mensaje || alerta.detalle || 'Solicita apoyo en estación'}</p>
+                    <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-1">{alerta.mensaje || alerta.detalle || 'Solicita apoyo en estación'}</p>
                   </div>
                   <button
                     onClick={() => handleResolverAlerta(alerta.id)}
-                    className="p-2 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl border border-emerald-500/30 transition text-xs font-bold flex items-center gap-1"
+                    className="p-2 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-slate-900 dark:hover:text-white rounded-xl border border-emerald-500/30 transition text-xs font-bold flex items-center gap-1"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" /> Atendido
                   </button>

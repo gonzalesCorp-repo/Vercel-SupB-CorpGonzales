@@ -73,7 +73,7 @@ export default function StaffMetricasView({ agente, onClose }: StaffMetricasView
           <BarChart2 className="w-5 h-5 text-indigo-600 dark:text-purple-400" /> MÉTRICAS Y DESEMPEÑO DEL MES
         </h2>
         {onClose && (
-          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-800 cursor-pointer">
+          <button onClick={onClose} className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-800 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         )}
@@ -105,10 +105,10 @@ export default function StaffMetricasView({ agente, onClose }: StaffMetricasView
         <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">DESGLOSE DE SERVICIOS</span>
 
         {loading ? (
-          <div className="p-8 text-center text-xs text-slate-400 animate-pulse">Cargando métricas de producción...</div>
+          <div className="p-8 text-center text-xs text-slate-500 dark:text-slate-400 animate-pulse">Cargando métricas de producción...</div>
         ) : Object.keys(desglose).length === 0 ? (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl text-center space-y-2">
-            <Scissors className="w-8 h-8 text-slate-400 mx-auto opacity-50" />
+            <Scissors className="w-8 h-8 text-slate-500 dark:text-slate-400 mx-auto opacity-50" />
             <h4 className="font-bold text-xs text-slate-700 dark:text-slate-300">Sin atenciones registradas este mes</h4>
             <p className="text-[10px] text-slate-500 dark:text-slate-400">Las órdenes completadas en tu estación aparecerán automáticamente aquí.</p>
           </div>

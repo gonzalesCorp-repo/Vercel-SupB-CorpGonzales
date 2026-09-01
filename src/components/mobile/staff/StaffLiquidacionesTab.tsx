@@ -170,9 +170,9 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
           </button>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
           <span>Rango: {fechaInicio} al {fechaFin}</span>
-          <button onClick={cargarDatos} className="text-indigo-500 font-bold flex items-center gap-1">
+          <button onClick={cargarDatos} className="text-indigo-500 font-bold flex items-center gap-1 cursor-pointer">
             <RefreshCw className={`w-3 h-3 ${cargando ? 'animate-spin' : ''}`} /> Actualizar
           </button>
         </div>
@@ -216,11 +216,11 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm space-y-3">
         <h3 className="font-bold text-slate-800 dark:text-white text-xs uppercase tracking-wider flex items-center justify-between">
           <span>Auditoría de Servicios ({ventas.length})</span>
-          <span className="text-[10px] text-slate-400 font-normal">Antiduplicidad activa</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Antiduplicidad activa</span>
         </h3>
 
         {ventas.length === 0 ? (
-          <div className="py-8 text-center text-xs text-slate-400">
+          <div className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">
             No registras atenciones finalizadas en este rango de fechas.
           </div>
         ) : (
@@ -230,7 +230,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
                 key={v.origen_id || idx}
                 className={`p-3 rounded-2xl border flex items-center justify-between gap-2 text-xs transition ${
                   v.esta_liquidado
-                    ? 'bg-slate-50/60 dark:bg-slate-800/30 border-slate-200/60 dark:border-slate-800 text-slate-400'
+                    ? 'bg-slate-50/60 dark:bg-slate-800/30 border-slate-200/60 dark:border-slate-800 text-slate-500 dark:text-slate-400'
                     : 'bg-indigo-50/40 dark:bg-indigo-950/20 border-indigo-200/60 dark:border-indigo-800/40 text-slate-800 dark:text-slate-100'
                 }`}
               >
@@ -245,7 +245,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
 
                   <div className="truncate">
                     <p className="font-bold truncate">{v.descripcion}</p>
-                    <span className="text-[10px] text-slate-400 block font-mono">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">
                       {format(new Date(v.fecha), 'dd/MM HH:mm', { locale: es })} • {v.cliente_nombre || 'Cliente'}
                     </span>
                   </div>
@@ -278,7 +278,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
         </h3>
 
         {misLiquidaciones.length === 0 ? (
-          <p className="text-xs text-slate-400 py-3 text-center">Aún no tienes liquidaciones solicitadas.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 py-3 text-center">Aún no tienes liquidaciones solicitadas.</p>
         ) : (
           <div className="space-y-2">
             {misLiquidaciones.slice(0, 5).map((l) => (
@@ -290,7 +290,7 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
                   <span className="font-mono font-bold text-slate-700 dark:text-slate-200 block text-[11px]">
                     {l.numero_correlativo}
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
                     {l.periodo_inicio} al {l.periodo_fin}
                   </span>
                 </div>

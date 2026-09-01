@@ -115,7 +115,7 @@ export default function MobileSoportePage() {
       </div>
 
       {/* Selector de Herramientas de Soporte (Segmented Control) */}
-      <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 mb-4 shadow-md">
+      <div className="flex gap-1.5 bg-slate-100 dark:bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 mb-4 shadow-md">
         {herramientas.includes('recepcion') && (
           <button
             onClick={() => setActiveTab('recepcion')}

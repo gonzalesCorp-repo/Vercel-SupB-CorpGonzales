@@ -191,11 +191,11 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
                   ? 'bg-amber-950/20 border-amber-500/30 text-amber-200'
                   : item.estado === 'EN_CURSO'
                   ? 'bg-indigo-950/40 border-indigo-500/40 text-white shadow-lg shadow-indigo-950/50'
-                  : 'bg-slate-900/80 border-slate-800 text-slate-300'
+                  : 'bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-xl ${isBloqueo ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-indigo-400'}`}>
+                <div className={`p-2.5 rounded-xl ${isBloqueo ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-indigo-400'}`}>
                   {isBloqueo ? <ShieldAlert className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                 </div>
                 <div>
@@ -205,7 +205,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
               </div>
 
               <div className="text-right">
-                <span className="font-mono text-xs font-black text-slate-200">{item.hora}</span>
+                <span className="font-mono text-xs font-black text-slate-900 dark:text-slate-200">{item.hora}</span>
                 <span className={`block text-[9px] font-black uppercase tracking-wider mt-0.5 ${
                   item.estado === 'EN_CURSO' ? 'text-indigo-400' : 'text-slate-500'
                 }`}>
@@ -219,17 +219,17 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
 
       {/* Modal Nuevo Registro */}
       {modalNuevoOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl animate-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-black text-slate-900 dark:text-white">Nuevo Registro en Agenda</h3>
-              <button onClick={() => setModalNuevoOpen(false)} className="text-slate-500 dark:text-slate-400 hover:text-white">
+              <button onClick={() => setModalNuevoOpen(false)} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Selector Tipo */}
-            <div className="flex gap-2 p-1 bg-slate-950 rounded-xl border border-slate-800">
+            <div className="flex gap-2 p-1 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setTipoRegistro('CITA')}
@@ -305,13 +305,13 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
                 <button
                   type="button"
                   onClick={() => setModalNuevoOpen(false)}
-                  className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold text-xs transition"
+                  className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-xs transition cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className={`flex-1 py-2.5 rounded-xl font-bold text-xs text-white shadow-lg transition ${
+                  className={`flex-1 py-2.5 rounded-xl font-bold text-xs text-white shadow-lg transition cursor-pointer ${
                     tipoRegistro === 'CITA'
                       ? 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30'
                       : 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/30'

@@ -134,21 +134,21 @@ export default function StaffTurnoTab({
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       <div className="flex justify-between items-center px-1">
-        <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+        <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
           ATENCIONES EN CURSO: <span className="text-indigo-400">{tickets.length}</span>
         </span>
         <button 
           onClick={cargarDatosMobile}
-          className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-indigo-400 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition cursor-pointer hover:bg-slate-800"
+          className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-indigo-400 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} /> Refrescar
         </button>
       </div>
 
       {/* Tarjeta de Estado Actual + Posición del Turno + Botón Colegas */}
-      <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 flex justify-between items-center shadow-xl">
+      <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-xl">
         <div>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">ESTADO ACTUAL</span>
+          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">ESTADO ACTUAL</span>
           <h3 className="text-xl font-black text-emerald-400 mt-0.5">{estadoActual}</h3>
           
           <div className="mt-1 inline-flex items-center gap-1.5 text-xs font-bold text-indigo-300 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-500/20">
@@ -197,7 +197,7 @@ export default function StaffTurnoTab({
                         setSelectedClienteId(null);
                       }}
                       placeholder="Nombre del cliente..."
-                      className="bg-slate-950 border border-indigo-500/40 rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-400 font-bold w-full"
+                      className="bg-slate-50 dark:bg-slate-950 border border-indigo-500/40 rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 font-bold w-full"
                       autoFocus
                     />
                     <button
@@ -213,14 +213,14 @@ export default function StaffTurnoTab({
                         setIsEditingName(false);
                         setClientSuggestions([]);
                       }}
-                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer"
+                      className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer"
                     >
                       X
                     </button>
                   </div>
 
                   {clientSuggestions.length > 0 && (
-                    <div className="absolute left-0 right-0 mt-1 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-800">
+                    <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-800">
                       {clientSuggestions.map((cli) => (
                         <div
                           key={cli.id}
@@ -229,10 +229,10 @@ export default function StaffTurnoTab({
                             setSelectedClienteId(cli.id || null);
                             setClientSuggestions([]);
                           }}
-                          className="px-3 py-2.5 hover:bg-slate-800 cursor-pointer text-left transition-colors"
+                          className="px-3 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800 cursor-pointer text-left transition-colors"
                         >
                           <p className="text-xs font-bold text-white">{cli.nombre}</p>
-                          <p className="text-[10px] text-slate-400">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">
                             {cli.dni ? `DNI: ${cli.dni}` : ''} {cli.celular ? `| Cel: ${cli.celular}` : ''}
                           </p>
                         </div>
@@ -249,7 +249,7 @@ export default function StaffTurnoTab({
                       setSelectedClienteId(ticketActivo.cliente_id || null);
                       setIsEditingName(true);
                     }}
-                    className="p-1 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                    className="p-1 text-slate-500 dark:text-slate-400 hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                     title="Editar nombre de cliente"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -257,15 +257,15 @@ export default function StaffTurnoTab({
                 </div>
               )}
             </div>
-            <span className="text-xs font-mono font-bold text-indigo-400 bg-slate-950 px-3 py-1 rounded-xl border border-slate-800">
+            <span className="text-xs font-mono font-bold text-indigo-400 bg-slate-50 dark:bg-slate-950 px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
               {ticketActivo.codigo_ticket || 'OATC-LIVE'}
             </span>
           </div>
 
           {/* Servicios contratados */}
-          <div className="bg-slate-950/80 p-3.5 rounded-2xl border border-slate-800 space-y-2">
+          <div className="bg-black/60 dark:bg-slate-950/80 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Servicios / Productos:</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Servicios / Productos:</span>
               {(isEnCurso || isAsesoria) && (
                 <button 
                   onClick={() => handleOpenAddService(ticketActivo)}
@@ -276,10 +276,10 @@ export default function StaffTurnoTab({
               )}
             </div>
             {ticketActivo.punto_partida?.map((srv: any, idx: number) => (
-              <div key={idx} className="flex items-center justify-between gap-2 bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800 shadow-md">
-                <span className="text-xs font-bold text-slate-100 truncate flex-1">{srv.nombre}</span>
+              <div key={idx} className="flex items-center justify-between gap-2 bg-slate-900/90 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate flex-1">{srv.nombre}</span>
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-indigo-500/40 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition-all">
+                  <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-indigo-500/40 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition-all">
                     <span className="text-xs font-black text-amber-400">S/</span>
                     <input 
                       type="number" 
@@ -302,7 +302,7 @@ export default function StaffTurnoTab({
                           handleRemoveItem(idx);
                         }
                       }}
-                      className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                      className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                       title="Eliminar servicio"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -351,13 +351,13 @@ export default function StaffTurnoTab({
             )}
 
             {/* Fila de Impresión de Ficha / Pre-Cuenta para Staff */}
-            <div className="flex items-center gap-2 pt-1 border-t border-slate-800/80">
+            <div className="flex items-center gap-2 pt-1 border-t border-slate-200 dark:border-slate-800/80">
               <TouchActionButton
                 variant="secondary"
                 icon={Printer}
                 onClick={handlePrintTicket}
                 disabled={isPrintingTicket}
-                className="flex-1 bg-slate-800/80 hover:bg-slate-700/80 border-slate-700 text-indigo-300"
+                className="flex-1 bg-slate-800/80 hover:bg-slate-700/80 border-slate-300 dark:border-slate-700 text-indigo-300"
               >
                 {isPrintingTicket ? 'Imprimiendo...' : 'Imprimir Ficha / Pre-Cuenta'}
               </TouchActionButton>
@@ -365,7 +365,7 @@ export default function StaffTurnoTab({
               <button
                 type="button"
                 onClick={() => setShowPrinterHub(true)}
-                className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition shrink-0 cursor-pointer"
+                className="p-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 transition shrink-0 cursor-pointer"
                 title="Configurar Impresora Bluetooth / USB"
               >
                 <Settings2 className="w-5 h-5 text-indigo-400" />
@@ -399,10 +399,10 @@ export default function StaffTurnoTab({
           </div>
         </div>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center space-y-3 shadow-xl">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center space-y-3 shadow-xl">
           <span className="text-4xl block">📂</span>
-          <h3 className="font-bold text-slate-200 text-base">Sin atenciones activas</h3>
-          <p className="text-xs text-slate-400 max-w-[240px] mx-auto">
+          <h3 className="font-bold text-slate-900 dark:text-slate-200 text-base">Sin atenciones activas</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-[240px] mx-auto">
             No tienes turnos o clientes asignados en este momento.
           </p>
         </div>
@@ -411,27 +411,27 @@ export default function StaffTurnoTab({
       {/* Modal de Cancelación con Registro de Motivos */}
       <AnimatePresence>
         {showCancelModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl text-slate-100">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-slate-950/80 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl text-slate-900 dark:text-slate-100">
               <div className="flex justify-between items-center">
                 <h3 className="font-black text-sm text-red-400 flex items-center gap-2">
                   <Ban className="w-5 h-5" /> SOLICITAR CANCELACIÓN
                 </h3>
-                <button onClick={() => setShowCancelModal(false)} className="p-1 text-slate-400 hover:text-white rounded-lg bg-slate-800 cursor-pointer">
+                <button onClick={() => setShowCancelModal(false)} className="p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg bg-slate-100 dark:bg-slate-800 cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Selecciona el motivo de la cancelación. Esta solicitud pasará al panel de <strong>Recepción</strong> para su aprobación.
               </p>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Motivo de Cancelación</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Motivo de Cancelación</label>
                 <select 
                   value={selectedMotivoId} 
                   onChange={(e) => setSelectedMotivoId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-red-500"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-red-500"
                 >
                   {motivos.map(m => (
                     <option key={m.id} value={m.id}>{m.motivo}</option>
@@ -440,12 +440,12 @@ export default function StaffTurnoTab({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Detalle adicional (opcional)</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Detalle adicional (opcional)</label>
                 <textarea 
                   value={cancelDetalle}
                   onChange={(e) => setCancelDetalle(e.target.value)}
                   placeholder="Explicación del problema o desistimiento del cliente..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-red-500 h-20 resize-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-red-500 h-20 resize-none"
                 />
               </div>
 

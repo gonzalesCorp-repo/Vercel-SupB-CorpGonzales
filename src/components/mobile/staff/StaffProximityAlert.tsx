@@ -75,7 +75,7 @@ export function StaffProximityAlert({ sedeId, agenteId, agenteNombre }: StaffPro
           <button
             type="button"
             onClick={() => setAlerta(null)}
-            className="p-1 text-slate-400 hover:text-white rounded-lg transition"
+            className="p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg transition"
           >
             <X className="w-3.5 h-3.5" />
           </button>

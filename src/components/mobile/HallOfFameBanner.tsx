@@ -64,7 +64,7 @@ export default function HallOfFameBanner({ hallOfFame, currentAgenteId, cicloFin
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <Trophy className="text-yellow-400" size={20} />
-          <h3 className="text-slate-100 font-black text-lg">Salón de la Fama</h3>
+          <h3 className="text-slate-900 dark:text-slate-100 font-black text-lg">Salón de la Fama</h3>
         </div>
         <div className="flex items-center space-x-1 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
           <Timer className="text-indigo-400" size={14} />
@@ -94,14 +94,14 @@ export default function HallOfFameBanner({ hallOfFame, currentAgenteId, cicloFin
                 </div>
                 <div>
                   <div className="flex items-center space-x-2">
-                    <p className="text-slate-100 font-bold text-sm">{entry.nombre} {isCurrentUser && '(Tú)'}</p>
+                    <p className="text-slate-900 dark:text-slate-100 font-bold text-sm">{entry.nombre} {isCurrentUser && '(Tú)'}</p>
                     {entry.streak > 3 && (
                       <div className="flex items-center text-orange-500 text-xs font-bold">
                         <Flame size={12} /> {entry.streak}
                       </div>
                     )}
                   </div>
-                  <p className="text-slate-400 text-xs">{entry.titulo}</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">{entry.titulo}</p>
                 </div>
               </div>
               

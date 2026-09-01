@@ -135,10 +135,10 @@ export default function StaffAgendaTab({
 
       <div className="space-y-3">
         {loading ? (
-          <div className="p-8 text-center text-xs text-slate-400 animate-pulse">Cargando agenda de citas...</div>
+          <div className="p-8 text-center text-xs text-slate-500 dark:text-slate-400 animate-pulse">Cargando agenda de citas...</div>
         ) : citas.length === 0 ? (
           <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-2 shadow-xs transition-colors">
-            <Calendar className="w-8 h-8 text-slate-400 mx-auto opacity-50" />
+            <Calendar className="w-8 h-8 text-slate-500 dark:text-slate-400 mx-auto opacity-50" />
             <h4 className="font-bold text-xs text-slate-700 dark:text-slate-300">Sin citas agendadas</h4>
             <p className="text-[10px] text-slate-500 dark:text-slate-400">Las citas registradas para tu estación aparecerán automáticamente aquí.</p>
           </div>
@@ -188,7 +188,7 @@ export default function StaffAgendaTab({
                 <h3 className="font-black text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <CalendarPlus className="w-4 h-4 text-purple-500" /> Agendar Nueva Cita
                 </h3>
-                <button onClick={() => setShowAddCitaModal(false)} className="text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer">
+                <button onClick={() => setShowAddCitaModal(false)} className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer">
                   <X className="w-5 h-5" />
                 </button>
               </div>

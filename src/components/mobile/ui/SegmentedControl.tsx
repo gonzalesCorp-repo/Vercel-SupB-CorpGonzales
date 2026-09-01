@@ -51,7 +51,7 @@ export default function SegmentedControl({
             )}
             <span
               className={`relative z-10 transition-colors ${
-                isSelected ? 'text-white font-black' : 'text-slate-400 hover:text-slate-200 font-bold'
+                isSelected ? 'text-white font-black' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200 font-bold'
               }`}
             >
               {option.label}
@@ -61,7 +61,7 @@ export default function SegmentedControl({
                 className={`relative z-10 px-2 py-0.5 text-[10px] font-black rounded-full transition-colors ${
                   isSelected
                     ? 'bg-white/20 text-white'
-                    : 'bg-slate-800 text-slate-400'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                 }`}
               >
                 {option.badge}

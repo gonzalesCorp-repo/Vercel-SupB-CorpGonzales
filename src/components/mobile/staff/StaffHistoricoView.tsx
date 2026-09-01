@@ -78,7 +78,7 @@ export default function StaffHistoricoView({
           <History className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> HISTÓRICO DE PRODUCCIÓN
         </h2>
         {onClose && (
-          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-800 cursor-pointer">
+          <button onClick={onClose} className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-800 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         )}
@@ -135,10 +135,10 @@ export default function StaffHistoricoView({
       {/* Lista Histórico */}
       <div className="space-y-3">
         {loading ? (
-          <div className="p-8 text-center text-xs text-slate-400 animate-pulse">Cargando órdenes históricas...</div>
+          <div className="p-8 text-center text-xs text-slate-500 dark:text-slate-400 animate-pulse">Cargando órdenes históricas...</div>
         ) : registros.length === 0 ? (
           <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-2">
-            <History className="w-8 h-8 text-slate-400 mx-auto opacity-50" />
+            <History className="w-8 h-8 text-slate-500 dark:text-slate-400 mx-auto opacity-50" />
             <h4 className="font-bold text-xs text-slate-700 dark:text-slate-300">Sin órdenes en este rango</h4>
             <p className="text-[10px] text-slate-500 dark:text-slate-400">No se encontraron órdenes registradas para las fechas seleccionadas.</p>
           </div>

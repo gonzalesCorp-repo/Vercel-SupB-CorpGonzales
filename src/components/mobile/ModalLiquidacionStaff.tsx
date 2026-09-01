@@ -56,8 +56,8 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-800 space-y-5 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden text-slate-100 animate-in zoom-in-95">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900 dark:text-slate-100 animate-in zoom-in-95">
         
         {/* Header Modal */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -67,11 +67,11 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
             </div>
             <div>
               <h3 className="text-sm font-black text-slate-900 dark:text-white">Estado de Cuenta Continuo</h3>
-              <p className="text-[10px] text-slate-400">Liquidaciones y Comisiones bajo demanda</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">Liquidaciones y Comisiones bajo demanda</p>
             </div>
           </div>
 
-          <button onClick={onClose} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-white">
+          <button onClick={onClose} className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -97,13 +97,13 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80 text-xs">
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200 dark:border-slate-800/80 text-xs">
             <div>
-              <span className="text-[10px] text-slate-400 block">Créditos Hoy:</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Créditos Hoy:</span>
               <span className="font-bold text-emerald-400 font-mono">+ S/. {creditos.toFixed(2)}</span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 block">Deducciones/Canon:</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Deducciones/Canon:</span>
               <span className="font-bold text-rose-400 font-mono">- S/. {debitos.toFixed(2)}</span>
             </div>
           </div>
@@ -111,7 +111,7 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
 
         {/* Lista de Transacciones / Extracto */}
         <div className="space-y-2 flex-1 overflow-y-auto pr-1">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
             Movimientos del Periodo
           </span>
 
@@ -121,11 +121,11 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
             return (
               <div
                 key={tx.id}
-                className="p-3 bg-slate-950/70 border border-slate-800/80 rounded-2xl flex items-center justify-between text-xs"
+                className="p-3 bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex items-center justify-between text-xs"
               >
                 <div className="space-y-0.5 pr-2">
-                  <p className="font-bold text-slate-200">{tx.concepto}</p>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                  <p className="font-bold text-slate-900 dark:text-slate-200">{tx.concepto}</p>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                     <span>{tx.fecha}</span>
                     {tx.clienteNombre && <span>• {tx.clienteNombre}</span>}
                   </div>
@@ -142,11 +142,11 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
         </div>
 
         {/* Botón de Solicitud de Liquidación */}
-        <div className="pt-2 border-t border-slate-800 shrink-0">
+        <div className="pt-2 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <button
             onClick={handleSolicitar}
             disabled={solicitando || balance <= 0}
-            className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-600/30 transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2"
+            className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-600/30 transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer"
           >
             <Send className="w-4 h-4" />
             <span>{solicitando ? 'Enviando Solicitud...' : `Solicitar Liquidación (S/. ${balance.toFixed(2)})`}</span>

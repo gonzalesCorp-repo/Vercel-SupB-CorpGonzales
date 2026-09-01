@@ -58,7 +58,7 @@ export function TabKpisMando({
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="p-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-purple-300 border border-purple-500/20 active:scale-95 transition"
+            className="p-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-purple-300 border border-purple-500/20 active:scale-95 transition cursor-pointer"
             title="Refrescar métricas"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -67,8 +67,8 @@ export function TabKpisMando({
 
         {/* Métricas Principales */}
         <div className="grid grid-cols-2 gap-2.5 mt-4 pt-4 border-t border-purple-500/20">
-          <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-3">
-            <div className="flex items-center justify-between text-slate-400 mb-1">
+          <div className="bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-3">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
               <span className="text-[10px] uppercase font-bold tracking-wider">Ventas Hoy</span>
               <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
             </div>
@@ -80,8 +80,8 @@ export function TabKpisMando({
             </p>
           </div>
 
-          <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-3">
-            <div className="flex items-center justify-between text-slate-400 mb-1">
+          <div className="bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-3">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
               <span className="text-[10px] uppercase font-bold tracking-wider">Órdenes Activas</span>
               <Activity className="w-3.5 h-3.5 text-indigo-400" />
             </div>
@@ -96,39 +96,39 @@ export function TabKpisMando({
       </div>
 
       {/* Monitor de Fases de Piso */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-xl">
-        <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 space-y-3 shadow-xl">
+        <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
           <Layers className="w-4 h-4 text-cyan-400" /> Ritmo Operativo de Piso
         </h3>
 
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-slate-950/80 border border-amber-500/20 rounded-2xl p-3 text-center">
+          <div className="bg-black/60 dark:bg-slate-950/80 border border-amber-500/20 rounded-2xl p-3 text-center">
             <span className="text-[10px] font-bold text-amber-400 block uppercase">En Espera</span>
             <span className="text-lg font-black text-white font-mono">{enEspera}</span>
-            <span className="text-[9px] text-slate-400 block mt-0.5">En cola de piso</span>
+            <span className="text-[9px] text-slate-500 dark:text-slate-400 block mt-0.5">En cola de piso</span>
           </div>
 
-          <div className="bg-slate-950/80 border border-indigo-500/20 rounded-2xl p-3 text-center">
+          <div className="bg-black/60 dark:bg-slate-950/80 border border-indigo-500/20 rounded-2xl p-3 text-center">
             <span className="text-[10px] font-bold text-indigo-400 block uppercase">En Proceso</span>
             <span className="text-lg font-black text-white font-mono">{enProceso}</span>
-            <span className="text-[9px] text-slate-400 block mt-0.5">En servicio</span>
+            <span className="text-[9px] text-slate-500 dark:text-slate-400 block mt-0.5">En servicio</span>
           </div>
 
-          <div className="bg-slate-950/80 border border-emerald-500/20 rounded-2xl p-3 text-center">
+          <div className="bg-black/60 dark:bg-slate-950/80 border border-emerald-500/20 rounded-2xl p-3 text-center">
             <span className="text-[10px] font-bold text-emerald-400 block uppercase">Por Cobrar</span>
             <span className="text-lg font-black text-white font-mono">{porCobrar}</span>
-            <span className="text-[9px] text-slate-400 block mt-0.5">En caja</span>
+            <span className="text-[9px] text-slate-500 dark:text-slate-400 block mt-0.5">En caja</span>
           </div>
         </div>
       </div>
 
       {/* Monitor de Asistencia y Staff en Turno */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-xl">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 space-y-3 shadow-xl">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
             <Users className="w-4 h-4 text-emerald-400" /> Staff en Turno ({staffPresente.length})
           </h3>
-          <span className="text-[10px] text-slate-400">
+          <span className="text-[10px] text-slate-500 dark:text-slate-400">
             {staffAusente.length} fuera de turno
           </span>
         </div>
@@ -142,15 +142,15 @@ export function TabKpisMando({
             staffPresente.map((s) => (
               <div
                 key={s.id}
-                className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3 flex items-center justify-between"
+                className="bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 flex items-center justify-between"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-xs">
                     {s.nombre ? s.nombre.charAt(0) : 'S'}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-100">{s.nombre}</h4>
-                    <p className="text-[10px] text-slate-400">{s.rol || 'STAFF'} • {s.especialidad || 'General'}</p>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">{s.nombre}</h4>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">{s.rol || 'STAFF'} • {s.especialidad || 'General'}</p>
                   </div>
                 </div>
 
@@ -172,13 +172,13 @@ export function TabKpisMando({
       </div>
 
       {/* Estado del Sistema */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-2 shadow-xl">
-        <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 space-y-2 shadow-xl">
+        <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
           <Zap className="w-4 h-4 text-purple-400" /> Infraestructura & Salud
         </h3>
         
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="bg-slate-950/70 border border-slate-800 p-2.5 rounded-2xl flex items-center gap-2">
+          <div className="bg-slate-950/70 border border-slate-200 dark:border-slate-800 p-2.5 rounded-2xl flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <div>
               <p className="text-[10px] font-bold text-white">Supabase Realtime</p>
@@ -186,7 +186,7 @@ export function TabKpisMando({
             </div>
           </div>
 
-          <div className="bg-slate-950/70 border border-slate-800 p-2.5 rounded-2xl flex items-center gap-2">
+          <div className="bg-slate-950/70 border border-slate-200 dark:border-slate-800 p-2.5 rounded-2xl flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <div>
               <p className="text-[10px] font-bold text-white">Servidor Dev</p>

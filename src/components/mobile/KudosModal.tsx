@@ -45,22 +45,22 @@ export default function KudosModal({ isOpen, onClose, receiverId, receiverName, 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/60 dark:bg-slate-950/80 backdrop-blur-sm z-[100]"
           />
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 z-[101] bg-slate-900 border-t border-slate-800 rounded-t-[2rem] p-6 pb-8 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"
+            className="fixed bottom-0 left-0 right-0 z-[101] bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-[2rem] p-6 pb-8 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"
           >
-            <button onClick={onClose} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-200 bg-slate-800/50 rounded-full">
+            <button onClick={onClose} className="absolute top-4 right-4 p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-slate-200 bg-slate-800/50 rounded-full cursor-pointer">
               <X size={20} />
             </button>
             
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-black text-slate-100">Enviar Kudos</h2>
-              <p className="text-slate-400 text-sm mt-1">Reconoce el gran trabajo de <span className="text-indigo-400 font-bold">{receiverName}</span></p>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">Enviar Kudos</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Reconoce el gran trabajo de <span className="text-indigo-400 font-bold">{receiverName}</span></p>
             </div>
 
             {isSuccess ? (
@@ -76,7 +76,7 @@ export default function KudosModal({ isOpen, onClose, receiverId, receiverName, 
                 >
                   ✨
                 </motion.div>
-                <h3 className="text-xl font-bold text-slate-100">¡Kudos enviados!</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">¡Kudos enviados!</h3>
               </motion.div>
             ) : (
               <div className="space-y-6">
@@ -88,11 +88,11 @@ export default function KudosModal({ isOpen, onClose, receiverId, receiverName, 
                       className={`flex flex-col items-center p-4 rounded-2xl border transition-all ${
                         selectedType === kudo.id 
                           ? 'bg-indigo-500/20 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)] scale-105' 
-                          : 'bg-slate-800/50 border-slate-700 hover:bg-slate-800'
+                          : 'bg-slate-800/50 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800'
                       }`}
                     >
                       <span className="text-4xl mb-2">{kudo.emoji}</span>
-                      <span className="text-slate-200 font-bold text-sm text-center">{kudo.name}</span>
+                      <span className="text-slate-900 dark:text-slate-200 font-bold text-sm text-center">{kudo.name}</span>
                     </button>
                   ))}
                 </div>
@@ -107,11 +107,11 @@ export default function KudosModal({ isOpen, onClose, receiverId, receiverName, 
                       placeholder="Escribe un mensaje (opcional)..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-h-[100px] resize-none"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-slate-900 dark:text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-h-[100px] resize-none"
                     />
                     <button
                       onClick={handleSend}
-                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 shadow-[0_0_20px_rgba(99,102,241,0.4)]"
+                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 shadow-[0_0_20px_rgba(99,102,241,0.4)] cursor-pointer"
                     >
                       <span>Enviar Kudos</span>
                       <Send size={18} />

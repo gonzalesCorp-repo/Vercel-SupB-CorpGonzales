@@ -146,7 +146,7 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
               >
                 <div className="leading-tight">
                   <span className="text-xs font-bold block">{f.name}</span>
-                  <span className="text-[9px] text-slate-400 dark:text-slate-500 block">{f.sample}</span>
+                  <span className="text-[9px] text-slate-500 dark:text-slate-400 dark:text-slate-500 block">{f.sample}</span>
                 </div>
                 {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />}
               </button>

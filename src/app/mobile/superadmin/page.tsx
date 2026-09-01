@@ -154,7 +154,7 @@ export default function MobileSuperAdminPage() {
       <GlobalUI />
 
       {/* Header Fijo SuperAdmin */}
-      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 transition-colors">
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-50 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 transition-colors">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30">
@@ -174,7 +174,7 @@ export default function MobileSuperAdminPage() {
           {/* Selector de Sede */}
           <button
             onClick={() => setShowSedesModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-purple-500/40 transition active:scale-95 shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-purple-500/40 transition active:scale-95 shadow-sm cursor-pointer"
           >
             <MapPin className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
             <span className="truncate max-w-[110px]">{sedeActiva?.nombre || 'Elegir Sede'}</span>
@@ -223,7 +223,7 @@ export default function MobileSuperAdminPage() {
               exit={{ opacity: 0, y: 100 }}
               className="bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-[32px] sm:rounded-3xl w-full max-w-md p-6 space-y-4 shadow-2xl transition-colors"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-200 dark:border-slate-800">
                 <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-purple-600 dark:text-purple-400" /> Cambiar Sede Activa
                 </h3>

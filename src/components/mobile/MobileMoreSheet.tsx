@@ -99,7 +99,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
             <Link
               href="/mobile/superadmin"
               onClick={onClose}
-              className="w-full p-3.5 bg-purple-50 dark:bg-gradient-to-r dark:from-purple-950/60 dark:to-slate-950/80 hover:bg-purple-100 dark:hover:bg-slate-800 border border-purple-200 dark:border-purple-500/40 rounded-2xl flex items-center justify-between text-left transition-all active:scale-[0.99] group shadow-sm cursor-pointer"
+              className="w-full p-3.5 bg-purple-50 dark:bg-gradient-to-r dark:from-purple-950/60 dark:to-slate-950/80 hover:bg-purple-100 dark:hover:bg-slate-100 dark:bg-slate-800 border border-purple-200 dark:border-purple-500/40 rounded-2xl flex items-center justify-between text-left transition-all active:scale-[0.99] group shadow-sm cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl border border-purple-200 dark:border-purple-500/30 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 flex items-center justify-center">
@@ -122,7 +122,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
             <Link
               href="/mobile/config"
               onClick={onClose}
-              className="w-full p-3.5 bg-emerald-50 dark:bg-gradient-to-r dark:from-emerald-950/40 dark:to-slate-950/70 hover:bg-emerald-100 dark:hover:bg-slate-800 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl flex items-center justify-between text-left transition-all active:scale-[0.99] group shadow-sm cursor-pointer"
+              className="w-full p-3.5 bg-emerald-50 dark:bg-gradient-to-r dark:from-emerald-950/40 dark:to-slate-950/70 hover:bg-emerald-100 dark:hover:bg-slate-100 dark:bg-slate-800 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl flex items-center justify-between text-left transition-all active:scale-[0.99] group shadow-sm cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
@@ -149,7 +149,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
                   onSelectOption(item.id);
                   onClose();
                 }}
-                className="w-full p-3.5 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex items-center justify-between text-left transition-all active:scale-[0.99] group cursor-pointer"
+                className="w-full p-3.5 bg-slate-50 dark:bg-slate-950/60 hover:bg-slate-100 dark:hover:bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex items-center justify-between text-left transition-all active:scale-[0.99] group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center ${item.color}`}>
@@ -162,7 +162,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{item.desc}</p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
+                <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-slate-900 dark:hover:text-white transition-colors" />
               </button>
             );
           })}
@@ -170,7 +170,7 @@ export function MobileMoreSheet({ isOpen, onClose, onSelectOption, onToggleIpodM
 
         {/* Cerrar Sesión */}
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs">
-          <span className="text-[10px] text-slate-400 dark:text-slate-500">Vaikuntha Staff OS v2.0</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 dark:text-slate-500">Vaikuntha Staff OS v2.0</span>
           <button
             type="button"
             onClick={onLogout || (() => { window.location.href = '/login'; })}

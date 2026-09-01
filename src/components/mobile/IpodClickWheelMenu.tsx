@@ -45,18 +45,18 @@ export function IpodClickWheelMenu({ isOpen, onClose, onSelectOption }: IpodClic
         initial={{ opacity: 0, scale: 0.85, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.85, y: 30 }}
-        className="bg-gradient-to-b from-slate-900 via-slate-920 to-slate-950 w-full max-w-xs rounded-[40px] p-6 border border-slate-700/80 shadow-2xl shadow-indigo-950/50 flex flex-col items-center select-none relative"
+        className="bg-gradient-to-b from-slate-900 via-slate-920 to-slate-950 w-full max-w-xs rounded-[40px] p-6 border border-slate-300 dark:border-slate-700/80 shadow-2xl shadow-indigo-950/50 flex flex-col items-center select-none relative"
       >
         {/* Botón Cerrar */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white rounded-full transition"
+          className="absolute top-4 right-4 p-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Pantalla Superior estilo iPod */}
-        <div className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 mb-6 shadow-inner text-center space-y-2">
+        <div className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 mb-6 shadow-inner text-center space-y-2">
           <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 border-b border-slate-900 pb-1">
             <span className="flex items-center gap-1">
               <Disc className="w-3 h-3 text-indigo-400 animate-spin" /> iPod Mini Mode
@@ -67,7 +67,7 @@ export function IpodClickWheelMenu({ isOpen, onClose, onSelectOption }: IpodClic
           <div className="py-2">
             <span className="text-3xl block mb-1">{currentTool.icon}</span>
             <h3 className="text-base font-black text-white tracking-tight">{currentTool.label}</h3>
-            <p className="text-[11px] text-slate-400 font-medium">{currentTool.desc}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{currentTool.desc}</p>
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export function IpodClickWheelMenu({ isOpen, onClose, onSelectOption }: IpodClic
           <button
             onClick={() => { setSelectedIndex(0); }}
             className={`absolute top-2.5 font-bold text-[10px] uppercase tracking-widest transition-all ${
-              selectedIndex === 0 ? 'text-indigo-400 font-black scale-110' : 'text-slate-400 hover:text-white'
+              selectedIndex === 0 ? 'text-indigo-400 font-black scale-110' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             📊 Historial
@@ -88,7 +88,7 @@ export function IpodClickWheelMenu({ isOpen, onClose, onSelectOption }: IpodClic
           <button
             onClick={() => { setSelectedIndex(1); }}
             className={`absolute right-2.5 font-bold text-[10px] uppercase tracking-widest transition-all ${
-              selectedIndex === 1 ? 'text-emerald-400 font-black scale-110' : 'text-slate-400 hover:text-white'
+              selectedIndex === 1 ? 'text-emerald-400 font-black scale-110' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             💵 Liquidación
@@ -98,7 +98,7 @@ export function IpodClickWheelMenu({ isOpen, onClose, onSelectOption }: IpodClic
           <button
             onClick={() => { setSelectedIndex(2); }}
             className={`absolute bottom-2.5 font-bold text-[10px] uppercase tracking-widest transition-all ${
-              selectedIndex === 2 ? 'text-rose-400 font-black scale-110' : 'text-slate-400 hover:text-white'
+              selectedIndex === 2 ? 'text-rose-400 font-black scale-110' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             🚨 Asistencia
@@ -108,7 +108,7 @@ export function IpodClickWheelMenu({ isOpen, onClose, onSelectOption }: IpodClic
           <button
             onClick={() => { setSelectedIndex(3); }}
             className={`absolute left-3.5 font-bold text-[10px] uppercase tracking-widest transition-all ${
-              selectedIndex === 3 ? 'text-amber-400 font-black scale-110' : 'text-slate-400 hover:text-white'
+              selectedIndex === 3 ? 'text-amber-400 font-black scale-110' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             🍹 Bar
@@ -118,9 +118,9 @@ export function IpodClickWheelMenu({ isOpen, onClose, onSelectOption }: IpodClic
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={handleConfirm}
-            className="w-24 h-24 rounded-full bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-slate-700 shadow-xl flex flex-col items-center justify-center text-white active:bg-indigo-950 transition-all group"
+            className="w-24 h-24 rounded-full bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-slate-300 dark:border-slate-700 shadow-xl flex flex-col items-center justify-center text-white active:bg-indigo-950 transition-all group cursor-pointer"
           >
-            <span className="text-[11px] font-black uppercase tracking-widest text-indigo-400 group-hover:text-white transition-colors">
+            <span className="text-[11px] font-black uppercase tracking-widest text-indigo-400 group-hover:text-slate-900 dark:hover:text-white transition-colors">
               SELECT
             </span>
             <span className="text-[9px] text-slate-500 font-bold mt-0.5">Abrir</span>
@@ -131,13 +131,13 @@ export function IpodClickWheelMenu({ isOpen, onClose, onSelectOption }: IpodClic
         <div className="flex items-center gap-4 mt-6">
           <button
             onClick={handlePrev}
-            className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl active:scale-95 transition"
+            className="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl active:scale-95 transition cursor-pointer"
           >
             ◀ Anterior
           </button>
           <button
             onClick={handleNext}
-            className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl active:scale-95 transition"
+            className="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl active:scale-95 transition cursor-pointer"
           >
             Siguiente ▶
           </button>

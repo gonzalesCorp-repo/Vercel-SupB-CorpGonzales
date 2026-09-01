@@ -154,22 +154,22 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
   return (
     <div className="space-y-4 pb-20">
       {/* Header Destrabe */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-2">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xl space-y-2">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-black">
             <Wrench className="w-5 h-5" />
           </div>
           <div>
             <h2 className="text-sm font-black text-white">Destrabe Quirúrgico Remoto</h2>
-            <p className="text-[11px] text-slate-400">Acciones de desbloqueo inmediato para piso y caja</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Acciones de desbloqueo inmediato para piso y caja</p>
           </div>
         </div>
       </div>
 
       {/* 1. Destrabe de Estaciones de Piso */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-xl">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 space-y-3 shadow-xl">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
             <Unlock className="w-4 h-4 text-cyan-400" /> Estaciones de Piso ({estaciones.length})
           </h3>
 
@@ -193,10 +193,10 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
               return (
                 <div
                   key={est.id}
-                  className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3 flex items-center justify-between"
+                  className="bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 flex items-center justify-between"
                 >
                   <div>
-                    <h4 className="text-xs font-bold text-slate-100 flex items-center gap-2">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                       <span>{est.nombre || `Estación #${est.numero}`}</span>
                       <span className={`text-[9px] px-2 py-0.2 rounded-full font-bold ${
                         estaOcupada ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
@@ -204,7 +204,7 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
                         {est.estado_ocupacion || 'LIBRE'}
                       </span>
                     </h4>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                       {estaOcupada ? `Cliente: ${est.cliente_nombre_actual || 'Atención en curso'}` : 'Lista para asignación'}
                     </p>
                   </div>
@@ -226,8 +226,8 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
       </div>
 
       {/* 2. Destrabe de Órdenes de Atención (OATCs) Activas */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-xl">
-        <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 space-y-3 shadow-xl">
+        <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 text-purple-400" /> Órdenes Activas en Sede ({oatcsActivas.length})
         </h3>
 
@@ -240,16 +240,16 @@ export function TabDestrabeFixes({ sedeId, oatcsActivas, onActionComplete }: Tab
             oatcsActivas.map((o) => (
               <div
                 key={o.id}
-                className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3 space-y-2"
+                className="bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 space-y-2"
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-xs font-bold text-white">{o.cliente_nombre || 'Cliente'}</h4>
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">
                       Staff: {o.agente_nombre || 'Sin asignar'} • Fase: <span className="text-purple-300 font-bold">{o.estado_proceso}</span>
                     </p>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800">
+                  <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
                     {o.estado_pago || 'Pendiente'}
                   </span>
                 </div>

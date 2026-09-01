@@ -28,26 +28,26 @@ export function ModalEditarPrecioItem({
   if (!isOpen || !editItemTarget) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-      <div className="bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl">
+    <div className="fixed inset-0 z-[60] bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
         
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <h4 className="text-sm font-black text-white">Editar Precio / Cortesía</h4>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="space-y-3">
-          <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
             <p className="text-xs font-bold text-white">{editItemTarget.item.nombre}</p>
-            <span className="text-[10px] text-slate-400">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">
               Precio Base Original: S/ {Number(editItemTarget.item.precio_base || editItemTarget.item.precio_final).toFixed(2)}
             </span>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase">Nuevo Precio (S/):</label>
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Nuevo Precio (S/):</label>
             <input
               type="number"
               step="0.5"
@@ -67,7 +67,7 @@ export function ModalEditarPrecioItem({
                 value={motivoCortesiaInput}
                 onChange={(e) => setMotivoCortesiaInput(e.target.value)}
                 placeholder="Motivo de la cortesía..."
-                className="w-full p-2 bg-slate-950 border border-amber-500/30 rounded-lg text-xs text-white outline-none"
+                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-amber-500/30 rounded-lg text-xs text-white outline-none"
               />
               <p className="text-[10px] text-amber-300/80">
                 Se generará una alerta de aprobación inmediata para el supervisor en Recepción y Caja.
@@ -75,18 +75,18 @@ export function ModalEditarPrecioItem({
             </div>
           )}
 
-          <div className="pt-2 flex justify-end gap-2 border-t border-slate-800">
+          <div className="pt-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl"
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="button"
               onClick={onGuardarPrecio}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30 cursor-pointer"
             >
               Guardar Precio
             </button>

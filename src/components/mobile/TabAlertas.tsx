@@ -127,7 +127,7 @@ export function TabAlertas({ agenteId, agenteNombre, estadoActual, onEstadoCambi
           WFM & Control Horario
         </span>
         <h3 className="text-sm font-black text-white mt-2">Botonera de Asistencia y Turno</h3>
-        <p className="text-xs text-slate-400">Valida con el Tag NFC de la sede para registrar tu estado en tiempo real.</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Valida con el Tag NFC de la sede para registrar tu estado en tiempo real.</p>
       </div>
 
       {feedback && (
@@ -143,10 +143,10 @@ export function TabAlertas({ agenteId, agenteNombre, estadoActual, onEstadoCambi
         {/* 1. Ya Llegué */}
         <button
           onClick={() => handleDispararAlerta('ENTRADA', 'Ya llegué (Inicio de Turno)')}
-          className="bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative min-h-[95px]"
+          className="bg-white dark:bg-slate-900 hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative min-h-[95px]"
         >
           <span className="text-3xl group-hover:scale-110 transition-transform">👋</span>
-          <span className="text-xs font-black uppercase tracking-wide text-slate-200 group-hover:text-emerald-400">
+          <span className="text-xs font-black uppercase tracking-wide text-slate-900 dark:text-slate-200 group-hover:text-emerald-400">
             Ya llegué
           </span>
           <span className="text-[9px] text-slate-500 font-semibold">Inicio de Turno</span>
@@ -155,10 +155,10 @@ export function TabAlertas({ agenteId, agenteNombre, estadoActual, onEstadoCambi
         {/* 2. Voy a Comer */}
         <button
           onClick={() => handleDispararAlerta('INICIO_REFRIGERIO', 'Voy a comer (Inicio Refrigerio)')}
-          className="bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative min-h-[95px]"
+          className="bg-white dark:bg-slate-900 hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-amber-500/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative min-h-[95px]"
         >
           <span className="text-3xl group-hover:scale-110 transition-transform">🍕</span>
-          <span className="text-xs font-black uppercase tracking-wide text-slate-200 group-hover:text-amber-400">
+          <span className="text-xs font-black uppercase tracking-wide text-slate-900 dark:text-slate-200 group-hover:text-amber-400">
             Voy a comer
           </span>
           <span className="text-[9px] text-slate-500 font-semibold">Pausa Refrigerio</span>
@@ -167,10 +167,10 @@ export function TabAlertas({ agenteId, agenteNombre, estadoActual, onEstadoCambi
         {/* 3. Regresé */}
         <button
           onClick={() => handleDispararAlerta('FIN_REFRIGERIO', 'Regresé de comer (Fin Refrigerio)')}
-          className="bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-indigo-500/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative min-h-[95px]"
+          className="bg-white dark:bg-slate-900 hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative min-h-[95px]"
         >
           <span className="text-3xl group-hover:scale-110 transition-transform">🔄</span>
-          <span className="text-xs font-black uppercase tracking-wide text-slate-200 group-hover:text-indigo-400">
+          <span className="text-xs font-black uppercase tracking-wide text-slate-900 dark:text-slate-200 group-hover:text-indigo-400">
             Regresé
           </span>
           <span className="text-[9px] text-slate-500 font-semibold">Fin de Refrigerio</span>
@@ -179,10 +179,10 @@ export function TabAlertas({ agenteId, agenteNombre, estadoActual, onEstadoCambi
         {/* 4. Acabó mi Día */}
         <button
           onClick={() => handleDispararAlerta('SALIDA', 'Acabó mi día (Salida)')}
-          className="bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-rose-500/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative min-h-[95px]"
+          className="bg-white dark:bg-slate-900 hover:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-rose-500/50 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative min-h-[95px]"
         >
           <span className="text-3xl group-hover:scale-110 transition-transform">🏁</span>
-          <span className="text-xs font-black uppercase tracking-wide text-slate-200 group-hover:text-rose-400">
+          <span className="text-xs font-black uppercase tracking-wide text-slate-900 dark:text-slate-200 group-hover:text-rose-400">
             Acabó mi día
           </span>
           <span className="text-[9px] text-slate-500 font-semibold">Fin de Jornada</span>

@@ -160,7 +160,7 @@ export function LiveFeedDrawer({ isOpen, onClose, sedeId }: LiveFeedDrawerProps)
 
                 <button
                   onClick={onClose}
-                  className="p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition"
+                  className="p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>

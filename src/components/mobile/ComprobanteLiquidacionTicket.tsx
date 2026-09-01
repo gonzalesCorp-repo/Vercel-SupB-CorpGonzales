@@ -47,10 +47,10 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
 
   return (
     <div className="fixed inset-0 z-[140] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-800 space-y-5 shadow-2xl my-auto text-slate-100 animate-in zoom-in-95">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xl my-auto text-slate-900 dark:text-slate-100 animate-in zoom-in-95">
         
         {/* Header Modal */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
               🧾
@@ -61,7 +61,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
             </div>
           </div>
 
-          <button onClick={onClose} className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-white">
+          <button onClick={onClose} className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -149,7 +149,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
           {/* Espacio de Firmas Duales */}
           <div className="grid grid-cols-2 gap-4 pt-6 text-center text-[9px] border-t border-dashed border-slate-400">
             <div className="space-y-1">
-              <div className="border-b border-slate-800 pb-1 font-mono italic text-[8px] text-slate-500">
+              <div className="border-b border-slate-200 dark:border-slate-800 pb-1 font-mono italic text-[8px] text-slate-500">
                 {comprobante.firmaSolicitante ? 'FIRMA DIGITAL REGISTRADA' : '___________________'}
               </div>
               <p className="font-bold text-slate-700">FIRMA DEL COLABORADOR</p>
@@ -157,7 +157,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
             </div>
 
             <div className="space-y-1">
-              <div className="border-b border-slate-800 pb-1 font-mono italic text-[8px] text-slate-500">
+              <div className="border-b border-slate-200 dark:border-slate-800 pb-1 font-mono italic text-[8px] text-slate-500">
                 PENDIENTE AUTORIZACIÓN
               </div>
               <p className="font-bold text-slate-700">ADMIN / CAJA POS</p>
@@ -165,7 +165,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
             </div>
           </div>
 
-          <div className="text-[8px] text-center text-slate-400 pt-2">
+          <div className="text-[8px] text-center text-slate-500 dark:text-slate-400 pt-2">
             HASH DE SEGURIDAD: {comprobante.codigoLiquidacion} • VÁLIDO SUNAT / LOCACIÓN DE SERVICIOS
           </div>
 
@@ -176,7 +176,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
           <button
             onClick={handleImprimirTermica}
             disabled={imprimiendo}
-            className="p-3 bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold text-xs rounded-2xl border border-slate-700 flex flex-col items-center justify-center gap-1 transition active:scale-95"
+            className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold text-xs rounded-2xl border border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span className="text-[10px]">{imprimiendo ? 'Imprimiendo...' : 'Térmica 80mm'}</span>
@@ -194,7 +194,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
 
           <button
             onClick={handleDescargarPDF}
-            className="p-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-2xl flex flex-col items-center justify-center gap-1 transition active:scale-95 shadow-lg shadow-indigo-600/20"
+            className="p-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-2xl flex flex-col items-center justify-center gap-1 transition active:scale-95 shadow-lg shadow-indigo-600/20 cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span className="text-[10px]">Descargar PDF</span>

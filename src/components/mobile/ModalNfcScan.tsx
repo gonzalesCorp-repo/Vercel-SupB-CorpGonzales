@@ -208,16 +208,16 @@ export function ModalNfcScan({ isOpen, onClose, onSuccess, tipoAccion = 'Validac
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[70] bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-slate-900 w-full max-w-sm rounded-3xl p-6 border border-slate-800 text-center space-y-4 shadow-2xl relative select-none"
+        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-2xl relative select-none"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full bg-slate-800 transition"
+          className="absolute top-4 right-4 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white p-2 rounded-full bg-slate-100 dark:bg-slate-800 transition cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -226,7 +226,7 @@ export function ModalNfcScan({ isOpen, onClose, onSuccess, tipoAccion = 'Validac
         <button
           type="button"
           onClick={isSupported ? iniciarEscanerNfc : handleMarcacionDigital}
-          className="relative w-24 h-24 mx-auto flex items-center justify-center pt-2 group outline-none"
+          className="relative w-24 h-24 mx-auto flex items-center justify-center pt-2 group outline-none cursor-pointer"
         >
           <div className={`absolute inset-0 rounded-full ${isSupported ? 'bg-indigo-500/20' : 'bg-emerald-500/20'} ${isScanning ? 'animate-ping' : ''}`} />
           <div className={`w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl shadow-lg relative z-10 group-active:scale-95 transition-transform ${
@@ -253,7 +253,7 @@ export function ModalNfcScan({ isOpen, onClose, onSuccess, tipoAccion = 'Validac
           <h3 className="text-lg font-black text-white mt-2">
             {isSupported ? 'Aproxime el Tag NFC' : 'Confirmar Marcación Digital'}
           </h3>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {isSupported 
               ? 'Acerque su teléfono al Tag o presione el botón de validación inmediata.'
               : 'Dispositivo compatible con Marcación Digital 1-Tap (iPhone / Android).'}
@@ -272,11 +272,11 @@ export function ModalNfcScan({ isOpen, onClose, onSuccess, tipoAccion = 'Validac
 
         {/* Temporizador Regresivo (Si NFC está activo) */}
         {isSupported && (
-          <div className="bg-slate-800/60 p-2.5 rounded-2xl border border-slate-700/60 flex items-center justify-center gap-3">
+          <div className="bg-slate-800/60 p-2.5 rounded-2xl border border-slate-300 dark:border-slate-700/60 flex items-center justify-center gap-3">
             <span className="text-xl font-black font-mono text-indigo-400">
               {segundos}s
             </span>
-            <span className="text-[10px] font-medium text-slate-400 text-left leading-tight">
+            <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 text-left leading-tight">
               Esperando lectura física NFC...
             </span>
           </div>

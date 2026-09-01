@@ -119,11 +119,11 @@ export default function StaffPerfilView({
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 font-sans">
       <div className="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-3xl shadow-xl">
-        <h2 className="text-sm font-black text-slate-100 flex items-center gap-2">
+        <h2 className="text-sm font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <User className="w-5 h-5 text-pink-400" /> MI CUENTA STAFF (360)
         </h2>
         {onClose && (
-          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white rounded-xl bg-slate-800 cursor-pointer">
+          <button onClick={onClose} className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-800 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         )}
@@ -254,7 +254,7 @@ export default function StaffPerfilView({
       {/* 🏅 Badge Collection */}
       {gamProfile && (
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-xl">
-          <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
             <Award className="w-4 h-4 text-amber-400" /> MIS INSIGNIAS OPERATIVAS
           </h3>
           <BadgeCollection
@@ -280,7 +280,7 @@ export default function StaffPerfilView({
 
               <div>
                 <h3 className="text-base font-black text-white">Cambiar PIN Secreto</h3>
-                <p className="text-xs text-slate-400 mt-1">Ingresa un PIN numérico de 4 dígitos para desbloquear tus autorizaciones de piso.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Ingresa un PIN numérico de 4 dígitos para desbloquear tus autorizaciones de piso.</p>
               </div>
 
               <form onSubmit={handleGuardarPin} className="space-y-4">
@@ -299,7 +299,7 @@ export default function StaffPerfilView({
                   <button
                     type="button"
                     onClick={() => setModalPinOpen(false)}
-                    className="w-1/2 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition cursor-pointer"
+                    className="w-1/2 py-3 bg-slate-100 dark:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -333,7 +333,7 @@ export default function StaffPerfilView({
 
               <div>
                 <h3 className="text-base font-black text-white">Editar Apodo</h3>
-                <p className="text-xs text-slate-400 mt-1">Este nombre aparecerá en las comandas de clientes y reportes de producción.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Este nombre aparecerá en las comandas de clientes y reportes de producción.</p>
               </div>
 
               <form onSubmit={handleGuardarApodo} className="space-y-4">
@@ -351,7 +351,7 @@ export default function StaffPerfilView({
                   <button
                     type="button"
                     onClick={() => setModalApodoOpen(false)}
-                    className="w-1/2 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition cursor-pointer"
+                    className="w-1/2 py-3 bg-slate-100 dark:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition cursor-pointer"
                   >
                     Cancelar
                   </button>

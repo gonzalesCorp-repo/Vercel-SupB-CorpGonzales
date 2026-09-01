@@ -22,7 +22,7 @@ export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) 
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'agenda'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
           }`}
         >
           <div className={`p-1.5 rounded-xl transition-colors ${
@@ -42,7 +42,7 @@ export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) 
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'cartera'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
           }`}
         >
           <div className={`p-1.5 rounded-xl transition-colors ${
@@ -81,7 +81,7 @@ export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) 
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'liquidacion'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
           }`}
         >
           <div className={`p-1.5 rounded-xl transition-colors ${
@@ -101,7 +101,7 @@ export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) 
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'cuenta'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
           }`}
         >
           <div className={`p-1.5 rounded-xl transition-colors ${

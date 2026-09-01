@@ -152,12 +152,12 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando pedidos de laboratorio...</div>
             ) : pedidosPrep.length === 0 ? (
-              <div className="text-center text-slate-400 py-10 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
+              <div className="text-center text-slate-500 dark:text-slate-400 py-10 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 ✨ No hay fórmulas o pedidos de insumos pendientes de despacho
               </div>
             ) : (
               pedidosPrep.map((item) => (
-                <div key={item.id} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-lg space-y-2">
+                <div key={item.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-lg space-y-2">
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-2">
@@ -166,7 +166,7 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
                         </span>
                         <p className="font-bold text-xs text-white">{item.titulo}</p>
                       </div>
-                      <p className="text-[10px] text-slate-400 mt-1">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                         Solicitado por: <span className="text-indigo-300 font-bold">{item.solicitante}</span> {item.cliente && `• Cliente: ${item.cliente}`}
                       </p>
                     </div>
@@ -190,7 +190,7 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando stock de laboratorio...</div>
             ) : stockLab.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
+              <div className="text-center text-slate-500 dark:text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay stock registrado en el taller de esta sede
               </div>
             ) : (
@@ -201,7 +201,7 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
                   <div key={item.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex justify-between items-center shadow-md">
                     <div>
                       <p className="font-bold text-xs text-white">{item.bienes?.nombre || 'Insumo Químico'}</p>
-                      <p className="text-[10px] text-slate-400">{item.bienes?.categoria || 'General'}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{item.bienes?.categoria || 'General'}</p>
                     </div>
                     <div className="text-right">
                       <span className={`text-xs font-black ${isBajo ? 'text-rose-400' : 'text-emerald-400'}`}>
@@ -226,7 +226,7 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando movimientos de kardex...</div>
             ) : movimientosKardex.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
+              <div className="text-center text-slate-500 dark:text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay movimientos de inventario registrados recientemente
               </div>
             ) : (
@@ -234,12 +234,12 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
                 <div key={mov.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex justify-between items-center shadow-md">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-bold px-1.5 py-0.2 bg-slate-800 text-slate-300 rounded">
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded">
                         {mov.tipo_movimiento || 'DESPACHO'}
                       </span>
                       <p className="font-bold text-xs text-white">{mov.bienes?.nombre || mov.descripcion || 'Movimiento'}</p>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                       {mov.fecha_hora ? new Date(mov.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                     </p>
                   </div>

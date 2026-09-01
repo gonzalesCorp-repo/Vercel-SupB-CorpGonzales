@@ -43,12 +43,12 @@ export function ModalDerivarTicketCruzado({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-      <div className="bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
         
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <h4 className="text-sm font-black text-white">+ Añadir Ticket / Cross-Selling</h4>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -57,13 +57,13 @@ export function ModalDerivarTicketCruzado({
           
           {/* Selector de Triple Destino */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase">Destino de la atención:</label>
-            <div className="grid grid-cols-3 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Destino de la atención:</label>
+            <div className="grid grid-cols-3 gap-1.5 bg-slate-50 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setDestinoTicket('PROPIO')}
                 className={`py-1.5 rounded-lg text-[10px] font-bold transition ${
-                  destinoTicket === 'PROPIO' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400'
+                  destinoTicket === 'PROPIO' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
                 Para Mí
@@ -72,7 +72,7 @@ export function ModalDerivarTicketCruzado({
                 type="button"
                 onClick={() => setDestinoTicket('COLEGA')}
                 className={`py-1.5 rounded-lg text-[10px] font-bold transition ${
-                  destinoTicket === 'COLEGA' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400'
+                  destinoTicket === 'COLEGA' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
                 A Colega
@@ -81,7 +81,7 @@ export function ModalDerivarTicketCruzado({
                 type="button"
                 onClick={() => setDestinoTicket('RECEPCION')}
                 className={`py-1.5 rounded-lg text-[10px] font-bold transition ${
-                  destinoTicket === 'RECEPCION' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400'
+                  destinoTicket === 'RECEPCION' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
                 A Recepción
@@ -92,7 +92,7 @@ export function ModalDerivarTicketCruzado({
           {/* Selector de Colega si destino === COLEGA */}
           {destinoTicket === 'COLEGA' && (
             <div className="space-y-1 animate-in fade-in">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">Seleccionar Colega:</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Seleccionar Colega:</label>
               <select
                 value={colegaSeleccionadoId}
                 onChange={(e) => {
@@ -115,11 +115,11 @@ export function ModalDerivarTicketCruzado({
 
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">Servicio o Producto:</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Servicio o Producto:</label>
               <button
                 type="button"
                 onClick={onAbrirCatalogo}
-                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 bg-indigo-950/60 px-2 py-0.5 rounded-lg border border-indigo-800/60 transition active:scale-95"
+                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 bg-indigo-950/60 px-2 py-0.5 rounded-lg border border-indigo-800/60 transition active:scale-95 cursor-pointer"
               >
                 <Sparkles className="w-3 h-3 text-indigo-400" /> Explorar Catálogo
               </button>
@@ -136,7 +136,7 @@ export function ModalDerivarTicketCruzado({
 
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">Tipo:</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Tipo:</label>
               <select
                 value={nuevoItemTipo}
                 onChange={(e) => setNuevoItemTipo(e.target.value as any)}
@@ -148,7 +148,7 @@ export function ModalDerivarTicketCruzado({
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">Precio (S/):</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Precio (S/):</label>
               <input
                 type="number"
                 step="0.5"
@@ -159,17 +159,17 @@ export function ModalDerivarTicketCruzado({
             </div>
           </div>
 
-          <div className="pt-2 flex justify-end gap-2 border-t border-slate-800">
+          <div className="pt-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl"
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30 cursor-pointer"
             >
               {destinoTicket === 'COLEGA' ? 'Enviar a Colega' : destinoTicket === 'RECEPCION' ? 'Enviar a Recepción' : 'Añadir a OATC'}
             </button>

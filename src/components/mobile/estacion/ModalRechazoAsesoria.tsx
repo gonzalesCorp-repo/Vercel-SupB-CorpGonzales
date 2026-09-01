@@ -29,22 +29,22 @@ export function ModalRechazoAsesoria({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-      <div className="bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
         
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2 text-rose-400">
             <UserX className="w-5 h-5" />
             <h4 className="text-sm font-black text-white">Cancelar / No Acepta Proforma</h4>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button onClick={onClose} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="space-y-3">
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase">Motivo del Rechazo:</label>
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Motivo del Rechazo:</label>
             <select
               value={motivoSeleccionado}
               onChange={(e) => setMotivoSeleccionado(e.target.value)}
@@ -57,7 +57,7 @@ export function ModalRechazoAsesoria({
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase">Detalles adicionales (opcional):</label>
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Detalles adicionales (opcional):</label>
             <textarea
               value={detalleInput}
               onChange={(e) => setDetalleInput(e.target.value)}
@@ -70,7 +70,7 @@ export function ModalRechazoAsesoria({
             <p className="text-[11px] text-indigo-300 font-bold flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" /> ¿Deseas agendar para otra fecha?
             </p>
-            <p className="text-[10px] text-slate-400">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">
               Guardará un Lead de recuperación en el CRM vinculado a tu cartera para retomar contacto por WhatsApp.
             </p>
             <button
@@ -83,11 +83,11 @@ export function ModalRechazoAsesoria({
             </button>
           </div>
 
-          <div className="pt-2 flex justify-end gap-2 border-t border-slate-800">
+          <div className="pt-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl"
+              className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl cursor-pointer"
             >
               Volver
             </button>

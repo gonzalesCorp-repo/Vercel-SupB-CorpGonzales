@@ -107,17 +107,17 @@ export default function AdminMobileView({ agente, sedeId }: { agente: any; sedeI
   return (
     <div className="space-y-4">
       {/* Tabs */}
-      <div className="grid grid-cols-4 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 shadow-md">
-        <button onClick={() => setTab('dashboard')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'dashboard' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'}`}>
+      <div className="grid grid-cols-4 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
+        <button onClick={() => setTab('dashboard')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'dashboard' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'}`}>
           <LayoutDashboard className="w-4 h-4" /> Dash
         </button>
-        <button onClick={() => setTab('equipo')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'equipo' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('equipo')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'equipo' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'}`}>
           <Users className="w-4 h-4" /> Equipo ({agentes.length})
         </button>
-        <button onClick={() => setTab('retos')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'retos' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('retos')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'retos' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'}`}>
           <Trophy className="w-4 h-4" /> Retos
         </button>
-        <button onClick={() => setTab('market')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'market' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('market')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'market' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'}`}>
           <Store className="w-4 h-4" /> Market ({rewards.length})
         </button>
       </div>
@@ -127,12 +127,12 @@ export default function AdminMobileView({ agente, sedeId }: { agente: any; sedeI
         {tab === 'dashboard' && (
           <div className="space-y-3">
              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-900 p-4 rounded-3xl border border-slate-800 text-center shadow-lg">
-                   <p className="text-[10px] uppercase font-bold text-slate-400">Agentes Activos</p>
+                <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 text-center shadow-lg">
+                   <p className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Agentes Activos</p>
                    <p className="text-3xl font-black text-white mt-1">{dashMetrics.agentesActivos}</p>
                 </div>
-                <div className="bg-slate-900 p-4 rounded-3xl border border-slate-800 text-center shadow-lg">
-                   <p className="text-[10px] uppercase font-bold text-slate-400">OATCs Hoy</p>
+                <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 text-center shadow-lg">
+                   <p className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">OATCs Hoy</p>
                    <p className="text-3xl font-black text-indigo-400 mt-1">{dashMetrics.oatcsHoy}</p>
                 </div>
              </div>
@@ -140,10 +140,10 @@ export default function AdminMobileView({ agente, sedeId }: { agente: any; sedeI
                 <p className="text-[10px] uppercase font-bold text-indigo-200">Facturación Real Hoy</p>
                 <p className="text-4xl font-black mt-1">S/ {dashMetrics.ingresosHoy.toFixed(2)}</p>
              </div>
-             <div className="bg-slate-900 p-5 rounded-3xl border border-slate-800 shadow-lg">
-                <p className="text-xs uppercase font-bold text-slate-400 mb-2">Gamificación Global</p>
+             <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-lg">
+                <p className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400 mb-2">Gamificación Global</p>
                 <div className="flex justify-between items-center text-sm">
-                   <span className="text-slate-300">Total XP Entregado</span>
+                   <span className="text-slate-700 dark:text-slate-300">Total XP Entregado</span>
                    <span className="font-bold text-amber-400">{dashMetrics.totalXP.toLocaleString()} XP</span>
                 </div>
              </div>
@@ -153,10 +153,10 @@ export default function AdminMobileView({ agente, sedeId }: { agente: any; sedeI
         {tab === 'equipo' && (
           <div className="space-y-2">
             {agentes.map(a => (
-              <div key={a.id} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center shadow-lg">
+              <div key={a.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-lg">
                 <div>
                   <p className="font-bold text-white text-sm">{a.nombre || a.email}</p>
-                  <p className="text-[10px] text-slate-400 uppercase">{a.rol} • {a.especialidad || 'Especialista'}</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase">{a.rol} • {a.especialidad || 'Especialista'}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-black text-amber-400">{a.xp_total || 0} XP • Nvl {a.nivel || 1}</p>
@@ -168,7 +168,7 @@ export default function AdminMobileView({ agente, sedeId }: { agente: any; sedeI
         )}
 
         {tab === 'retos' && (
-          <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 text-center text-slate-400 text-sm">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 text-center text-slate-500 dark:text-slate-400 text-sm">
             Retos activos del mes (conectado a gamification engine)
           </div>
         )}
@@ -176,35 +176,35 @@ export default function AdminMobileView({ agente, sedeId }: { agente: any; sedeI
         {tab === 'market' && (
           <div className="space-y-4">
              <div className="flex justify-between items-center px-1">
-                <span className="text-xs font-black uppercase text-slate-400">Catálogo de Recompensas</span>
+                <span className="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Catálogo de Recompensas</span>
                 <button onClick={() => setShowAddReward(!showAddReward)} className="bg-indigo-600/20 text-indigo-400 p-2 rounded-xl border border-indigo-500/30">
                    <Plus className="w-4 h-4" />
                 </button>
              </div>
 
              {showAddReward && (
-                <form onSubmit={handleAddReward} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
-                   <input type="text" placeholder="Nombre" value={newReward.nombre} onChange={e => setNewReward({...newReward, nombre: e.target.value})} required className="w-full bg-slate-950 p-3 rounded-xl border border-slate-800 text-sm text-white" />
-                   <textarea placeholder="Descripción" value={newReward.descripcion} onChange={e => setNewReward({...newReward, descripcion: e.target.value})} required className="w-full bg-slate-950 p-3 rounded-xl border border-slate-800 text-sm text-white" />
+                <form onSubmit={handleAddReward} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                   <input type="text" placeholder="Nombre" value={newReward.nombre} onChange={e => setNewReward({...newReward, nombre: e.target.value})} required className="w-full bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm text-white" />
+                   <textarea placeholder="Descripción" value={newReward.descripcion} onChange={e => setNewReward({...newReward, descripcion: e.target.value})} required className="w-full bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm text-white" />
                    <div className="flex gap-2">
-                      <input type="number" placeholder="Monedas" value={newReward.costo_monedas || ''} onChange={e => setNewReward({...newReward, costo_monedas: parseInt(e.target.value)})} required className="w-1/2 bg-slate-950 p-3 rounded-xl border border-slate-800 text-sm text-white" />
-                      <select value={newReward.tipo_beneficiario} onChange={e => setNewReward({...newReward, tipo_beneficiario: e.target.value})} className="w-1/2 bg-slate-950 p-3 rounded-xl border border-slate-800 text-sm text-white">
+                      <input type="number" placeholder="Monedas" value={newReward.costo_monedas || ''} onChange={e => setNewReward({...newReward, costo_monedas: parseInt(e.target.value)})} required className="w-1/2 bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm text-white" />
+                      <select value={newReward.tipo_beneficiario} onChange={e => setNewReward({...newReward, tipo_beneficiario: e.target.value})} className="w-1/2 bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm text-white">
                          <option value="TODOS">TODOS</option>
                          <option value="STAFF">STAFF</option>
                          <option value="CLIENTE">CLIENTE</option>
                       </select>
                    </div>
-                   <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm">Guardar</button>
+                   <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm cursor-pointer">Guardar</button>
                 </form>
              )}
 
              <div className="grid grid-cols-2 gap-3">
                 {rewards.map(r => (
-                  <div key={r.id} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-md flex flex-col justify-between">
+                  <div key={r.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md flex flex-col justify-between">
                      <div>
                         <Gift className="w-5 h-5 text-purple-400 mb-2" />
                         <p className="font-bold text-xs text-white">{r.nombre}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">{r.descripcion}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{r.descripcion}</p>
                      </div>
                      <p className="text-xs font-black text-amber-400 mt-3">{r.costo_monedas} 💎</p>
                   </div>
