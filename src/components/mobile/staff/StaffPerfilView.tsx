@@ -2,7 +2,11 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, X, Edit3, Award, Heart, LogOut, Sliders, KeyRound, Check } from 'lucide-react';
+import { 
+  User, X, Edit3, Award, Heart, LogOut, Sliders, 
+  KeyRound, Check, Sparkles, Shield, Trophy, Settings, 
+  Calendar, Mail, Lock
+} from 'lucide-react';
 import StreakCounter from '@/components/mobile/StreakCounter';
 import HallOfFameBanner from '@/components/mobile/HallOfFameBanner';
 import BadgeCollection from '@/components/mobile/BadgeCollection';
@@ -38,6 +42,7 @@ export default function StaffPerfilView({
   const supabase = createClient();
   const { themeMode, setThemeMode, primaryColor, setPrimaryColor } = useThemeStore();
 
+  const [activeTab, setActiveTab] = useState<'perfil' | 'logros' | 'ajustes'>('perfil');
   const [agente, setAgente] = useState<any>(initialAgente);
   const [modalPinOpen, setModalPinOpen] = useState(false);
   const [nuevoPin, setNuevoPin] = useState('');
@@ -46,15 +51,6 @@ export default function StaffPerfilView({
   const [modalApodoOpen, setModalApodoOpen] = useState(false);
   const [nuevoApodo, setNuevoApodo] = useState(agente?.nombre || '');
   const [guardandoApodo, setGuardandoApodo] = useState(false);
-
-  const colors = [
-    { name: 'Índigo', value: '#4f46e5' },
-    { name: 'Esmeralda', value: '#10b981' },
-    { name: 'Rosa', value: '#ec4899' },
-    { name: 'Violeta', value: '#8b5cf6' },
-    { name: 'Naranja', value: '#f97316' },
-    { name: 'Azul', value: '#3b82f6' }
-  ];
 
   const handleGuardarPin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,12 +97,12 @@ export default function StaffPerfilView({
         .eq('id', agente.id);
 
       if (error) {
-        showAlert('Error al actualizar tu apodo', 'error');
+        showAlert('Error al actualizar el apodo', 'error');
         return;
       }
 
       setAgente({ ...agente, nombre: nuevoApodo.trim() });
-      showAlert('¡Apodo de comanda actualizado con éxito!', 'success');
+      showAlert('¡Apodo en comandas actualizado!', 'success');
       setModalApodoOpen(false);
     } catch (err) {
       console.error(err);
@@ -116,252 +112,273 @@ export default function StaffPerfilView({
     }
   };
 
+  const handleCerrarSesion = async () => {
+    await supabase.auth.signOut();
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('vaikuntha_user_email');
+      localStorage.removeItem('vaikuntha_user_rol');
+      localStorage.removeItem('vaikuntha_user_name');
+      window.location.href = '/login';
+    }
+  };
+
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 font-sans">
-      <div className="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-3xl shadow-xl">
-        <h2 className="text-sm font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <User className="w-5 h-5 text-pink-400" /> MI CUENTA STAFF (360)
-        </h2>
-        {onClose && (
-          <button onClick={onClose} className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-800 cursor-pointer">
-            <X className="w-5 h-5" />
-          </button>
-        )}
-      </div>
-
-      {/* 🏆 Hall of Fame Banner */}
-      {hallOfFame && hallOfFame.length > 0 && (
-        <HallOfFameBanner
-          hallOfFame={hallOfFame.slice(0, 3).map(h => ({
-            nombre: h.nombre,
-            xp_ciclo: h.xp_ciclo,
-            streak: h.streak_asistencia,
-            titulo: h.titulo,
-            agente_id: h.agente_id
-          }))}
-          currentAgenteId={agente?.id || ''}
-          cicloFin={calcularFinCiclo()}
-        />
-      )}
-
-      {/* 🔥 Streak Counter */}
-      {gamProfile && (
-        <StreakCounter
-          streak={gamProfile.streak_asistencia || 0}
-          streakMax={gamProfile.streak_max || 0}
-        />
-      )}
-
-      {/* Card Principal de Perfil */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl transition-colors">
-        <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-3">
-          <div>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">{agente?.nombre || 'Colaborador'}</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
-              Turno: ⏰ {formatHorarioAgente(agente?.atributos)} • <span className="text-indigo-600 dark:text-indigo-400 font-bold">ROL: {agente?.rol || 'STAFF'}</span>
-            </p>
-          </div>
-          <button onClick={() => setModalApodoOpen(true)}
-            className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 rounded-xl text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-600/30 transition cursor-pointer"
-          >
-            Editar
-          </button>
-        </div>
-
-        {/* Campos Configuración */}
-        <div className="space-y-2 text-xs">
-          <div 
-            onClick={() => setModalApodoOpen(true)}
-            className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition"
-          >
-            <span className="font-bold text-slate-500 dark:text-slate-400">APODO / NOMBRE EN COMANDAS</span>
-            <span className="font-black text-slate-900 dark:text-white flex items-center gap-1">
-              {agente?.atributos?.nickname || agente?.nombre || 'Colaborador'} <Edit3 className="w-3.5 h-3.5 text-indigo-500" />
-            </span>
-          </div>
-
-          <div 
-            onClick={() => setModalPinOpen(true)}
-            className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-pink-500/40 cursor-pointer transition"
-          >
-            <span className="font-bold text-slate-500 dark:text-slate-400">PIN SECRETO DE PISO</span>
-            <span className="font-black text-pink-500 tracking-widest flex items-center gap-1">
-              {agente?.pin ? '••••' : 'Configurar'} <Edit3 className="w-3.5 h-3.5 text-pink-500" />
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-            <span className="font-bold text-slate-500 dark:text-slate-400">DÍA DE DESCANSO HABITUAL</span>
-            <span className="font-black text-emerald-600 dark:text-emerald-400">{formatDescansoAgente(agente?.atributos)}</span>
-          </div>
-
-          <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-            <span className="font-bold text-slate-500 dark:text-slate-400">CORREO / USUARIO</span>
-            <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[180px]">{agente?.email || 'Sin correo asignado'}</span>
-          </div>
-        </div>
-
-        {/* 📲 Botón de Instalación PWA Directa con Marca */}
-        <PwaInstallButton />
-
-        {/* Tarjeta Completa de Accesibilidad y Legibilidad Visual */}
-        <MobileAccessibilityCard userId={agente?.id} />
-
-        {/* Botón Enviar Kudos */}
-        <button onClick={() => {
-            if (setKudosTargetId && setKudosTargetName && setShowKudosModal) {
-              setKudosTargetId(agente?.id || '');
-              setKudosTargetName(agente?.nombre || 'Compañero');
-              setShowKudosModal(true);
-            }
-          }}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-pink-600/30 active:scale-95 transition cursor-pointer"
+    <div className="space-y-4 pb-20 w-full animate-in fade-in duration-200">
+      
+      {/* 1. Selector de Pestañas Superiores de Mi Cuenta */}
+      <div className="flex gap-1 bg-slate-100 dark:bg-slate-900/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner w-full">
+        <button
+          type="button"
+          onClick={() => setActiveTab('perfil')}
+          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            activeTab === 'perfil'
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
         >
-          <Heart className="w-4 h-4 fill-current" /> Enviar Kudos Reconocimiento 💖
+          <User className="w-3.5 h-3.5" />
+          <span>Perfil</span>
         </button>
 
-        {/* Botón Acceso Configuración de Sede para Admin / SuperAdmin */}
-        {['ADMIN', 'SUPERADMIN', 'SOPORTE'].includes(agente?.rol?.toUpperCase() || '') && (
-          <a 
-            href="/mobile/config"
-            className="w-full py-3.5 rounded-2xl bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition hover:bg-emerald-500/20 cursor-pointer shadow-md"
-          >
-            <Sliders className="w-4 h-4 text-emerald-400" /> Configuración Quirúrgica de Sede (Admin)
-          </a>
-        )}
-
-        {/* Botón Cerrar Sesión */}
-        <button onClick={async () => {
-            const { createClient } = await import('@/lib/supabase/client');
-            const supabase = createClient();
-            await supabase.auth.signOut();
-            if (typeof window !== 'undefined') {
-              localStorage.removeItem('vaikuntha_user_email');
-              localStorage.removeItem('vaikuntha_user_role');
-              localStorage.removeItem('vaikuntha_user_name');
-              window.location.href = '/login';
-            }
-          }}
-          className="w-full py-3.5 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition hover:bg-rose-500/20 cursor-pointer"
+        <button
+          type="button"
+          onClick={() => setActiveTab('logros')}
+          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            activeTab === 'logros'
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
         >
-          <LogOut className="w-4 h-4" /> Cerrar Sesión Operativa
+          <Trophy className="w-3.5 h-3.5" />
+          <span>Logros</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('ajustes')}
+          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            activeTab === 'ajustes'
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <Settings className="w-3.5 h-3.5" />
+          <span>Ajustes</span>
         </button>
       </div>
 
-      {/* 🏅 Badge Collection */}
-      {gamProfile && (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-xl">
-          <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
-            <Award className="w-4 h-4 text-amber-400" /> MIS INSIGNIAS OPERATIVAS
-          </h3>
+      {/* ========================================================================= */}
+      {/* PESTAÑA 1: PERFIL & DATOS PERSONALES */}
+      {/* ========================================================================= */}
+      {activeTab === 'perfil' && (
+        <div className="space-y-4 animate-in fade-in w-full">
+          {/* Tarjeta de Identidad */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white font-black text-xl flex items-center justify-center shadow-lg shadow-purple-600/30">
+                  {agente?.nombre ? agente.nombre.charAt(0) : 'S'}
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+                    {agente?.nombre || 'Colaborador Staff'}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Turno: ⏰ {formatHorarioAgente(agente?.atributos)} • <span className="text-indigo-600 dark:text-indigo-400 font-bold uppercase">{agente?.rol || 'STAFF'}</span>
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setModalApodoOpen(true)}
+                className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 rounded-xl text-xs font-bold transition cursor-pointer"
+              >
+                Editar
+              </button>
+            </div>
+
+            {/* Bloques de Datos */}
+            <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800/80">
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Apodo / Nombre en Comandas</span>
+                  <span className="text-xs font-black text-slate-900 dark:text-white">{agente?.atributos?.nickname || agente?.nombre}</span>
+                </div>
+                <button onClick={() => setModalApodoOpen(true)} className="p-1.5 text-indigo-500 hover:text-indigo-600 cursor-pointer">
+                  <Edit3 className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">PIN Secreto de Piso</span>
+                  <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                    {agente?.pin ? '•••• (Configurado)' : 'Sin configurar'}
+                  </span>
+                </div>
+                <button onClick={() => setModalPinOpen(true)} className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl text-[11px] font-bold border border-indigo-200 dark:border-indigo-500/30 cursor-pointer">
+                  Cambiar
+                </button>
+              </div>
+
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Día de Descanso Habitual</span>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                    {formatDescansoAgente(agente?.atributos)}
+                  </span>
+                </div>
+                <Calendar className="w-4 h-4 text-emerald-500" />
+              </div>
+
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Correo / Usuario</span>
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    {agente?.email || 'Sin correo asignado'}
+                  </span>
+                </div>
+                <Mail className="w-4 h-4 text-slate-400" />
+              </div>
+            </div>
+          </div>
+
+          {/* Botón Cerrar Sesión */}
+          <button
+            onClick={handleCerrarSesion}
+            className="w-full py-3 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 rounded-2xl text-xs font-black flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-xs"
+          >
+            <LogOut className="w-4 h-4" /> Cerrar Sesión Segura
+          </button>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PESTAÑA 2: LOGROS, RACHA & GAMIFICACIÓN */}
+      {/* ========================================================================= */}
+      {activeTab === 'logros' && (
+        <div className="space-y-4 animate-in fade-in w-full">
+          <StreakCounter
+            streak={gamProfile?.streak_asistencia || 0}
+            streakMax={gamProfile?.streak_max || 0}
+          />
+
+          <HallOfFameBanner
+            hallOfFame={hallOfFame || []}
+            currentAgenteId={agente?.id || ''}
+            cicloFin={calcularFinCiclo()}
+          />
+
           <BadgeCollection
-            earnedBadges={gamProfile.badges || []}
-            allBadges={BADGE_CATALOG.filter(b => !b.role_filter || b.role_filter.includes(agente?.rol || 'STAFF'))}
+            earnedBadges={gamProfile?.badges || []}
+            allBadges={BADGE_CATALOG}
           />
         </div>
       )}
 
-      {/* MODAL CAMBIAR PIN */}
-      <AnimatePresence>
-        {modalPinOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-xs w-full text-center space-y-4 shadow-2xl"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-pink-500/20 text-pink-400 flex items-center justify-center mx-auto">
-                <KeyRound className="w-6 h-6" />
+      {/* ========================================================================= */}
+      {/* PESTAÑA 3: AJUSTES, ACCESIBILIDAD & PWA */}
+      {/* ========================================================================= */}
+      {activeTab === 'ajustes' && (
+        <div className="space-y-4 animate-in fade-in w-full">
+          <PwaInstallButton />
+          <MobileAccessibilityCard />
+        </div>
+      )}
+
+      {/* Modal Cambio de PIN */}
+      {modalPinOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <KeyRound className="w-4 h-4 text-indigo-500" /> Cambiar PIN Secreto
+              </h4>
+              <button onClick={() => setModalPinOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-200 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500">Ingresa tu nuevo PIN de 4 dígitos para autorizar comandas e insumos en salón.</p>
+
+            <form onSubmit={handleGuardarPin} className="space-y-3">
+              <input
+                type="password"
+                maxLength={4}
+                value={nuevoPin}
+                onChange={(e) => setNuevoPin(e.target.value.replace(/\D/g, ''))}
+                placeholder="4 dígitos numéricos"
+                className="w-full text-center text-2xl font-mono tracking-widest bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl py-3 text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                autoFocus
+              />
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setModalPinOpen(false)}
+                  className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={guardandoPin || nuevoPin.length !== 4}
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs disabled:opacity-50 cursor-pointer shadow-md"
+                >
+                  {guardandoPin ? 'Guardando...' : 'Guardar PIN'}
+                </button>
               </div>
-
-              <div>
-                <h3 className="text-base font-black text-slate-900 dark:text-white">Cambiar PIN Secreto</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Ingresa un PIN numérico de 4 dígitos para desbloquear tus autorizaciones de piso.</p>
-              </div>
-
-              <form onSubmit={handleGuardarPin} className="space-y-4">
-                <input
-                  type="password"
-                  maxLength={4}
-                  value={nuevoPin}
-                  onChange={e => setNuevoPin(e.target.value.replace(/\D/g, ''))}
-                  placeholder="••••"
-                  className="w-full text-center text-3xl tracking-[0.5em] font-black bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors rounded-2xl p-4 focus:border-pink-500 outline-none"
-                  autoFocus
-                  required
-                />
-
-                <div className="flex gap-2">
-                  <button type="button"
-                    onClick={() => setModalPinOpen(false)}
-                    className="w-1/2 py-3 bg-slate-100 dark:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                  <button type="submit"
-                    disabled={guardandoPin || nuevoPin.length !== 4}
-                    className="w-1/2 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl text-xs font-black shadow-lg disabled:opacity-50 transition cursor-pointer"
-                  >
-                    {guardandoPin ? 'Guardando...' : 'Guardar PIN'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+            </form>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
-      {/* MODAL CAMBIAR APODO */}
-      <AnimatePresence>
-        {modalApodoOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-xs w-full text-center space-y-4 shadow-2xl"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto">
-                <User className="w-6 h-6" />
+      {/* Modal Cambio de Apodo */}
+      {modalApodoOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 max-w-sm w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-indigo-500" /> Editar Apodo en Salón
+              </h4>
+              <button onClick={() => setModalApodoOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-200 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500">Este nombre aparecerá en la comanda de bar, tickets y pantalla de turnos.</p>
+
+            <form onSubmit={handleGuardarApodo} className="space-y-3">
+              <input
+                type="text"
+                value={nuevoApodo}
+                onChange={(e) => setNuevoApodo(e.target.value)}
+                placeholder="Tu apodo o nombre corto"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl py-3 px-4 text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 text-xs font-bold"
+                autoFocus
+              />
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setModalApodoOpen(false)}
+                  className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={guardandoApodo || !nuevoApodo.trim()}
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs disabled:opacity-50 cursor-pointer shadow-md"
+                >
+                  {guardandoApodo ? 'Guardando...' : 'Guardar Apodo'}
+                </button>
               </div>
-
-              <div>
-                <h3 className="text-base font-black text-slate-900 dark:text-white">Editar Apodo</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Este nombre aparecerá en las comandas de clientes y reportes de producción.</p>
-              </div>
-
-              <form onSubmit={handleGuardarApodo} className="space-y-4">
-                <input
-                  type="text"
-                  value={nuevoApodo}
-                  onChange={e => setNuevoApodo(e.target.value)}
-                  placeholder="Tu apodo o nombre..."
-                  className="w-full text-center text-base font-black bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors rounded-2xl p-3.5 focus:border-indigo-500 outline-none"
-                  autoFocus
-                  required
-                />
-
-                <div className="flex gap-2">
-                  <button type="button"
-                    onClick={() => setModalApodoOpen(false)}
-                    className="w-1/2 py-3 bg-slate-100 dark:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                  <button type="submit"
-                    disabled={guardandoApodo || !nuevoApodo.trim()}
-                    className="w-1/2 py-3 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg disabled:opacity-50 transition cursor-pointer"
-                  >
-                    {guardandoApodo ? 'Guardando...' : 'Guardar'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+            </form>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
-    </motion.div>
+    </div>
   );
 }

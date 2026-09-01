@@ -71,7 +71,7 @@ export function TabEstacion({
   onServicioFinalizado,
   onRefrescar
 }: TabEstacionProps) {
-  const [subTab, setSubTab] = useState<'silla' | 'bar' | 'cola'>('silla');
+  const [subTab, setSubTab] = useState<'silla' | 'turno' | 'bar' | 'cola'>('silla');
   const [modalNfcOpen, setModalNfcOpen] = useState(false);
   const [modalSelectorEstacionOpen, setModalSelectorEstacionOpen] = useState(false);
   const [modalLabOpen, setModalLabOpen] = useState(false);
@@ -541,41 +541,53 @@ export function TabEstacion({
     <div className="space-y-4 animate-in fade-in duration-200">
       
       {/* 3 Sub-Tabs Principales en Estación: Silla, Bar y Cola */}
-      <div className="flex gap-1 bg-slate-100 dark:bg-slate-900/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner transition-colors">
+      <div className="flex gap-1 bg-slate-100 dark:bg-slate-900/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner transition-colors w-full">
         <button type="button"
           onClick={() => setSubTab('silla')}
-          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
             subTab === 'silla'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <Layers className="w-3.5 h-3.5" />
-          <span>{esFueraDeTurno ? '⏰ Mi Turno' : '🛋️ Mi Silla'}</span>
+          <Layers className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">🛋️ Mi Silla</span>
+        </button>
+
+        <button type="button"
+          onClick={() => setSubTab('turno')}
+          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+            subTab === 'turno'
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">⏰ Asistencia</span>
         </button>
 
         <button type="button"
           onClick={() => setSubTab('bar')}
-          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
             subTab === 'bar'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <Coffee className="w-3.5 h-3.5" />
-          <span>🍹 Bar & Café</span>
+          <Coffee className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">🍹 Bar</span>
         </button>
 
         <button type="button"
           onClick={() => setSubTab('cola')}
-          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
             subTab === 'cola'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <Users className="w-3.5 h-3.5" />
-          <span>👥 Cola</span>
+          <Users className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">👥 Cola</span>
         </button>
       </div>
 

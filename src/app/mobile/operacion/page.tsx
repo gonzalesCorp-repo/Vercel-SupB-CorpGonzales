@@ -404,7 +404,7 @@ export default function MobileOperacionPage() {
 
         {/* 3. 👥 CARTERA CRM */}
         {activeHub === 'cartera' && (
-          <TabCarteraCRM />
+          <TabCarteraCRM agenteId={agente.id} agenteNombre={agente.nombre} />
         )}
 
         {/* 4. 📊 LIQUIDACIÓN & AUDITORÍA */}

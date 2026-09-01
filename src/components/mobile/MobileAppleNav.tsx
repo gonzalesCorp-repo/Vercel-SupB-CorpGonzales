@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Calendar, Users, Layers, DollarSign, User, Sparkles } from 'lucide-react';
+import { Calendar, Users, Layers, DollarSign, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export type MainHubTab = 'agenda' | 'cartera' | 'estacion' | 'liquidacion' | 'cuenta';
@@ -12,14 +12,14 @@ interface MobileAppleNavProps {
   mostrarCartera?: boolean;
 }
 
-export function MobileAppleNav({ activeHub, onSelectHub, mostrarCartera = false }: MobileAppleNavProps) {
+export function MobileAppleNav({ activeHub, onSelectHub }: MobileAppleNavProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-900 px-3 pt-2 pb-2.5 safe-bottom max-w-md mx-auto select-none shadow-2xl transition-colors duration-200">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-900 px-2 sm:px-4 pt-2 pb-2.5 safe-bottom w-full max-w-lg mx-auto select-none shadow-2xl transition-colors duration-200">
       <div className="flex items-center justify-around">
         
         {/* 1. Agenda */}
         <button onClick={() => onSelectHub('agenda')}
-          className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'agenda'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
@@ -36,30 +36,28 @@ export function MobileAppleNav({ activeHub, onSelectHub, mostrarCartera = false 
           )}
         </button>
 
-        {/* 2. Cartera CRM (Visible solo para administradores o staff con clientes asignados) */}
-        {mostrarCartera && (
-          <button onClick={() => onSelectHub('cartera')}
-            className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
-              activeHub === 'cartera'
-                ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
-            }`}
-          >
-            <div className={`p-1.5 rounded-xl transition-colors ${
-              activeHub === 'cartera' ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-sm' : ''
-            }`}>
-              <Users className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] tracking-tight">Cartera</span>
-            {activeHub === 'cartera' && (
-              <motion.span layoutId="navDot" className="w-1 h-1 rounded-full bg-indigo-600 dark:bg-indigo-400 absolute bottom-0" />
-            )}
-          </button>
-        )}
+        {/* 2. Cartera CRM */}
+        <button onClick={() => onSelectHub('cartera')}
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-2xl transition-all relative cursor-pointer ${
+            activeHub === 'cartera'
+              ? 'text-indigo-600 dark:text-indigo-400 font-bold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
+          }`}
+        >
+          <div className={`p-1.5 rounded-xl transition-colors ${
+            activeHub === 'cartera' ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-sm' : ''
+          }`}>
+            <Users className="w-5 h-5" />
+          </div>
+          <span className="text-[10px] tracking-tight">Cartera</span>
+          {activeHub === 'cartera' && (
+            <motion.span layoutId="navDot" className="w-1 h-1 rounded-full bg-indigo-600 dark:bg-indigo-400 absolute bottom-0" />
+          )}
+        </button>
 
-        {/* 3. ESTACIÓN (Hero Central Elevado) */}
+        {/* 3. ESTACIÓN (Hero Central Elevado y Simétrico) */}
         <button onClick={() => onSelectHub('estacion')}
-          className="flex flex-col items-center -mt-5 relative group cursor-pointer"
+          className="flex flex-col items-center -mt-5 relative group cursor-pointer px-1"
         >
           <div className={`w-14 h-14 rounded-3xl flex items-center justify-center shadow-xl transition-all duration-300 relative ${
             activeHub === 'estacion'
@@ -81,9 +79,9 @@ export function MobileAppleNav({ activeHub, onSelectHub, mostrarCartera = false 
           </span>
         </button>
 
-        {/* 4. Liquidación & Historial */}
+        {/* 4. Liquidación */}
         <button onClick={() => onSelectHub('liquidacion')}
-          className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'liquidacion'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
@@ -102,7 +100,7 @@ export function MobileAppleNav({ activeHub, onSelectHub, mostrarCartera = false 
 
         {/* 5. Mi Cuenta */}
         <button onClick={() => onSelectHub('cuenta')}
-          className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-2xl transition-all relative cursor-pointer ${
+          className={`flex flex-col items-center gap-1 py-1 px-2 rounded-2xl transition-all relative cursor-pointer ${
             activeHub === 'cuenta'
               ? 'text-indigo-600 dark:text-indigo-400 font-bold'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
