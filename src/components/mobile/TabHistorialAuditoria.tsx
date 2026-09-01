@@ -1,8 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BarChart3, Clock, CheckCircle2, XCircle, Beaker, DollarSign, Search, Sparkles, Scale, AlertTriangle, RefreshCw } from 'lucide-react';
+import { 
+  BarChart3, Clock, CheckCircle2, XCircle, Beaker, 
+  DollarSign, Search, Sparkles, Scale, AlertTriangle, 
+  RefreshCw, ChevronRight, Eye
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { ModalDetalleOrdenStaff } from '@/components/mobile/ModalDetalleOrdenStaff';
 
 interface TabHistorialAuditoriaProps {
   agenteId?: string;
@@ -15,13 +20,14 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
   const [atenciones, setAtenciones] = useState<any[]>([]);
   const [insumosList, setInsumosList] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [selectedOatcId, setSelectedOatcId] = useState<string | null>(null);
 
   const cargarDatos = async () => {
     setCargando(true);
     try {
       const supabase = createClient();
       
-      // 1. Cargar atenciones OATC
+      // 1. Cargar atenciones OATC donde el agente participó como principal o en tickets
       let query = supabase
         .from('oatc')
         .select('*')
@@ -29,7 +35,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
         .limit(30);
 
       if (agenteId) {
-        query = query.eq('agente_id', agenteId);
+        query = query.or(`agente_id.eq.${agenteId},agente_nombre.ilike.%${agenteNombre || ''}%`);
       } else if (agenteNombre) {
         query = query.ilike('agente_nombre', `%${agenteNombre}%`);
       }
@@ -39,13 +45,18 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
         setAtenciones(data);
       }
 
-      // 2. Cargar insumos y fórmulas solicitadas al Lab
-      const { data: dataInsumos } = await supabase
+      // 2. Cargar insumos y fórmulas solicitadas al Lab por este agente
+      let queryInsumos = supabase
         .from('pedidos_insumos')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
 
+      if (agenteId) {
+        queryInsumos = queryInsumos.eq('agente_id', agenteId);
+      }
+
+      const { data: dataInsumos } = await queryInsumos;
       setInsumosList(dataInsumos || []);
     } catch (e) {
       console.warn('Error cargando historial de atenciones en móvil:', e);
@@ -70,7 +81,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">
+          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500 dark:text-indigo-400">
             Auditoría de Turno
           </span>
           <h3 className="text-sm font-black text-slate-900 dark:text-white">Historial de Operaciones</h3>
@@ -85,10 +96,10 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
       </div>
 
       {/* Segmented Control */}
-      <div className="flex gap-1 p-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <div className="flex gap-1 p-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <button type="button"
           onClick={() => setSubTab('atenciones')}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
             subTab === 'atenciones' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'
           }`}
         >
@@ -97,7 +108,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
 
         <button type="button"
           onClick={() => setSubTab('insumos')}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
             subTab === 'insumos' ? 'bg-sky-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'
           }`}
         >
@@ -106,7 +117,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
 
         <button type="button"
           onClick={() => setSubTab('precios')}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
             subTab === 'precios' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400'
           }`}
         >
@@ -124,7 +135,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
               value={searchCliente}
               onChange={(e) => setSearchCliente(e.target.value)}
               placeholder="Buscar por nombre de cliente..."
-              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium"
             />
           </div>
 
@@ -133,7 +144,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
               Consultando historial de órdenes de atención...
             </div>
           ) : atencionesFiltradas.length === 0 ? (
-            <div className="text-center py-8 text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <div className="text-center py-8 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800">
               No se encontraron atenciones registradas para este colaborador.
             </div>
           ) : (
@@ -150,23 +161,24 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
               return (
                 <div
                   key={a.id}
-                  className="p-3.5 bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between shadow-md"
+                  onClick={() => setSelectedOatcId(a.id)}
+                  className="p-3.5 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between shadow-xs hover:border-indigo-500/40 transition active:scale-[0.99] cursor-pointer"
                 >
-                  <div>
+                  <div className="flex-1 min-w-0 pr-2">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-xs text-slate-900 dark:text-white">{a.cliente_nombre || 'Cliente'}</h4>
-                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
+                      <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate">{a.cliente_nombre || 'Cliente'}</h4>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${
                         a.estado_proceso === 'FINALIZADO' 
-                          ? 'bg-emerald-500/10 text-emerald-400' 
+                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' 
                           : a.estado_proceso === 'CANCELADO'
-                          ? 'bg-rose-500/10 text-rose-400'
-                          : 'bg-indigo-500/10 text-indigo-400'
+                          ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30'
+                          : 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30'
                       }`}>
                         {a.estado_proceso}
                       </span>
                     </div>
 
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                       {Array.isArray(a.punto_partida) 
                         ? a.punto_partida.map((p: any) => p.nombre).join(' + ') 
                         : 'Servicio en Salón'}
@@ -177,11 +189,14 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
                     </span>
                   </div>
 
-                  {montoTotal > 0 && (
-                    <span className="text-xs font-black text-amber-400 font-mono">
-                      S/ {montoTotal.toFixed(2)}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {montoTotal > 0 && (
+                      <span className="text-xs font-black text-amber-600 dark:text-amber-400 font-mono">
+                        S/ {montoTotal.toFixed(2)}
+                      </span>
+                    )}
+                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                  </div>
                 </div>
               );
             })
@@ -192,33 +207,39 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
       {/* 2. Sub-Tab: Insumos Lab IoT */}
       {subTab === 'insumos' && (
         <div className="space-y-2.5 animate-in fade-in">
-          <div className="bg-sky-950/30 border border-sky-500/30 p-3 rounded-2xl flex items-center gap-2 text-sky-300 text-xs font-medium">
-            <Scale className="w-4 h-4 text-sky-400 shrink-0" />
+          <div className="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-500/30 p-3 rounded-2xl flex items-center gap-2 text-sky-800 dark:text-sky-300 text-xs font-medium">
+            <Scale className="w-4 h-4 text-sky-500 shrink-0" />
             <span>Fórmulas químicas despachadas en gramos por balanza IoT.</span>
           </div>
 
-          {insumosList.map((i) => (
-            <div key={i.id} className="p-3.5 bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-2 shadow-md">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">{i.insumo_solicitado}</h4>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                  i.estado === 'DESPACHADO' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
-                }`}>
-                  {i.estado || 'PENDIENTE'}
-                </span>
-              </div>
-              <p className="text-[10px] text-slate-500">
-                {i.created_at ? new Date(i.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Hoy'}
-              </p>
+          {insumosList.length === 0 ? (
+            <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs text-slate-500">
+              No tienes fórmulas químicas registradas en esta sede.
             </div>
-          ))}
+          ) : (
+            insumosList.map((i) => (
+              <div key={i.id} className="p-3.5 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-1.5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">{i.insumo_solicitado}</h4>
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                    i.estado === 'DESPACHADO' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
+                  }`}>
+                    {i.estado || 'PENDIENTE'}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  {i.created_at ? new Date(i.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Hoy'}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       )}
 
       {/* 3. Sub-Tab: Cortesías */}
       {subTab === 'precios' && (
         <div className="space-y-2.5 animate-in fade-in">
-          <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-2xl flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs font-medium">
+          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-3 rounded-2xl flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs font-medium">
             <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
             <span>Cortesías de fidelización y descuentos aplicados.</span>
           </div>
@@ -260,6 +281,14 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
         </div>
       )}
 
+      {/* Modal de Detalle de Orden */}
+      <ModalDetalleOrdenStaff
+        isOpen={Boolean(selectedOatcId)}
+        onClose={() => setSelectedOatcId(null)}
+        oatcId={selectedOatcId}
+        agenteId={agenteId || ''}
+        agenteNombre={agenteNombre || ''}
+      />
     </div>
   );
 }

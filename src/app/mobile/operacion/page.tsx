@@ -423,7 +423,7 @@ export default function MobileOperacionPage() {
                 Ver Comprobantes
               </button>
             </div>
-            <TabHistorialAuditoria />
+            <TabHistorialAuditoria agenteId={agente.id} agenteNombre={agente.nombre} />
           </div>
         )}
 
@@ -439,9 +439,10 @@ export default function MobileOperacionPage() {
       </main>
 
       {/* 📱 BARRA DE NAVEGACIÓN INFERIOR iOS CENTER HUB */}
-      <MobileAppleNav
+      <MobileAppleNav 
         activeHub={activeHub}
         onSelectHub={setActiveHub}
+        mostrarCartera={agente.rol === 'SUPERADMIN' || agente.rol === 'ADMIN' || agente.rol === 'SOPORTE'}
       />
 
       {/* MODAL CONTROL DE ASISTENCIA / TURNO */}
