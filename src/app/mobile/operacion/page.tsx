@@ -176,18 +176,27 @@ export default function MobileOperacionPage() {
       return;
     }
 
-    // Caso 2: Tag de Asistencia / Sede (Determinación inteligente del movimiento)
-    let tipoMovimiento: TipoMovimientoAsistencia = 'ENTRADA';
+    // Caso 2: Tag de Asistencia / Sede (Determinación inteligente y segura del movimiento)
     const estadoActual = (agente.estado_operativo || '').toUpperCase();
+    let tipoMovimiento: TipoMovimientoAsistencia = 'ENTRADA';
 
-    if (estadoActual.includes('FUERA') || estadoActual === 'INACTIVO') {
-      tipoMovimiento = 'ENTRADA';
-    } else if (estadoActual === 'DISPONIBLE') {
-      tipoMovimiento = 'INICIO_REFRIGERIO';
-    } else if (estadoActual === 'EN_REFRIGERIO' || estadoActual === 'REFRIGERIO') {
-      tipoMovimiento = 'FIN_REFRIGERIO';
+    // A. Si el tag contiene una acción explícita grabada
+    if (payload.raw.toUpperCase().includes('REFRIGERIO')) {
+      tipoMovimiento = estadoActual.includes('REFRIGERIO') ? 'FIN_REFRIGERIO' : 'INICIO_REFRIGERIO';
+    } else if (payload.raw.toUpperCase().includes('SALIDA')) {
+      tipoMovimiento = 'SALIDA';
     } else {
-      tipoMovimiento = 'ENTRADA';
+      // B. Tag general de Sede / Puerta Principal:
+      if (estadoActual.includes('FUERA') || estadoActual === 'INACTIVO') {
+        tipoMovimiento = 'ENTRADA';
+      } else if (estadoActual.includes('REFRIGERIO')) {
+        // Si estaba en refrigerio y vuelve a pasar el tag de puerta, es retorno
+        tipoMovimiento = 'FIN_REFRIGERIO';
+      } else if (estadoActual === 'DISPONIBLE' || estadoActual === 'OCUPADO') {
+        // Si YA está disponible u ocupado, el tag de puerta NO debe cambiar su estado a refrigerio
+        showAlert(`ℹ️ ¡Hola ${agente.nombre}! Tu turno ya se encuentra activo. ¡Estás disponible para atender! ✨`, 'info');
+        return;
+      }
     }
 
     try {

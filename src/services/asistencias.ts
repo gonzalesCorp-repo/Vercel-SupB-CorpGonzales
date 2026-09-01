@@ -102,15 +102,37 @@ export async function validarYRegistrarAsistenciaNfc(params: RegistroAsistencia)
     const movimientos = movimientosHoy || [];
     const ultimoMovimiento = movimientos[0]; // El más reciente
 
-    // Cooldown Anti-Ráfaga (Si se detecta un toque hace menos de 5 segundos, rechazar rebotes de antena)
+    // Cooldown Anti-Ráfaga (Protección estricta de 60 segundos contra rebotes de antena o toques accidentales)
     if (ultimoMovimiento) {
-      const diffMs = Date.now() - new Date(ultimoMovimiento.timestamp_registro).getTime();
-      if (diffMs < 5000) {
+      const diffMs = Math.abs(Date.now() - new Date(ultimoMovimiento.timestamp_registro).getTime());
+      
+      // 1. Mismo movimiento repetido en menos de 60 segundos
+      if (diffMs < 60000 && ultimoMovimiento.tipo_movimiento === params.tipo_movimiento) {
         return {
           ok: false,
           duplicado: true,
-          mensaje: `ℹ️ Tu marcación ya fue procesada hace un instante.`,
-          estadoSugerido: ultimoMovimiento.tipo_movimiento === 'INICIO_REFRIGERIO' ? 'EN_REFRIGERIO' : ultimoMovimiento.tipo_movimiento === 'SALIDA' ? 'INACTIVO' : 'DISPONIBLE'
+          mensaje: `ℹ️ Tu marcación de ${params.tipo_movimiento} ya fue procesada hace un instante.`,
+          estadoSugerido: ultimoMovimiento.tipo_movimiento === 'INICIO_REFRIGERIO' ? 'EN_REFRIGERIO' : ultimoMovimiento.tipo_movimiento === 'SALIDA' ? 'FUERA_DE_TURNO' : 'DISPONIBLE'
+        };
+      }
+
+      // 2. Transición inmediata absurda (ej. ENTRADA -> INICIO_REFRIGERIO en menos de 60 segundos)
+      if (diffMs < 60000 && params.tipo_movimiento === 'INICIO_REFRIGERIO' && ultimoMovimiento.tipo_movimiento === 'ENTRADA') {
+        return {
+          ok: false,
+          duplicado: true,
+          mensaje: `ℹ️ Acabas de registrar tu llegada. ¡Tu turno ya se encuentra activo!`,
+          estadoSugerido: 'DISPONIBLE'
+        };
+      }
+
+      // 3. Salida inmediata tras entrada (menos de 60s)
+      if (diffMs < 60000 && params.tipo_movimiento === 'SALIDA' && ultimoMovimiento.tipo_movimiento === 'ENTRADA') {
+        return {
+          ok: false,
+          duplicado: true,
+          mensaje: `ℹ️ Acabas de registrar tu llegada hace unos segundos.`,
+          estadoSugerido: 'DISPONIBLE'
         };
       }
     }

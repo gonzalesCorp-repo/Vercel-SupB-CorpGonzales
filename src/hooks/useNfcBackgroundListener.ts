@@ -27,6 +27,8 @@ export function useNfcBackgroundListener({
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const lastReadTimestampRef = useRef<number>(0);
+  const isProcessingRef = useRef<boolean>(false);
+  const tagHistoryRef = useRef<Map<string, number>>(new Map());
   const onTagScannedRef = useRef(onTagScanned);
 
   useEffect(() => {
@@ -102,13 +104,34 @@ export function useNfcBackgroundListener({
       await ndef.scan({ signal: controller.signal });
       setIsListening(true);
 
-      ndef.onreading = (event: any) => {
+      ndef.onreading = async (event: any) => {
         const ahora = Date.now();
-        // Cooldown anti-rebote de 5 segundos
-        if (ahora - lastReadTimestampRef.current < 5000) {
+
+        // 1. Candado de procesamiento activo (Mutex)
+        if (isProcessingRef.current) {
+          console.log('[useNfcBackgroundListener] Ignorando ráfaga: Escaneo ya en proceso.');
           return;
         }
+
+        // 2. Cooldown anti-rebote global de 10 segundos
+        if (ahora - lastReadTimestampRef.current < 10000) {
+          console.log('[useNfcBackgroundListener] Ignorando ráfaga: Cooldown global activo.');
+          return;
+        }
+
+        const parsed = parseNfcRecord(event);
+        const tagKey = parsed.raw || parsed.id || parsed.serialNumber || 'default_tag';
+
+        // 3. Cooldown por Tag específico (60 segundos para evitar doble marcación con el mismo tag)
+        const lastScanForTag = tagHistoryRef.current.get(tagKey) || 0;
+        if (ahora - lastScanForTag < 60000) {
+          console.log(`[useNfcBackgroundListener] Ignorando tag ${tagKey}: Ya escaneado hace menos de 60s.`);
+          return;
+        }
+
+        isProcessingRef.current = true;
         lastReadTimestampRef.current = ahora;
+        tagHistoryRef.current.set(tagKey, ahora);
 
         // Feedback sensorial: Háptico + Chime
         try {
@@ -118,11 +141,19 @@ export function useNfcBackgroundListener({
           liveFeedService.reproducirChime('emerald');
         } catch (e) {}
 
-        const parsed = parseNfcRecord(event);
         setLastScannedTag(parsed);
 
-        if (onTagScannedRef.current) {
-          onTagScannedRef.current(parsed);
+        try {
+          if (onTagScannedRef.current) {
+            await onTagScannedRef.current(parsed);
+          }
+        } catch (scanErr) {
+          console.error('[useNfcBackgroundListener] Error procesando callback onTagScanned:', scanErr);
+        } finally {
+          // Desbloquear mutex tras 3 segundos adicionales de gracia
+          setTimeout(() => {
+            isProcessingRef.current = false;
+          }, 3000);
         }
       };
 
