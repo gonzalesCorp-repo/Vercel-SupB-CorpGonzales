@@ -54,7 +54,7 @@ export default function MobileCuentaPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-center p-6 transition-colors duration-200">
         <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -63,7 +63,7 @@ export default function MobileCuentaPage() {
   // 1. Si es CLIENTE o viene desde el portal cliente
   if (userRol?.toUpperCase() === 'CLIENTE' && cliente) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 p-4 font-sans">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 font-sans transition-colors duration-200">
         <ClientePerfilView 
           cliente={cliente}
           onCerrarSesion={() => {

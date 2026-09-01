@@ -285,7 +285,7 @@ export default function StaffPerfilView({
                   value={nuevoPin}
                   onChange={e => setNuevoPin(e.target.value.replace(/\D/g, ''))}
                   placeholder="••••"
-                  className="w-full text-center text-3xl tracking-[0.5em] font-black bg-slate-950 border border-slate-800 text-white rounded-2xl p-4 focus:border-pink-500 outline-none"
+                  className="w-full text-center text-3xl tracking-[0.5em] font-black bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors rounded-2xl p-4 focus:border-pink-500 outline-none"
                   autoFocus
                   required
                 />
@@ -337,7 +337,7 @@ export default function StaffPerfilView({
                   value={nuevoApodo}
                   onChange={e => setNuevoApodo(e.target.value)}
                   placeholder="Tu apodo o nombre..."
-                  className="w-full text-center text-base font-black bg-slate-950 border border-slate-800 text-white rounded-2xl p-3.5 focus:border-indigo-500 outline-none"
+                  className="w-full text-center text-base font-black bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors rounded-2xl p-3.5 focus:border-indigo-500 outline-none"
                   autoFocus
                   required
                 />

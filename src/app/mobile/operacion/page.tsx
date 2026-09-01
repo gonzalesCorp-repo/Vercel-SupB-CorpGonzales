@@ -271,7 +271,7 @@ export default function MobileOperacionPage() {
     if (s.includes('REFRIGERIO')) {
       return { label: 'EN REFRIGERIO', bg: 'bg-amber-500/10 border-amber-500/30 text-amber-400', dot: 'bg-amber-400' };
     }
-    return { label: 'FUERA DE TURNO', bg: 'bg-slate-800 border-slate-700 text-slate-400', dot: 'bg-slate-500' };
+    return { label: 'FUERA DE TURNO', bg: 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400', dot: 'bg-slate-400 dark:bg-slate-500' };
   };
 
   const badgeInfo = getBadgeEstado(agente.estado_operativo);
@@ -384,10 +384,10 @@ export default function MobileOperacionPage() {
         {/* 4. 📊 LIQUIDACIÓN & AUDITORÍA */}
         {activeHub === 'liquidacion' && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-3xl shadow-xl">
+            <div className="flex justify-between items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-3xl shadow-xl transition-colors duration-200">
               <div>
-                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">Producción de Hoy</span>
-                <div className="text-2xl font-black text-white">
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider block">Producción de Hoy</span>
+                <div className="text-2xl font-black text-slate-900 dark:text-white">
                   <AnimatedNumber value={agente.comisionesHoy} prefix="S/ " decimals={2} />
                 </div>
               </div>
@@ -421,14 +421,14 @@ export default function MobileOperacionPage() {
 
       {/* MODAL CONTROL DE ASISTENCIA / TURNO */}
       {modalTurnoOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl animate-in slide-in-from-bottom">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl transition-colors duration-200 animate-in slide-in-from-bottom">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-indigo-400" />
-                <h3 className="text-sm font-black text-white">Control de Turno & Asistencia</h3>
+                <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-sm font-black text-slate-900 dark:text-white">Control de Turno & Asistencia</h3>
               </div>
-              <button onClick={() => setModalTurnoOpen(false)} className="p-1 text-slate-400 hover:text-white rounded-lg cursor-pointer">
+              <button onClick={() => setModalTurnoOpen(false)} className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -436,38 +436,38 @@ export default function MobileOperacionPage() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleMarcarAsistenciaManual('DISPONIBLE', 'Llegada / Inicio de Turno')}
-                className="p-4 bg-emerald-950/40 border border-emerald-500/40 hover:bg-emerald-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
+                className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
               >
                 <span className="text-2xl block">👋</span>
-                <span className="text-xs font-black text-emerald-300 block">YA LLEGUÉ</span>
-                <span className="text-[10px] text-slate-400">Inicio de Turno</span>
+                <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 block">YA LLEGUÉ</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Inicio de Turno</span>
               </button>
 
               <button
                 onClick={() => handleMarcarAsistenciaManual('REFRIGERIO', 'Pausa Refrigerio')}
-                className="p-4 bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
+                className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
               >
                 <span className="text-2xl block">🍕</span>
-                <span className="text-xs font-black text-amber-300 block">VOY A COMER</span>
-                <span className="text-[10px] text-slate-400">Pausa Refrigerio</span>
+                <span className="text-xs font-black text-amber-700 dark:text-amber-300 block">VOY A COMER</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Pausa Refrigerio</span>
               </button>
 
               <button
                 onClick={() => handleMarcarAsistenciaManual('DISPONIBLE', 'Retorno de Refrigerio')}
-                className="p-4 bg-indigo-950/40 border border-indigo-500/40 hover:bg-indigo-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
+                className="p-4 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
               >
                 <span className="text-2xl block">🔄</span>
-                <span className="text-xs font-black text-indigo-300 block">REGRESÉ</span>
-                <span className="text-[10px] text-slate-400">Fin de Refrigerio</span>
+                <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 block">REGRESÉ</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Fin de Refrigerio</span>
               </button>
 
               <button
                 onClick={() => handleMarcarAsistenciaManual('FUERA_DE_TURNO', 'Fin de Jornada')}
-                className="p-4 bg-rose-950/40 border border-rose-500/40 hover:bg-rose-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
+                className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
               >
                 <span className="text-2xl block">🏁</span>
-                <span className="text-xs font-black text-rose-300 block">ACABÓ MI DÍA</span>
-                <span className="text-[10px] text-slate-400">Salida del Salón</span>
+                <span className="text-xs font-black text-rose-700 dark:text-rose-300 block">ACABÓ MI DÍA</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Salida del Salón</span>
               </button>
             </div>
           </div>

@@ -43,10 +43,10 @@ export function ModalDerivarTicketCruzado({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl">
         
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <h4 className="text-sm font-black text-white">+ Añadir Ticket / Cross-Selling</h4>
           <button onClick={onClose} className="text-slate-400 hover:text-white">
             <X className="w-4 h-4" />
@@ -101,7 +101,7 @@ export function ModalDerivarTicketCruzado({
                   if (c) setColegaSeleccionadoNombre(c.nombre);
                 }}
                 required
-                className="w-full p-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none"
+                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none"
               >
                 <option value="">Selecciona a un compañero...</option>
                 {colaboradoresStaff.map((colab) => (
@@ -130,7 +130,7 @@ export function ModalDerivarTicketCruzado({
               value={nuevoItemNombre}
               onChange={(e) => setNuevoItemNombre(e.target.value)}
               placeholder="Selecciona del catálogo o escribe personalizado..."
-              className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-indigo-500 font-bold"
+              className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none focus:border-indigo-500 font-bold"
             />
           </div>
 
@@ -140,7 +140,7 @@ export function ModalDerivarTicketCruzado({
               <select
                 value={nuevoItemTipo}
                 onChange={(e) => setNuevoItemTipo(e.target.value as any)}
-                className="w-full p-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none"
+                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none"
               >
                 <option value="servicio">✂️ Servicio</option>
                 <option value="producto">🛍️ Producto Retail</option>
@@ -154,7 +154,7 @@ export function ModalDerivarTicketCruzado({
                 step="0.5"
                 value={nuevoItemPrecio}
                 onChange={(e) => setNuevoItemPrecio(Number(e.target.value))}
-                className="w-full p-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-mono font-bold text-white outline-none"
+                className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs font-mono font-bold text-white outline-none"
               />
             </div>
           </div>

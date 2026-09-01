@@ -54,7 +54,12 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-slate-950 text-slate-100 overflow-x-hidden font-sans">
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden font-sans transition-colors duration-200">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('theme-storage');if(s){var p=JSON.parse(s);if(p&&p.state&&p.state.themeMode==='light'){document.documentElement.classList.remove('dark');}}else{var m=localStorage.getItem('vaikuntha_theme_mode');if(m==='light'){document.documentElement.classList.remove('dark');}}}catch(e){}})();`
+          }}
+        />
         <QueryProvider>
           <ThemeProvider>
             {children}

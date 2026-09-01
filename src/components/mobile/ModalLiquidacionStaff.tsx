@@ -56,17 +56,17 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[130] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-800 space-y-5 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden text-slate-100 animate-in zoom-in-95">
         
         {/* Header Modal */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
               💵
             </div>
             <div>
-              <h3 className="text-sm font-black text-white">Estado de Cuenta Continuo</h3>
+              <h3 className="text-sm font-black text-slate-900 dark:text-white">Estado de Cuenta Continuo</h3>
               <p className="text-[10px] text-slate-400">Liquidaciones y Comisiones bajo demanda</p>
             </div>
           </div>
@@ -84,7 +84,7 @@ export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre 
         )}
 
         {/* Tarjeta de Balance Actual Acumulado */}
-        <div className="bg-gradient-to-br from-emerald-950/40 via-slate-950 to-slate-950 border border-emerald-500/30 p-5 rounded-3xl space-y-3 shrink-0 shadow-lg">
+        <div className="bg-emerald-50 dark:bg-gradient-to-br dark:from-emerald-950/40 dark:via-slate-950 dark:to-slate-950 border border-emerald-200 dark:border-emerald-500/30 border border-emerald-500/30 p-5 rounded-3xl space-y-3 shrink-0 shadow-lg">
           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1">
             <Sparkles className="w-3.5 h-3.5" /> Saldo Liquidable Disponible
           </span>

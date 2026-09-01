@@ -31,9 +31,9 @@ export function ModalSolicitarInsumosLab({
   };
 
   return (
-    <div className="fixed inset-0 z-[110] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Beaker className="w-5 h-5 text-sky-400" />
             <h4 className="text-sm font-black text-white">Solicitar Insumos al Lab</h4>
@@ -52,7 +52,7 @@ export function ModalSolicitarInsumosLab({
               rows={3}
               value={insumoTexto}
               onChange={(e) => setInsumoTexto(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 text-white rounded-2xl p-3 text-xs placeholder:text-slate-500 focus:outline-none focus:border-sky-500 shadow-inner resize-none font-medium"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors text-white rounded-2xl p-3 text-xs placeholder:text-slate-500 focus:outline-none focus:border-sky-500 shadow-inner resize-none font-medium"
               placeholder="Ej. Tinte 7.1 (45g) + Oxigenta 20V (60ml)..."
               required
             />

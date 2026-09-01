@@ -109,7 +109,7 @@ export default function MobileClientePage() {
 
   if (clienteActivo) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-6 font-sans">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 md:p-6 font-sans transition-colors duration-200">
         <ClientePerfilView 
           cliente={clienteActivo}
           onCerrarSesion={handleCerrarSesion}
@@ -123,32 +123,32 @@ export default function MobileClientePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between max-w-md mx-auto p-5 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between max-w-md mx-auto p-5 font-sans transition-colors duration-200">
       {/* Header Cliente */}
       <div className="space-y-4">
         <div className="flex items-center justify-between pt-2">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500 p-[2px]">
-              <div className="w-full h-full bg-slate-950 rounded-2xl flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-pink-400" />
+              <div className="w-full h-full bg-white dark:bg-slate-950 rounded-2xl flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-pink-500" />
               </div>
             </div>
             <div>
-              <h1 className="text-base font-black tracking-tight text-white">Vaikuntha Client</h1>
-              <p className="text-[10px] text-pink-400 font-bold uppercase tracking-widest">Portal de Experiencia & Auto-Checkin</p>
+              <h1 className="text-base font-black tracking-tight text-slate-900 dark:text-white">Vaikuntha Client</h1>
+              <p className="text-[10px] text-pink-600 dark:text-pink-400 font-bold uppercase tracking-widest">Portal de Experiencia & Auto-Checkin</p>
             </div>
           </div>
-          <span className="text-[10px] bg-pink-500/10 border border-pink-500/30 text-pink-400 font-bold px-2.5 py-1 rounded-full">
+          <span className="text-[10px] bg-pink-50 dark:bg-pink-500/10 border border-pink-200 dark:border-pink-500/30 text-pink-700 dark:text-pink-400 font-bold px-2.5 py-1 rounded-full">
             VIP 2.0
           </span>
         </div>
 
         {/* Input DNI / Identificación */}
         {!mostrarRegistro ? (
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-4 backdrop-blur-xl shadow-2xl">
+          <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4 backdrop-blur-xl shadow-xl transition-colors">
             <div className="space-y-1">
-              <h2 className="text-lg font-black text-white">Ingresa a tu Cuenta VIP</h2>
-              <p className="text-xs text-slate-400">
+              <h2 className="text-lg font-black text-slate-900 dark:text-white">Ingresa a tu Cuenta VIP</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Ingresa tu DNI o Celular para consultar tus puntos, medallas de consumo y pase de Auto-Checkin.
               </p>
             </div>
@@ -160,7 +160,7 @@ export default function MobileClientePage() {
                   placeholder="DNI o Celular..."
                   value={dni}
                   onChange={(e) => setDni(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3.5 text-sm text-white font-mono placeholder:text-slate-500 focus:outline-none focus:border-pink-500 transition-all shadow-inner"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3.5 text-sm text-slate-900 dark:text-white font-mono placeholder:text-slate-400 focus:outline-none focus:border-pink-500 transition-all shadow-inner"
                   required
                 />
               </div>
@@ -176,35 +176,35 @@ export default function MobileClientePage() {
             </form>
           </div>
         ) : (
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-4 backdrop-blur-xl shadow-2xl">
+          <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4 backdrop-blur-xl shadow-xl transition-colors">
             <div className="space-y-1">
-              <h2 className="text-lg font-black text-white">Crear Pase VIP Rápido</h2>
-              <p className="text-xs text-slate-400">
-                No encontramos el DNI <strong className="text-pink-400 font-mono">{dni}</strong>. Regístrate en 10 segundos:
+              <h2 className="text-lg font-black text-slate-900 dark:text-white">Crear Pase VIP Rápido</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                No encontramos el DNI <strong className="text-pink-600 dark:text-pink-400 font-mono">{dni}</strong>. Regístrate en 10 segundos:
               </p>
             </div>
 
             <form onSubmit={handleRegistrar} className="space-y-3">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nombre Completo</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Nombre Completo</label>
                 <input
                   type="text"
                   placeholder="Ej. Camila Torres"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-pink-500"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-white outline-none focus:border-pink-500 transition-colors"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">WhatsApp (Opcional)</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">WhatsApp (Opcional)</label>
                 <input
                   type="tel"
                   placeholder="+51 999 999 999"
                   value={nuevoTelefono}
                   onChange={(e) => setNuevoTelefono(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-pink-500"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-white outline-none focus:border-pink-500 transition-colors"
                 />
               </div>
 
@@ -212,7 +212,7 @@ export default function MobileClientePage() {
                 <button
                   type="button"
                   onClick={() => setMostrarRegistro(false)}
-                  className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition cursor-pointer"
+                  className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition cursor-pointer"
                 >
                   Volver
                 </button>
@@ -231,7 +231,7 @@ export default function MobileClientePage() {
 
       {/* Footer Branding */}
       <div className="pt-6 text-center space-y-1">
-        <p className="text-[10px] text-slate-600 font-semibold tracking-wider uppercase">
+        <p className="text-[10px] text-slate-400 dark:text-slate-600 font-semibold tracking-wider uppercase">
           Impulsado por Vaikuntha ERP & LuminaHQ
         </p>
       </div>

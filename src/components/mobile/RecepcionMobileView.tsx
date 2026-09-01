@@ -103,17 +103,17 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
       </div>
 
       {/* Tabs Selector */}
-      <div className="grid grid-cols-4 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 shadow-md">
-        <button onClick={() => setTab('cola')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'cola' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'}`}>
+      <div className="grid grid-cols-4 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+        <button onClick={() => setTab('cola')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition cursor-pointer ${tab === 'cola' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <Users className="w-4 h-4" /> Cola ({agentes.length})
         </button>
-        <button onClick={() => setTab('clientes')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'clientes' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('clientes')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition cursor-pointer ${tab === 'clientes' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <Search className="w-4 h-4" /> Clientes
         </button>
-        <button onClick={() => setTab('agenda')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'agenda' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('agenda')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition cursor-pointer ${tab === 'agenda' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <Calendar className="w-4 h-4" /> Citas ({citas.length})
         </button>
-        <button onClick={() => setTab('alertas')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition ${tab === 'alertas' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('alertas')} className={`py-2 text-[10px] font-bold rounded-xl flex flex-col justify-center items-center gap-1 transition cursor-pointer ${tab === 'alertas' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <Bell className="w-4 h-4" /> Peticiones ({alertas.length})
         </button>
       </div>
@@ -127,7 +127,7 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando cola de piso...</div>
             ) : agentes.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs">
+              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay colaboradores activos en esta sede
               </div>
             ) : (
@@ -136,7 +136,7 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
                 const isLibre = opStatus === 'DISPONIBLE';
                 const isOcupado = opStatus === 'OCUPADO';
                 return (
-                  <div key={a.id} className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 flex justify-between items-center shadow-md">
+                  <div key={a.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex justify-between items-center shadow-md">
                     <div className="flex items-center gap-3">
                       <span className="font-mono text-xs text-slate-500 font-bold">#{i + 1}</span>
                       <div>
@@ -178,12 +178,12 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
             {loading ? (
               <div className="text-center text-slate-500 py-6 text-xs font-bold">Buscando clientes...</div>
             ) : clientes.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs">
+              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No se encontraron clientes registrados
               </div>
             ) : (
               clientes.map((c) => (
-                <div key={c.id} className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 flex justify-between items-center shadow-md">
+                <div key={c.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex justify-between items-center shadow-md">
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-xs text-white">{c.nombre} {c.apellido || ''}</p>
@@ -215,16 +215,16 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando agenda del día...</div>
             ) : citas.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs">
+              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay citas agendadas para hoy
               </div>
             ) : (
               citas.map((cita) => (
-                <div key={cita.id} className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 shadow-md">
+                <div key={cita.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors shadow-md">
                   <div className="flex justify-between items-start mb-1.5">
                     <div className="flex items-center gap-2">
                       <Clock className="w-3.5 h-3.5 text-indigo-400" />
-                      <span className="text-xs font-bold text-white">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">
                         {cita.inicio_iso ? new Date(cita.inicio_iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Hora flexible'}
                       </span>
                     </div>
@@ -246,18 +246,18 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando peticiones de piso...</div>
             ) : alertas.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs">
+              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay peticiones pendientes en este momento
               </div>
             ) : (
               alertas.map((alerta) => (
-                <div key={alerta.id} className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 flex justify-between items-center shadow-md">
+                <div key={alerta.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex justify-between items-center shadow-md">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-[9px] font-bold px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded">
                         {alerta.tipo || 'ASISTENCIA'}
                       </span>
-                      <p className="text-xs font-bold text-white">{alerta.solicitante_nombre || 'Staff'}</p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">{alerta.solicitante_nombre || 'Staff'}</p>
                     </div>
                     <p className="text-[11px] text-slate-300 mt-1">{alerta.mensaje || alerta.detalle || 'Solicita apoyo en estación'}</p>
                   </div>

@@ -192,7 +192,7 @@ export function TabCarteraCRM({ agenteNombre = 'Demócrito de Abdera', agenteId 
           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-1">
             <Shield className="w-3 h-3 text-emerald-400" /> Mi Cartera Exclusiva
           </span>
-          <h3 className="text-sm font-black text-white">Clientes de {agenteNombre.split(' ')[0]}</h3>
+          <h3 className="text-sm font-black text-slate-900 dark:text-white">Clientes de {agenteNombre.split(' ')[0]}</h3>
         </div>
 
         <button
@@ -430,7 +430,7 @@ export function TabCarteraCRM({ agenteNombre = 'Demócrito de Abdera', agenteId 
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   placeholder="Ej. Carmen Salazar"
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white transition-colors rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
 
@@ -442,7 +442,7 @@ export function TabCarteraCRM({ agenteNombre = 'Demócrito de Abdera', agenteId 
                     value={nuevoDni}
                     onChange={(e) => setNuevoDni(e.target.value)}
                     placeholder="8 dígitos"
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white transition-colors rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
                   />
                 </div>
                 <div>
@@ -452,7 +452,7 @@ export function TabCarteraCRM({ agenteNombre = 'Demócrito de Abdera', agenteId 
                     value={nuevoCelular}
                     onChange={(e) => setNuevoCelular(e.target.value)}
                     placeholder="999..."
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white transition-colors rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
                   />
                 </div>
               </div>
@@ -464,7 +464,7 @@ export function TabCarteraCRM({ agenteNombre = 'Demócrito de Abdera', agenteId 
                   value={nuevasNotas}
                   onChange={(e) => setNuevasNotas(e.target.value)}
                   placeholder="Ej. Tinte 7.1 con 20 volúmenes, porosidad media..."
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 resize-none font-medium"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white transition-colors rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 resize-none font-medium"
                 />
               </div>
 

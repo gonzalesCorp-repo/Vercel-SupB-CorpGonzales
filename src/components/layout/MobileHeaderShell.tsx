@@ -89,11 +89,11 @@ export function MobileHeaderShell({
 
       {/* Sensor NFC en vivo */}
       {isNfcSupported && isNfcListening && (
-        <div className="flex items-center justify-between text-[9px] text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+        <div className="flex items-center justify-between text-[9px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-500/20 transition-colors">
           <span className="flex items-center gap-1 font-semibold">
             <Radio className="w-2.5 h-2.5 animate-pulse" /> Antena NFC activa
           </span>
-          <span className="text-slate-400">Toca tag para marcar</span>
+          <span className="text-slate-500 dark:text-slate-400">Toca tag para marcar</span>
         </div>
       )}
     </header>

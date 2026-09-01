@@ -29,10 +29,10 @@ export function ModalRechazoAsesoria({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl">
         
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2 text-rose-400">
             <UserX className="w-5 h-5" />
             <h4 className="text-sm font-black text-white">Cancelar / No Acepta Proforma</h4>
@@ -48,7 +48,7 @@ export function ModalRechazoAsesoria({
             <select
               value={motivoSeleccionado}
               onChange={(e) => setMotivoSeleccionado(e.target.value)}
-              className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none"
+              className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none"
             >
               {motivosList.map((m, idx) => (
                 <option key={idx} value={m}>{m}</option>
@@ -62,7 +62,7 @@ export function ModalRechazoAsesoria({
               value={detalleInput}
               onChange={(e) => setDetalleInput(e.target.value)}
               placeholder="ej. El cliente solo disponía de 30 min o el presupuesto superó los S/ 150..."
-              className="w-full p-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none min-h-[60px]"
+              className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none min-h-[60px]"
             />
           </div>
 

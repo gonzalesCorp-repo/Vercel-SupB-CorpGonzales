@@ -22,11 +22,14 @@
 [data-uppercase="true"] p:not(.keep-case),
 [data-uppercase="true"] span:not(.font-mono):not(.keep-case),
 [data-uppercase="true"] div[role="button"],
+[data-uppercase="true"] div:not(:has(*)),
 [data-uppercase="true"] small,
 [data-uppercase="true"] strong,
 [data-uppercase="true"] em,
 [data-uppercase="true"] b,
-[data-uppercase="true"] li:not(.keep-case) {
+[data-uppercase="true"] li:not(.keep-case),
+[data-uppercase="true"] input::placeholder,
+[data-uppercase="true"] textarea::placeholder {
   text-transform: uppercase !important;
   letter-spacing: 0.02em;
 }

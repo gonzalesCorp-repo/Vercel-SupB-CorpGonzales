@@ -129,16 +129,16 @@ export function ModalCatalogoPicker({
   };
 
   return (
-    <div className="fixed inset-0 z-[140] bg-slate-950/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[60] bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
       <div className="bg-slate-900 w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl max-h-[85vh] flex flex-col justify-between">
         
         {/* Cabecera del Modal */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-400" />
               <div>
-                <h3 className="text-sm font-black text-white">{titulo}</h3>
+                <h3 className="text-sm font-black text-slate-900 dark:text-white">{titulo}</h3>
                 <span className="text-[10px] text-slate-400 font-medium">Catálogo Oficial Vaikuntha</span>
               </div>
             </div>
@@ -191,7 +191,7 @@ export function ModalCatalogoPicker({
               placeholder={`Buscar en catálogo de ${tipoActivo === 'servicio' ? 'servicios' : 'productos retail'}...`}
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-indigo-500 font-medium"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none focus:border-indigo-500 font-medium"
             />
             {busqueda && (
               <button

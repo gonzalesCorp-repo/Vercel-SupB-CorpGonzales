@@ -539,14 +539,14 @@ export function TabEstacion({
     <div className="space-y-4 animate-in fade-in duration-200">
       
       {/* 3 Sub-Tabs Principales en Estación: Silla, Bar y Cola */}
-      <div className="flex gap-1 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 shadow-inner">
+      <div className="flex gap-1 bg-slate-100 dark:bg-slate-900/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner transition-colors">
         <button
           type="button"
           onClick={() => setSubTab('silla')}
           className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'silla'
               ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-slate-200'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -559,7 +559,7 @@ export function TabEstacion({
           className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'bar'
               ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-slate-200'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
           <Coffee className="w-3.5 h-3.5" />
@@ -572,7 +572,7 @@ export function TabEstacion({
           className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'cola'
               ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-slate-200'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
           <Users className="w-3.5 h-3.5" />
@@ -593,12 +593,12 @@ export function TabEstacion({
           
           {/* Si está Fuera de Turno: Muestra la Botonera de Asistencia y Turno Completa */}
           {esFueraDeTurno ? (
-            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-xl">
+            <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-xl transition-colors">
               <div className="text-center py-1 space-y-1">
                 <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/30">
                   WFM & Control Horario
                 </span>
-                <h3 className="text-base font-black text-white mt-2">Botonera de Asistencia y Turno</h3>
+                <h3 className="text-base font-black text-slate-900 dark:text-white mt-2">Botonera de Asistencia y Turno</h3>
                 <p className="text-xs text-slate-400 max-w-[280px] mx-auto">
                   Valida tu estado para activar tu estación de trabajo y recibir atenciones en tiempo real.
                 </p>
@@ -608,40 +608,40 @@ export function TabEstacion({
                 <button
                   type="button"
                   onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Llegada / Inicio de Turno')}
-                  className="p-4 bg-emerald-950/40 border-2 border-emerald-500/50 hover:bg-emerald-900/50 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-emerald-950/50 group"
+                  className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-200 dark:border-emerald-500/50 hover:bg-emerald-900/50 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-emerald-950/50 group"
                 >
                   <span className="text-3xl block group-hover:scale-110 transition-transform">👋</span>
-                  <span className="text-xs font-black text-emerald-300 block tracking-wide">YA LLEGUÉ</span>
+                  <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 block tracking-wide">YA LLEGUÉ</span>
                   <span className="text-[10px] text-slate-400 block font-medium">Inicio de Turno</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => onMarcarAsistencia?.('REFRIGERIO', 'Pausa Refrigerio')}
-                  className="p-4 bg-amber-950/40 border border-amber-500/30 hover:bg-amber-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-amber-950/50 group"
+                  className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-amber-950/50 group"
                 >
                   <span className="text-3xl block group-hover:scale-110 transition-transform">🍕</span>
-                  <span className="text-xs font-black text-amber-300 block tracking-wide">VOY A COMER</span>
+                  <span className="text-xs font-black text-amber-700 dark:text-amber-300 block tracking-wide">VOY A COMER</span>
                   <span className="text-[10px] text-slate-400 block font-medium">Pausa Refrigerio</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Retorno de Refrigerio')}
-                  className="p-4 bg-indigo-950/40 border border-indigo-500/30 hover:bg-indigo-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-indigo-950/50 group"
+                  className="p-4 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-indigo-950/50 group"
                 >
                   <span className="text-3xl block group-hover:scale-110 transition-transform">🔄</span>
-                  <span className="text-xs font-black text-indigo-300 block tracking-wide">REGRESÉ</span>
+                  <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 block tracking-wide">REGRESÉ</span>
                   <span className="text-[10px] text-slate-400 block font-medium">Fin de Refrigerio</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => onMarcarAsistencia?.('FUERA_DE_TURNO', 'Fin de Jornada')}
-                  className="p-4 bg-rose-950/40 border border-rose-500/30 hover:bg-rose-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-rose-950/50 group"
+                  className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/30 hover:bg-rose-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-rose-950/50 group"
                 >
                   <span className="text-3xl block group-hover:scale-110 transition-transform">🏁</span>
-                  <span className="text-xs font-black text-rose-300 block tracking-wide">ACABÓ MI DÍA</span>
+                  <span className="text-xs font-black text-rose-700 dark:text-rose-300 block tracking-wide">ACABÓ MI DÍA</span>
                   <span className="text-[10px] text-slate-400 block font-medium">Fin de Jornada</span>
                 </button>
               </div>
@@ -658,7 +658,7 @@ export function TabEstacion({
             /* Cuando el colaborador YA ESTÁ EN TURNO: Muestra la Estación Física y la OATC */
             <>
               {/* Tarjeta de Estación Física (Híbrida: Táctil + NFC Opcional) */}
-              <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-4 space-y-2 backdrop-blur-xl">
+              <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm transition-colors space-y-2 backdrop-blur-xl">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                     Estación Física de Trabajo

@@ -28,10 +28,10 @@ export function ModalEditarPrecioItem({
   if (!isOpen || !editItemTarget) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[60] bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl">
         
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <h4 className="text-sm font-black text-white">Editar Precio / Cortesía</h4>
           <button onClick={onClose} className="text-slate-400 hover:text-white">
             <X className="w-4 h-4" />
@@ -53,7 +53,7 @@ export function ModalEditarPrecioItem({
               step="0.5"
               value={nuevoPrecioInput}
               onChange={(e) => setNuevoPrecioInput(Number(e.target.value))}
-              className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono font-bold text-white outline-none focus:border-indigo-500"
+              className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-sm font-mono font-bold text-white outline-none focus:border-indigo-500"
             />
           </div>
 

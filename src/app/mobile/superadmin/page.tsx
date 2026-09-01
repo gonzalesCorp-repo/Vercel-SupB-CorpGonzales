@@ -150,33 +150,33 @@ export default function MobileSuperAdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pb-24 transition-colors duration-200">
       <GlobalUI />
 
       {/* Header Fijo SuperAdmin */}
-      <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3">
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 transition-colors">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30">
               <ShieldCheck className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h1 className="text-xs font-black text-white tracking-wider flex items-center gap-1.5">
+              <h1 className="text-xs font-black text-slate-900 dark:text-white tracking-wider flex items-center gap-1.5">
                 <span>VAIKUNTHA</span>
-                <span className="text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.2 rounded font-black">
+                <span className="text-[9px] bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 px-1.5 py-0.2 rounded font-black">
                   SUPERADMIN
                 </span>
               </h1>
-              <p className="text-[10px] text-slate-400">Auditoría Remota Multi-Sede</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">Auditoría Remota Multi-Sede</p>
             </div>
           </div>
 
           {/* Selector de Sede */}
           <button
             onClick={() => setShowSedesModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-200 hover:border-purple-500/40 transition active:scale-95 shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-purple-500/40 transition active:scale-95 shadow-sm cursor-pointer"
           >
-            <MapPin className="w-3.5 h-3.5 text-purple-400" />
+            <MapPin className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
             <span className="truncate max-w-[110px]">{sedeActiva?.nombre || 'Elegir Sede'}</span>
             <ChevronDown className="w-3 h-3 text-slate-400" />
           </button>
@@ -216,20 +216,20 @@ export default function MobileSuperAdminPage() {
       {/* Modal Selector de Sede */}
       <AnimatePresence>
         {showSedesModal && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end justify-center p-0 sm:p-4">
+          <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-end justify-center p-0 sm:p-4">
             <motion.div
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              className="bg-slate-900 border-t border-slate-800 rounded-t-[32px] w-full max-w-md p-6 space-y-4 shadow-2xl"
+              className="bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-[32px] sm:rounded-3xl w-full max-w-md p-6 space-y-4 shadow-2xl transition-colors"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <h3 className="text-sm font-black text-white flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-purple-400" /> Cambiar Sede Activa
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-purple-600 dark:text-purple-400" /> Cambiar Sede Activa
                 </h3>
                 <button
                   onClick={() => setShowSedesModal(false)}
-                  className="text-xs text-slate-400 hover:text-white px-2 py-1 bg-slate-800 rounded-xl"
+                  className="text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded-xl transition cursor-pointer"
                 >
                   Cerrar
                 </button>
@@ -243,10 +243,10 @@ export default function MobileSuperAdminPage() {
                       setSedeActiva(sede);
                       setShowSedesModal(false);
                     }}
-                    className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition ${
+                    className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition cursor-pointer ${
                       sede.id === sedeActiva?.id
-                        ? 'bg-purple-600/20 border-purple-500 text-white font-bold'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-850'
+                        ? 'bg-purple-50 dark:bg-purple-600/20 border-purple-500 text-purple-900 dark:text-white font-bold'
+                        : 'bg-slate-50 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-850'
                     }`}
                   >
                     <div>
@@ -254,7 +254,7 @@ export default function MobileSuperAdminPage() {
                       <p className="text-[10px] text-slate-500">{sede.direccion || 'Sede Operativa'}</p>
                     </div>
                     {sede.id === sedeActiva?.id && (
-                      <span className="text-[10px] bg-purple-500 text-white px-2 py-0.5 rounded-full font-bold">
+                      <span className="text-[10px] bg-purple-600 text-white px-2 py-0.5 rounded-full font-bold">
                         Activa
                       </span>
                     )}

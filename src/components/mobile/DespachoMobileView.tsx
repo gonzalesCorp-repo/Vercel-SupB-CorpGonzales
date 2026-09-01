@@ -131,14 +131,14 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
       </div>
 
       {/* Tabs */}
-      <div className="grid grid-cols-3 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 shadow-md">
-        <button onClick={() => setTab('prep')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'prep' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-400'}`}>
+      <div className="grid grid-cols-3 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+        <button onClick={() => setTab('prep')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'prep' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <Package className="w-4 h-4" /> Prep ({pedidosPrep.length})
         </button>
-        <button onClick={() => setTab('stock')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'stock' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('stock')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'stock' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <Archive className="w-4 h-4" /> Stock Lab ({stockLab.length})
         </button>
-        <button onClick={() => setTab('kardex')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'kardex' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('kardex')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'kardex' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <ClipboardList className="w-4 h-4" /> Kardex
         </button>
       </div>
@@ -152,7 +152,7 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando pedidos de laboratorio...</div>
             ) : pedidosPrep.length === 0 ? (
-              <div className="text-center text-slate-400 py-10 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs">
+              <div className="text-center text-slate-400 py-10 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 ✨ No hay fórmulas o pedidos de insumos pendientes de despacho
               </div>
             ) : (
@@ -190,7 +190,7 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando stock de laboratorio...</div>
             ) : stockLab.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs">
+              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay stock registrado en el taller de esta sede
               </div>
             ) : (
@@ -198,7 +198,7 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
                 const stock = Number(item.stock_actual || 0);
                 const isBajo = stock < 50;
                 return (
-                  <div key={item.id} className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 flex justify-between items-center shadow-md">
+                  <div key={item.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex justify-between items-center shadow-md">
                     <div>
                       <p className="font-bold text-xs text-white">{item.bienes?.nombre || 'Insumo Químico'}</p>
                       <p className="text-[10px] text-slate-400">{item.bienes?.categoria || 'General'}</p>
@@ -226,12 +226,12 @@ export default function DespachoMobileView({ agente, sedeId }: { agente: any; se
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando movimientos de kardex...</div>
             ) : movimientosKardex.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs">
+              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay movimientos de inventario registrados recientemente
               </div>
             ) : (
               movimientosKardex.map((mov) => (
-                <div key={mov.id} className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 flex justify-between items-center shadow-md">
+                <div key={mov.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex justify-between items-center shadow-md">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-[9px] font-bold px-1.5 py-0.2 bg-slate-800 text-slate-300 rounded">

@@ -191,14 +191,14 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
       </div>
 
       {/* Tabs */}
-      <div className="grid grid-cols-3 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 shadow-md">
-        <button onClick={() => setTab('cobros')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'cobros' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400'}`}>
+      <div className="grid grid-cols-3 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+        <button onClick={() => setTab('cobros')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'cobros' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <CreditCard className="w-4 h-4" /> Cobros ({oatcs.length})
         </button>
-        <button onClick={() => setTab('arqueo')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'arqueo' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('arqueo')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'arqueo' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <Calculator className="w-4 h-4" /> Arqueo
         </button>
-        <button onClick={() => setTab('historial')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'historial' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400'}`}>
+        <button onClick={() => setTab('historial')} className={`py-2 text-xs font-bold rounded-xl flex justify-center items-center gap-2 transition ${tab === 'historial' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}>
           <History className="w-4 h-4" /> Historial
         </button>
       </div>
@@ -212,7 +212,7 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando órdenes por cobrar...</div>
             ) : oatcs.length === 0 ? (
-              <div className="text-center text-slate-400 py-10 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs">
+              <div className="text-center text-slate-400 py-10 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 ✨ No hay tickets pendientes de cobro en este momento
               </div>
             ) : (
@@ -220,7 +220,7 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
                 const total = calcularTotalOatc(o);
                 const metodoActual = metodoPagoSeleccionado[o.id] || 'YAPE';
                 return (
-                  <div key={o.id} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-lg space-y-3">
+                  <div key={o.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors shadow-lg space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="text-[10px] text-slate-400 font-mono">ID: {o.id.slice(0, 8)}</p>
@@ -299,12 +299,12 @@ export default function CajaMobileView({ agente, sedeId }: { agente: any; sedeId
             {loading ? (
               <div className="text-center text-slate-500 py-8 text-xs font-bold">Cargando comprobantes emitidos...</div>
             ) : historialComprobantes.length === 0 ? (
-              <div className="text-center text-slate-400 py-8 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs">
+              <div className="text-center text-slate-400 py-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-xs">
                 No hay pagos registrados hoy en esta sede
               </div>
             ) : (
               historialComprobantes.map((comp) => (
-                <div key={comp.id} className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 flex justify-between items-center shadow-md">
+                <div key={comp.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex justify-between items-center shadow-md">
                   <div>
                     <div className="flex items-center gap-2">
                       <Receipt className="w-3.5 h-3.5 text-emerald-400" />

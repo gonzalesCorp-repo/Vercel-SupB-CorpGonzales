@@ -157,7 +157,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
           <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">
             Agenda Personal
           </span>
-          <h3 className="text-sm font-black text-white">Citas & Bloqueos de Horario</h3>
+          <h3 className="text-sm font-black text-slate-900 dark:text-white">Citas & Bloqueos de Horario</h3>
         </div>
 
         <button
@@ -197,7 +197,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
                 </div>
                 <div>
                   <h4 className="font-bold text-xs text-white">{item.clienteNombre}</h4>
-                  <p className="text-[10px] text-slate-400">{item.servicio}</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">{item.servicio}</p>
                 </div>
               </div>
 
@@ -219,8 +219,8 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-black text-white">Nuevo Registro en Agenda</h3>
-              <button onClick={() => setModalNuevoOpen(false)} className="text-slate-400 hover:text-white">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white">Nuevo Registro en Agenda</h3>
+              <button onClick={() => setModalNuevoOpen(false)} className="text-slate-500 dark:text-slate-400 hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -231,7 +231,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
                 type="button"
                 onClick={() => setTipoRegistro('CITA')}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition ${
-                  tipoRegistro === 'CITA' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+                  tipoRegistro === 'CITA' ? 'bg-indigo-600 text-white' : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
                 📅 Cita con Cliente
@@ -240,7 +240,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
                 type="button"
                 onClick={() => setTipoRegistro('BLOQUEO')}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition ${
-                  tipoRegistro === 'BLOQUEO' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-400'
+                  tipoRegistro === 'BLOQUEO' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
                 🛡️ Bloqueo / Pausa
@@ -251,34 +251,34 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
               {tipoRegistro === 'CITA' ? (
                 <>
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nombre del Cliente</label>
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Nombre del Cliente</label>
                     <input
                       type="text"
                       placeholder="Ej. Valeria Mendoza"
                       value={nombreCliente}
                       onChange={(e) => setNombreCliente(e.target.value)}
                       required
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Servicio Solicitado</label>
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Servicio Solicitado</label>
                     <input
                       type="text"
                       value={servicioNombre}
                       onChange={(e) => setServicioNombre(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </>
               ) : (
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Motivo del Bloqueo</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Motivo del Bloqueo</label>
                   <select
                     value={motivoBloqueo}
                     onChange={(e) => setMotivoBloqueo(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
                   >
                     <option value="Capacitación Técnica L’Oréal">🎓 Capacitación Técnica / Taller</option>
                     <option value="Permiso Médico / Trámite Personal">🩺 Permiso Médico / Trámite</option>
@@ -289,12 +289,12 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
               )}
 
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Hora de Inicio</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Hora de Inicio</label>
                 <input
                   type="text"
                   value={horaSeleccionada}
                   onChange={(e) => setHoraSeleccionada(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
 

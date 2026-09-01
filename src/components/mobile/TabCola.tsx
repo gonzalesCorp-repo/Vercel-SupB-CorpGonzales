@@ -134,7 +134,7 @@ export function TabCola({ miNombre }: TabColaProps) {
             <span className="text-xl">🚪</span>
           </div>
           <div className="mt-2.5">
-            <h3 className="text-sm font-black text-white">No estás en la cola activa</h3>
+            <h3 className="text-sm font-black text-slate-900 dark:text-white">No estás en la cola activa</h3>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
               Actualmente figuras fuera de jornada. Para ingresar a la asignación de atenciones en piso, ve a la pestaña <strong>Mi Turno</strong> y presiona <strong>Ya Llegué</strong>.
             </p>
@@ -194,7 +194,7 @@ export function TabCola({ miNombre }: TabColaProps) {
         </div>
 
         {filtrados.length === 0 ? (
-          <div className="p-6 bg-slate-900/60 rounded-2xl border border-slate-800 text-center text-xs text-slate-400">
+          <div className="p-6 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors text-center text-xs text-slate-400">
             No hay colaboradores en piso para este filtro.
           </div>
         ) : (

@@ -79,7 +79,7 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
           <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">
             Auditoría de Turno
           </span>
-          <h3 className="text-sm font-black text-white">Historial de Operaciones</h3>
+          <h3 className="text-sm font-black text-slate-900 dark:text-white">Historial de Operaciones</h3>
         </div>
 
         <button

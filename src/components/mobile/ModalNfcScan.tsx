@@ -208,7 +208,7 @@ export function ModalNfcScan({ isOpen, onClose, onSuccess, tipoAccion = 'Validac
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[70] bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
