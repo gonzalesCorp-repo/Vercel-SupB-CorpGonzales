@@ -8,25 +8,32 @@ import HallOfFameBanner from '@/components/mobile/HallOfFameBanner';
 import SegmentedControl from '@/components/mobile/ui/SegmentedControl';
 import TouchActionButton from '@/components/mobile/ui/TouchActionButton';
 import { StaffProximityAlert } from './StaffProximityAlert';
+import { useAppStore } from '@/store/useAppStore';
+import { calcularFinCiclo } from '@/lib/gamification/config';
 
 export interface StaffInicioTabProps {
-  hallOfFame: any[];
   agente: any;
-  calcularFinCiclo: () => Date;
+  colegas?: any[];
+  estadoActual?: string;
+  onCambiarEstado?: (e: string) => void;
+  hallOfFame: any[];
   gamProfile: any;
   inicioSubTab: 'alertas' | 'bar';
-  setInicioSubTab: (tab: 'alertas' | 'bar') => void;
-  handleAlertaRapidaWFM: (accion: string, estado: string) => void;
+  setInicioSubTab: (t: 'alertas' | 'bar') => void;
+  handleAlertaRapidaWFM: (accion: string, nuevoEstado: string) => void;
   handleNfcTagScan: () => void;
   barOrder: { cafe: number; infusion: number; agua: number; especial: number };
   setBarOrder: React.Dispatch<React.SetStateAction<{ cafe: number; infusion: number; agua: number; especial: number }>>;
   handleEnviarPedidoBar: () => void;
+  calcularFinCiclo?: () => Date;
 }
 
 export default function StaffInicioTab({
-  hallOfFame,
   agente,
-  calcularFinCiclo,
+  colegas,
+  estadoActual,
+  onCambiarEstado,
+  hallOfFame,
   gamProfile,
   inicioSubTab,
   setInicioSubTab,
@@ -36,6 +43,7 @@ export default function StaffInicioTab({
   setBarOrder,
   handleEnviarPedidoBar
 }: StaffInicioTabProps) {
+  const sedeActiva = useAppStore((state) => state.sedeActiva);
   const today = new Date().getDay();
   const isWeekendSpecial = today === 5 || today === 6;
 
@@ -43,7 +51,7 @@ export default function StaffInicioTab({
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       {/* 🎯 Alerta de Proximidad de Cliente en Tiempo Real */}
       <StaffProximityAlert
-        sedeId="d954b259-69a0-4546-9156-2f6ad392853f"
+        sedeId={sedeActiva?.id || ''}
         agenteId={agente?.id}
         agenteNombre={agente?.nombre}
       />

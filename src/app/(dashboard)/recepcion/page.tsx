@@ -365,7 +365,7 @@ export default function RecepcionPage() {
 
       {/* Radar de Proximidad Bidireccional en Tiempo Real (GPS Geofence + BLE Beacons) */}
       <ProximityRadarModal
-        sedeId={sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f'}
+        sedeId={sedeActiva?.id || ''}
         onPreAsignarOatc={() => abrirNuevaVentanaOATC()}
       />
 

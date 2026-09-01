@@ -39,7 +39,7 @@ interface TabCarteraCRMProps {
   agenteId?: string;
 }
 
-export function TabCarteraCRM({ agenteNombre = 'Demócrito de Abdera', agenteId }: TabCarteraCRMProps) {
+export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProps) {
   const [query, setQuery] = useState('');
   const [clientes, setClientes] = useState<ClienteCartera[]>([]);
   const [cargando, setCargando] = useState(true);

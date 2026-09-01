@@ -535,8 +535,8 @@ export async function ejecutarResetDiarioAgentes(sedeId?: string): Promise<{ age
         await supabase.from('asistencias_turnos').insert([{
           agente_id: ag.id,
           agente_nombre: ag.nombre,
-          sede_id: sedeId || 'd954b259-69a0-4546-9156-2f6ad392853f',
-          sede_nombre: 'Sede Principal',
+          sede_id: sedeId || undefined,
+          sede_nombre: 'Sede Operativa',
           tipo_movimiento: 'SALIDA',
           punto_acceso: 'Auto-Reset Nocturno del Sistema',
           dispositivo: 'Daemon Programado',

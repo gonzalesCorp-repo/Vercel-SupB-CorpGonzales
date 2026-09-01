@@ -36,11 +36,18 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
   const [feedback, setFeedback] = useState('');
 
   const supabase = createClient();
-  const sedeId = useAppStore((state) => state.sedeActiva?.id) || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore((state) => state.sedeActiva?.id) || '';
 
   const cargarCitas = async () => {
     setLoading(true);
     const hoy = new Date().toISOString().split('T')[0];
+    
+    if (!sedeId) {
+      setCitas([]);
+      setLoading(false);
+      return;
+    }
+
     const { data } = await supabase
       .from('citas')
       .select('*')
@@ -60,11 +67,7 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
       }));
       setCitas(mapeadas);
     } else {
-      // Fallback predeterminado de muestra si el día recién inicia
-      setCitas([
-        { id: '1', clienteNombre: 'Luciana Ramos', servicio: 'Alisado Orgánico + Tratamiento', hora: '03:15 PM', duracionMin: 90, tipo: 'CITA_CLIENTE', estado: 'EN_CURSO' },
-        { id: '2', clienteNombre: 'Andrea Silva', servicio: 'Balayage Premium', hora: '05:30 PM', duracionMin: 120, tipo: 'CITA_CLIENTE', estado: 'PROGRAMADO' }
-      ]);
+      setCitas([]);
     }
     setLoading(false);
   };

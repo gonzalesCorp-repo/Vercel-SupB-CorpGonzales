@@ -91,7 +91,7 @@ export interface LoteProduccionBOH {
 
 // 1. Obtener Órdenes de Servicio (OATC) y Solicitudes de Insumos Pendientes
 export async function obtenerPedidosPendientesLab() {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
   try {
     const [resLab, resInsumos, resOatc] = await Promise.all([
@@ -168,7 +168,7 @@ export async function obtenerPedidosPendientesLab() {
 
 // 2. Obtener Stock Completo optimizado O(N) con Map lookup
 export async function obtenerStockUbicacion() {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
   try {
     const [resPrincipal, resLab] = await Promise.all([
@@ -265,7 +265,7 @@ export async function despacharInsumoConBalanzaIoT(params: {
   agenteNombre?: string;
   notas?: string;
 }) {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
   
   const { data: bien } = await supabase
     .from('bienes')
@@ -379,7 +379,7 @@ export async function producirLoteSubRecetaBOH(params: {
   responsableId?: string;
   diasVencimiento?: number;
 }) {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
   // 1. Obtener bien intermedio y su receta
   const { data: bienIntermedio } = await supabase
@@ -494,7 +494,7 @@ export async function producirLoteSubRecetaBOH(params: {
 
 // 6. Obtener Lotes de Sub-Recetas
 export async function obtenerLotesSubRecetas(limite: number = 30): Promise<LoteProduccionBOH[]> {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
   const { data, error } = await supabase
     .from('lotes_produccion_boh')
@@ -512,7 +512,7 @@ export async function obtenerLotesSubRecetas(limite: number = 30): Promise<LoteP
 
 // 7. Obtener Kardex con Auditoría de Mermas
 export async function obtenerKardex(limite: number = 100): Promise<MovimientoKardex[]> {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
   const { data, error } = await supabase
     .from('inventario_movimientos')
@@ -530,7 +530,7 @@ export async function obtenerKardex(limite: number = 100): Promise<MovimientoKar
 
 // 8. Obtener Métricas Globales de Mermas y Eficiencia IoT
 export async function obtenerMetricasMermasLab() {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
   const hoy = new Date().toISOString().split('T')[0];
 
   const { data: despachos } = await supabase
@@ -598,7 +598,7 @@ export async function obtenerMetricasMermasLab() {
 
 // 9. Ingreso Central
 export async function registrarIngresoCentral(items: any[], referenciaDocumento: string, usuarioId: string) {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
   for (const item of items) {
     const { data: exists } = await supabase
@@ -646,7 +646,7 @@ export async function registrarIngresoCentral(items: any[], referenciaDocumento:
 
 // 10. Transferencia Masiva a Lab
 export async function transferirAlmacen(items: any[], usuarioId: string) {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
   for (const item of items) {
     const cantMover = Number(item.cantidad_mover);

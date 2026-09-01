@@ -35,7 +35,7 @@ export interface ConfiguracionProximidadSede {
 
 // Coordenadas predeterminadas por sede (Sandbox demo para San Isidro y Miraflores)
 export const SEDES_COORDINATES_DEFAULT: Record<string, { lat: number; lng: number; nombre: string }> = {
-  'd954b259-69a0-4546-9156-2f6ad392853f': {
+  '': {
     lat: -12.096528,
     lng: -77.035417,
     nombre: 'Sede San Isidro (Principal)'

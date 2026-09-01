@@ -154,10 +154,10 @@ export default function PerfilPage() {
             </div>
             <div>
               <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                {agente?.nombre || 'Colaborador Vaikuntha'}
+                {agente?.nombre || 'Colaborador'}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                {agente?.email || 'usuario@vaikuntha.pe'}
+                {agente?.email || 'Sin correo registrado'}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <span 
@@ -180,7 +180,7 @@ export default function PerfilPage() {
             <div className="text-left">
               <span className="text-[10px] text-slate-400 font-bold uppercase block">Sede en Operación</span>
               <span className="text-xs font-black text-slate-800 dark:text-slate-200">
-                {sedeActiva?.nombre || 'Unidad de Prueba (Sandbox)'}
+                {sedeActiva?.nombre || 'Sin sede asignada'}
               </span>
             </div>
           </div>

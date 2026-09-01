@@ -333,7 +333,7 @@ export async function imprimirViaWebBluetooth(
 export async function encolarImpresionCloud(
   payload: ImpresionTicketPayload,
   config: ThermalPrinterConfig,
-  sedeId: string = 'd954b259-69a0-4546-9156-2f6ad392853f'
+  sedeId: string = ''
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = createClient();

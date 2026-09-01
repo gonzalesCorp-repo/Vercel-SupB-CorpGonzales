@@ -94,19 +94,7 @@ export async function obtenerEstadoCuentaContinuo(agenteId: string): Promise<{
       });
     }
 
-    // Si no hay órdenes hoy, proveer un estado base coherente
-    if (transacciones.length === 0) {
-      return {
-        transacciones: [
-          { id: 'tx_init_1', fecha: '10:30 AM', tipo: 'CREDITO_COMISION', concepto: 'Comisión Balayage Signature (35%)', monto: 98.00, clienteNombre: 'Andrea Silva' },
-          { id: 'tx_init_2', fecha: '01:20 PM', tipo: 'CREDITO_COMISION', concepto: 'Comisión Corte & Diseño Master (40%)', monto: 26.00, clienteNombre: 'Mariana Ríos' }
-        ],
-        balanceAcumulado: 124.00,
-        creditosHoy: 124.00,
-        debitosHoy: 0
-      };
-    }
-
+    // Si no hay órdenes hoy, retornar balance en 0 y lista vacía
     return {
       transacciones,
       balanceAcumulado: creditos,
@@ -131,22 +119,26 @@ export async function solicitarLiquidacionStaff(
   flujo: FlujoLiquidacion = 'DIRECTO_CAJA'
 ): Promise<ComprobanteLiquidacion> {
   const supabase = createClient();
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id;
   const codigoLiq = `LIQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
 
   try {
     // 1. Notificar solicitud de liquidación a Caja y Admin en cola_peticiones
-    await supabase.from('cola_peticiones').insert([{
-      sede_id: sedeId,
-      tipo: 'LIQUIDACION_COMISION',
-      solicitante_nombre: agenteNombre,
-      detalle: `Solicitud de Liquidación ${codigoLiq}: S/ ${monto.toFixed(2)} (${flujo})`,
-      estado: 'PENDIENTE',
-      metadata: { agenteId, agenteNombre, monto, flujo, codigoLiq }
-    }]);
+    if (sedeId) {
+      await supabase.from('cola_peticiones').insert([{
+        sede_id: sedeId,
+        tipo: 'LIQUIDACION_COMISION',
+        solicitante_nombre: agenteNombre,
+        detalle: `Solicitud de Liquidación ${codigoLiq}: S/ ${monto.toFixed(2)} (${flujo})`,
+        estado: 'PENDIENTE',
+        metadata: { agenteId, agenteNombre, monto, flujo, codigoLiq }
+      }]);
+    }
   } catch (e) {
     console.error('Error insertando solicitud de liquidación:', e);
   }
+
+  const sedeActiva = useAppStore.getState().sedeActiva;
 
   const comprobante: ComprobanteLiquidacion = {
     id: `liq_${Date.now()}`,
@@ -154,12 +146,12 @@ export async function solicitarLiquidacionStaff(
     fechaEmision: new Date().toISOString(),
     agenteId,
     agenteNombre,
-    agenteDni: '47891234',
+    agenteDni: undefined,
     regimen: 'FREELANCE_DESTAJO',
-    sedeId,
-    sedeNombre: 'Unidad de Prueba (Sandbox)',
-    periodoInicio: 'Hoy 08:00 AM',
-    periodoFin: 'Hoy 06:00 PM',
+    sedeId: sedeId || '',
+    sedeNombre: sedeActiva?.nombre || 'Sede Operativa',
+    periodoInicio: 'Hoy',
+    periodoFin: 'Hoy',
     totalServiciosBruto: Number((monto / 0.4).toFixed(2)),
     totalComisionesServicios: monto,
     totalComisionesProductos: 0.00,

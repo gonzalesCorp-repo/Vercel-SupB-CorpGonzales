@@ -191,7 +191,7 @@ export function TabEstacion({
   }, [oatcActiva?.created_at, oatcActiva?.hora_inicio_atencion]);
 
   const handleNfcExitoso = (tag: any) => {
-    const nombreFinal = tag.nombre || (tag.tipo === 'ESTACION' ? `Estación ${tag.id}` : 'Sillón #04 (Estación Central)');
+    const nombreFinal = tag.nombre || (tag.tipo === 'ESTACION' ? `Estación ${tag.id}` : 'Estación de Piso');
     onEstacionVinculada(nombreFinal);
     setFeedback(`¡Estación física "${nombreFinal}" validada con Web NFC!`);
     setTimeout(() => setFeedback(''), 3500);
@@ -1097,14 +1097,14 @@ export function TabEstacion({
           try {
             const supabase = createClient();
             const { useAppStore } = await import('@/store/useAppStore');
-            const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+            const sedeId = useAppStore.getState().sedeActiva?.id;
 
             await supabase.from('pedidos_insumos').insert([{
               agente_id: oatcActiva?.agente_id || null,
               agente_nombre: agenteNombre,
               insumo_solicitado: insumoTexto,
               estado: 'PENDIENTE',
-              sede_id: sedeId
+              sede_id: sedeId || null
             }]);
 
             setModalLabOpen(false);

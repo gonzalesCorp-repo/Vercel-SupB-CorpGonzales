@@ -46,16 +46,10 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
         .order('created_at', { ascending: false })
         .limit(20);
 
-      if (dataInsumos && dataInsumos.length > 0) {
-        setInsumosList(dataInsumos);
-      } else {
-        setInsumosList([
-          { id: 'ins_1', insumo_solicitado: 'Tinte 7.1 Rubio Cenizo (45g) + Oxigenta 20V (60ml)', estado: 'DESPACHADO', created_at: new Date().toISOString() },
-          { id: 'ins_2', insumo_solicitado: 'Polvo Decolorante Blond Studio 9 (30g) + Oxigenta 30V (60ml)', estado: 'DESPACHADO', created_at: new Date().toISOString() }
-        ]);
-      }
+      setInsumosList(dataInsumos || []);
     } catch (e) {
       console.warn('Error cargando historial de atenciones en móvil:', e);
+      setInsumosList([]);
     } finally {
       setCargando(false);
     }
@@ -228,19 +222,45 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
       {/* 3. Sub-Tab: Cortesías */}
       {subTab === 'precios' && (
         <div className="space-y-2.5 animate-in fade-in">
-          <div className="bg-amber-950/30 border border-amber-500/30 p-3 rounded-2xl flex items-center gap-2 text-amber-300 text-xs font-medium">
-            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>Cortesías de fidelización y descuentos autorizados.</span>
+          <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-2xl flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs font-medium">
+            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>Cortesías de fidelización y descuentos aplicados.</span>
           </div>
-          <div className="p-3.5 bg-slate-900/80 border border-slate-800 rounded-2xl flex justify-between items-center">
-            <div>
-              <h4 className="text-xs font-bold text-white">Tratamiento Hidratante Express</h4>
-              <p className="text-[10px] text-slate-400">Cliente VIP: Fidelización Cartera</p>
+
+          {atenciones.flatMap(a => {
+            const srvs = Array.isArray(a.punto_partida) ? a.punto_partida : (a.punto_partida?.servicios || []);
+            return srvs
+              .filter((s: any) => s.es_cortesia || Number(s.precio || s.precio_venta || 0) === 0)
+              .map((s: any, idx: number) => ({
+                id: `${a.id}_cortesia_${idx}`,
+                cliente: a.cliente_nombre || 'Cliente General',
+                servicio: s.nombre || 'Cortesía de Estación',
+                motivo: s.motivo_cortesia || 'Fidelización de Cartera',
+                fecha: a.created_at
+              }));
+          }).length === 0 ? (
+            <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Sin cortesías registradas</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Los servicios otorgados como cortesía aparecerán aquí.</p>
             </div>
-            <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/30">
-              S/ 0.00 (Cortesía)
-            </span>
-          </div>
+          ) : (
+            atenciones.flatMap(a => {
+              const srvs = Array.isArray(a.punto_partida) ? a.punto_partida : (a.punto_partida?.servicios || []);
+              return srvs
+                .filter((s: any) => s.es_cortesia || Number(s.precio || s.precio_venta || 0) === 0)
+                .map((s: any, idx: number) => (
+                  <div key={`${a.id}_cortesia_${idx}`} className="p-3.5 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl flex justify-between items-center shadow-xs transition-colors">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">{s.nombre || 'Cortesía de Estación'}</h4>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{a.cliente_nombre || 'Cliente'} • {s.motivo_cortesia || 'Fidelización'}</p>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-emerald-500/30">
+                      S/ 0.00 (Cortesía)
+                    </span>
+                  </div>
+                ));
+            })
+          )}
         </div>
       )}
 

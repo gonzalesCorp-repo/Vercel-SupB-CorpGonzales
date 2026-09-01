@@ -71,7 +71,7 @@ export default function MobileSoportePage() {
     router.push('/login');
   };
 
-  const sedeId = sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = sedeActiva?.id || '';
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 pb-24 font-sans selection:bg-indigo-500/30 transition-colors duration-200">
@@ -91,7 +91,7 @@ export default function MobileSoportePage() {
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
               <Building2 className="w-3 h-3 text-slate-400" />
-              {sedeActiva?.nombre || 'Unidad de Prueba (Sandbox)'}
+              {sedeActiva?.nombre || 'Sede Operativa'}
             </p>
           </div>
         </div>

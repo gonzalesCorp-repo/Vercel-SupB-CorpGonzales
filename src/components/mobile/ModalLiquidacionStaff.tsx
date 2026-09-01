@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  DollarSign, Clock, CheckCircle2, FileText, ArrowUpRight, ArrowDownRight, 
-  Sparkles, X, Printer, MessageSquare, ChevronRight, ShieldCheck, Send 
+  DollarSign, ArrowUpRight, ArrowDownRight, 
+  X, Send, CheckCircle2, Sparkles 
 } from 'lucide-react';
 import { 
   obtenerEstadoCuentaContinuo, solicitarLiquidacionStaff, 
@@ -19,9 +19,9 @@ interface ModalLiquidacionStaffProps {
 }
 
 export function ModalLiquidacionStaff({ isOpen, onClose, agenteId, agenteNombre }: ModalLiquidacionStaffProps) {
-  const [balance, setBalance] = useState(165.50);
-  const [creditos, setCreditos] = useState(180.50);
-  const [debitos, setDebitos] = useState(15.00);
+  const [balance, setBalance] = useState(0);
+  const [creditos, setCreditos] = useState(0);
+  const [debitos, setDebitos] = useState(0);
   const [transacciones, setTransacciones] = useState<TransaccionCuenta[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 

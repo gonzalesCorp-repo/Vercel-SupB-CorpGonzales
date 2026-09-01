@@ -35,7 +35,11 @@ export function TabBar({ clienteNombre }: TabBarProps) {
     setEnviando(true);
     try {
       const supabase = createClient();
-      const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+      const sedeId = useAppStore.getState().sedeActiva?.id;
+      if (!sedeId) {
+        setEnviando(false);
+        return;
+      }
       const email = typeof window !== 'undefined' ? localStorage.getItem('vaikuntha_user_email') || '' : '';
 
       const resumen: string[] = [];

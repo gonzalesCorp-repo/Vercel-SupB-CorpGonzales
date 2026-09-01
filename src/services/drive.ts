@@ -101,7 +101,7 @@ export const DRIVE_ARCHIVOS_DEMO: DriveArchivo[] = [
     entidad_nombre: 'Masterclasses & Protocolos',
     carpeta_padre_id: 'root',
     carpeta_ruta: '/Capacitaciones/',
-    subido_por_nombre: 'Diógenes de Sinope',
+    subido_por_nombre: 'Equipo de Educación',
     created_at: '2026-08-15T14:30:00Z'
   },
   {
@@ -133,7 +133,7 @@ export const DRIVE_ARCHIVOS_DEMO: DriveArchivo[] = [
     entidad_nombre: 'Valeria Mendoza (VIP)',
     carpeta_padre_id: 'root',
     carpeta_ruta: '/Clientes/Valeria_Mendoza/',
-    subido_por_nombre: 'Demócrito de Abdera',
+    subido_por_nombre: 'Especialista de Salón',
     created_at: '2026-08-17T16:45:00Z'
   },
   {

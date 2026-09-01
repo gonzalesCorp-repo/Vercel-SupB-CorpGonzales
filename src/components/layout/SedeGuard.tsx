@@ -36,11 +36,6 @@ export default function SedeGuard({ children }: SedeGuardProps) {
       }
     } catch (e) {
       console.error('[SedeGuard] Error al cargar sedes:', e);
-      // Fallback sandbox sede en caso de falla de red
-      setSedeActiva({
-        id: 'd954b259-69a0-4546-9156-2f6ad392853f',
-        nombre: 'Unidad de Prueba (Sandbox)'
-      });
     } finally {
       setLoading(false);
     }
@@ -56,7 +51,7 @@ export default function SedeGuard({ children }: SedeGuardProps) {
 
           <h2 className="text-2xl font-bold text-white mb-2">Selecciona tu Sede Activa</h2>
           <p className="text-slate-400 text-sm mb-6">
-            Para operar en Vaikuntha ERP, selecciona la sede física donde te encuentras trabajando.
+            Para operar en el sistema, selecciona la sede física donde te encuentras trabajando.
           </p>
 
           {loading ? (

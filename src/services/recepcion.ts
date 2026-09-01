@@ -408,7 +408,7 @@ export async function obtenerHistorialOatcs(
   page: number = 1,
   limit: number = 50
 ): Promise<{ data: OATC[], total: number }> {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
   let query = supabase
     .from('oatc')

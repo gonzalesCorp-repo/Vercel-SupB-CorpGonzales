@@ -46,7 +46,7 @@ export async function obtenerResumenCuentasPorCobrar(): Promise<{
   clientesConDeuda: number;
   totalAbonosMes: number;
 }> {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
   try {
     const { data: clientesData, error } = await supabase

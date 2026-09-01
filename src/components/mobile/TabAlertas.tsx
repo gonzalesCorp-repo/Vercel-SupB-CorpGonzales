@@ -55,12 +55,12 @@ export function TabAlertas({ agenteId, agenteNombre, estadoActual, onEstadoCambi
     if (tag.metodoMarcacion === 'DIGITAL_1TAP') {
       const { useAppStore } = await import('@/store/useAppStore');
       const { crearSolicitudAsistenciaCola } = await import('@/services/asistencias');
-      const activeSedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
-      const activeSedeNombre = useAppStore.getState().sedeActiva?.nombre || 'Sede Sandbox';
+      const activeSedeId = useAppStore.getState().sedeActiva?.id || tag.id || '';
+      const activeSedeNombre = useAppStore.getState().sedeActiva?.nombre || tag.nombre || 'Sede Operativa';
 
       const resCola = await crearSolicitudAsistenciaCola({
-        agenteId: agenteId || '0115bf49-eb69-46f2-8501-23e3b422d8dc',
-        agenteNombre: agenteNombre || 'Demócrito de Abdera',
+        agenteId: agenteId || '',
+        agenteNombre: agenteNombre || 'Colaborador',
         sedeId: activeSedeId,
         sedeNombre: activeSedeNombre,
         tipoMovimiento: tipoMov,
@@ -74,11 +74,14 @@ export function TabAlertas({ agenteId, agenteNombre, estadoActual, onEstadoCambi
     }
 
     // 1. Validar reglas de negocio y registrar en Supabase asistencias_turnos para Web NFC físico
+    const { useAppStore } = await import('@/store/useAppStore');
+    const activeSede = useAppStore.getState().sedeActiva;
+
     const res = await validarYRegistrarAsistenciaNfc({
-      agente_id: agenteId || '0115bf49-eb69-46f2-8501-23e3b422d8dc',
-      agente_nombre: agenteNombre || 'Demócrito de Abdera',
-      sede_id: tag.id || 'd954b259-69a0-4546-9156-2f6ad392853f',
-      sede_nombre: tag.nombre || 'Sede Sandbox',
+      agente_id: agenteId || '',
+      agente_nombre: agenteNombre || 'Colaborador',
+      sede_id: tag.id || activeSede?.id || '',
+      sede_nombre: tag.nombre || activeSede?.nombre || 'Sede Operativa',
       tipo_movimiento: tipoMov,
       nfc_tag_id: tag.serialNumber,
       nfc_tag_raw: tag.raw,
@@ -100,10 +103,11 @@ export function TabAlertas({ agenteId, agenteNombre, estadoActual, onEstadoCambi
 
     try {
       // Actualizar último cambio de timestamp en la ficha del agente
-      const targetId = agenteId || '0115bf49-eb69-46f2-8501-23e3b422d8dc';
-      await supabase.from('agentes').update({
-        ultimo_cambio_estado: new Date().toISOString()
-      }).or(`id.eq.${targetId},email.ilike.%democrito%`);
+      if (agenteId) {
+        await supabase.from('agentes').update({
+          ultimo_cambio_estado: new Date().toISOString()
+        }).eq('id', agenteId);
+      }
     } catch (e) {
       console.warn('Fallback offline para timestamp de agente:', e);
     }

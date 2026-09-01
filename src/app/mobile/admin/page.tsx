@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Building2, MapPin, ChevronDown, RefreshCw, LogOut, 
-  Sparkles, Sliders, Bell, Users, CreditCard, BarChart3, 
-  Scissors, CheckCircle2, Clock, ShieldCheck, UserCheck, Eye
+  Building2, ChevronDown, RefreshCw, LogOut, 
+  Sliders, Users, CreditCard, BarChart3, 
+  CheckCircle2, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
@@ -24,14 +24,8 @@ export default function MobileAdminPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('mando');
   const [misSedes, setMisSedes] = useState<Sede[]>([]);
   const [showSedesModal, setShowSedesModal] = useState(false);
+  const [agente, setAgente] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
-  const [agente, setAgente] = useState<any>({
-    id: '',
-    nombre: 'Administrador',
-    rol: 'ADMIN',
-    email: ''
-  });
 
   // KPIs de la Sede
   const [totalVentasHoy, setTotalVentasHoy] = useState(0);
@@ -45,17 +39,8 @@ export default function MobileAdminPage() {
   // 1. Validar Permisos de ADMIN o SUPERADMIN
   useEffect(() => {
     const rol = typeof window !== 'undefined' ? (localStorage.getItem('vaikuntha_user_rol') || '').toUpperCase() : '';
-    const email = typeof window !== 'undefined' ? (localStorage.getItem('vaikuntha_user_email') || '') : '';
 
-    const esAdminAutorizado = 
-      rol === 'ADMIN' || 
-      rol === 'SUPERADMIN' || 
-      email.includes('diana') || 
-      email.includes('joseph') || 
-      email.includes('erick') || 
-      email.includes('adriano') || 
-      email.includes('platon') || 
-      email.includes('cristian');
+    const esAdminAutorizado = rol === 'ADMIN' || rol === 'SUPERADMIN' || rol === 'SOPORTE';
 
     if (!esAdminAutorizado) {
       router.replace('/login');

@@ -96,7 +96,7 @@ export default function KioskoDualPage() {
   const [barEnviando, setBarEnviando] = useState(false);
 
   const cargarDatosStaff = useCallback(async () => {
-    const sedeId = sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+    const sedeId = sedeActiva?.id || '';
     setLoadingData(true);
     const supabase = createClient();
 
@@ -215,7 +215,7 @@ export default function KioskoDualPage() {
 
     try {
       const supabase = createClient();
-      const sedeId = sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+      const sedeId = sedeActiva?.id || '';
 
       const { data, error } = await supabase
         .from('oatc')
@@ -256,7 +256,7 @@ export default function KioskoDualPage() {
     if (!clienteVip?.cliente) return;
     try {
       const supabase = createClient();
-      const sedeId = sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+      const sedeId = sedeActiva?.id || '';
 
       await supabase.from('cola_peticiones').insert([{
         sede_id: sedeId,
@@ -284,7 +284,7 @@ export default function KioskoDualPage() {
         nombre: nuevoClienteForm.nombre.trim(),
         dni: nuevoClienteForm.dni.trim() || undefined,
         celular: nuevoClienteForm.celular.trim() || undefined,
-        sede_id: sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f'
+        sede_id: sedeActiva?.id || ''
       });
 
       if (creado) {
@@ -364,7 +364,7 @@ export default function KioskoDualPage() {
       setPinError('');
 
       if (solicitudParaValidar) {
-        const sedeId = sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+        const sedeId = sedeActiva?.id || '';
         const sedeNombre = sedeActiva?.nombre || 'Sede Sandbox';
 
         let tipoMov: TipoMovimientoAsistencia = 'ENTRADA';
@@ -394,7 +394,7 @@ export default function KioskoDualPage() {
         setTimeout(() => setFeedback(''), 6000);
 
       } else if (colaboradorParaAccion && tipoMovimientoParaAccion) {
-        const sedeId = sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+        const sedeId = sedeActiva?.id || '';
         const sedeNombre = sedeActiva?.nombre || 'Sede Sandbox';
 
         const res = await validarYRegistrarAsistenciaNfc({
@@ -474,7 +474,7 @@ export default function KioskoDualPage() {
       await supabase.from('pedidos_insumos').insert([{
         agente_id: colaboradorActivo.id,
         agente_nombre: colaboradorActivo.nombre,
-        sede_id: sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f',
+        sede_id: sedeActiva?.id || '',
         oatc_id: oatcActiva?.id || null,
         cliente_nombre: oatcActiva?.cliente_nombre || 'Cliente en Estación',
         insumo: `${labInsumo} (${labGramos}g + ${labOxidante}g)`,
@@ -499,7 +499,7 @@ export default function KioskoDualPage() {
       const supabase = createClient();
       await supabase.from('cola_peticiones').insert([{
         agente_id: colaboradorActivo.id,
-        sede_id: sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f',
+        sede_id: sedeActiva?.id || '',
         tipo_id: '5ef41109-0c11-469c-b79d-2e2e74a79d25',
         estado: 'PENDIENTE',
         oatc_id: oatcActiva?.id || null

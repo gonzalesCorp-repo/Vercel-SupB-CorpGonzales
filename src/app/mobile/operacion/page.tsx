@@ -2,12 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Briefcase, Zap, Beaker, Award, Clock, CheckCircle2, 
-  ChevronRight, Wifi, ShieldCheck, LogOut, Disc, Smartphone, 
-  BellRing, CalendarPlus, UserX, X, User, DollarSign, 
-  Calendar, Layers, Users, Coffee, Sparkles, Radio 
+  Clock, X, User, DollarSign, Calendar, Users, Coffee
 } from 'lucide-react';
-import Link from 'next/link';
 import { MobileAppleNav, MainHubTab } from '@/components/mobile/MobileAppleNav';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
@@ -25,6 +21,7 @@ import { reproducirChimeNuevaOrden } from '@/lib/audio/chime';
 import { useNfcBackgroundListener, NfcPayloadParsed } from '@/hooks/useNfcBackgroundListener';
 import { validarYRegistrarAsistenciaNfc, TipoMovimientoAsistencia } from '@/services/asistencias';
 import { obtenerConfiguracionSede, SedeFeatureToggles } from '@/services/sedesConfig';
+import { obtenerEstadoCuentaContinuo } from '@/services/compensaciones';
 
 import { MobileHeaderShell } from '@/components/layout/MobileHeaderShell';
 import { CommandPalette, CommandItem } from '@/components/ui/watermelon-patterns/command-palette';
@@ -45,16 +42,17 @@ export default function MobileOperacionPage() {
   const [sedeConfig, setSedeConfig] = useState<SedeFeatureToggles | null>(null);
 
   const [agente, setAgente] = useState({
-    id: '682826e5-0324-4af8-ae58-fe2580d265f9',
-    nombre: 'Diógenes de Sinope',
+    id: '',
+    nombre: '',
     rol: 'STAFF',
-    especialidad: 'Estilismo & Capilar',
+    especialidad: 'Especialista de Salón',
     estado: 'ACTIVO',
     estado_operativo: 'FUERA_DE_TURNO',
-    estacion: 'Sillón #04 (Estación Central)',
-    comisionesHoy: 185.50,
-    serviciosCompletados: 4,
-    clienteActual: null as string | null
+    estacion: null as string | null,
+    comisionesHoy: 0,
+    serviciosCompletados: 0,
+    clienteActual: null as string | null,
+    atributos: null as any
   });
 
   const [oatcActiva, setOatcActiva] = useState<any>(null);
@@ -109,18 +107,37 @@ export default function MobileOperacionPage() {
     let currentNombre = agente.nombre;
 
     async function syncAgente() {
-      const email = typeof window !== 'undefined' ? (localStorage.getItem('vaikuntha_user_email') || 'diogenes@vaikuntha.com') : 'diogenes@vaikuntha.com';
+      const email = typeof window !== 'undefined' ? localStorage.getItem('vaikuntha_user_email') : null;
+      if (!email) {
+        router.replace('/login');
+        return;
+      }
+
       const { data } = await supabase.from('agentes').select('*').ilike('email', email).maybeSingle();
       if (data) {
         currentId = data.id;
         currentNombre = data.nombre;
+
+        // Cargar comisiones reales de hoy
+        const estadoCta = await obtenerEstadoCuentaContinuo(data.id);
+        const hoy = new Date().toISOString().split('T')[0];
+        const { count: srvCount } = await supabase
+          .from('oatc')
+          .select('id', { count: 'exact', head: true })
+          .or(`agente_id.eq.${data.id},agente_nombre.ilike.%${data.nombre}%`)
+          .eq('estado_proceso', 'FINALIZADO')
+          .gte('created_at', `${hoy}T00:00:00`);
+
         setAgente(prev => ({
           ...prev,
           id: data.id,
           nombre: data.nombre,
           rol: data.rol,
           especialidad: data.especialidad || prev.especialidad,
-          estado_operativo: data.estado_operativo || 'FUERA_DE_TURNO'
+          estado_operativo: data.estado_operativo || 'FUERA_DE_TURNO',
+          atributos: data.atributos,
+          comisionesHoy: estadoCta.creditosHoy || 0,
+          serviciosCompletados: srvCount || 0
         }));
 
         loadGamification(data.id);
@@ -291,7 +308,7 @@ export default function MobileOperacionPage() {
       {/* 📱 HEADER PRINCIPAL (MobileHeaderShell Compacto) */}
       <MobileHeaderShell
         agenteNombre={agente.nombre}
-        estacionNombre={agente.estacion}
+        estacionNombre={agente.estacion || undefined}
         estadoOperativo={agente.estado_operativo}
         badgeLabel={badgeInfo.label}
         badgeBg={badgeInfo.bg}
@@ -369,7 +386,7 @@ export default function MobileOperacionPage() {
         {/* 1. 💈 ESTACIÓN (Hub Principal con Sub-Tabs: Silla, Bar y Cola) */}
         {activeHub === 'estacion' && (
           <TabEstacion
-            estacionNombre={agente.estacion}
+            estacionNombre={agente.estacion || 'Estación de Piso'}
             agenteNombre={agente.nombre}
             oatcActiva={oatcActiva}
             estadoOperativo={agente.estado_operativo}

@@ -79,7 +79,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
           <div className="text-center border-b border-dashed border-slate-400 pb-3 space-y-0.5">
             <h2 className="font-black text-sm uppercase tracking-wider">{comprobante.sedeNombre}</h2>
             <p className="text-[10px] text-slate-600">LIQUIDACIÓN DE SERVICIOS POR DESTAJO</p>
-            <p className="text-[10px] text-slate-500">RUC: 20608912341 • San Isidro, Lima</p>
+            <p className="text-[10px] text-slate-500">RUC: 20608912341 • Jesús María, Lima</p>
           </div>
 
           <div className="text-[11px] space-y-1">
@@ -89,7 +89,7 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">DNI / RUC:</span>
-              <span className="font-bold">{comprobante.agenteDni || '47891234'}</span>
+              <span className="font-bold">{comprobante.agenteDni || '--------'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">Régimen:</span>
@@ -161,12 +161,12 @@ export function ComprobanteLiquidacionTicket({ comprobante, onClose }: Comproban
                 PENDIENTE AUTORIZACIÓN
               </div>
               <p className="font-bold text-slate-700">ADMIN / CAJA POS</p>
-              <p className="text-slate-500">Vaikuntha ERP</p>
+              <p className="text-slate-500">{comprobante.sedeNombre || 'Administración'}</p>
             </div>
           </div>
 
           <div className="text-[8px] text-center text-slate-400 pt-2">
-            HASH DE SEGURIDAD: 98AF-2026-X19B-VKN • VÁLIDO SUNAT / LOCACIÓN DE SERVICIOS
+            HASH DE SEGURIDAD: {comprobante.codigoLiquidacion} • VÁLIDO SUNAT / LOCACIÓN DE SERVICIOS
           </div>
 
         </div>

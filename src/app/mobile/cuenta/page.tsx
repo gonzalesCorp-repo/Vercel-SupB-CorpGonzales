@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { useGamificationStore } from '@/store/useGamificationStore';
 import { createClient } from '@/lib/supabase/client';
 import StaffPerfilView from '@/components/mobile/staff/StaffPerfilView';
 import ClientePerfilView from '@/components/mobile/cliente/ClientePerfilView';
 import Link from 'next/link';
-import { ArrowLeft, User, Smartphone, Shield, Sparkles } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import MiPerfilPage from '@/app/(dashboard)/perfil/page';
 
 export default function MobileCuentaPage() {
@@ -14,6 +15,10 @@ export default function MobileCuentaPage() {
   const [agente, setAgente] = useState<any>(null);
   const [cliente, setCliente] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const gamProfile = useGamificationStore((state) => state.profile);
+  const hallOfFame = useGamificationStore((state) => state.hallOfFame);
+  const loadGamification = useGamificationStore((state) => state.loadProfile);
 
   const supabase = createClient();
 
@@ -23,13 +28,14 @@ export default function MobileCuentaPage() {
       const userEmail = user?.email || (typeof window !== 'undefined' ? localStorage.getItem('vaikuntha_user_email') : null);
 
       if (userEmail) {
-        const { data } = await supabase.from('agentes').select('*').eq('email', userEmail).maybeSingle();
+        const { data } = await supabase.from('agentes').select('*').ilike('email', userEmail).maybeSingle();
         if (data) {
           setAgente(data);
+          loadGamification(data.id);
         } else {
           setAgente({
-            id: 'admin-fallback',
-            nombre: localStorage.getItem('vaikuntha_user_name') || 'Usuario Staff',
+            id: '',
+            nombre: typeof window !== 'undefined' ? (localStorage.getItem('vaikuntha_user_name') || 'Colaborador') : 'Colaborador',
             email: userEmail,
             rol: userRol || 'STAFF'
           });
@@ -50,7 +56,7 @@ export default function MobileCuentaPage() {
     }
 
     loadData();
-  }, [userRol]);
+  }, [userRol, loadGamification]);
 
   if (loading) {
     return (
@@ -87,7 +93,7 @@ export default function MobileCuentaPage() {
             <ArrowLeft className="w-4 h-4" /> Volver a Operaciones
           </Link>
         </div>
-        <StaffPerfilView agente={agente} gamProfile={{ streak_asistencia: 7, streak_max: 14, badges: ['PUNTUAL_ORO', 'ZERO_WASTE', 'SPEED_MASTER'] }} />
+        <StaffPerfilView agente={agente} gamProfile={gamProfile} hallOfFame={hallOfFame} />
       </div>
     );
   }
@@ -109,3 +115,4 @@ export default function MobileCuentaPage() {
     </div>
   );
 }
+

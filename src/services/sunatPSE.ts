@@ -70,7 +70,7 @@ export interface RespuestaSunatPSE {
 export async function emitirComprobanteSunatPSE(
   params: EmitirComprobanteParams
 ): Promise<RespuestaSunatPSE> {
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
   const config = await obtenerConfiguracionSede(sedeId);
 
   const rucEmisor = config.sunatRuc || '20608945123';

@@ -33,16 +33,16 @@ export default function ClientePortalPage() {
   const [redeemSuccess, setRedeemSuccess] = useState(false);
 
   const supabase = createClient();
-  const defaultSedeId = 'd954b259-69a0-4546-9156-2f6ad392853f';
+  const defaultSedeId = '';
 
   const proximity = useClientProximity({
     sedeId: defaultSedeId,
     clienteId: cliente?.id || clienteId || '',
     clienteNombre: cliente?.nombre || 'Cliente VIP',
     clienteDni: cliente?.dni || '',
-    servicioNombre: 'Corte & Estilismo Master',
-    estilistaNombre: 'Demócrito de Abdera',
-    horaCita: 'Hoy 4:30 PM'
+    servicioNombre: 'Servicio en Salón',
+    estilistaNombre: 'Especialista Asignado',
+    horaCita: 'Próxima Cita'
   });
 
   useEffect(() => {

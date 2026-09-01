@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, X, Edit3, Sun, Moon, Award, Heart, LogOut, Sliders, KeyRound, Check, Palette } from 'lucide-react';
+import { User, X, Edit3, Award, Heart, LogOut, Sliders, KeyRound, Check } from 'lucide-react';
 import StreakCounter from '@/components/mobile/StreakCounter';
 import HallOfFameBanner from '@/components/mobile/HallOfFameBanner';
 import BadgeCollection from '@/components/mobile/BadgeCollection';
@@ -12,6 +12,7 @@ import { useThemeStore } from '@/store/useThemeStore';
 import { createClient } from '@/lib/supabase/client';
 import { MobileAccessibilityCard } from '@/components/mobile/MobileAccessibilityCard';
 import { PwaInstallButton } from '@/components/mobile/PwaInstallButton';
+import { formatHorarioAgente, formatDescansoAgente } from '@/lib/utils/timeUtils';
 
 export interface StaffPerfilViewProps {
   agente?: any;
@@ -155,9 +156,9 @@ export default function StaffPerfilView({
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl transition-colors">
         <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-3">
           <div>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">{agente?.nombre || 'Especialista Staff'}</h3>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white">{agente?.nombre || 'Colaborador'}</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
-              Turno: ⏰ 9:00 am - 8:00 pm • <span className="text-indigo-600 dark:text-indigo-400 font-bold">ROL: {agente?.rol || 'STAFF'}</span>
+              Turno: ⏰ {formatHorarioAgente(agente?.atributos)} • <span className="text-indigo-600 dark:text-indigo-400 font-bold">ROL: {agente?.rol || 'STAFF'}</span>
             </p>
           </div>
           <button 
@@ -176,7 +177,7 @@ export default function StaffPerfilView({
           >
             <span className="font-bold text-slate-500 dark:text-slate-400">APODO / NOMBRE EN COMANDAS</span>
             <span className="font-black text-slate-900 dark:text-white flex items-center gap-1">
-              {agente?.nombre || 'Staff'} <Edit3 className="w-3.5 h-3.5 text-indigo-500" />
+              {agente?.atributos?.nickname || agente?.nombre || 'Colaborador'} <Edit3 className="w-3.5 h-3.5 text-indigo-500" />
             </span>
           </div>
 
@@ -192,12 +193,12 @@ export default function StaffPerfilView({
 
           <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
             <span className="font-bold text-slate-500 dark:text-slate-400">DÍA DE DESCANSO HABITUAL</span>
-            <span className="font-black text-emerald-600 dark:text-emerald-400">Lunes</span>
+            <span className="font-black text-emerald-600 dark:text-emerald-400">{formatDescansoAgente(agente?.atributos)}</span>
           </div>
 
           <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
             <span className="font-bold text-slate-500 dark:text-slate-400">CORREO / USUARIO</span>
-            <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[180px]">{agente?.email || 'staff@empresa.com'}</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[180px]">{agente?.email || 'Sin correo asignado'}</span>
           </div>
         </div>
 
