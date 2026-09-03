@@ -9,7 +9,7 @@ import {
 } from '@/services/plantillasInsumos';
 import { 
   PackageSearch, Zap, Plus, Scale, Sparkles, AlertCircle, 
-  Check, CheckCircle2, ChevronRight, Barcode, Trash2, Printer 
+  Check, CheckCircle2, ChevronRight, Barcode, Trash2, Printer, RotateCcw 
 } from 'lucide-react';
 import { ModalOneTapRecipes } from './ModalOneTapRecipes';
 import { RecetaPreset } from './OneTapRecipeGrid';
@@ -66,6 +66,64 @@ export function FormularioDespachoGeneral({
   // Lista multicomponente activa
   const [filas, setFilas] = useState<InsumoFila[]>([]);
   const [filaActivaIdx, setFilaActivaIdx] = useState<number>(0);
+  const [modoForzadoManual, setModoForzadoManual] = useState<boolean>(false);
+
+  const handleActualizarGramosManual = (index: number, gramos: number) => {
+    setFilas(prev => {
+      const copy = [...prev];
+      if (copy[index]) {
+        const nuevoNeto = Math.max(0, Number(isNaN(gramos) ? 0 : gramos));
+        copy[index] = {
+          ...copy[index],
+          pesoNetoG: nuevoNeto,
+          pesoBrutoG: nuevoNeto > 0 ? Number((nuevoNeto + copy[index].taraEnvaseG).toFixed(1)) : 0,
+          pesado: true
+        };
+      }
+      return copy;
+    });
+  };
+
+  const handleAjustarDelta = (index: number, delta: number) => {
+    setFilas(prev => {
+      const copy = [...prev];
+      if (copy[index]) {
+        const base = copy[index].pesoNetoG > 0 ? copy[index].pesoNetoG : copy[index].pesoTeoricoG;
+        const nuevoNeto = Math.max(0, Number((base + delta).toFixed(1)));
+        copy[index] = {
+          ...copy[index],
+          pesoNetoG: nuevoNeto,
+          pesoBrutoG: nuevoNeto > 0 ? Number((nuevoNeto + copy[index].taraEnvaseG).toFixed(1)) : 0,
+          pesado: true
+        };
+      }
+      return copy;
+    });
+  };
+
+  const handleRestablecerTeorico = (index: number) => {
+    setFilas(prev => {
+      const copy = [...prev];
+      if (copy[index]) {
+        copy[index] = {
+          ...copy[index],
+          pesoNetoG: copy[index].pesoTeoricoG,
+          pesoBrutoG: Number((copy[index].pesoTeoricoG + copy[index].taraEnvaseG).toFixed(1)),
+          pesado: false
+        };
+      }
+      return copy;
+    });
+  };
+
+  const handleAplicarTodosTeoricos = () => {
+    setFilas(prev => prev.map(f => ({
+      ...f,
+      pesoNetoG: f.pesoTeoricoG,
+      pesoBrutoG: Number((f.pesoTeoricoG + f.taraEnvaseG).toFixed(1)),
+      pesado: true
+    })));
+  };
 
   useEffect(() => {
     obtenerPlantillaInsumosConfig().then(setPlantilla);
@@ -161,14 +219,43 @@ export function FormularioDespachoGeneral({
           </h2>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setModalOneTapOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500/10 to-indigo-500/10 hover:from-amber-500/20 hover:to-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-bold transition active:scale-95 shadow-sm cursor-pointer"
-        >
-          <Zap className="w-3.5 h-3.5 text-amber-500" />
-          <span>⚡ Fórmulas Rápidas 1-Tap</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {habilitarBalanzasIot && (
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => setModoForzadoManual(false)}
+                className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
+                  !modoForzadoManual
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                Balanza IoT
+              </button>
+              <button
+                type="button"
+                onClick={() => setModoForzadoManual(true)}
+                className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
+                  modoForzadoManual
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                Manual Asistido
+              </button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setModalOneTapOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500/10 to-indigo-500/10 hover:from-amber-500/20 hover:to-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-bold transition active:scale-95 shadow-sm cursor-pointer"
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-500" />
+            <span>⚡ Fórmulas Rápidas 1-Tap</span>
+          </button>
+        </div>
       </div>
 
       {/* Grid de Configuración de Plantilla */}
@@ -242,8 +329,8 @@ export function FormularioDespachoGeneral({
         </div>
       )}
 
-      {/* Si Balanzas IoT están Habilitadas ➔ Mesa Multicomponente con Balanza */}
-      {habilitarBalanzasIot ? (
+      {/* Si Balanzas IoT están Habilitadas y activas ➔ Mesa Multicomponente con Balanza */}
+      {habilitarBalanzasIot && !modoForzadoManual ? (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
@@ -346,21 +433,137 @@ export function FormularioDespachoGeneral({
           </div>
         </div>
       ) : (
-        /* Modo Convencional sin Balanza */
-        <div className="space-y-3 p-4 bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-800">
-          <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            Resumen de Insumos a Despachar (Modo Manual Convencional)
-          </h3>
-          <div className="space-y-2">
-            {filas.map((f, idx) => (
-              <div key={idx} className="flex items-center justify-between p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-                <div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{f.nombre}</span>
-                  <span className="block text-[10px] font-mono text-slate-400">{f.sku}</span>
+        /* Modo Convencional Manual Asistido con Prellenado Teórico */
+        <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                <Scale className="w-4 h-4 text-indigo-500" />
+                Mesa de Pesaje Manual Asistido (Prellenado Teórico)
+              </h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Valores calculados por fórmula. Edita o confirma los gramos reales sin necesidad de balanza física.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                Manual Asistido
+              </span>
+              <button
+                type="button"
+                onClick={handleAplicarTodosTeoricos}
+                className="px-2.5 py-1 text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-lg transition cursor-pointer"
+              >
+                ✓ Aplicar Teóricos
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            {filas.map((f, idx) => {
+              const valorActual = f.pesoNetoG > 0 ? f.pesoNetoG : f.pesoTeoricoG;
+              const delta = Number((valorActual - f.pesoTeoricoG).toFixed(1));
+              const esDiferente = Math.abs(delta) > 0.01;
+
+              return (
+                <div 
+                  key={idx} 
+                  className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                >
+                  <div className="min-w-[180px] flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{f.nombre}</span>
+                      {f.motivoRegla && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                          Regla Auto
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono mt-0.5">
+                      <span>{f.sku}</span>
+                      <span>•</span>
+                      <span>Teórico Receta: <strong className="text-slate-600 dark:text-slate-300">{f.pesoTeoricoG} g</strong></span>
+                    </div>
+                  </div>
+
+                  {/* Controles de Edición Manual Asistida */}
+                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+                      <button
+                        type="button"
+                        onClick={() => handleAjustarDelta(idx, -5)}
+                        className="px-1.5 py-1 text-[10px] font-bold bg-white dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 rounded-lg transition cursor-pointer"
+                        title="-5g"
+                      >
+                        -5
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAjustarDelta(idx, -1)}
+                        className="px-1.5 py-1 text-[10px] font-bold bg-white dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 rounded-lg transition cursor-pointer"
+                        title="-1g"
+                      >
+                        -1
+                      </button>
+
+                      <div className="relative flex items-center">
+                        <input
+                          type="number"
+                          step={0.5}
+                          min={0}
+                          value={valorActual}
+                          onChange={(e) => handleActualizarGramosManual(idx, parseFloat(e.target.value) || 0)}
+                          className="w-20 text-center font-mono font-black text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg py-1 px-1 text-indigo-600 dark:text-indigo-400 focus:outline-none focus:border-indigo-500"
+                        />
+                        <span className="text-[10px] font-bold text-slate-400 ml-1 mr-1">g</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAjustarDelta(idx, 1)}
+                        className="px-1.5 py-1 text-[10px] font-bold bg-white dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 rounded-lg transition cursor-pointer"
+                        title="+1g"
+                      >
+                        +1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAjustarDelta(idx, 5)}
+                        className="px-1.5 py-1 text-[10px] font-bold bg-white dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 rounded-lg transition cursor-pointer"
+                        title="+5g"
+                      >
+                        +5
+                      </button>
+                    </div>
+
+                    {esDiferente && (
+                      <button
+                        type="button"
+                        onClick={() => handleRestablecerTeorico(idx)}
+                        className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 bg-slate-100 dark:bg-slate-800 rounded-lg transition cursor-pointer"
+                        title="Restablecer a teórico"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        <span>Teórico</span>
+                      </button>
+                    )}
+
+                    <div className="min-w-[75px] text-right">
+                      {esDiferente ? (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                          {delta > 0 ? `+${delta}g` : `${delta}g`}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                          Exacto
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <span className="font-mono font-black text-indigo-500">{f.pesoTeoricoG} g</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

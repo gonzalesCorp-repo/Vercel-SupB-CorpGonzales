@@ -18,9 +18,12 @@ interface ComprobanteExt {
   total: number;
   fecha_emision: string;
   estado: string;
-  emisores: { id: string; razon_social: string; ruc: string } | null;
-  agentes: { id: string; nombre: string; } | null;
-  oatc: { id: string; cliente_nombre: string; punto_partida: any[] } | null;
+  cliente_nombre?: string;
+  cajero_nombre?: string;
+  metadata_fiscal?: any;
+  emisores?: { id: string; razon_social: string; ruc: string } | null;
+  agentes?: { id: string; nombre: string; } | null;
+  oatc?: { id: string; cliente_nombre: string; punto_partida: any[] } | null;
 }
 
 export default function ComprobantesPage() {
@@ -58,19 +61,13 @@ export default function ComprobantesPage() {
     const { data: agData } = await supabase.from('agentes').select('id, nombre');
     if (agData) setOperativosList(agData);
 
-    // Query principal
-    let query = supabase.from('comprobantes').select(`
-      *,
-      emisores (id, razon_social, ruc),
-      agentes (id, nombre),
-      oatc (id, cliente_nombre, punto_partida)
-    `).eq('sede_id', sedeActiva.id).order('fecha_emision', { ascending: false });
+    // Query principal a tabla canónica comprobantes_pago
+    let query = supabase.from('comprobantes_pago').select('*')
+      .eq('sede_id', sedeActiva.id).order('fecha_emision', { ascending: false });
 
     if (fechaInicio) query = query.gte('fecha_emision', `${fechaInicio}T00:00:00.000Z`);
     if (fechaFin) query = query.lte('fecha_emision', `${fechaFin}T23:59:59.999Z`);
     if (estadoFiltro !== 'TODOS') query = query.eq('estado', estadoFiltro);
-    if (filtroEmisor) query = query.eq('emisor_id', filtroEmisor);
-    if (filtroOperativo) query = query.eq('cajero_id', filtroOperativo);
 
     const { data, error } = await query;
     if (error) {
@@ -79,17 +76,17 @@ export default function ComprobantesPage() {
     } else {
       let result = (data as unknown) as ComprobanteExt[];
       
-      // Filtros por texto (en JS para simplificar la búsqueda en joins)
+      // Filtros por texto (en JS para simplificar la búsqueda)
       if (searchDoc) {
         const term = searchDoc.toLowerCase();
         result = result.filter(c => 
-          `${c.serie}-${c.correlativo.toString().padStart(6, '0')}`.toLowerCase().includes(term) ||
+          `${c.serie}-${(c.correlativo || 0).toString().padStart(6, '0')}`.toLowerCase().includes(term) ||
           c.tipo_comprobante.toLowerCase().includes(term)
         );
       }
       if (searchCliente) {
         const term = searchCliente.toLowerCase();
-        result = result.filter(c => c.oatc?.cliente_nombre.toLowerCase().includes(term));
+        result = result.filter(c => (c.cliente_nombre || c.oatc?.cliente_nombre || '').toLowerCase().includes(term));
       }
       
       setComprobantes(result);
@@ -104,7 +101,7 @@ export default function ComprobantesPage() {
   const handleAnular = async (id: string) => {
     if (!confirm('¿Estás seguro de anular este comprobante? Esta acción es irreversible.')) return;
 
-    const { error } = await supabase.from('comprobantes').update({ estado: 'ANULADO' }).eq('id', id);
+    const { error } = await supabase.from('comprobantes_pago').update({ estado: 'ANULADO' }).eq('id', id);
     if (error) {
       showAlert('Error al anular', 'error');
     } else {
@@ -205,13 +202,15 @@ export default function ComprobantesPage() {
                       <p className="text-sm font-medium text-slate-500">{comp.serie}-{comp.correlativo.toString().padStart(6, '0')}</p>
                     </td>
                     <td className="p-4 font-medium text-slate-700">
-                      {comp.oatc?.cliente_nombre || 'Cliente Final'}
+                      {comp.cliente_nombre || comp.oatc?.cliente_nombre || 'Cliente Final'}
                     </td>
                     <td className="p-4 text-sm">
-                      <p className="font-medium text-slate-800 truncate max-w-[200px]" title={comp.emisores?.razon_social}>{comp.emisores?.razon_social}</p>
+                      <p className="font-medium text-slate-800 truncate max-w-[200px]" title={comp.cajero_nombre || comp.emisores?.razon_social}>
+                        {comp.cajero_nombre || comp.emisores?.razon_social || 'Caja Principal'}
+                      </p>
                       <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-                        {comp.agentes?.nombre}
+                        {comp.cajero_nombre || comp.agentes?.nombre || 'Cajero'}
                       </p>
                     </td>
                     <td className="p-4 font-black text-slate-800 text-right">

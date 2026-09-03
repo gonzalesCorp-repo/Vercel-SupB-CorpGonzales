@@ -35,18 +35,19 @@ export const CONFIG_DEFAULT_SOPORTE: Omit<AgenteConfigRemunerativa, 'agente_id'>
 };
 
 export async function obtenerConfiguracionRemunerativa(agenteId: string, rol?: string): Promise<AgenteConfigRemunerativa> {
-  try {
-    const { data, error } = await supabase
-      .from('agente_configuracion_remunerativa')
-      .select('*')
-      .eq('agente_id', agenteId)
-      .maybeSingle();
+  const { data, error } = await supabase
+    .from('agente_configuracion_remunerativa')
+    .select('*')
+    .eq('agente_id', agenteId)
+    .maybeSingle();
 
-    if (!error && data) {
-      return data as AgenteConfigRemunerativa;
-    }
-  } catch (err) {
-    console.warn('Tabla agente_configuracion_remunerativa aún no disponible:', err);
+  if (error) {
+    console.error('Error consultando agente_configuracion_remunerativa:', error);
+    throw error;
+  }
+
+  if (data) {
+    return data as AgenteConfigRemunerativa;
   }
 
   const isStaff = rol === 'STAFF' || !rol;
@@ -244,7 +245,11 @@ export async function solicitarLiquidacionStaff(params: {
       cliente_nombre: v.cliente_nombre
     }));
 
-    await supabase.from('liquidaciones_items').insert(itemsInsert);
+    const { error: itemsErr } = await supabase.from('liquidaciones_items').insert(itemsInsert);
+    if (itemsErr) {
+      console.error('Error insertando liquidaciones_items:', itemsErr);
+      throw itemsErr;
+    }
   }
 
   await registrarLog('LIQUIDACION_SOLICITADA', `Solicitud de liquidación ${correlativo} generada para ${params.agenteNombre} por S/ ${totalNeto.toFixed(2)}`, {
@@ -266,36 +271,34 @@ export async function obtenerLiquidaciones(filtros?: {
   estado?: string;
   sedeId?: string;
 }): Promise<LiquidacionPersonal[]> {
-  try {
-    let query = supabase
-      .from('liquidaciones_personal')
-      .select(`
-        *,
-        liquidaciones_items ( * )
-      `)
-      .order('created_at', { ascending: false });
+  let query = supabase
+    .from('liquidaciones_personal')
+    .select(`
+      *,
+      liquidaciones_items ( * )
+    `)
+    .order('created_at', { ascending: false });
 
-    if (filtros?.agenteId) query = query.eq('agente_id', filtros.agenteId);
-    if (filtros?.estado) query = query.eq('estado', filtros.estado);
-    if (filtros?.sedeId) query = query.eq('sede_id', filtros.sedeId);
+  if (filtros?.agenteId) query = query.eq('agente_id', filtros.agenteId);
+  if (filtros?.estado) query = query.eq('estado', filtros.estado);
+  if (filtros?.sedeId) query = query.eq('sede_id', filtros.sedeId);
 
-    if (filtros?.rolGrupo === 'STAFF') {
-      query = query.in('agente_rol', ['STAFF', 'ESTILISTA', 'BARBERO', 'MANICURISTA', 'COSMIATRA', 'OPERACION']);
-    } else if (filtros?.rolGrupo === 'SOPORTE') {
-      query = query.in('agente_rol', ['SOPORTE', 'CAJA', 'ADMIN', 'JEFE_OPERATIVO', 'RECEPCION']);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-
-    return (data || []).map((l: any) => ({
-      ...l,
-      items: l.liquidaciones_items || []
-    })) as LiquidacionPersonal[];
-  } catch (err) {
-    console.warn('Error consultando liquidaciones_personal:', err);
-    return [];
+  if (filtros?.rolGrupo === 'STAFF') {
+    query = query.in('agente_rol', ['STAFF', 'ESTILISTA', 'BARBERO', 'MANICURISTA', 'COSMIATRA', 'OPERACION']);
+  } else if (filtros?.rolGrupo === 'SOPORTE') {
+    query = query.in('agente_rol', ['SOPORTE', 'CAJA', 'ADMIN', 'JEFE_OPERATIVO', 'RECEPCION']);
   }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error('Error consultando liquidaciones_personal:', error);
+    throw error;
+  }
+
+  return (data || []).map((l: any) => ({
+    ...l,
+    items: l.liquidaciones_items || []
+  })) as LiquidacionPersonal[];
 }
 
 export async function pagarLiquidacionPersonal(params: {

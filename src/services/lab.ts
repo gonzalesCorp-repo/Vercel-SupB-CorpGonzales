@@ -255,16 +255,20 @@ export async function buscarBienPorSkuOCodigoBarras(codigo: string) {
   return data;
 }
 
-// 4. Despacho Asistido por Balanza IoT con Deducción de Tara & Auditoría de Mermas
-export async function despacharInsumoConBalanzaIoT(params: {
+export interface DespachoInsumoBalanzaParams {
   bienId: string;
-  pesoBrutoMedidoGramos: number;
+  pesoBrutoMedidoGramos?: number;
+  pesoNetoManualGramos?: number;
   pesoTeoricoRecetaGramos?: number;
   oatcId?: string;
   agenteId?: string;
   agenteNombre?: string;
   notas?: string;
-}) {
+  modoPesaje?: 'MANUAL_ASISTIDO' | 'BALANZA_IOT';
+}
+
+// 4. Despacho Asistido por Balanza IoT o Manual Asistido con Deducción de Tara & Auditoría de Mermas
+export async function despacharInsumoConBalanzaIoT(params: DespachoInsumoBalanzaParams) {
   const sedeId = useAppStore.getState().sedeActiva?.id || '';
   
   const { data: bien } = await supabase
@@ -277,9 +281,19 @@ export async function despacharInsumoConBalanzaIoT(params: {
 
   const tara = Number(bien.peso_envase_tara_gramos || 0);
   const densidad = Number(bien.factor_densidad || 1.0);
-  const pesoNetoGramos = Math.max(0, params.pesoBrutoMedidoGramos - tara);
+
+  // Determinar si opera en modo manual asistido o balanza física
+  const esModoManual = params.modoPesaje === 'MANUAL_ASISTIDO' ||
+    params.pesoNetoManualGramos !== undefined ||
+    params.pesoBrutoMedidoGramos === undefined;
+
+  // Cálculo del peso neto: si es manual asistido, toma el manual o el teórico
+  const pesoNetoGramos = esModoManual
+    ? Number(params.pesoNetoManualGramos ?? (params.pesoTeoricoRecetaGramos || 0))
+    : Math.max(0, (params.pesoBrutoMedidoGramos || 0) - tara);
+
   const volumenNetoMl = Number((pesoNetoGramos / densidad).toFixed(2));
-  const pesoTeorico = params.pesoTeoricoRecetaGramos || pesoNetoGramos;
+  const pesoTeorico = params.pesoTeoricoRecetaGramos !== undefined ? Number(params.pesoTeoricoRecetaGramos) : pesoNetoGramos;
 
   // Cálculo de Mermas Teórico vs Real
   const deltaGramos = Number((pesoNetoGramos - pesoTeorico).toFixed(1));
@@ -293,18 +307,29 @@ export async function despacharInsumoConBalanzaIoT(params: {
     estadoMerma = 'SUB_DOSIFICACION';
   }
 
+  const tipoMovimiento = esModoManual ? 'DESPACHO_ODI_MANUAL' : 'DESPACHO_ODI_IOT';
+  const descripcionMovimiento = esModoManual
+    ? `Pesaje Manual Asistido: Teórico ${pesoTeorico}g vs Despachado ${pesoNetoGramos}g (Delta: ${deltaGramos > 0 ? '+' : ''}${deltaGramos}g / ${deltaPorcentaje}%)`
+    : `Pesaje IoT: Teórico ${pesoTeorico}g vs Real ${pesoNetoGramos}g (Delta: ${deltaGramos > 0 ? '+' : ''}${deltaGramos}g / ${deltaPorcentaje}%)`;
+
+  const pesoBrutoEfectivo = params.pesoBrutoMedidoGramos !== undefined
+    ? params.pesoBrutoMedidoGramos
+    : Number((pesoNetoGramos + tara).toFixed(1));
+
   // Descontar stock y registrar Kardex atómicamente en PostgreSQL
   try {
     const { error: rpcErr } = await supabase.rpc('rpc_despachar_stock_laboratorio', {
       p_sede_id: sedeId,
       p_bien_id: params.bienId,
       p_cantidad: pesoNetoGramos,
-      p_tipo_movimiento: 'DESPACHO_ODI_IOT',
-      p_descripcion: `Pesaje IoT: Teórico ${pesoTeorico}g vs Real ${pesoNetoGramos}g (Delta: ${deltaGramos > 0 ? '+' : ''}${deltaGramos}g / ${deltaPorcentaje}%)`,
+      p_tipo_movimiento: tipoMovimiento,
+      p_descripcion: descripcionMovimiento,
       p_oatc_id: params.oatcId ? `OATC: ${params.oatcId.slice(0, 8)}` : 'ESTACION_PISO',
       p_agente_id: params.agenteId || null,
       p_metadata: {
-        peso_bruto: params.pesoBrutoMedidoGramos,
+        modo_pesaje: esModoManual ? 'MANUAL_ASISTIDO' : 'BALANZA_IOT',
+        peso_bruto: pesoBrutoEfectivo,
+        peso_neto_manual: params.pesoNetoManualGramos,
         tara_envase: tara,
         densidad,
         volumen_ml: volumenNetoMl,
@@ -335,9 +360,9 @@ export async function despacharInsumoConBalanzaIoT(params: {
 
     await supabase.from('inventario_movimientos').insert([{
       sede_id: sedeId,
-      tipo_movimiento: 'DESPACHO_ODI_IOT',
+      tipo_movimiento: tipoMovimiento,
       bien_id: params.bienId,
-      descripcion: `Pesaje IoT: Teórico ${pesoTeorico}g vs Real ${pesoNetoGramos}g (Delta: ${deltaGramos > 0 ? '+' : ''}${deltaGramos}g / ${deltaPorcentaje}%)`,
+      descripcion: descripcionMovimiento,
       cantidad: pesoNetoGramos,
       cantidad_teorica: pesoTeorico,
       cantidad_real: pesoNetoGramos,
@@ -349,7 +374,9 @@ export async function despacharInsumoConBalanzaIoT(params: {
       destino: params.oatcId ? `OATC: ${params.oatcId.slice(0, 8)}` : 'ESTACION_PISO',
       agente_id: params.agenteId || null,
       metadata_iot: {
-        peso_bruto: params.pesoBrutoMedidoGramos,
+        modo_pesaje: esModoManual ? 'MANUAL_ASISTIDO' : 'BALANZA_IOT',
+        peso_bruto: pesoBrutoEfectivo,
+        peso_neto_manual: params.pesoNetoManualGramos,
         tara_envase: tara,
         densidad,
         volumen_ml: volumenNetoMl,
@@ -360,13 +387,14 @@ export async function despacharInsumoConBalanzaIoT(params: {
 
   return {
     bien,
-    pesoBruto: params.pesoBrutoMedidoGramos,
+    pesoBruto: pesoBrutoEfectivo,
     tara,
     pesoNetoGramos,
     volumenNetoMl,
     deltaGramos,
     deltaPorcentaje,
-    estadoMerma
+    estadoMerma,
+    modoPesaje: esModoManual ? 'MANUAL_ASISTIDO' : 'BALANZA_IOT'
   };
 }
 

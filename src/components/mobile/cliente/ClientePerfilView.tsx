@@ -16,8 +16,10 @@ export interface ClientePerfilViewProps {
     id: string;
     nombre: string;
     dni?: string;
+    celular?: string;
     telefono?: string;
     email?: string;
+    notas?: string;
     fecha_nacimiento?: string;
     puntos_lumina?: number;
     rango_vip?: string;
@@ -41,9 +43,10 @@ export default function ClientePerfilView({
   const [editandoDatos, setEditandoDatos] = useState(false);
 
   // Form de edición de datos personales
-  const [telefono, setTelefono] = useState(cliente.telefono || '');
-  const [fechaNacimiento, setFechaNacimiento] = useState(cliente.fecha_nacimiento || '');
+  const [celular, setCelular] = useState(cliente.celular || cliente.telefono || '');
   const [email, setEmail] = useState(cliente.email || '');
+  const [notas, setNotas] = useState(cliente.notas || '');
+  const [fechaNacimiento, setFechaNacimiento] = useState(cliente.fecha_nacimiento || '');
   const [guardando, setGuardando] = useState(false);
 
   // Cargar insignias desde el motor de reglas y últimas atenciones
@@ -82,9 +85,9 @@ export default function ClientePerfilView({
       const { error } = await supabase
         .from('clientes')
         .update({
-          telefono,
-          fecha_nacimiento: fechaNacimiento || null,
-          email: email || null
+          celular: celular || null,
+          email: email || null,
+          notas: notas || null
         })
         .eq('id', cliente.id);
 
@@ -98,9 +101,10 @@ export default function ClientePerfilView({
       if (onActualizarCliente) {
         onActualizarCliente({
           ...cliente,
-          telefono,
-          fecha_nacimiento: fechaNacimiento,
-          email
+          celular,
+          telefono: celular,
+          email,
+          notas
         });
       }
     } catch (err) {
@@ -246,22 +250,12 @@ export default function ClientePerfilView({
         {editandoDatos ? (
           <form onSubmit={handleGuardarDatos} className="space-y-3">
             <div>
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">WhatsApp / Teléfono</label>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">WhatsApp / Celular</label>
               <input 
                 type="tel"
-                value={telefono}
-                onChange={e => setTelefono(e.target.value)}
+                value={celular}
+                onChange={e => setCelular(e.target.value)}
                 placeholder="+51 999 999 999"
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-pink-500"
-              />
-            </div>
-
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Fecha de Cumpleaños (Regalos VIP)</label>
-              <input 
-                type="date"
-                value={fechaNacimiento}
-                onChange={e => setFechaNacimiento(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-pink-500"
               />
             </div>
@@ -277,6 +271,17 @@ export default function ClientePerfilView({
               />
             </div>
 
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Notas / Diagnóstico Capilar</label>
+              <textarea 
+                value={notas}
+                onChange={e => setNotas(e.target.value)}
+                placeholder="Preferencias de corte, productos favoritos, etc."
+                rows={2}
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-white outline-none focus:border-pink-500 resize-none"
+              />
+            </div>
+
             <button type="submit"
               disabled={guardando}
               className="w-full py-2.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white rounded-xl text-xs font-black shadow-lg shadow-pink-600/30 transition cursor-pointer"
@@ -288,17 +293,26 @@ export default function ClientePerfilView({
           <div className="space-y-2 text-xs">
             <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
               <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-slate-500" /> WhatsApp
+                <Phone className="w-3.5 h-3.5 text-slate-500" /> WhatsApp / Celular
               </span>
-              <span className="font-black text-white">{cliente.telefono || 'No registrado'}</span>
+              <span className="font-black text-white">{cliente.celular || cliente.telefono || 'No registrado'}</span>
             </div>
 
             <div className="flex justify-between items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
               <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Gift className="w-3.5 h-3.5 text-pink-400" /> Cumpleaños
+                <Gift className="w-3.5 h-3.5 text-pink-400" /> Correo
               </span>
-              <span className="font-black text-pink-300">{cliente.fecha_nacimiento || 'Regístralo para tu regalo'}</span>
+              <span className="font-black text-pink-300">{cliente.email || 'Sin registrar'}</span>
             </div>
+
+            {cliente.notas && (
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                <span className="font-bold text-slate-500 dark:text-slate-400 block mb-1 text-[10px] uppercase">
+                  Ficha / Notas
+                </span>
+                <span className="text-slate-300 italic">{cliente.notas}</span>
+              </div>
+            )}
           </div>
         )}
       </div>

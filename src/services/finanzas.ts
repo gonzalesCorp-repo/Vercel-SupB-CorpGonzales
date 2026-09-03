@@ -17,29 +17,22 @@ export const UMBRAL_APROBACION_EGRESO = 200; // Egresos > S/ 200 requieren aprob
 // ============================================================================
 
 export async function obtenerCuentasFinancieras(sedeId?: string): Promise<CuentaFinanciera[]> {
-  try {
-    let query = supabase
-      .from('cuentas_financieras')
-      .select('*')
-      .eq('estado', 'ACTIVO')
-      .order('nombre', { ascending: true });
+  let query = supabase
+    .from('cuentas_financieras')
+    .select('*')
+    .eq('estado', 'ACTIVO')
+    .order('nombre', { ascending: true });
 
-    if (sedeId) {
-      query = query.or(`sede_id.eq.${sedeId},sede_id.is.null`);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return (data || []) as CuentaFinanciera[];
-  } catch (err) {
-    console.warn('Fallo consultando cuentas_financieras en Supabase:', err);
-    // Fallback inicial si la tabla aún no tiene datos
-    return [
-      { id: 'cta_caja_chica', nombre: 'Caja Chica (Fondo Fijo)', tipo_cuenta: 'CAJA_CHICA', banco_entidad: 'Efectivo', numero_cuenta: 'EF-01', moneda: 'PEN', saldo_actual: 350.00, estado: 'ACTIVO' },
-      { id: 'cta_bcp_empresa', nombre: 'BCP Cta Corriente', tipo_cuenta: 'BANCO', banco_entidad: 'BCP', numero_cuenta: '193-98231234-0-12', moneda: 'PEN', saldo_actual: 4200.00, estado: 'ACTIVO' },
-      { id: 'cta_yape_empresa', nombre: 'Yape Comercial', tipo_cuenta: 'BILLETERA_DIGITAL', banco_entidad: 'Yape', numero_cuenta: '987-654-321', moneda: 'PEN', saldo_actual: 890.00, estado: 'ACTIVO' }
-    ];
+  if (sedeId) {
+    query = query.or(`sede_id.eq.${sedeId},sede_id.is.null`);
   }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error('Error consultando cuentas_financieras en Supabase:', error);
+    throw error;
+  }
+  return (data || []) as CuentaFinanciera[];
 }
 
 export async function crearCuentaFinanciera(params: Omit<CuentaFinanciera, 'id' | 'created_at' | 'updated_at'>): Promise<CuentaFinanciera> {
@@ -123,8 +116,6 @@ export async function registrarMovimientoTesoreria(params: {
   const requiereAprobacion = params.tipoMovimiento === 'EGRESO' && montoNum > UMBRAL_APROBACION_EGRESO;
   const estadoAprobacion = requiereAprobacion ? 'PENDIENTE_SUPERADMIN' : 'APROBADO';
 
-  // In-memory fallback list
-  let movData: any = null;
   const payload = {
     cuenta_id: params.cuentaId,
     tipo_movimiento: params.tipoMovimiento,
@@ -145,27 +136,15 @@ export async function registrarMovimientoTesoreria(params: {
     incluido_en_cuadre: false
   };
 
-  try {
-    const { data, error: movErr } = await supabase
-      .from('movimientos_tesoreria')
-      .insert([payload])
-      .select()
-      .single();
+  const { data: movData, error: movErr } = await supabase
+    .from('movimientos_tesoreria')
+    .insert([payload])
+    .select()
+    .single();
 
-    if (movErr) throw movErr;
-    movData = data;
-  } catch (e) {
-    console.warn('[Finanzas] Fallo insertando en Supabase, usando objeto local:', e);
-    movData = {
-      id: 'mov_mock_' + Date.now(),
-      ...payload,
-      created_at: new Date().toISOString()
-    };
-    // Guardar en array global en memoria
-    if (typeof window !== 'undefined') {
-      const existing = (window as any).__MOCK_MOVIMIENTOS__ || [];
-      (window as any).__MOCK_MOVIMIENTOS__ = [movData, ...existing];
-    }
+  if (movErr) {
+    console.error('[Finanzas] Error registrando movimiento_tesoreria en Supabase:', movErr);
+    throw movErr;
   }
 
   // 2. Si está aprobado inmediatamente, actualizar el saldo de la cuenta atómicamente
@@ -191,38 +170,30 @@ export async function obtenerMovimientosTesoreria(filtros?: {
   categoria?: string;
   limite?: number;
 }): Promise<MovimientoTesoreria[]> {
-  try {
-    let query = supabase
-      .from('movimientos_tesoreria')
-      .select(`
-        *,
-        cuentas_financieras ( nombre )
-      `)
-      .order('fecha_movimiento', { ascending: false })
-      .limit(filtros?.limite || 100);
+  let query = supabase
+    .from('movimientos_tesoreria')
+    .select(`
+      *,
+      cuentas_financieras ( nombre )
+    `)
+    .order('fecha_movimiento', { ascending: false })
+    .limit(filtros?.limite || 100);
 
-    if (filtros?.sedeId) query = query.eq('sede_id', filtros.sedeId);
-    if (filtros?.cuentaId) query = query.eq('cuenta_id', filtros.cuentaId);
-    if (filtros?.tipo) query = query.eq('tipo_movimiento', filtros.tipo);
-    if (filtros?.categoria) query = query.eq('categoria', filtros.categoria);
+  if (filtros?.sedeId) query = query.eq('sede_id', filtros.sedeId);
+  if (filtros?.cuentaId) query = query.eq('cuenta_id', filtros.cuentaId);
+  if (filtros?.tipo) query = query.eq('tipo_movimiento', filtros.tipo);
+  if (filtros?.categoria) query = query.eq('categoria', filtros.categoria);
 
-    const { data, error } = await query;
-    if (error) throw error;
-
-    if (data && data.length > 0) {
-      return (data || []).map((m: any) => ({
-        ...m,
-        cuenta_nombre: m.cuentas_financieras?.nombre || 'Cuenta Principal'
-      })) as MovimientoTesoreria[];
-    }
-  } catch (err) {
-    console.warn('Fallo consultando movimientos_tesoreria en Supabase:', err);
+  const { data, error } = await query;
+  if (error) {
+    console.error('Error consultando movimientos_tesoreria en Supabase:', error);
+    throw error;
   }
 
-  if (typeof window !== 'undefined' && (window as any).__MOCK_MOVIMIENTOS__) {
-    return (window as any).__MOCK_MOVIMIENTOS__;
-  }
-  return [];
+  return (data || []).map((m: any) => ({
+    ...m,
+    cuenta_nombre: m.cuentas_financieras?.nombre || 'Cuenta Principal'
+  })) as MovimientoTesoreria[];
 }
 
 export async function aprobarRechazarEgreso(

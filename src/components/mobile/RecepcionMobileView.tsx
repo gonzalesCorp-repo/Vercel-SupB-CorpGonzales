@@ -39,12 +39,12 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
     setLoading(true);
     let query = supabase
       .from('clientes')
-      .select('id, nombre, apellido, celular, dni, metadata_crm, created_at')
+      .select('id, nombre, celular, dni, email, saldo_credito, limite_credito, notas, created_at')
       .order('created_at', { ascending: false })
       .limit(20);
 
     if (term.trim()) {
-      query = query.or(`nombre.ilike.%${term}%,apellido.ilike.%${term}%,celular.ilike.%${term}%,dni.ilike.%${term}%`);
+      query = query.or(`nombre.ilike.%${term}%,celular.ilike.%${term}%,dni.ilike.%${term}%`);
     }
 
     const { data } = await query;
@@ -186,8 +186,12 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
                 <div key={c.id} className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors flex justify-between items-center shadow-md">
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-xs text-white">{c.nombre} {c.apellido || ''}</p>
-                      {c.metadata_crm?.vip && (
+                      <p className="font-bold text-xs text-white">{c.nombre}</p>
+                      {Number(c.saldo_credito || 0) > 0 ? (
+                        <span className="text-[9px] font-black px-1.5 py-0.2 bg-rose-500/20 text-rose-300 rounded border border-rose-500/30">
+                          Deuda: S/ {Number(c.saldo_credito).toFixed(2)}
+                        </span>
+                      ) : (
                         <span className="text-[9px] font-black px-1.5 py-0.2 bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
                           👑 VIP
                         </span>
@@ -196,11 +200,12 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
                     <div className="flex items-center gap-3 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
                       {c.celular && <span className="flex items-center gap-1"><Phone className="w-2.5 h-2.5" /> {c.celular}</span>}
                       {c.dni && <span>DNI: {c.dni}</span>}
+                      {c.notas && <span className="truncate max-w-[140px] italic">“{c.notas}”</span>}
                     </div>
                   </div>
                   <div className="text-right">
                     <span className="text-[10px] font-black text-indigo-400">
-                      {c.metadata_crm?.puntos || 0} VP 💎
+                      {c.email ? '📧 Con Correo' : '✨ Registrado'}
                     </span>
                   </div>
                 </div>

@@ -78,7 +78,7 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
           id: c.id,
           nombre: c.nombre,
           dni: c.dni,
-          celular: c.celular || c.telefono,
+          celular: c.celular || '',
           ultimoServicio: c.notas || 'Cliente Frecuente',
           ultimaVisita: 'Reciente',
           totalGastado: metricas.consumoTotalHistorico,
@@ -154,6 +154,7 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
         nombre: nombreCompleto,
         dni: nuevoDni.trim() || undefined,
         celular: nuevoCelular.trim(),
+        notas: nuevasNotas.trim() || undefined,
         agente_id: agenteId || null
       });
     } catch (e) {

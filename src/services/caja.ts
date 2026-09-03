@@ -33,6 +33,7 @@ export interface ComprobantePago {
   tipo_comprobante: 'BOLETA' | 'FACTURA' | 'NOTA_VENTA';
   serie: string;
   numero: number;
+  correlativo?: number;
   cliente_id?: string;
   cliente_nombre: string;
   cliente_doc?: string;
@@ -46,6 +47,8 @@ export interface ComprobantePago {
   oatc_ids: string[];
   cajero_nombre: string;
   estado: 'EMITIDO' | 'ANULADO';
+  fecha_emision?: string;
+  metadata_fiscal?: any;
   created_at: string;
 }
 
@@ -213,37 +216,100 @@ export async function procesarCobroFlexible(params: {
   const igv = Number((total - subtotal).toFixed(2));
   const descuentoTotal = items.filter(i => i.es_cortesia).reduce((acc, i) => acc + (Number(i.precio_base || 0) * Number(i.cantidad || 1)), 0);
 
-  // 1. Crear el Comprobante de Pago
-  const serie = tipoComprobante === 'FACTURA' ? 'F001' : tipoComprobante === 'BOLETA' ? 'B001' : 'NV01';
-  const { data: comprobante, error: errComp } = await supabase
-    .from('comprobantes_pago')
-    .insert([{
-      sesion_caja_id: sesionCajaId || null,
-      tipo_comprobante: tipoComprobante,
-      serie,
-      cliente_nombre: clienteNombre,
-      cliente_doc: clienteDoc || '00000000',
-      tipo_doc: tipoDoc || 'DNI',
-      subtotal,
-      igv,
-      total,
-      descuento_total: descuentoTotal,
-      items,
-      pagos,
-      oatc_ids: oatcIds,
-      cajero_nombre: cajeroNombre,
-      estado: 'EMITIDO'
-    }])
-    .select()
-    .single();
+  // 1. Emitir Comprobante de Pago de forma atómica con Advisory Lock (rpc_emitir_comprobante_pago)
+  const serie = tipoComprobante === 'FACTURA' ? 'F001' : tipoComprobante === 'BOLETA' ? 'B001' : 'T001';
+  const sedeId = useAppStore.getState().sedeActiva?.id || '';
 
-  if (errComp) {
-    console.error('Error emitiendo comprobante:', errComp);
-    throw errComp;
+  let comprobante: ComprobantePago | null = null;
+
+  try {
+    const { data: rpcComp, error: rpcErr } = await supabase.rpc('rpc_emitir_comprobante_pago', {
+      p_sede_id: sedeId || 'c9755dbc-11e0-452d-b971-209f5476bbcb',
+      p_sesion_caja_id: sesionCajaId || null,
+      p_tipo_comprobante: tipoComprobante,
+      p_serie: serie,
+      p_cliente_id: null,
+      p_cliente_nombre: clienteNombre || 'Cliente General',
+      p_cliente_doc: clienteDoc || '00000000',
+      p_tipo_doc: tipoDoc || 'DNI',
+      p_subtotal: subtotal,
+      p_igv: igv,
+      p_total: total,
+      p_descuento_total: descuentoTotal,
+      p_items: items,
+      p_pagos: pagos,
+      p_oatc_ids: (oatcIds || []).filter(id => id && !id.startsWith('libre_')),
+      p_cajero_nombre: cajeroNombre || 'Cajero POS',
+      p_metadata_fiscal: {}
+    });
+
+    if (!rpcErr && rpcComp) {
+      comprobante = rpcComp as ComprobantePago;
+    } else {
+      throw rpcErr || new Error('RPC rpc_emitir_comprobante_pago no disponible');
+    }
+  } catch (emitErr) {
+    console.warn('Fallback a emisión manual por error en rpc_emitir_comprobante_pago:', emitErr);
+    let correlativo = 1;
+    try {
+      const { data: rpcCorr, error: rpcErr } = await supabase.rpc('rpc_siguiente_correlativo_comprobante', {
+        p_sede_id: sedeId || 'c9755dbc-11e0-452d-b971-209f5476bbcb',
+        p_serie: serie
+      });
+      if (!rpcErr && rpcCorr !== null) {
+        correlativo = Number(rpcCorr);
+      } else {
+        throw rpcErr || new Error('RPC no disponible');
+      }
+    } catch {
+      const { data: lastComp } = await supabase
+        .from('comprobantes_pago')
+        .select('numero, correlativo')
+        .eq('serie', serie)
+        .order('numero', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (lastComp) {
+        correlativo = Math.max(Number(lastComp.correlativo || 0), Number(lastComp.numero || 0)) + 1;
+      }
+    }
+
+    const { data: insComp, error: errComp } = await supabase
+      .from('comprobantes_pago')
+      .insert([{
+        sede_id: sedeId || null,
+        sesion_caja_id: sesionCajaId || null,
+        tipo_comprobante: tipoComprobante,
+        serie,
+        numero: correlativo,
+        correlativo: correlativo,
+        cliente_nombre: clienteNombre || 'Cliente General',
+        cliente_doc: clienteDoc || '00000000',
+        tipo_doc: tipoDoc || 'DNI',
+        subtotal,
+        igv,
+        total,
+        descuento_total: descuentoTotal,
+        items,
+        pagos,
+        oatc_ids: oatcIds,
+        cajero_nombre: cajeroNombre || 'Cajero POS',
+        estado: 'EMITIDO',
+        fecha_emision: new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (errComp || !insComp) {
+      console.error('Error emitiendo comprobante en fallback:', errComp);
+      throw errComp || new Error('Error emitiendo comprobante');
+    }
+    comprobante = insComp as ComprobantePago;
   }
 
   // 2. Registrar movimientos de caja por cada medio de pago y rutear fondos a cuentas financieras
-  const sedeId = useAppStore.getState().sedeActiva?.id || 'general';
+  const sedeActivaId = sedeId || 'general';
   for (const pago of pagos) {
     if (sesionCajaId) {
       await supabase.from('movimientos_caja').insert([{
@@ -259,7 +325,7 @@ export async function procesarCobroFlexible(params: {
     // Ruteo a cuentas financieras / Lotes POS en Tránsito
     try {
       await procesarAcreditacionPagoPOS({
-        sedeId,
+        sedeId: sedeActivaId,
         metodoPago: pago.metodo,
         montoBruto: pago.monto,
         oatcId: oatcIds[0],

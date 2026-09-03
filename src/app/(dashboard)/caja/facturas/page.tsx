@@ -27,7 +27,7 @@ export default function FacturasPage() {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('comprobantes')
+        .from('comprobantes_pago')
         .select('*')
         .eq('sede_id', sedeActiva.id)
         .order('fecha_emision', { ascending: false })

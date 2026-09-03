@@ -26,12 +26,14 @@ export interface SedeFeatureToggles {
   sunatRazonSocial?: string;
   sunatSerieBoleta?: string;
   sunatSerieFactura?: string;
+  sunatSerieNotaVenta?: string;
+  sunatModoPruebas?: boolean;
   sunatApiToken?: string;
 }
 
 const DEFAULT_TOGGLES: SedeFeatureToggles = {
   moduloLaboratorioGramos: true,
-  habilitarBalanzasIot: true,
+  habilitarBalanzasIot: false,
   usarComisionesEscalonadas: true,
   modoEstaciones: 'SEMI_AUTOMATICO_BUZON',
   kioskoAutoservicioHabilitado: true,
@@ -43,7 +45,9 @@ const DEFAULT_TOGGLES: SedeFeatureToggles = {
   autoImpresionTermicaTickets: true,
   balanzaIotLecturaExacta: true,
   sunatSerieBoleta: 'B001',
-  sunatSerieFactura: 'F001'
+  sunatSerieFactura: 'F001',
+  sunatSerieNotaVenta: 'T001',
+  sunatModoPruebas: true
 };
 
 export async function obtenerConfiguracionSede(sedeId?: string): Promise<SedeFeatureToggles> {

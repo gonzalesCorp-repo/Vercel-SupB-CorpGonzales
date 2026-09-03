@@ -31,7 +31,7 @@ export default function DespachoPanel() {
   const [bienesInsumos, setBienesInsumos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [historialHoy, setHistorialHoy] = useState<any[]>([]);
-  const [habilitarBalanzasIot, setHabilitarBalanzasIot] = useState<boolean>(true);
+  const [habilitarBalanzasIot, setHabilitarBalanzasIot] = useState<boolean>(false);
   
   const sedeActiva = useAppStore((state) => state.sedeActiva);
   const { showAlert } = useUIStore();
@@ -59,7 +59,7 @@ export default function DespachoPanel() {
 
     setPedidos(dataPedidos || []);
     setBienesInsumos(dataStock || []);
-    setHabilitarBalanzasIot(dataToggles.habilitarBalanzasIot ?? true);
+    setHabilitarBalanzasIot(dataToggles.habilitarBalanzasIot ?? false);
 
     // Cargar historial de despachos de hoy
     const hoy = new Date().toISOString().split('T')[0];
@@ -122,8 +122,10 @@ export default function DespachoPanel() {
         if (fila.bienId && !fila.bienId.startsWith('auto_') && !fila.bienId.startsWith('preset_')) {
           await despacharInsumoConBalanzaIoT({
             bienId: fila.bienId,
-            pesoBrutoMedidoGramos: fila.pesoBrutoG > 0 ? fila.pesoBrutoG : (pesoFinal + fila.taraEnvaseG),
+            pesoBrutoMedidoGramos: fila.pesoBrutoG > 0 ? fila.pesoBrutoG : undefined,
+            pesoNetoManualGramos: pesoFinal,
             pesoTeoricoRecetaGramos: fila.pesoTeoricoG,
+            modoPesaje: habilitarBalanzasIot && fila.pesoBrutoG > 0 ? 'BALANZA_IOT' : 'MANUAL_ASISTIDO',
             oatcId: pedido?.oatc_id || pedido?.id,
             agenteId: pedido?.oatc?.agente_id,
             agenteNombre: pedido?.oatc?.agente_nombre

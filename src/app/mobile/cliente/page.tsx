@@ -38,7 +38,7 @@ export default function MobileClientePage() {
       const { data, error } = await supabase
         .from('clientes')
         .select('*')
-        .or(`dni.eq.${dni.trim()},telefono.eq.${dni.trim()}`)
+        .or(`dni.eq.${dni.trim()},celular.eq.${dni.trim()}`)
         .limit(1)
         .maybeSingle();
 
@@ -70,7 +70,7 @@ export default function MobileClientePage() {
         .insert([{
           nombre: nuevoNombre.trim(),
           dni: dni.trim(),
-          telefono: nuevoTelefono.trim() || null
+          celular: nuevoTelefono.trim() || null
         }])
         .select()
         .single();
@@ -81,7 +81,7 @@ export default function MobileClientePage() {
           id: `temp-${Date.now()}`,
           nombre: nuevoNombre.trim(),
           dni: dni.trim(),
-          telefono: nuevoTelefono.trim()
+          celular: nuevoTelefono.trim()
         };
         setClienteActivo(mockCliente);
         localStorage.setItem('vaikuntha_cliente_sesion', JSON.stringify(mockCliente));

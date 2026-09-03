@@ -87,7 +87,7 @@ const HOJA_GUIA_JERARQUIA = [
     Paso_Orden: "10",
     Nivel: "NIVEL 2 - Dependientes",
     Tabla_Destino: "public.emisores_series",
-    Descripcion: "Series electrónicas SUNAT (B001, F001, NV01).",
+    Descripcion: "Series electrónicas SUNAT (B001, F001, T001).",
     Dependencias_Requeridas: "Requiere N1_04_Emisores_SUNAT."
   },
   {
@@ -464,7 +464,7 @@ const PLANTILLA_EMISORES_SERIES = [
   {
     emisor_ruc: "20608945123",
     tipo_comprobante: "NOTA_VENTA",
-    serie: "NV01",
+    serie: "T001",
     correlativo_actual: 1,
     activo: true
   }

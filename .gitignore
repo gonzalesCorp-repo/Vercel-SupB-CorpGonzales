@@ -41,3 +41,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agents & local scratch
+.agents/
+scratch/
+ORIGINAL_REQUEST.md

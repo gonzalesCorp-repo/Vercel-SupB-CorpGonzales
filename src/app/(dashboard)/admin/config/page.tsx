@@ -187,7 +187,7 @@ export default function AdminSedeConfigPage() {
                   </div>
                   <input
                     type="checkbox"
-                    checked={toggles.habilitarBalanzasIot ?? true}
+                    checked={toggles.habilitarBalanzasIot ?? false}
                     onChange={(e) => setToggles(prev => ({ ...prev, habilitarBalanzasIot: e.target.checked }))}
                     className="w-5 h-5 accent-emerald-500 rounded cursor-pointer shrink-0"
                   />

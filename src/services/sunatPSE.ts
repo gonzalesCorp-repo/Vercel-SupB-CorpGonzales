@@ -76,8 +76,8 @@ export async function emitirComprobanteSunatPSE(
   const rucEmisor = config.sunatRuc || '20608945123';
   const razonSocialEmisor = config.sunatRazonSocial || 'VAIKUNTHA INNOVATIONS S.A.C.';
   
-  // Determinar Serie
-  let serie = 'NV01';
+  // Determinar Serie (Gloss Salón standard: T001 para tickets internos, B001 para boletas)
+  let serie = config.sunatSerieNotaVenta || 'T001';
   let tipoSunatCodigo = 0; // 1: Factura, 2: Boleta, 3: Nota Credito
 
   if (params.tipoComprobante === 'FACTURA') {
@@ -89,6 +89,8 @@ export async function emitirComprobanteSunatPSE(
   } else if (params.tipoComprobante === 'NOTA_CREDITO') {
     serie = 'FC01';
     tipoSunatCodigo = 3;
+  } else {
+    serie = config.sunatSerieNotaVenta || 'T001';
   }
 
   // Cálculos Tributarios
@@ -105,33 +107,72 @@ export async function emitirComprobanteSunatPSE(
   const igv = Math.round((totalBaseConDescuento - subtotal) * 100) / 100;
   const totalFinal = Number((totalBaseConDescuento + propina).toFixed(2));
 
-  // Obtener siguiente correlativo atómicamente con Advisory Lock
-  let correlativo = 1;
-  try {
-    const { data: rpcCorr, error: rpcErr } = await supabase.rpc('rpc_siguiente_correlativo_comprobante', {
-      p_sede_id: sedeId,
-      p_serie: serie
-    });
-    if (!rpcErr && rpcCorr !== null) {
-      correlativo = Number(rpcCorr);
-    } else {
-      throw rpcErr || new Error('RPC no disponible');
-    }
-  } catch {
-    // Fallback secuencial estricto
-    const { data: lastComp } = await supabase
-      .from('comprobantes')
-      .select('correlativo')
-      .eq('sede_id', sedeId)
-      .eq('serie', serie)
-      .order('correlativo', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+  const pagosDetalle = params.pagosDetalle && params.pagosDetalle.length > 0
+    ? params.pagosDetalle
+    : (params.metodoPagoPrincipal ? [{ metodo: params.metodoPagoPrincipal, monto: totalFinal }] : [{ metodo: 'EFECTIVO', monto: totalFinal }]);
 
-    if (lastComp && lastComp.correlativo) {
-      correlativo = Number(lastComp.correlativo) + 1;
+  const validOatcIds = (params.oatcIds || []).filter(id => id && !id.startsWith('libre_'));
+
+  // Obtener siguiente correlativo y emitir comprobante atómicamente con Advisory Lock (rpc_emitir_comprobante_pago)
+  let correlativo = 1;
+  let comprobanteId: string | null = null;
+  let emitidoViaRpc = false;
+
+  try {
+    const { data: rpcComp, error: rpcErr } = await supabase.rpc('rpc_emitir_comprobante_pago', {
+      p_sede_id: sedeId || 'c9755dbc-11e0-452d-b971-209f5476bbcb',
+      p_sesion_caja_id: null,
+      p_tipo_comprobante: params.tipoComprobante,
+      p_serie: serie,
+      p_cliente_id: null,
+      p_cliente_nombre: params.clienteRazonSocial || 'Cliente General',
+      p_cliente_doc: params.clienteNumDoc || '00000000',
+      p_tipo_doc: params.clienteTipoDoc || 'SIN_DOC',
+      p_subtotal: subtotal,
+      p_igv: igv,
+      p_total: totalFinal,
+      p_descuento_total: descuento,
+      p_items: params.items || [],
+      p_pagos: pagosDetalle,
+      p_oatc_ids: validOatcIds,
+      p_cajero_nombre: params.cajeroNombre || 'Cajero POS',
+      p_metadata_fiscal: {}
+    });
+
+    if (!rpcErr && rpcComp && (rpcComp.correlativo || rpcComp.numero)) {
+      correlativo = Number(rpcComp.correlativo || rpcComp.numero);
+      comprobanteId = rpcComp.id;
+      emitidoViaRpc = true;
     } else {
-      correlativo = 1; // Iniciar en 1 rigurosamente
+      throw rpcErr || new Error('RPC rpc_emitir_comprobante_pago no disponible');
+    }
+  } catch (emitErr) {
+    console.warn('[SUNAT PSE] Fallback a correlativo separado por error en rpc_emitir_comprobante_pago:', emitErr);
+    try {
+      const { data: rpcCorr, error: rpcErr } = await supabase.rpc('rpc_siguiente_correlativo_comprobante', {
+        p_sede_id: sedeId || 'c9755dbc-11e0-452d-b971-209f5476bbcb',
+        p_serie: serie
+      });
+      if (!rpcErr && rpcCorr !== null) {
+        correlativo = Number(rpcCorr);
+      } else {
+        throw rpcErr || new Error('RPC no disponible');
+      }
+    } catch {
+      // Fallback defensivo sobre comprobantes_pago canónica
+      const { data: lastComp } = await supabase
+        .from('comprobantes_pago')
+        .select('correlativo, numero')
+        .eq('serie', serie)
+        .order('correlativo', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (lastComp) {
+        correlativo = Math.max(Number(lastComp.correlativo || 0), Number(lastComp.numero || 0)) + 1;
+      } else {
+        correlativo = 1; // Iniciar en 1 rigurosamente
+      }
     }
   }
 
@@ -166,8 +207,11 @@ export async function emitirComprobanteSunatPSE(
     fechaEmision: new Date().toISOString()
   };
 
-  // Si existen credenciales reales de API Token del PSE, enviar petición HTTP real
-  if (config.sunatApiToken && config.sunatApiToken.trim().length > 10) {
+  // En pruebas de campo o modo test/offline: si el token es demo o no se requiere facturación electrónica real,
+  // omitir el fetch externo a Nubefact y emitir el comprobante local con su hash y QR legal sintético sin bloquear la caja.
+  const esModoPruebas = config.sunatModoPruebas || !config.sunatApiToken || config.sunatApiToken.includes('demo') || config.sunatApiToken.includes('test') || config.sunatApiToken.trim().length <= 10;
+
+  if (!esModoPruebas && config.sunatApiToken && config.sunatApiToken.trim().length > 10) {
     try {
       const payloadNubefact = {
         operacion: "generar_comprobante",
@@ -229,36 +273,56 @@ export async function emitirComprobanteSunatPSE(
     }
   }
 
-  // Guardar comprobante inmutable en Supabase `public.comprobantes`
+  // Guardar comprobante inmutable en Supabase tabla canónica `public.comprobantes_pago`
   try {
-    await supabase.from('comprobantes').insert([{
-      sede_id: sedeId,
-      tipo_comprobante: params.tipoComprobante,
-      serie,
-      correlativo,
-      subtotal,
-      igv,
-      total: totalFinal,
-      estado: respuestaPSE.aceptadaPorSunat ? 'EMITIDO' : 'RECHAZADO',
-      fecha_emision: new Date().toISOString(),
-      cajero_nombre: params.cajeroNombre || 'Cajero POS',
-      metadata_fiscal: {
-        ruc_emisor: rucEmisor,
-        razon_social: razonSocialEmisor,
-        cliente_tipo_doc: params.clienteTipoDoc,
-        cliente_num_doc: params.clienteNumDoc,
-        cliente_nombre: params.clienteRazonSocial,
-        descuento,
-        motivo_descuento: params.motivoDescuento,
-        propina,
-        propina_agente: params.propinaAgenteNombre,
-        qr_legal: respuestaPSE.cadenaQrLegal,
-        enlace_pdf: respuestaPSE.enlacePdf,
-        enlace_xml: respuestaPSE.enlaceXml,
-        enlace_cdr: respuestaPSE.enlaceCdr,
-        pagos_detalle: params.pagosDetalle || []
-      }
-    }]);
+    const metadataFiscalCompleta = {
+      ruc_emisor: rucEmisor,
+      razon_social: razonSocialEmisor,
+      cliente_tipo_doc: params.clienteTipoDoc,
+      cliente_num_doc: params.clienteNumDoc,
+      cliente_nombre: params.clienteRazonSocial,
+      descuento,
+      motivo_descuento: params.motivoDescuento,
+      propina,
+      propina_agente: params.propinaAgenteNombre,
+      qr_legal: respuestaPSE.cadenaQrLegal,
+      enlace_pdf: respuestaPSE.enlacePdf,
+      enlace_xml: respuestaPSE.enlaceXml,
+      enlace_cdr: respuestaPSE.enlaceCdr,
+      pagos_detalle: pagosDetalle
+    };
+
+    if (emitidoViaRpc && comprobanteId) {
+      await supabase
+        .from('comprobantes_pago')
+        .update({
+          estado: respuestaPSE.aceptadaPorSunat ? 'EMITIDO' : 'RECHAZADO',
+          metadata_fiscal: metadataFiscalCompleta
+        })
+        .eq('id', comprobanteId);
+    } else {
+      await supabase.from('comprobantes_pago').insert([{
+        sede_id: sedeId || null,
+        tipo_comprobante: params.tipoComprobante,
+        serie,
+        numero: correlativo,
+        correlativo: correlativo,
+        cliente_nombre: params.clienteRazonSocial || 'Cliente General',
+        cliente_doc: params.clienteNumDoc || '00000000',
+        tipo_doc: params.clienteTipoDoc || 'SIN_DOC',
+        subtotal,
+        igv,
+        total: totalFinal,
+        descuento_total: descuento,
+        items: params.items || [],
+        pagos: pagosDetalle,
+        oatc_ids: validOatcIds,
+        cajero_nombre: params.cajeroNombre || 'Cajero POS',
+        estado: respuestaPSE.aceptadaPorSunat ? 'EMITIDO' : 'RECHAZADO',
+        fecha_emision: new Date().toISOString(),
+        metadata_fiscal: metadataFiscalCompleta
+      }]);
+    }
 
     // Si hay OATCs vinculadas, actualizar su estado a FINALIZADO y PAGADO
     if (params.oatcIds && params.oatcIds.length > 0) {

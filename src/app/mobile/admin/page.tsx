@@ -95,7 +95,7 @@ export default function MobileAdminPage() {
 
       // Cargar Ventas
       const { data: ventas } = await supabase
-        .from('comprobantes')
+        .from('comprobantes_pago')
         .select('total, estado')
         .eq('sede_id', sedeActiva.id)
         .gte('created_at', hoyIso);

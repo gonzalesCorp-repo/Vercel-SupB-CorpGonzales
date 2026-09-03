@@ -51,7 +51,7 @@ export async function obtenerResumenCuentasPorCobrar(): Promise<{
   try {
     const { data: clientesData, error } = await supabase
       .from('clientes')
-      .select('id, nombre, documento, telefono, email, saldo_credito, limite_credito, created_at')
+      .select('id, nombre, dni, celular, email, saldo_credito, limite_credito, notas, created_at')
       .order('nombre', { ascending: true });
 
     if (error || !clientesData) {
@@ -70,8 +70,8 @@ export async function obtenerResumenCuentasPorCobrar(): Promise<{
       return {
         cliente_id: c.id,
         cliente_nombre: c.nombre,
-        cliente_doc: c.documento || 'Sin doc',
-        cliente_telefono: c.telefono || '',
+        cliente_doc: c.dni || 'Sin doc',
+        cliente_telefono: c.celular || '',
         cliente_email: c.email || '',
         limite_credito: limite,
         saldo_deudor: saldoDeudor,
@@ -144,7 +144,7 @@ export async function registrarAbonoDeuda(params: {
   try {
     const { data: cliente } = await supabase
       .from('clientes')
-      .select('id, nombre, documento, saldo_credito')
+      .select('id, nombre, dni, saldo_credito')
       .eq('id', params.clienteId)
       .single();
 
@@ -165,7 +165,7 @@ export async function registrarAbonoDeuda(params: {
       const respSunat = await emitirComprobanteSunatPSE({
         tipoComprobante: params.tipoComprobante || 'BOLETA',
         clienteTipoDoc: (params.clienteDoc && params.clienteDoc.length === 11) ? 'RUC' : 'DNI',
-        clienteNumDoc: params.clienteDoc || cliente.documento || '00000000',
+        clienteNumDoc: params.clienteDoc || cliente.dni || '00000000',
         clienteRazonSocial: cliente.nombre,
         items: [{
           descripcion: `Liquidación / Abono de Cuenta Corriente - Saldo cancelado`,

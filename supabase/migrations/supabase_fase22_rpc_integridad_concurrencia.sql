@@ -49,7 +49,15 @@ DECLARE
   v_stock_actual NUMERIC;
   v_nuevo_stock NUMERIC;
   v_costo_base NUMERIC;
+  v_sede_uuid UUID;
 BEGIN
+  -- Casteo seguro de sede_id a UUID con fallback
+  BEGIN
+    v_sede_uuid := p_sede_id::UUID;
+  EXCEPTION WHEN OTHERS THEN
+    SELECT id INTO v_sede_uuid FROM public.sedes LIMIT 1;
+  END;
+
   -- 1. Obtener costo base
   SELECT COALESCE(costo_base, 0) INTO v_costo_base
   FROM public.bienes
@@ -58,13 +66,13 @@ BEGIN
   -- 2. Bloquear y actualizar stock en almacen_laboratorio
   SELECT COALESCE(stock_actual, 0) INTO v_stock_actual
   FROM public.almacen_laboratorio
-  WHERE sede_id = p_sede_id AND bien_id = p_bien_id
+  WHERE sede_id = v_sede_uuid AND bien_id = p_bien_id
   FOR UPDATE;
 
   IF NOT FOUND THEN
     -- Si no existe registro previo en laboratorio, inicializarlo en 0
     INSERT INTO public.almacen_laboratorio (sede_id, bien_id, stock_actual, stock_en_uso, updated_at)
-    VALUES (p_sede_id, p_bien_id, 0, 0, NOW());
+    VALUES (v_sede_uuid, p_bien_id, 0, 0, NOW());
     v_stock_actual := 0;
   END IF;
 
@@ -73,9 +81,9 @@ BEGIN
   UPDATE public.almacen_laboratorio
   SET stock_actual = v_nuevo_stock,
       updated_at = NOW()
-  WHERE sede_id = p_sede_id AND bien_id = p_bien_id;
+  WHERE sede_id = v_sede_uuid AND bien_id = p_bien_id;
 
-  -- 3. Registrar movimiento en Kardex
+  -- 3. Registrar movimiento en Kardex (usando fecha_hora nativa en vez de created_at)
   INSERT INTO public.inventario_movimientos (
     sede_id,
     tipo_movimiento,
@@ -87,9 +95,9 @@ BEGIN
     destino,
     agente_id,
     metadata_iot,
-    created_at
+    fecha_hora
   ) VALUES (
-    p_sede_id,
+    v_sede_uuid,
     p_tipo_movimiento,
     p_bien_id,
     p_descripcion,
@@ -106,7 +114,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 3. Generación Concurrente y Atómica de Correlativos SUNAT
+GRANT EXECUTE ON FUNCTION public.rpc_actualizar_saldo_cuenta(UUID, NUMERIC) TO authenticated, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.rpc_despachar_stock_laboratorio(VARCHAR, UUID, NUMERIC, VARCHAR, TEXT, VARCHAR, UUID, JSONB) TO authenticated, anon, service_role;
+
+-- 3. Generación Concurrente y Atómica de Correlativos SUNAT / POS sobre comprobantes_pago
 CREATE OR REPLACE FUNCTION public.rpc_siguiente_correlativo_comprobante(
   p_sede_id VARCHAR,
   p_serie VARCHAR
@@ -115,16 +126,21 @@ RETURNS INTEGER AS $$
 DECLARE
   v_ultimo_correlativo INTEGER;
   v_siguiente_correlativo INTEGER;
+  v_lock_key TEXT;
 BEGIN
   -- Bloqueo a nivel de serie mediante advisory lock con hash
-  PERFORM pg_advisory_xact_lock(hashtext(p_sede_id || '_' || p_serie));
+  v_lock_key := COALESCE(p_sede_id, 'GLOBAL') || '_' || p_serie;
+  PERFORM pg_advisory_xact_lock(hashtext(v_lock_key));
 
-  SELECT COALESCE(MAX(correlativo), 0) INTO v_ultimo_correlativo
-  FROM public.comprobantes
-  WHERE sede_id = p_sede_id AND serie = p_serie;
+  SELECT COALESCE(MAX(COALESCE(correlativo, numero)), 0) INTO v_ultimo_correlativo
+  FROM public.comprobantes_pago
+  WHERE serie = p_serie
+    AND (p_sede_id IS NULL OR sede_id IS NULL OR sede_id::text = p_sede_id);
 
   v_siguiente_correlativo := v_ultimo_correlativo + 1;
 
   RETURN v_siguiente_correlativo;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.rpc_siguiente_correlativo_comprobante(VARCHAR, VARCHAR) TO authenticated, anon, service_role;

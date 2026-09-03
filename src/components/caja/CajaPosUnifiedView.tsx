@@ -99,7 +99,7 @@ export function CajaPosUnifiedView() {
         obtenerSesionCajaActiva(),
         obtenerOrdenesPorCobrar(sedeActiva.id),
         supabase.from('bienes').select('*').eq('tipo_bien', 'producto').limit(40),
-        supabase.from('comprobantes').select('*').eq('sede_id', sedeActiva.id).order('fecha_emision', { ascending: false }).limit(25)
+        supabase.from('comprobantes_pago').select('*').eq('sede_id', sedeActiva.id).order('created_at', { ascending: false }).limit(25)
       ]);
 
       setSesionActiva(sesion);
@@ -124,7 +124,7 @@ export function CajaPosUnifiedView() {
 
     const channel = supabase.channel('realtime-caja-pos-unified')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, () => cargarDatos())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'comprobantes' }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comprobantes_pago' }, () => cargarDatos())
       .subscribe();
 
     return () => {
