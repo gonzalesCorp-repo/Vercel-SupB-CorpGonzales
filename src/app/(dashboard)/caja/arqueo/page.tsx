@@ -211,6 +211,29 @@ export default function ArqueoCiegoPage() {
               </span>
             </div>
           </div>
+
+          {resultado.desgloseEsperado && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+              <div className="p-3 bg-slate-50/50 dark:bg-slate-950/50 rounded-xl border border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
+                <div>
+                  <span className="font-bold block text-slate-700 dark:text-slate-300">Efectivo en Cajón</span>
+                  <span className="text-[10px] text-slate-400">Declarado: S/ {resultado.totalEfectivoContado.toFixed(2)} | Sistema: S/ {resultado.desgloseEsperado.totalEfectivo.toFixed(2)}</span>
+                </div>
+                <span className={`font-black ${Math.abs(resultado.diferenciaEfectivo) < 0.01 ? 'text-emerald-500' : resultado.diferenciaEfectivo > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  {resultado.diferenciaEfectivo >= 0 ? `+ S/ ${resultado.diferenciaEfectivo.toFixed(2)}` : `- S/ ${Math.abs(resultado.diferenciaEfectivo).toFixed(2)}`}
+                </span>
+              </div>
+              <div className="p-3 bg-slate-50/50 dark:bg-slate-950/50 rounded-xl border border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
+                <div>
+                  <span className="font-bold block text-slate-700 dark:text-slate-300">Vouchers Tarjetas & Digitales</span>
+                  <span className="text-[10px] text-slate-400">Declarado: S/ {resultado.totalVouchersContado.toFixed(2)} | Sistema: S/ {(resultado.desgloseEsperado.totalTarjetas + resultado.desgloseEsperado.totalDigitales).toFixed(2)}</span>
+                </div>
+                <span className={`font-black ${Math.abs(resultado.diferenciaVouchers) < 0.01 ? 'text-emerald-500' : resultado.diferenciaVouchers > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  {resultado.diferenciaVouchers >= 0 ? `+ S/ ${resultado.diferenciaVouchers.toFixed(2)}` : `- S/ ${Math.abs(resultado.diferenciaVouchers).toFixed(2)}`}
+                </span>
+              </div>
+            </div>
+          )}
         </motion.div>
       )}
     </div>

@@ -53,15 +53,9 @@ export default function KioskoDualPage() {
   const [guardandoCliente, setGuardandoCliente] = useState(false);
   const [accionTurnoEnviando, setAccionTurnoEnviando] = useState(false);
 
-  // Lista de Clientes Demo Sandbox para Acceso Rápido en 1-Toque
-  const clientesSandboxDemo = [
-    { nombre: 'Valeria Demo Sandbox', dni: '10000001', tier: 'Diamante VIP', pts: 1450, avatar: 'V' },
-    { nombre: 'Camila Demo Sandbox', dni: '10000002', tier: 'Platino VIP', pts: 890, avatar: 'C' },
-    { nombre: 'Mateo Demo Sandbox', dni: '10000003', tier: 'Oro VIP', pts: 520, avatar: 'M' },
-    { nombre: 'Sebastián Demo Sandbox', dni: '10000004', tier: 'Oro VIP', pts: 480, avatar: 'S' },
-    { nombre: 'Lucas Demo Sandbox', dni: '10000005', tier: 'Plata VIP', pts: 210, avatar: 'L' },
-    { nombre: 'Sofía Demo Sandbox', dni: '10000006', tier: 'Bronce VIP', pts: 100, avatar: 'S' }
-  ];
+  // Lista de Clientes Frecuentes Reales de la Sede para Acceso Rápido en 1-Toque
+  const [clientesFrecuentes, setClientesFrecuentes] = useState<any[]>([]);
+
 
   // ================= ESTADO STAFF & TERMINAL TÁCTIL =================
   const [colaboradores, setColaboradores] = useState<ColaboradorKiosk[]>([]);
@@ -142,8 +136,30 @@ export default function KioskoDualPage() {
     }
   }, []);
 
+  // Cargar clientes frecuentes reales de la sede para el Kiosko
+  const cargarClientesFrecuentes = useCallback(async () => {
+    const supabase = createClient();
+    try {
+      let q = supabase
+        .from('clientes')
+        .select('id, nombre, dni, celular, saldo_credito, created_at')
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (sedeActiva?.id) {
+        q = q.or(`sede_id.eq.${sedeActiva.id},sede_id.is.null`);
+      }
+
+      const { data } = await q;
+      setClientesFrecuentes(data || []);
+    } catch (e) {
+      console.error('Error cargando clientes frecuentes en Kiosko:', e);
+    }
+  }, [sedeActiva?.id]);
+
   useEffect(() => {
     cargarDatosStaff();
+    cargarClientesFrecuentes();
 
     const supabase = createClient();
     const channelPeticiones = supabase.channel('totem-live-peticiones')
@@ -155,6 +171,12 @@ export default function KioskoDualPage() {
     const channelAgentes = supabase.channel('totem-live-agentes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'agentes' }, () => {
         cargarDatosStaff();
+      })
+      .subscribe();
+
+    const channelClientes = supabase.channel('totem-live-clientes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'clientes' }, () => {
+        cargarClientesFrecuentes();
       })
       .subscribe();
 
@@ -172,9 +194,11 @@ export default function KioskoDualPage() {
     return () => {
       supabase.removeChannel(channelPeticiones);
       supabase.removeChannel(channelAgentes);
+      supabase.removeChannel(channelClientes);
       supabase.removeChannel(channelOatc);
     };
-  }, [cargarDatosStaff, colaboradorActivo?.id, cargarOatcColaborador, clienteVip?.cliente?.dni]);
+  }, [cargarDatosStaff, cargarClientesFrecuentes, colaboradorActivo?.id, cargarOatcColaborador, clienteVip?.cliente?.dni]);
+
 
   // Seleccionar Colaborador para Terminal Táctil
   const handleSeleccionarColaborador = (colab: ColaboradorKiosk) => {
@@ -343,11 +367,10 @@ export default function KioskoDualPage() {
         return;
       }
 
+      const fallbackPinDni = agenteDb.dni && String(agenteDb.dni).length >= 4 ? String(agenteDb.dni).slice(-4) : null;
       const pinValido = 
         (agenteDb.pin && agenteDb.pin === pinIngresado) ||
-        (!agenteDb.pin && (pinIngresado === '1234' || pinIngresado === '1111' || pinIngresado === '4444' || pinIngresado === '5555')) ||
-        pinIngresado === '3010' ||
-        pinIngresado === '4321';
+        (!agenteDb.pin && fallbackPinDni && pinIngresado === fallbackPinDni);
 
       if (!pinValido) {
         if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
@@ -363,10 +386,10 @@ export default function KioskoDualPage() {
       setPinIngresado('');
       setPinError('');
 
-      if (solicitudParaValidar) {
-        const sedeId = sedeActiva?.id || '';
-        const sedeNombre = sedeActiva?.nombre || 'Sede Sandbox';
+      const sedeId = sedeActiva?.id || '';
+      const sedeNombre = sedeActiva?.nombre || branding.brandName || 'Gloss Salón';
 
+      if (solicitudParaValidar) {
         let tipoMov: TipoMovimientoAsistencia = 'ENTRADA';
         if (solicitudParaValidar.config_peticiones?.nombre?.toLowerCase().includes('refrigerio')) {
           tipoMov = 'INICIO_REFRIGERIO';
@@ -395,7 +418,8 @@ export default function KioskoDualPage() {
 
       } else if (colaboradorParaAccion && tipoMovimientoParaAccion) {
         const sedeId = sedeActiva?.id || '';
-        const sedeNombre = sedeActiva?.nombre || 'Sede Sandbox';
+        const sedeNombre = sedeActiva?.nombre || branding.brandName || 'Gloss Salón';
+
 
         const res = await validarYRegistrarAsistenciaNfc({
           agente_id: colaboradorParaAccion.id,
@@ -491,21 +515,43 @@ export default function KioskoDualPage() {
     }
   };
 
-  // Enviar Pedido a Bar & Cafetería (Staff)
+  // Enviar Pedido a Bar & Cafetería (Staff): Anexar a la OATC como ítem de cortesía
   const handleEnviarBar = async (bebida: string) => {
     if (!colaboradorActivo) return;
     setBarEnviando(true);
     try {
       const supabase = createClient();
+      
+      // Si hay una OATC activa, anexamos la bebida como ítem de cortesía (S/ 0.00)
+      if (oatcActiva?.id) {
+        const itemsActuales = Array.isArray(oatcActiva.punto_partida) ? oatcActiva.punto_partida : [];
+        const nuevoItemBebida = {
+          id: `bar_${Date.now()}`,
+          nombre: `Cortesía Bar: ${bebida}`,
+          precio: 0.00,
+          precio_venta: 0.00,
+          tipo: 'BEBIDA_CORTESIA',
+          solicitado_por: colaboradorActivo.nombre,
+          fecha: new Date().toISOString()
+        };
+        
+        await supabase
+          .from('oatc')
+          .update({
+            punto_partida: [...itemsActuales, nuevoItemBebida]
+          })
+          .eq('id', oatcActiva.id);
+      }
+
+      // También registramos en cola_peticiones para el monitor de alertas de recepción
       await supabase.from('cola_peticiones').insert([{
         agente_id: colaboradorActivo.id,
-        sede_id: sedeActiva?.id || '',
-        tipo_id: '5ef41109-0c11-469c-b79d-2e2e74a79d25',
+        sede_id: sedeActiva?.id || null,
         estado: 'PENDIENTE',
         oatc_id: oatcActiva?.id || null
       }]);
 
-      setFeedback(`🍹 ${bebida} solicitada para ${oatcActiva?.cliente_nombre || 'el cliente'}.`);
+      setFeedback(`🍹 ${bebida} solicitada como cortesía para ${oatcActiva?.cliente_nombre || 'el cliente'}.`);
       setTimeout(() => setFeedback(''), 5000);
     } catch (err: any) {
       setFeedback(`Error: ${err.message}`);
@@ -513,6 +559,7 @@ export default function KioskoDualPage() {
       setBarEnviando(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col justify-between p-4 sm:p-6 select-none">
@@ -683,49 +730,58 @@ export default function KioskoDualPage() {
                 </form>
               </div>
 
-              {/* Tiles Rápidos de Clientes Demo Sandbox */}
+              {/* Tiles Rápidos de Clientes Frecuentes Reales */}
               <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-5 space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <Sparkles className="w-4 h-4 text-purple-400" />
                     <h3 className="text-xs font-black text-white uppercase tracking-wider">
-                      Clientes Demo Sandbox (1-Toque para Pruebas)
+                      Clientes Recientes & Frecuentes
                     </h3>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-mono">DNI Pre-configurados</span>
+                  <span className="text-[10px] text-slate-400 font-mono">1-Toque para Check-in</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {clientesSandboxDemo.map((c) => (
-                    <div
-                      key={c.dni}
-                      onClick={() => ejecutarBusquedaCliente(c.dni)}
-                      className="p-3.5 bg-slate-900 border border-slate-800 hover:border-purple-500/60 rounded-2xl cursor-pointer transition-all flex items-center justify-between group active:scale-98 shadow-md"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center justify-center font-black text-sm">
-                          {c.avatar}
+                {clientesFrecuentes.length === 0 ? (
+                  <div className="py-6 text-center text-slate-400 text-xs">
+                    No hay clientes registrados recientemente en esta sede. Utiliza el buscador o regístrate como nuevo cliente.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {clientesFrecuentes.map((c) => (
+                      <div
+                        key={c.id || c.dni}
+                        onClick={() => ejecutarBusquedaCliente(c.dni || c.celular || c.nombre)}
+                        className="p-3.5 bg-slate-900 border border-slate-800 hover:border-purple-500/60 rounded-2xl cursor-pointer transition-all flex items-center justify-between group active:scale-98 shadow-md"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center justify-center font-black text-sm uppercase">
+                            {c.nombre?.charAt(0) || 'C'}
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors line-clamp-1">
+                              {c.nombre}
+                            </h4>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {c.dni ? `DNI: ${c.dni}` : c.celular ? `Cel: ${c.celular}` : 'Cliente Registrado'}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
-                            {c.nombre}
-                          </h4>
-                          <span className="text-[10px] text-slate-400 font-mono">DNI: {c.dni}</span>
-                        </div>
-                      </div>
 
-                      <div className="text-right">
-                        <span className="text-[9px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2 py-0.5 rounded-full block mb-1">
-                          {c.tier}
-                        </span>
-                        <span className="text-[10px] text-emerald-400 font-mono font-bold">
-                          {c.pts} VP
-                        </span>
+                        <div className="text-right">
+                          <span className="text-[9px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-full block mb-1">
+                            VIP Salón
+                          </span>
+                          <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                            Activo
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
 
             </div>
           ) : (

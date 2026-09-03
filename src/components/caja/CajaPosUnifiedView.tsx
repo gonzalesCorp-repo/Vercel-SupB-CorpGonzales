@@ -21,10 +21,12 @@ import { ItemTicket } from '@/services/tickets';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
+import { getBrandingForSede } from '@/config/branding';
 import { imprimirTicketTermicoHtml, DatosTicketTermico } from '@/lib/hardware/thermalPrinter';
 import { OperacionesCajaDrawer } from './operaciones/OperacionesCajaDrawer';
 
 const supabase = createClient();
+
 
 export function CajaPosUnifiedView() {
   const [sesionActiva, setSesionActiva] = useState<SesionCaja | null>(null);
@@ -89,7 +91,17 @@ export function CajaPosUnifiedView() {
   const [filtroFechaCpe, setFiltroFechaCpe] = useState<string>(hoyStr);
 
   const sedeActiva = useAppStore((state) => state.sedeActiva);
+  const userEmail = useAppStore((state) => state.userEmail);
+  const branding = getBrandingForSede(sedeActiva);
   const { showAlert } = useUIStore();
+
+  useEffect(() => {
+    if (userEmail && cajeroNombre === 'Sócrates (Cajero)') {
+      const nombreLimpio = userEmail.split('@')[0].toUpperCase();
+      setCajeroNombre(`${nombreLimpio} (Caja)`);
+    }
+  }, [userEmail, cajeroNombre]);
+
 
   const cargarDatos = async () => {
     if (!sedeActiva) return;
@@ -977,9 +989,10 @@ export function CajaPosUnifiedView() {
             {/* Mockup Visual del Ticket Térmico */}
             <div className="flex justify-center p-3 bg-slate-950 rounded-2xl border border-slate-800 max-h-72 overflow-y-auto">
               <div className={`bg-white text-black p-3 font-mono shadow-md ${anchoTermicoPreview === 58 ? 'w-[200px] text-[10px]' : 'w-[280px] text-xs'}`}>
-                <div className="text-center font-black">VAIKUNTHA SALON & SPA</div>
-                <div className="text-center text-[9px]">RUC: 20608945123</div>
+                <div className="text-center font-black uppercase">{branding.brandName}</div>
+                <div className="text-center text-[9px] uppercase">{sedeActiva?.nombre || 'Sede Principal'}</div>
                 <div className="border-b border-black my-1 border-dashed"></div>
+
                 <div className="text-center font-bold">{comprobantePreview.tipo_comprobante || 'BOLETA ELECTRÓNICA'}</div>
                 <div className="text-center font-bold">{comprobantePreview.comprobanteCompleto || `${comprobantePreview.serie}-${String(comprobantePreview.correlativo).padStart(8, '0')}`}</div>
                 <div className="border-b border-black my-1 border-dashed"></div>

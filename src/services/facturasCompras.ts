@@ -114,13 +114,9 @@ export async function registrarFacturaCompra(params: {
       }));
       await supabase.from('cuotas_facturas_compras').insert(cuotasPayload);
     }
-  } catch (err) {
-    console.warn('[FacturasCompras] Error guardando en Supabase, usando objeto local:', err);
-    facturaCreada = {
-      id: 'fc_mock_' + Date.now(),
-      ...payloadFactura,
-      created_at: new Date().toISOString()
-    };
+  } catch (err: any) {
+    console.error('[FacturasCompras] Error guardando en Supabase:', err);
+    throw new Error('Error al registrar factura de compra: ' + (err.message || 'Error en base de datos'));
   }
 
   // Si es compra al CONTADO, ejecutar el egreso financiero de inmediato
@@ -164,109 +160,17 @@ export async function obtenerFacturasCompras(filtros?: {
     const { data, error } = await query;
     if (error) throw error;
 
-    if (data && data.length > 0) {
-      return data.map((d: any) => ({
-        ...d,
-        cuenta_pago_nombre: d.cuenta?.nombre,
-        cuotas: d.cuotas || []
-      })) as FacturaCompra[];
-    }
+    return (data || []).map((d: any) => ({
+      ...d,
+      cuenta_pago_nombre: d.cuenta?.nombre,
+      cuotas: d.cuotas || []
+    })) as FacturaCompra[];
   } catch (err) {
-    console.warn('[FacturasCompras] Error consultando DB, usando seeds demo:', err);
+    console.error('[FacturasCompras] Error consultando DB:', err);
+    return [];
   }
-
-  const hoy = new Date().toISOString().split('T')[0];
-  const fecha15d = format(addDays(new Date(), 15), 'yyyy-MM-dd');
-  const fecha30d = format(addDays(new Date(), 30), 'yyyy-MM-dd');
-  const fechaVencida = format(addDays(new Date(), -5), 'yyyy-MM-dd');
-
-  return [
-    {
-      id: 'fc_001',
-      sede_id: filtros?.sedeId || 'general',
-      proveedor_ruc: '20512345678',
-      proveedor_razon_social: 'L\'Oréal Perú S.A.',
-      tipo_comprobante: 'FACTURA',
-      serie: 'F001',
-      numero: '008921',
-      fecha_emision: hoy,
-      condicion_pago: 'CREDITO_30D',
-      fecha_vencimiento: fecha30d,
-      moneda: 'PEN',
-      subtotal: 2500.00,
-      igv: 450.00,
-      total: 2950.00,
-      monto_pagado: 0.00,
-      saldo_pendiente: 2950.00,
-      estado_pago: 'PENDIENTE',
-      categoria_gasto: 'PAGO_PROVEEDOR',
-      registrado_por: 'Administrador'
-    },
-    {
-      id: 'fc_002',
-      sede_id: filtros?.sedeId || 'general',
-      proveedor_ruc: '20601298765',
-      proveedor_razon_social: 'Wella Professionals Perú',
-      tipo_comprobante: 'FACTURA',
-      serie: 'F002',
-      numero: '004120',
-      fecha_emision: hoy,
-      condicion_pago: 'CREDITO_15D',
-      fecha_vencimiento: fecha15d,
-      moneda: 'PEN',
-      subtotal: 1200.00,
-      igv: 216.00,
-      total: 1416.00,
-      monto_pagado: 500.00,
-      saldo_pendiente: 916.00,
-      estado_pago: 'PAGADO_PARCIAL',
-      categoria_gasto: 'PAGO_PROVEEDOR',
-      registrado_por: 'Administrador'
-    },
-    {
-      id: 'fc_003',
-      sede_id: filtros?.sedeId || 'general',
-      proveedor_ruc: '20109988776',
-      proveedor_razon_social: 'Distribuidora Belleza Total E.I.R.L.',
-      tipo_comprobante: 'BOLETA',
-      serie: 'B001',
-      numero: '001954',
-      fecha_emision: fechaVencida,
-      condicion_pago: 'CREDITO_15D',
-      fecha_vencimiento: fechaVencida,
-      moneda: 'PEN',
-      subtotal: 450.00,
-      igv: 81.00,
-      total: 531.00,
-      monto_pagado: 0.00,
-      saldo_pendiente: 531.00,
-      estado_pago: 'VENCIDO',
-      categoria_gasto: 'PAGO_PROVEEDOR',
-      registrado_por: 'Administrador'
-    },
-    {
-      id: 'fc_004',
-      sede_id: filtros?.sedeId || 'general',
-      proveedor_ruc: '20451239871',
-      proveedor_razon_social: 'Luz del Sur S.A.A.',
-      tipo_comprobante: 'RECIBO_HONORARIOS',
-      serie: 'E001',
-      numero: '003412',
-      fecha_emision: hoy,
-      condicion_pago: 'CONTADO',
-      fecha_vencimiento: hoy,
-      moneda: 'PEN',
-      subtotal: 680.00,
-      igv: 0.00,
-      total: 680.00,
-      monto_pagado: 680.00,
-      saldo_pendiente: 0.00,
-      estado_pago: 'PAGADO_TOTAL',
-      categoria_gasto: 'SERVICIOS_BASICOS',
-      registrado_por: 'Administrador'
-    }
-  ];
 }
+
 
 // ============================================================================
 // 3. PAGO Y ABONO A FACTURAS DE COMPRAS

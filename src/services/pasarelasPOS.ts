@@ -299,42 +299,13 @@ export async function obtenerLotesLiquidacionPOS(filtros?: {
 
     const { data, error } = await query;
     if (error) throw error;
-    if (data && data.length > 0) return data as LoteLiquidacionPOS[];
+    return (data || []) as LoteLiquidacionPOS[];
   } catch (err) {
-    console.warn('[PasarelasPOS] Error cargando lotes POS de DB, usando mock demo:', err);
+    console.error('[PasarelasPOS] Error cargando lotes POS de DB:', err);
+    return [];
   }
-
-  // Datos mock iniciales para demo si la tabla está recién creada
-  const fechaHoy = new Date().toISOString().split('T')[0];
-  return [
-    {
-      id: 'lote_mock_001',
-      sede_id: filtros?.sedeId || 'general',
-      pasarela_id: 'pasarela_izipay_credito',
-      pasarela_nombre: 'Izipay POS - Crédito',
-      fecha_lote: fechaHoy,
-      cantidad_transacciones: 8,
-      monto_bruto_total: 1250.00,
-      comision_estimada: 55.31,
-      monto_neto_estimado: 1194.69,
-      diferencia_varianza: 0.00,
-      estado: 'EN_TRANSITO'
-    },
-    {
-      id: 'lote_mock_002',
-      sede_id: filtros?.sedeId || 'general',
-      pasarela_id: 'pasarela_izipay_debito',
-      pasarela_nombre: 'Izipay POS - Débito',
-      fecha_lote: fechaHoy,
-      cantidad_transacciones: 12,
-      monto_bruto_total: 890.00,
-      comision_estimada: 29.93,
-      monto_neto_estimado: 860.07,
-      diferencia_varianza: 0.00,
-      estado: 'EN_TRANSITO'
-    }
-  ];
 }
+
 
 export async function conciliarLotePOS(params: {
   loteId: string;
