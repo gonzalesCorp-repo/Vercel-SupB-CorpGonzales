@@ -37,9 +37,29 @@ export async function POST(request: Request) {
       porcentaje_comision, tarifa_hora
     } = body;
 
+    // Validación de alcance para Administradores locales (ADMIN)
+    if (callerAgente.rol === 'ADMIN') {
+      if (rol === 'SUPERADMIN' || rol === 'ADMIN') {
+        return NextResponse.json({ error: 'Acceso denegado. Un Administrador local no puede crear Administradores o SuperAdmins.' }, { status: 403 });
+      }
+
+      const { data: callerSedes } = await supabaseAdmin
+        .from('sedes_usuarios')
+        .select('sede_id')
+        .eq('agente_id', user.id);
+      
+      const permittedSedeIds = (callerSedes || []).map((s: any) => s.sede_id);
+      const sedesValidas = (sedes_ids || []).every((sid: string) => permittedSedeIds.includes(sid));
+
+      if (!sedesValidas || (sedes_ids && sedes_ids.length === 0 && permittedSedeIds.length > 0)) {
+        return NextResponse.json({ error: 'Acceso denegado. Solo puedes asignar usuarios a tus sedes autorizadas.' }, { status: 403 });
+      }
+    }
+
     if (!email || !password || !nombre) {
       return NextResponse.json({ error: 'Faltan campos obligatorios (nombre, email, password)' }, { status: 400 });
     }
+
 
     // 1. Crear usuario en auth.users (Supabase Authentication)
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({

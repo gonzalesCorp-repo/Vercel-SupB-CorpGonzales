@@ -48,8 +48,22 @@ export async function obtenerMeticasGlobales(): Promise<KPIReporte> {
   };
 }
 
-// Para Gestión de Usuarios
-export async function obtenerTodosLosAgentes(): Promise<any[]> {
+// Para Gestión de Usuarios y Control de Acceso Multi-Sede
+export async function obtenerSedesPermitidasAgente(agenteId: string): Promise<string[]> {
+  try {
+    const { data, error } = await supabase
+      .from('sedes_usuarios')
+      .select('sede_id')
+      .eq('agente_id', agenteId);
+    if (error) throw error;
+    return (data || []).map((su: any) => su.sede_id);
+  } catch (err) {
+    console.error('Error consultando sedes permitidas del agente:', err);
+    return [];
+  }
+}
+
+export async function obtenerTodosLosAgentes(sedesPermitidas?: string[]): Promise<any[]> {
   const { data, error } = await supabase
     .from('agentes')
     .select(`
@@ -64,20 +78,34 @@ export async function obtenerTodosLosAgentes(): Promise<any[]> {
   }
   
   // Transformar la data para que sea más fácil de usar en el frontend
-  return data.map((agente: any) => ({
+  let transformed = data.map((agente: any) => ({
     ...agente,
     sedes_ids: agente.sedes_usuarios ? agente.sedes_usuarios.map((su: any) => su.sede_id) : []
   }));
+
+  // Si se especifican sedes permitidas (ej. rol ADMIN), filtrar solo los que compartan al menos una sede
+  if (sedesPermitidas && sedesPermitidas.length > 0) {
+    transformed = transformed.filter((agente: any) => {
+      return agente.sedes_ids && agente.sedes_ids.some((sid: string) => sedesPermitidas.includes(sid));
+    });
+  }
+
+  return transformed;
 }
 
-export async function obtenerTodasLasSedes(): Promise<{id: string, nombre: string}[]> {
-  const { data, error } = await supabase.from('sedes').select('id, nombre').order('nombre');
+export async function obtenerTodasLasSedes(sedesPermitidas?: string[]): Promise<{id: string, nombre: string}[]> {
+  let query = supabase.from('sedes').select('id, nombre').order('nombre');
+  if (sedesPermitidas && sedesPermitidas.length > 0) {
+    query = query.in('id', sedesPermitidas);
+  }
+  const { data, error } = await query;
   if (error) {
     console.error("Error obteniendo sedes:", error);
     return [];
   }
-  return data;
+  return data || [];
 }
+
 
 export async function guardarAgente(agente: any, sedes_ids: string[] = []): Promise<boolean> {
   let agenteId = agente.id;

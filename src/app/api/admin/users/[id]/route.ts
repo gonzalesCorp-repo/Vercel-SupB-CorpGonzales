@@ -41,6 +41,52 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Falta el ID de usuario' }, { status: 400 });
     }
 
+    // 0.1 Validación de seguridad para Administradores locales (ADMIN)
+    if (callerAgente?.rol === 'ADMIN') {
+      const { data: targetUser } = await supabaseAdmin
+        .from('agentes')
+        .select('rol, sedes_usuarios(sede_id)')
+        .eq('id', userId)
+        .single();
+
+      if (!targetUser) {
+        return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+      }
+
+      // No permitir modificar a otros administradores ni a SuperAdmins
+      if (targetUser.rol === 'ADMIN' || targetUser.rol === 'SUPERADMIN') {
+        return NextResponse.json({ error: 'Acceso denegado. No tienes autorización para modificar a otros administradores.' }, { status: 403 });
+      }
+
+      // No permitir promover a ADMIN o SUPERADMIN
+      if (rol === 'ADMIN' || rol === 'SUPERADMIN') {
+        return NextResponse.json({ error: 'Acceso denegado. Un Administrador local no puede promover usuarios a Administrador.' }, { status: 403 });
+      }
+
+      // Obtener sedes autorizadas del caller
+      const { data: callerSedes } = await supabaseAdmin
+        .from('sedes_usuarios')
+        .select('sede_id')
+        .eq('agente_id', user.id);
+      
+      const permittedSedeIds = (callerSedes || []).map((s: any) => s.sede_id);
+      const targetSedesIds = (targetUser.sedes_usuarios || []).map((s: any) => s.sede_id);
+
+      const comparteSede = targetSedesIds.some((sid: string) => permittedSedeIds.includes(sid));
+      if (!comparteSede && targetSedesIds.length > 0) {
+        return NextResponse.json({ error: 'Acceso denegado. El usuario no pertenece a tus sedes autorizadas.' }, { status: 403 });
+      }
+
+      // Validar que las nuevas sedes asignadas estén dentro de permittedSedeIds
+      if (sedes_ids && sedes_ids.length > 0) {
+        const sedesValidas = sedes_ids.every((sid: string) => permittedSedeIds.includes(sid));
+        if (!sedesValidas) {
+          return NextResponse.json({ error: 'Acceso denegado. Solo puedes asignar usuarios a tus sedes autorizadas.' }, { status: 403 });
+        }
+      }
+    }
+
+
     // 1. Actualizar tabla agentes
     const estadoLimpio = estado === 'INACTIVO' ? 'INACTIVO' : 'ACTIVO';
     const updatePayload: any = {

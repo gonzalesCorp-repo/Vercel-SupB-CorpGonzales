@@ -7,7 +7,13 @@ import {
   CreditCard, Inbox, Beaker, Calendar, FileText, Calculator, BarChart3, 
   PackageSearch, Layers, Activity, Award, CheckSquare, Square, RefreshCw
 } from 'lucide-react';
-import { obtenerTodosLosAgentes, guardarAgente, obtenerTodasLasSedes } from '@/services/admin';
+import { 
+  obtenerTodosLosAgentes, 
+  guardarAgente, 
+  obtenerTodasLasSedes,
+  obtenerSedesPermitidasAgente 
+} from '@/services/admin';
+import { createClient } from '@/lib/supabase/client';
 import { Agente } from '@/services/recepcion';
 import { Modal } from '@/components/ui/Modal';
 import { useAppStore } from '@/store/useAppStore';
@@ -78,9 +84,31 @@ export default function UsuariosPage() {
   const cargarDatos = async () => {
     setIsLoading(true);
     try {
+      const supabase = createClient();
+      const userEmail = useAppStore.getState().userEmail;
+      let sedesPermitidas: string[] | undefined = undefined;
+
+      if (userRol !== 'SUPERADMIN') {
+        const { data: { user } } = await supabase.auth.getUser();
+        let agenteId = user?.id;
+
+        if (!agenteId && userEmail) {
+          const { data: ag } = await supabase.from('agentes').select('id').eq('email', userEmail).maybeSingle();
+          if (ag?.id) agenteId = ag.id;
+        }
+
+        if (agenteId) {
+          sedesPermitidas = await obtenerSedesPermitidasAgente(agenteId);
+        }
+
+        if ((!sedesPermitidas || sedesPermitidas.length === 0) && sedeActiva?.id) {
+          sedesPermitidas = [sedeActiva.id];
+        }
+      }
+
       const [usuariosData, sedesData, rolesData] = await Promise.all([
-        obtenerTodosLosAgentes(),
-        obtenerTodasLasSedes(),
+        obtenerTodosLosAgentes(sedesPermitidas),
+        obtenerTodasLasSedes(sedesPermitidas),
         obtenerRolesSistema()
       ]);
       
@@ -89,9 +117,13 @@ export default function UsuariosPage() {
         return true;
       });
 
+      const rolesFiltrados = userRol === 'SUPERADMIN' 
+        ? (rolesData || []) 
+        : (rolesData || []).filter(r => r.codigo !== 'SUPERADMIN' && r.codigo !== 'ADMIN');
+
       setUsuarios(filtrados as AgenteAdmin[]);
       setTodasSedes(sedesData || []);
-      setRolesDisponibles(rolesData || []);
+      setRolesDisponibles(rolesFiltrados);
     } catch (e) {
       console.error('Error cargando datos de usuarios:', e);
     } finally {
@@ -101,7 +133,8 @@ export default function UsuariosPage() {
 
   useEffect(() => {
     cargarDatos();
-  }, [sedeActiva?.id]);
+  }, [sedeActiva?.id, userRol]);
+
 
   // Contadores de Métricas
   const stats = useMemo(() => {
@@ -148,14 +181,18 @@ export default function UsuariosPage() {
 
   const openNewUserModal = () => {
     setEditId(null);
+    const defaultSedeId = todasSedes.length === 1 
+      ? [todasSedes[0].id] 
+      : (sedeActiva?.id && todasSedes.some(s => s.id === sedeActiva.id) ? [sedeActiva.id] : (todasSedes[0]?.id ? [todasSedes[0].id] : []));
+
     setFormData({ 
       nombre: '', 
       email: '', 
       password: '', 
-      rol: 'SOPORTE', 
+      rol: 'STAFF', 
       especialidad: '', 
-      estado: 'DISPONIBLE', 
-      sedes_ids: sedeActiva?.id ? [sedeActiva.id] : [],
+      estado: 'ACTIVO', 
+      sedes_ids: defaultSedeId,
       regimen_laboral: 'HONORARIOS_RHE',
       sueldo_base: 0,
       tipo_pension: 'AFP',
@@ -167,11 +204,14 @@ export default function UsuariosPage() {
   };
 
   const openEditModal = (user: AgenteAdmin) => {
+    // Si el usuario objetivo es ADMIN y el usuario logueado no es SUPERADMIN, bloquear apertura
+    if (user.rol === 'ADMIN' && userRol !== 'SUPERADMIN') return;
+
     setEditId(user.id!);
     setFormData({
       nombre: user.nombre,
       email: user.email || '',
-      rol: user.rol || 'SOPORTE',
+      rol: user.rol || 'STAFF',
       especialidad: user.especialidad || '',
       estado: user.estado,
       sedes_ids: user.sedes_ids || [],
@@ -189,13 +229,14 @@ export default function UsuariosPage() {
     setIsModalOpen(false);
     setEditId(null);
     setFormData({ 
-      nombre: '', email: '', password: '', rol: 'SOPORTE', especialidad: '', estado: 'DISPONIBLE', sedes_ids: [],
+      nombre: '', email: '', password: '', rol: 'STAFF', especialidad: '', estado: 'ACTIVO', sedes_ids: [],
       regimen_laboral: 'HONORARIOS_RHE', sueldo_base: 0, tipo_pension: 'AFP', asignacion_familiar: false, porcentaje_comision: 40, tarifa_hora: 0
     });
   };
 
   // Abrir Modal de Delegación Quirúrgica
   const openDelegarModal = async (user: AgenteAdmin) => {
+    if (user.rol === 'ADMIN' && userRol !== 'SUPERADMIN') return;
     setAgenteDelegando(user);
     setIsDelegarModalOpen(true);
     setLoadingHerramientas(true);
@@ -206,6 +247,7 @@ export default function UsuariosPage() {
     }
     setLoadingHerramientas(false);
   };
+
 
   const toggleHerramienta = async (herramientaKey: string) => {
     if (!agenteDelegando?.id) return;
@@ -349,7 +391,9 @@ export default function UsuariosPage() {
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Administra roles jerárquicos, asignación multi-sede y delega herramientas quirúrgicas al personal de soporte.
+              {userRol === 'SUPERADMIN' 
+                ? 'Administra roles jerárquicos globales, asignación multi-sede y delega herramientas quirúrgicas al personal.'
+                : `Administrando ${todasSedes.length} sede(s) autorizada(s): ${todasSedes.map(s => s.nombre).join(', ') || 'Sede asignada'}.`}
             </p>
           </div>
         </div>
@@ -368,7 +412,7 @@ export default function UsuariosPage() {
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-1">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Personal</span>
           <p className="text-2xl font-black text-slate-900">{stats.total}</p>
-          <span className="text-[10px] text-slate-500 block">En todas las sedes</span>
+          <span className="text-[10px] text-slate-500 block">En sedes autorizadas</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-purple-100 shadow-sm space-y-1">
@@ -416,7 +460,7 @@ export default function UsuariosPage() {
               onChange={(e) => setSedeFilter(e.target.value)}
               className="w-full px-4 py-2.5 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-slate-50 focus:bg-white cursor-pointer"
             >
-              <option value="ALL">🏢 Todas las Sedes</option>
+              <option value="ALL">{userRol === 'SUPERADMIN' ? '🏢 Todas las Sedes' : '🏢 Todas mis Sedes'}</option>
               {todasSedes.map(s => (
                 <option key={s.id} value={s.id}>📍 {s.nombre}</option>
               ))}
@@ -428,13 +472,14 @@ export default function UsuariosPage() {
         <div className="flex gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
           {[
             { key: 'ALL', label: 'Todos' },
-            { key: 'SUPERADMIN', label: '👑 SuperAdmin' },
+            ...(userRol === 'SUPERADMIN' ? [{ key: 'SUPERADMIN', label: '👑 SuperAdmin' }] : []),
             { key: 'ADMIN', label: '🏢 Admin' },
             { key: 'JEFE_OPERATIVO', label: '🎯 Jefe Operativo' },
             { key: 'SOPORTE', label: '🛠️ Soporte' },
             { key: 'STAFF', label: '💈 Staff' },
             { key: 'KIOSKO', label: '🪪 Kiosko' }
           ].map(tab => (
+
             <button
               key={tab.key}
               type="button"
@@ -582,29 +627,39 @@ export default function UsuariosPage() {
 
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {/* Botón de Delegación Quirúrgica */}
-                          <button 
-                            onClick={() => openDelegarModal(u)} 
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
-                              esSoporte
-                                ? 'bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-700 border-emerald-300 shadow-sm'
-                                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                            }`}
-                            title="Delegar herramientas quirúrgicas"
-                          >
-                            <Zap className="w-3.5 h-3.5 text-amber-500 fill-current" />
-                            <span>Herramientas</span>
-                          </button>
+                          {u.rol === 'ADMIN' && userRol !== 'SUPERADMIN' ? (
+                            <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1.5 rounded-xl border border-slate-200 flex items-center gap-1">
+                              <Lock className="w-3 h-3 text-slate-400" />
+                              <span>Solo Lectura</span>
+                            </span>
+                          ) : (
+                            <>
+                              {/* Botón de Delegación Quirúrgica */}
+                              <button 
+                                onClick={() => openDelegarModal(u)} 
+                                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
+                                  esSoporte
+                                    ? 'bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-700 border-emerald-300 shadow-sm'
+                                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                                }`}
+                                title="Delegar herramientas quirúrgicas"
+                              >
+                                <Zap className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                                <span>Herramientas</span>
+                              </button>
 
-                          <button 
-                            onClick={() => openEditModal(u)} 
-                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors cursor-pointer"
-                            title="Editar usuario"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
+                              <button 
+                                onClick={() => openEditModal(u)} 
+                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors cursor-pointer"
+                                title="Editar usuario"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
+
                     </tr>
                   );
                 })}
