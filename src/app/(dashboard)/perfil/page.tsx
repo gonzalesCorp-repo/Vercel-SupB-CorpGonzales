@@ -214,9 +214,16 @@ export default function PerfilPage() {
             </div>
 
             <form onSubmit={handleSavePin} className="space-y-4">
+              <label htmlFor="perfil-pin-operativo" className="sr-only">
+                PIN de Seguridad Operativo (4 dígitos)
+              </label>
               <div className="relative">
                 <input
+                  id="perfil-pin-operativo"
+                  name="pin_operativo"
                   type={mostrarPin ? 'text' : 'password'}
+                  inputMode="numeric"
+                  autoComplete="off"
                   maxLength={4}
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
@@ -278,9 +285,9 @@ export default function PerfilPage() {
 
               {/* Selector de Color de Acento */}
               <div>
-                <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-2">
+                <span className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-2">
                   Color de Acento
-                </label>
+                </span>
                 <div className="flex flex-wrap gap-2.5">
                   {colors.map((color) => {
                     const isSelected = primaryColor === color.value;
@@ -360,10 +367,10 @@ export default function PerfilPage() {
             {/* Control 1: Tamaño de Letra (5 Niveles) */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <ZoomIn className="w-4 h-4 text-emerald-500" />
                   <span>Tamaño de Letra (Zoom UI)</span>
-                </label>
+                </span>
                 <span className="text-[11px] font-bold text-slate-400">
                   {fontSize === 'small' ? '14px (Pequeño)' : fontSize === 'normal' ? '16px (Normal)' : fontSize === 'large' ? '18px (Grande)' : fontSize === 'extra-large' ? '20px (Extra Grande)' : '22px (Gigante)'}
                 </span>
@@ -400,10 +407,10 @@ export default function PerfilPage() {
 
             {/* Control 2: Familia Tipográfica */}
             <div className="space-y-3">
-              <label className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <span className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <Type className="w-4 h-4 text-indigo-500" />
                 <span>Tipografía del Sistema</span>
-              </label>
+              </span>
 
               <div className="grid grid-cols-2 gap-2">
                 {[
@@ -484,10 +491,12 @@ export default function PerfilPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Sede Predeterminada */}
             <div className="p-4 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+              <label htmlFor="perfil-sede-predeterminada" className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                 Sede Predeterminada al Iniciar
               </label>
               <select
+                id="perfil-sede-predeterminada"
+                name="sede_predeterminada"
                 value={sedePredeterminada}
                 onChange={(e) => handleSaveSedePredeterminada(e.target.value)}
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer"
