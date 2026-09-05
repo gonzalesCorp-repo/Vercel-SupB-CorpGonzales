@@ -173,8 +173,13 @@ export default function StockPanel() {
         {/* Barra de Filtros */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
           <div className="relative flex-1 max-w-md">
+            <label htmlFor="lab-stock-buscar" className="sr-only">
+              Buscar por Nombre, SKU o Marca
+            </label>
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
+              id="lab-stock-buscar"
+              name="busqueda_stock"
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -373,11 +378,13 @@ export default function StockPanel() {
 
               <form onSubmit={handleExecuteTransfer} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label htmlFor="stock-modal-cantidad-trasladar" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 cursor-pointer">
                     Cantidad a Trasladar a Laboratorio
                   </label>
                   <div className="flex items-center gap-2">
                     <input
+                      id="stock-modal-cantidad-trasladar"
+                      name="cantidad_trasladar_lab"
                       type="number"
                       min={1}
                       max={transferModalItem.stock_central}
