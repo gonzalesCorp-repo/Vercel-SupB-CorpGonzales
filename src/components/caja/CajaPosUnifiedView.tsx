@@ -528,8 +528,13 @@ export function CajaPosUnifiedView() {
           </div>
 
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <label htmlFor="pos-filtro-cola" className="sr-only">
+              Buscar cliente, ticket o staff en cola de cobro
+            </label>
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
             <input
+              id="pos-filtro-cola"
+              name="filtro_cola"
               type="text"
               value={filtroCola}
               onChange={(e) => setFiltroCola(e.target.value)}
@@ -629,8 +634,10 @@ export function CajaPosUnifiedView() {
           {/* Datos del Cliente */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-100 dark:border-slate-800">
             <div>
-              <label className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Tipo Doc:</label>
+              <label htmlFor="pos-tipo-doc-cliente" className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Tipo Doc:</label>
               <select
+                id="pos-tipo-doc-cliente"
+                name="tipo_doc_cliente"
                 value={tipoDocCliente}
                 onChange={(e) => setTipoDocCliente(e.target.value as any)}
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs font-semibold text-slate-800 dark:text-white"
@@ -643,8 +650,10 @@ export function CajaPosUnifiedView() {
             </div>
 
             <div>
-              <label className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Nº Documento:</label>
+              <label htmlFor="pos-cliente-doc-input" className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Nº Documento:</label>
               <input
+                id="pos-cliente-doc-input"
+                name="cliente_doc_input"
                 type="text"
                 value={clienteDocInput}
                 onChange={(e) => setClienteDocInput(e.target.value)}
@@ -654,8 +663,10 @@ export function CajaPosUnifiedView() {
             </div>
 
             <div>
-              <label className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Cliente / Razón Social:</label>
+              <label htmlFor="pos-cliente-nombre-input" className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Cliente / Razón Social:</label>
               <input
+                id="pos-cliente-nombre-input"
+                name="cliente_nombre_input"
                 type="text"
                 value={clienteNombreInput}
                 onChange={(e) => setClienteNombreInput(e.target.value)}
@@ -689,10 +700,12 @@ export function CajaPosUnifiedView() {
           {/* Descuentos & Propinas */}
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="p-2.5 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100 dark:border-indigo-900 space-y-1">
-              <label className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase flex items-center gap-1">
+              <label htmlFor="pos-descuento-monto" className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase flex items-center gap-1">
                 <Percent className="w-3 h-3" /> Descuento (S/):
               </label>
               <input
+                id="pos-descuento-monto"
+                name="descuento_monto"
                 type="number"
                 value={descuentoMonto}
                 onChange={(e) => {
@@ -705,10 +718,12 @@ export function CajaPosUnifiedView() {
             </div>
 
             <div className="p-2.5 bg-rose-50/50 dark:bg-rose-950/20 rounded-2xl border border-rose-100 dark:border-rose-900 space-y-1">
-              <label className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase flex items-center gap-1">
+              <label htmlFor="pos-propina-monto" className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase flex items-center gap-1">
                 <Heart className="w-3 h-3" /> Propina Staff (S/):
               </label>
               <input
+                id="pos-propina-monto"
+                name="propina_monto"
                 type="number"
                 value={propinaMonto}
                 onChange={(e) => setPropinaMonto(Math.max(0, Number(e.target.value)))}
@@ -724,8 +739,10 @@ export function CajaPosUnifiedView() {
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
               <div>
-                <label className="text-[9px] text-slate-500 font-bold">💵 Efectivo:</label>
+                <label htmlFor="pos-monto-efectivo" className="text-[9px] text-slate-500 font-bold block mb-0.5">💵 Efectivo:</label>
                 <input
+                  id="pos-monto-efectivo"
+                  name="monto_efectivo"
                   type="number"
                   value={montoEfectivo}
                   onChange={(e) => setMontoEfectivo(Number(e.target.value))}
@@ -734,8 +751,10 @@ export function CajaPosUnifiedView() {
               </div>
 
               <div>
-                <label className="text-[9px] text-slate-500 font-bold">💳 Tarjeta POS:</label>
+                <label htmlFor="pos-monto-tarjeta" className="text-[9px] text-slate-500 font-bold block mb-0.5">💳 Tarjeta POS:</label>
                 <input
+                  id="pos-monto-tarjeta"
+                  name="monto_tarjeta"
                   type="number"
                   value={montoTarjeta}
                   onChange={(e) => setMontoTarjeta(Number(e.target.value))}
@@ -744,8 +763,10 @@ export function CajaPosUnifiedView() {
               </div>
 
               <div>
-                <label className="text-[9px] text-slate-500 font-bold">📱 Yape/Plin:</label>
+                <label htmlFor="pos-monto-yape" className="text-[9px] text-slate-500 font-bold block mb-0.5">📱 Yape/Plin:</label>
                 <input
+                  id="pos-monto-yape"
+                  name="monto_yape"
                   type="number"
                   value={montoYape}
                   onChange={(e) => setMontoYape(Number(e.target.value))}
@@ -754,8 +775,10 @@ export function CajaPosUnifiedView() {
               </div>
 
               <div>
-                <label className="text-[9px] text-slate-500 font-bold">🏛️ Crédito:</label>
+                <label htmlFor="pos-monto-credito" className="text-[9px] text-slate-500 font-bold block mb-0.5">🏛️ Crédito:</label>
                 <input
+                  id="pos-monto-credito"
+                  name="monto_credito"
                   type="number"
                   value={montoCredito}
                   onChange={(e) => setMontoCredito(Number(e.target.value))}
@@ -768,8 +791,10 @@ export function CajaPosUnifiedView() {
             {montoEfectivo > 0 && (
               <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-800 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-slate-500">Paga con:</span>
+                  <label htmlFor="pos-efectivo-recibido" className="text-[10px] text-slate-500">Paga con:</label>
                   <input
+                    id="pos-efectivo-recibido"
+                    name="efectivo_recibido"
                     type="number"
                     value={efectivoRecibido}
                     onChange={(e) => setEfectivoRecibido(Number(e.target.value))}
@@ -851,8 +876,11 @@ export function CajaPosUnifiedView() {
 
               {filtroModoFechaCpe === 'CUSTOM' && (
                 <div className="flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800 animate-in fade-in">
-                  <Calendar className="w-4 h-4 text-emerald-400" />
+                  <Calendar className="w-4 h-4 text-emerald-400 pointer-events-none" />
+                  <label htmlFor="cpe-filtro-fecha" className="sr-only">Filtrar por fecha</label>
                   <input
+                    id="cpe-filtro-fecha"
+                    name="filtro_fecha_cpe"
                     type="date"
                     value={filtroFechaCpe}
                     onChange={(e) => setFiltroFechaCpe(e.target.value)}
@@ -879,8 +907,13 @@ export function CajaPosUnifiedView() {
 
             {/* Buscador de Texto */}
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <label htmlFor="cpe-filtro-drawer" className="sr-only">
+                Buscar por serie, número o cliente
+              </label>
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
               <input
+                id="cpe-filtro-drawer"
+                name="filtro_cpe_drawer"
                 type="text"
                 value={filtroCpeDrawer}
                 onChange={(e) => setFiltroCpeDrawer(e.target.value)}
@@ -1075,8 +1108,10 @@ export function CajaPosUnifiedView() {
               <Unlock className="w-4 h-4 text-emerald-400" /> Apertura de Turno de Caja
             </h3>
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nombre del Cajero:</label>
+              <label htmlFor="apertura-cajero-nombre" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nombre del Cajero:</label>
               <input
+                id="apertura-cajero-nombre"
+                name="cajero_nombre"
                 type="text"
                 value={cajeroNombre}
                 onChange={(e) => setCajeroNombre(e.target.value)}
@@ -1084,8 +1119,10 @@ export function CajaPosUnifiedView() {
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Monto Inicial (Fondo de Sencillo S/):</label>
+              <label htmlFor="apertura-monto-inicial" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Monto Inicial (Fondo de Sencillo S/):</label>
               <input
+                id="apertura-monto-inicial"
+                name="monto_inicial"
                 type="number"
                 value={montoAperturaInput}
                 onChange={(e) => setMontoAperturaInput(Number(e.target.value))}
@@ -1113,8 +1150,10 @@ export function CajaPosUnifiedView() {
             <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1">
               {['200', '100', '50', '20', '10', '5', '2', '1', '0.5'].map((den) => (
                 <div key={den} className="p-2 bg-slate-950 border border-slate-800 rounded-xl">
-                  <label className="text-[9px] text-slate-400 font-bold">S/ {den}:</label>
+                  <label htmlFor={`cierre-den-${den.replace('.', '_')}`} className="text-[9px] text-slate-400 font-bold block">S/ {den}:</label>
                   <input
+                    id={`cierre-den-${den.replace('.', '_')}`}
+                    name={`den_${den.replace('.', '_')}`}
                     type="number"
                     value={conteoEfectivo[den] || ''}
                     onChange={(e) => setConteoEfectivo({ ...conteoEfectivo, [den]: Number(e.target.value) })}

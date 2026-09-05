@@ -267,10 +267,12 @@ export function OperacionesCajaDrawer({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="op-caja-monto" className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Monto (S/)
                   </label>
                   <input
+                    id="op-caja-monto"
+                    name="monto"
                     type="number"
                     step="0.01"
                     required
@@ -282,10 +284,12 @@ export function OperacionesCajaDrawer({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="op-caja-concepto" className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Concepto / Motivo
                   </label>
                   <input
+                    id="op-caja-concepto"
+                    name="concepto"
                     type="text"
                     required
                     placeholder="Ej. Compra de 2 bolsas de hielo"
@@ -296,10 +300,12 @@ export function OperacionesCajaDrawer({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="op-caja-beneficiario" className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Beneficiario / Proveedor (Opcional)
                   </label>
                   <input
+                    id="op-caja-beneficiario"
+                    name="beneficiario"
                     type="text"
                     placeholder="Ej. Bodega Don Lucho / Taxi"
                     value={beneficiario}
