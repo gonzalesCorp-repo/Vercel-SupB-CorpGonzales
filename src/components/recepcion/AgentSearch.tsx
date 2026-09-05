@@ -55,6 +55,9 @@ export default function AgentSearch({ agentes, selectedAgenteId, onSelectAgente 
           )}
           
           <input
+            id="agent-search-input"
+            name="agentSearch"
+            aria-label="Buscar colaborador por nombre o especialidad"
             type="text"
             className="w-full text-sm outline-none placeholder:text-slate-400 text-slate-800"
             placeholder={isOpen ? "Buscar por nombre o especialidad..." : (selectedAgenteId === '' ? "A Lista de Espera General" : selectedAgente?.nombre)}

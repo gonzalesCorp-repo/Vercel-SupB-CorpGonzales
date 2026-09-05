@@ -192,10 +192,12 @@ export function ConciliacionLotesPosModal({
               {/* Form Inputs de Depósito Real */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 dark:text-white mb-1">
+                  <label htmlFor="conciliacion-pos-monto-neto" className="block text-xs font-bold text-slate-800 dark:text-white mb-1">
                     Monto Neto Real Depositado en Banco (S/)
                   </label>
                   <input
+                    id="conciliacion-pos-monto-neto"
+                    name="montoNetoReal"
                     type="number"
                     step="0.01"
                     required
@@ -209,10 +211,12 @@ export function ConciliacionLotesPosModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 dark:text-white mb-1">
+                  <label htmlFor="conciliacion-pos-operacion" className="block text-xs font-bold text-slate-800 dark:text-white mb-1">
                     N° de Operación / Referencia Bancaria
                   </label>
                   <input
+                    id="conciliacion-pos-operacion"
+                    name="numeroOperacion"
                     type="text"
                     placeholder="Ej. OP-78234190"
                     value={numeroOperacion}

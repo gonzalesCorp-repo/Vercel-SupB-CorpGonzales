@@ -184,10 +184,13 @@ export default function CuentasPorCobrarPage() {
           <div className="relative flex-1 min-w-[240px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             <input
+              id="filtro_cuentas_cliente"
+              name="filtro_cuentas_cliente"
               type="text"
               value={filtroTexto}
               onChange={(e) => setFiltroTexto(e.target.value)}
               placeholder="Buscar por cliente o DNI/RUC..."
+              aria-label="Buscar por cliente o DNI/RUC"
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-9 pr-3 py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
             />
           </div>
@@ -324,8 +327,10 @@ export default function CuentasPorCobrarPage() {
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Monto a Abonar (S/):</label>
+              <label htmlFor="abono_monto" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Monto a Abonar (S/):</label>
               <input
+                id="abono_monto"
+                name="abono_monto"
                 type="number"
                 value={montoAbono}
                 onChange={(e) => setMontoAbono(Math.max(1, Number(e.target.value)))}
@@ -338,8 +343,10 @@ export default function CuentasPorCobrarPage() {
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Medio de Pago:</label>
+                <label htmlFor="abono_metodo_pago" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Medio de Pago:</label>
                 <select
+                  id="abono_metodo_pago"
+                  name="abono_metodo_pago"
                   value={metodoPagoAbono}
                   onChange={(e) => setMetodoPagoAbono(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs font-bold text-white"
@@ -352,8 +359,10 @@ export default function CuentasPorCobrarPage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Comprobante Fiscal:</label>
+                <label htmlFor="abono_tipo_comprobante" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Comprobante Fiscal:</label>
                 <select
+                  id="abono_tipo_comprobante"
+                  name="abono_tipo_comprobante"
                   value={tipoCompAbono}
                   onChange={(e) => setTipoCompAbono(e.target.value as any)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs font-bold text-white"
@@ -366,8 +375,10 @@ export default function CuentasPorCobrarPage() {
             </div>
 
             <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-2xl flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-300">Emitir Comprobante SUNAT PSE al liquidar</label>
+              <label htmlFor="abono_emitir_comprobante" className="text-xs font-bold text-slate-300">Emitir Comprobante SUNAT PSE al liquidar</label>
               <input
+                id="abono_emitir_comprobante"
+                name="abono_emitir_comprobante"
                 type="checkbox"
                 checked={emitirComprobante}
                 onChange={(e) => setEmitirComprobante(e.target.checked)}

@@ -405,6 +405,9 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
               <h4 className="text-sm text-slate-500 font-medium mb-2">Opciones de Cancelación</h4>
               
               <select
+                id="cancelar-oatc-motivo"
+                name="motivoCancelacion"
+                aria-label="Opciones de Cancelación"
                 value={selectedMotivoId}
                 onChange={(e) => setSelectedMotivoId(e.target.value)}
                 className="w-full text-sm rounded-lg border border-slate-300 p-2.5 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 mb-3"
@@ -417,6 +420,9 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
 
               <h4 className="text-sm text-slate-500 font-medium mb-2">Detalle adicional (opcional)</h4>
               <textarea
+                id="cancelar-oatc-detalle"
+                name="detalleCancelacion"
+                aria-label="Detalle adicional de cancelación"
                 value={detalleCancelacion}
                 onChange={(e) => setDetalleCancelacion(e.target.value)}
                 placeholder="Escribe más detalles sobre la cancelación aquí..."
@@ -448,6 +454,9 @@ export default function ActiveOATCsTable({ onGenerarOrden }: ActiveOATCsTablePro
             <h4 className="font-bold text-red-800 mb-1">Motivo del rechazo</h4>
             <p className="text-sm text-red-600 mb-3">Este mensaje será enviado al workspace del staff y bloqueará la solicitud.</p>
             <textarea
+              id="rechazar-oatc-motivo"
+              name="rejectReason"
+              aria-label="Motivo del rechazo"
               className="w-full border-red-200 rounded-lg p-3 text-sm focus:ring-red-500 focus:border-red-500"
               rows={3}
               placeholder="Ej: Faltan productos, debe agregar el servicio extra primero..."

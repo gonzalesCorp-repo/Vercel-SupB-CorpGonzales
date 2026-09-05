@@ -156,6 +156,9 @@ export default function MobileClientePage() {
             <form onSubmit={handleBuscar} className="space-y-3">
               <div className="relative">
                 <input
+                  id="vip-login-dni"
+                  name="dni"
+                  aria-label="DNI o Celular"
                   type="text"
                   placeholder="DNI o Celular..."
                   value={dni}
@@ -185,8 +188,10 @@ export default function MobileClientePage() {
 
             <form onSubmit={handleRegistrar} className="space-y-3">
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Nombre Completo</label>
+                <label htmlFor="vip-registro-nombre" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Nombre Completo</label>
                 <input
+                  id="vip-registro-nombre"
+                  name="nuevoNombre"
                   type="text"
                   placeholder="Ej. Camila Torres"
                   value={nuevoNombre}
@@ -197,8 +202,10 @@ export default function MobileClientePage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">WhatsApp (Opcional)</label>
+                <label htmlFor="vip-registro-telefono" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">WhatsApp (Opcional)</label>
                 <input
+                  id="vip-registro-telefono"
+                  name="nuevoTelefono"
                   type="tel"
                   placeholder="+51 999 999 999"
                   value={nuevoTelefono}

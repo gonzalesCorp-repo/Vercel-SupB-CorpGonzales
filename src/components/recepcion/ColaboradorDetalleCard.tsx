@@ -312,8 +312,10 @@ export default function ColaboradorDetalleCard({ agente, onClose, onAgenteActual
 
             {/* Input de Motivo */}
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Motivo de Cese / Despido / Renuncia</label>
+              <label htmlFor="motivo-baja-agente" className="text-xs font-bold text-slate-500 uppercase block mb-1">Motivo de Cese / Despido / Renuncia</label>
               <input
+                id="motivo-baja-agente"
+                name="motivoBaja"
                 type="text"
                 value={motivoBaja}
                 onChange={(e) => setMotivoBaja(e.target.value)}
@@ -324,8 +326,10 @@ export default function ColaboradorDetalleCard({ agente, onClose, onAgenteActual
 
             {/* Checkbox de Confirmación Obligatorio */}
             <div className="p-3 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-              <label className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+              <label htmlFor="confirma-check-baja" className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-200 cursor-pointer select-none">
                 <input
+                  id="confirma-check-baja"
+                  name="confirmaCheckBaja"
                   type="checkbox"
                   checked={confirmaCheckBaja}
                   onChange={(e) => setConfirmaCheckBaja(e.target.checked)}

@@ -81,6 +81,9 @@ export function CommandPalette({
             <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
               <Search className="w-5 h-5 text-slate-400 shrink-0" />
               <input
+                id="command-palette-search-input"
+                name="commandPaletteQuery"
+                aria-label={placeholder || "Buscar comandos..."}
                 autoFocus
                 type="text"
                 value={query}

@@ -30,6 +30,9 @@ export default function StaffClientesTab({
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-xl">
         <div className="relative">
           <input 
+            id="busqueda_staff_clientes"
+            name="busqueda_staff_clientes"
+            aria-label="Buscar clientes por DNI, Nombre, Apellido, Celular"
             type="text" 
             value={queryCliente}
             onChange={e => setQueryCliente(e.target.value)}
@@ -102,8 +105,10 @@ export default function StaffClientesTab({
 
               <form onSubmit={handleCrearCliente} className="space-y-3">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Nombre Completo *</label>
+                  <label htmlFor="nuevo_cliente_nombre" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Nombre Completo *</label>
                   <input 
+                    id="nuevo_cliente_nombre"
+                    name="nuevo_cliente_nombre"
                     type="text"
                     required
                     value={newClienteForm.nombre}
@@ -113,8 +118,10 @@ export default function StaffClientesTab({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">DNI / Identificación</label>
+                  <label htmlFor="nuevo_cliente_dni" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">DNI / Identificación</label>
                   <input 
+                    id="nuevo_cliente_dni"
+                    name="nuevo_cliente_dni"
                     type="text"
                     value={newClienteForm.dni}
                     onChange={e => setNewClienteForm({ ...newClienteForm, dni: e.target.value })}
@@ -123,8 +130,10 @@ export default function StaffClientesTab({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Celular / WhatsApp</label>
+                  <label htmlFor="nuevo_cliente_celular" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Celular / WhatsApp</label>
                   <input 
+                    id="nuevo_cliente_celular"
+                    name="nuevo_cliente_celular"
                     type="text"
                     value={newClienteForm.celular}
                     onChange={e => setNewClienteForm({ ...newClienteForm, celular: e.target.value })}

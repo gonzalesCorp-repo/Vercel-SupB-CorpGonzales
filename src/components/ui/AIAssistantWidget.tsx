@@ -227,6 +227,9 @@ export function AIAssistantWidget() {
               className="p-3 border-t border-slate-800 bg-slate-900 flex items-center gap-2"
             >
               <input
+                id="ai-assistant-chat-input"
+                name="chatInput"
+                aria-label="Escribe tu mensaje para el Asistente AI"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Escribe tu mensaje..."

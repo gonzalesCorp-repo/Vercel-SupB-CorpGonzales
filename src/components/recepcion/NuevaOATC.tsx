@@ -148,7 +148,7 @@ export default function NuevaOATC({ onClose, onClientSelected, onCreatedSuccess 
         
         {/* Fila 1: Cliente */}
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">1. Cliente / Consumidor</label>
+          <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">1. Cliente / Consumidor</span>
           <ClientSearch 
             onSelect={handleClienteSelect} 
             selectedClientName={cliente?.nombre} 
@@ -175,7 +175,7 @@ export default function NuevaOATC({ onClose, onClientSelected, onCreatedSuccess 
 
         {/* Fila 2: Punto de Partida */}
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">2. Punto de Partida</label>
+          <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">2. Punto de Partida</span>
           
           <div className="flex gap-2 mb-3">
             <button
@@ -226,7 +226,7 @@ export default function NuevaOATC({ onClose, onClientSelected, onCreatedSuccess 
         {/* Fila 3: Agente y Tipo de Demanda */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">3. Especialista Asignado</label>
+            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">3. Especialista Asignado</span>
             <AgentSearch 
               agentes={agentes}
               selectedAgenteId={agenteId}
@@ -234,8 +234,10 @@ export default function NuevaOATC({ onClose, onClientSelected, onCreatedSuccess 
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">4. Tipo de Demanda</label>
+            <label htmlFor="nueva-oatc-demanda" className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">4. Tipo de Demanda</label>
             <select
+              id="nueva-oatc-demanda"
+              name="tipoDemandaId"
               value={tipoDemandaId}
               onChange={(e) => setTipoDemandaId(e.target.value)}
               className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 dark:text-slate-100 outline-none"
@@ -250,8 +252,10 @@ export default function NuevaOATC({ onClose, onClientSelected, onCreatedSuccess 
         {/* Fila 4: Anticipo / Pre-Cobro Fuera de Horario */}
         <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 cursor-pointer">
+            <label htmlFor="nueva-oatc-adelanto" className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 cursor-pointer">
               <input
+                id="nueva-oatc-adelanto"
+                name="tieneAdelanto"
                 type="checkbox"
                 checked={tieneAdelanto}
                 onChange={(e) => {
@@ -278,8 +282,10 @@ export default function NuevaOATC({ onClose, onClientSelected, onCreatedSuccess 
           {tieneAdelanto && (
             <div className="grid grid-cols-2 gap-3 pt-1 animate-in fade-in duration-200">
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Monto Adelanto (S/)</label>
+                <label htmlFor="nueva-oatc-monto-adelanto" className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Monto Adelanto (S/)</label>
                 <input
+                  id="nueva-oatc-monto-adelanto"
+                  name="montoAdelanto"
                   type="number"
                   step="0.50"
                   min="0"
@@ -290,8 +296,10 @@ export default function NuevaOATC({ onClose, onClientSelected, onCreatedSuccess 
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Método de Anticipo</label>
+                <label htmlFor="nueva-oatc-metodo-adelanto" className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Método de Anticipo</label>
                 <select
+                  id="nueva-oatc-metodo-adelanto"
+                  name="metodoAdelanto"
                   value={metodoAdelanto}
                   onChange={(e) => setMetodoAdelanto(e.target.value)}
                   className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-100 outline-none"

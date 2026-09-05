@@ -126,9 +126,9 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
 
         {/* Canales de Impresión */}
         <div className="mt-5 space-y-4">
-          <label className="block text-xs font-black text-slate-300 uppercase tracking-wider">
+          <span className="block text-xs font-black text-slate-300 uppercase tracking-wider">
             Canal de Conexión Activo
-          </label>
+          </span>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {/* CANAL USB SERIAL */}
             <button
@@ -204,10 +204,12 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
             <div className="grid grid-cols-2 gap-3">
               {/* Ancho del papel */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                <label htmlFor="thermal_ancho_papel" className="block text-[11px] font-bold text-slate-400 mb-1">
                   Ancho de Papel
                 </label>
                 <select
+                  id="thermal_ancho_papel"
+                  name="thermal_ancho_papel"
                   value={config.ancho}
                   onChange={(e) => handleConfigUpdate({ ancho: e.target.value as any })}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-medium outline-none focus:border-indigo-500"
@@ -219,10 +221,12 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
 
               {/* Baud Rate (solo para USB) */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                <label htmlFor="thermal_baud_rate" className="block text-[11px] font-bold text-slate-400 mb-1">
                   Velocidad USB (Baud Rate)
                 </label>
                 <select
+                  id="thermal_baud_rate"
+                  name="thermal_baud_rate"
                   value={config.baudRate}
                   onChange={(e) => handleConfigUpdate({ baudRate: Number(e.target.value) })}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-medium outline-none focus:border-indigo-500"
@@ -240,10 +244,12 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
             {config.canal === 'WIFI_LAN_CLOUD' && (
               <div className="grid grid-cols-3 gap-2 pt-1">
                 <div className="col-span-2">
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                  <label htmlFor="thermal_ip_lan" className="block text-[11px] font-bold text-slate-400 mb-1">
                     IP de Impresora en Red Local
                   </label>
                   <input
+                    id="thermal_ip_lan"
+                    name="thermal_ip_lan"
                     type="text"
                     value={config.ipImpresoraLan || ''}
                     onChange={(e) => handleConfigUpdate({ ipImpresoraLan: e.target.value })}
@@ -252,10 +258,12 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                  <label htmlFor="thermal_puerto_lan" className="block text-[11px] font-bold text-slate-400 mb-1">
                     Puerto TCP
                   </label>
                   <input
+                    id="thermal_puerto_lan"
+                    name="thermal_puerto_lan"
                     type="number"
                     value={config.puertoLan || 9100}
                     onChange={(e) => handleConfigUpdate({ puertoLan: Number(e.target.value) })}
@@ -280,10 +288,12 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
               <div className="grid grid-cols-3 gap-2.5">
                 {/* Desplazamiento de Margen Izquierdo */}
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                  <label htmlFor="thermal_margen_izquierdo" className="block text-[10px] font-bold text-slate-400 mb-1">
                     Margen Izquierdo (Offset)
                   </label>
                   <select
+                    id="thermal_margen_izquierdo"
+                    name="thermal_margen_izquierdo"
                     value={config.margenIzquierdoEspacios || 0}
                     onChange={(e) => handleConfigUpdate({ margenIzquierdoEspacios: Number(e.target.value) })}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white font-medium outline-none focus:border-indigo-500"
@@ -298,10 +308,12 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
 
                 {/* Tipo de Fuente */}
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                  <label htmlFor="thermal_tipo_fuente" className="block text-[10px] font-bold text-slate-400 mb-1">
                     Tipo de Fuente (Font)
                   </label>
                   <select
+                    id="thermal_tipo_fuente"
+                    name="thermal_tipo_fuente"
                     value={config.fuenteTipo || 'FontA'}
                     onChange={(e) => handleConfigUpdate({ fuenteTipo: e.target.value as any })}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white font-medium outline-none focus:border-indigo-500"
@@ -313,10 +325,12 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
 
                 {/* Columnas Totales */}
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                  <label htmlFor="thermal_columnas_linea" className="block text-[10px] font-bold text-slate-400 mb-1">
                     Columnas por Línea
                   </label>
                   <select
+                    id="thermal_columnas_linea"
+                    name="thermal_columnas_linea"
                     value={config.columnasCustom || (config.ancho === '58mm' ? 32 : 48)}
                     onChange={(e) => handleConfigUpdate({ columnasCustom: Number(e.target.value) })}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white font-medium outline-none focus:border-indigo-500"
@@ -333,8 +347,10 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
 
             {/* Checkboxes de Hardware */}
             <div className="flex items-center gap-4 pt-1">
-              <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+              <label htmlFor="thermal_cortar_papel" className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
                 <input
+                  id="thermal_cortar_papel"
+                  name="thermal_cortar_papel"
                   type="checkbox"
                   checked={config.cortarPapelAutomatico}
                   onChange={(e) => handleConfigUpdate({ cortarPapelAutomatico: e.target.checked })}
@@ -343,8 +359,10 @@ export function ThermalPrinterHubModal({ isOpen, onClose, sedeId }: ThermalPrint
                 <span>Corte automático de papel</span>
               </label>
 
-              <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+              <label htmlFor="thermal_abrir_cajon" className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
                 <input
+                  id="thermal_abrir_cajon"
+                  name="thermal_abrir_cajon"
                   type="checkbox"
                   checked={config.abrirCajonAutomatico}
                   onChange={(e) => handleConfigUpdate({ abrirCajonAutomatico: e.target.checked })}

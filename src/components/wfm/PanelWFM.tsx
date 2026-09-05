@@ -326,8 +326,10 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
           <p className="text-sm text-slate-500 mb-2">Selecciona tu nombre e ingresa tu PIN de seguridad para enviar la solicitud.</p>
           
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Tu Nombre</label>
+            <label htmlFor="wfm-kiosko-agente" className="block text-sm font-medium text-slate-700 mb-1">Tu Nombre</label>
             <select 
+              id="wfm-kiosko-agente"
+              name="selectedAgenteId"
               className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"
               value={selectedAgenteId}
               onChange={(e) => {
@@ -354,8 +356,10 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
           )}
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Tu PIN</label>
+            <label htmlFor="wfm-kiosko-pin" className="block text-sm font-medium text-slate-700 mb-1">Tu PIN</label>
             <input 
+              id="wfm-kiosko-pin"
+              name="pin"
               type="password"
               maxLength={4}
               className={`w-full p-3 border rounded-xl text-center text-xl tracking-widest outline-none transition-all ${pinError ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50 focus:ring-2 focus:ring-indigo-500'}`}

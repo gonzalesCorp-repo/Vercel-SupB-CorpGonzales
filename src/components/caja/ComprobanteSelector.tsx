@@ -48,10 +48,12 @@ export function ComprobanteSelector({
 
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-bold text-slate-500 mb-1">
+          <label htmlFor="comp_sel_emisor" className="block text-xs font-bold text-slate-500 mb-1">
             Emisor (Razón Social)
           </label>
           <select
+            id="comp_sel_emisor"
+            name="comp_sel_emisor"
             value={selectedEmisorId}
             onChange={(e) => handleEmisorChange(e.target.value)}
             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-medium outline-none"
@@ -66,8 +68,10 @@ export function ComprobanteSelector({
 
         <div className="flex gap-4">
           <div className="flex-1">
-            <label className="block text-xs font-bold text-slate-500 mb-1">Tipo</label>
+            <label htmlFor="comp_sel_tipo" className="block text-xs font-bold text-slate-500 mb-1">Tipo</label>
             <select
+              id="comp_sel_tipo"
+              name="comp_sel_tipo"
               value={selectedTipo}
               onChange={(e) => handleTipoChange(e.target.value)}
               className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-medium outline-none"
@@ -78,8 +82,10 @@ export function ComprobanteSelector({
             </select>
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-bold text-slate-500 mb-1">Serie</label>
+            <label htmlFor="comp_sel_serie" className="block text-xs font-bold text-slate-500 mb-1">Serie</label>
             <select
+              id="comp_sel_serie"
+              name="comp_sel_serie"
               value={selectedSerieId}
               onChange={(e) => setSelectedSerieId(e.target.value)}
               className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-medium outline-none"

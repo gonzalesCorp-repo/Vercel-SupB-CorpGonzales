@@ -208,6 +208,9 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
       <div className="relative">
         <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
         <input
+          id="busqueda_cartera_crm"
+          name="busqueda_cartera_crm"
+          aria-label="Buscar por nombre, apellido, DNI o celular"
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -327,10 +330,12 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
             {wizardStep === 1 && (
               <form onSubmit={handleNextStep} className="space-y-3">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                  <label htmlFor="cartera_nuevo_nombre" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
                     Nombres *
                   </label>
                   <input
+                    id="cartera_nuevo_nombre"
+                    name="cartera_nuevo_nombre"
                     type="text"
                     required
                     value={nuevoNombre}
@@ -342,10 +347,12 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                  <label htmlFor="cartera_nuevo_apellido" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
                     Apellidos (Opcional)
                   </label>
                   <input
+                    id="cartera_nuevo_apellido"
+                    name="cartera_nuevo_apellido"
                     type="text"
                     value={nuevoApellido}
                     onChange={(e) => setNuevoApellido(e.target.value)}
@@ -355,10 +362,12 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                  <label htmlFor="cartera_nuevo_celular" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
                     Número de Celular * (9 dígitos)
                   </label>
                   <input
+                    id="cartera_nuevo_celular"
+                    name="cartera_nuevo_celular"
                     type="tel"
                     required
                     maxLength={9}
@@ -392,10 +401,12 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
             {wizardStep === 2 && (
               <form onSubmit={handleCrearClienteFinal} className="space-y-3">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                  <label htmlFor="cartera_nuevo_dni" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
                     DNI / Documento (Opcional - Comprobantes)
                   </label>
                   <input
+                    id="cartera_nuevo_dni"
+                    name="cartera_nuevo_dni"
                     type="text"
                     maxLength={8}
                     value={nuevoDni}
@@ -406,10 +417,12 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                  <label htmlFor="cartera_nuevas_notas" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
                     Ficha Técnica / Diagnóstico Capilar
                   </label>
                   <textarea
+                    id="cartera_nuevas_notas"
+                    name="cartera_nuevas_notas"
                     rows={3}
                     value={nuevasNotas}
                     onChange={(e) => setNuevasNotas(e.target.value)}

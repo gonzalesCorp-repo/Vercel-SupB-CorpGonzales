@@ -371,6 +371,9 @@ export function FinanzasDashboardView() {
               <div className="relative flex-1 sm:w-64">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
+                  id="filtro-busqueda-movimientos"
+                  name="filtroBusquedaMovimientos"
+                  aria-label="Buscar por concepto o beneficiario"
                   type="text"
                   value={filtroBusqueda}
                   onChange={(e) => setFiltroBusqueda(e.target.value)}
@@ -380,6 +383,9 @@ export function FinanzasDashboardView() {
               </div>
 
               <select
+                id="filtro-tipo-movimientos"
+                name="filtroTipoMovimientos"
+                aria-label="Filtrar por tipo de movimiento"
                 value={filtroTipo}
                 onChange={(e) => setFiltroTipo(e.target.value)}
                 className="p-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"

@@ -47,8 +47,10 @@ export function ModalEditarPrecioItem({
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Nuevo Precio (S/):</label>
+            <label htmlFor="editar-item-nuevo-precio" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Nuevo Precio (S/):</label>
             <input
+              id="editar-item-nuevo-precio"
+              name="nuevoPrecioInput"
               type="number"
               step="0.5"
               value={nuevoPrecioInput}
@@ -63,6 +65,9 @@ export function ModalEditarPrecioItem({
                 <AlertTriangle className="w-3.5 h-3.5" /> Cortesía de Fidelización
               </span>
               <input
+                id="editar-item-motivo-cortesia"
+                name="motivoCortesiaInput"
+                aria-label="Motivo de la cortesía"
                 type="text"
                 value={motivoCortesiaInput}
                 onChange={(e) => setMotivoCortesiaInput(e.target.value)}

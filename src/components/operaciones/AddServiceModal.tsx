@@ -46,6 +46,9 @@ export default function AddServiceModal({
                 <div className="flex items-center gap-1 bg-white px-2 py-1.5 rounded-lg border border-gray-300 shadow-sm">
                   <span className="text-xs font-bold text-gray-500">S/</span>
                   <input 
+                    id={`servicio-precio-${idx}`}
+                    name={`servicioPrecio_${idx}`}
+                    aria-label={`Precio de ${srv.nombre}`}
                     type="number" 
                     value={srv.precio ?? srv.monto ?? srv.precio_venta ?? 0}
                     onChange={(e) => {
@@ -78,6 +81,9 @@ export default function AddServiceModal({
 
         <div className="relative mb-4">
           <input
+            id="add-service-search"
+            name="searchCat"
+            aria-label="Buscar en catálogo"
             type="text"
             value={searchCat}
             onChange={(e) => setSearchCat(e.target.value)}

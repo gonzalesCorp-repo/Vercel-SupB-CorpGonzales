@@ -193,8 +193,10 @@ export default function StaffAgendaTab({
 
               <form onSubmit={handleCrear} className="space-y-3">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Nombre del Cliente *</label>
+                  <label htmlFor="staff_agenda_cliente_nombre" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Nombre del Cliente *</label>
                   <input 
+                    id="staff_agenda_cliente_nombre"
+                    name="staff_agenda_cliente_nombre"
                     type="text"
                     required
                     value={newCitaForm.clienteNombre}
@@ -205,8 +207,10 @@ export default function StaffAgendaTab({
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Servicio Solicitado</label>
+                  <label htmlFor="staff_agenda_servicio" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Servicio Solicitado</label>
                   <select 
+                    id="staff_agenda_servicio"
+                    name="staff_agenda_servicio"
                     value={newCitaForm.servicio}
                     onChange={e => setNewCitaForm({ ...newCitaForm, servicio: e.target.value })}
                     className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 font-bold"
@@ -221,8 +225,10 @@ export default function StaffAgendaTab({
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Fecha</label>
+                    <label htmlFor="staff_agenda_fecha" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Fecha</label>
                     <input 
+                      id="staff_agenda_fecha"
+                      name="staff_agenda_fecha"
                       type="date" 
                       value={newCitaForm.fecha}
                       onChange={e => setNewCitaForm({ ...newCitaForm, fecha: e.target.value })}
@@ -230,8 +236,10 @@ export default function StaffAgendaTab({
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Hora</label>
+                    <label htmlFor="staff_agenda_hora" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Hora</label>
                     <input 
+                      id="staff_agenda_hora"
+                      name="staff_agenda_hora"
                       type="time" 
                       value={newCitaForm.hora}
                       onChange={e => setNewCitaForm({ ...newCitaForm, hora: e.target.value })}

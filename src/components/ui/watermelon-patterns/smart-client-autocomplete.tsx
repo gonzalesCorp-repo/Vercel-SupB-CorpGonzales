@@ -134,6 +134,9 @@ export function SmartClientAutocomplete({
       <div className="relative flex items-center">
         <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
         <input
+          id="smart-client-search-input"
+          name="clientSearch"
+          aria-label={placeholder || "Buscar cliente por DNI, celular o nombre..."}
           type="text"
           value={query}
           onChange={(e) => {
@@ -281,10 +284,12 @@ export function SmartClientAutocomplete({
 
               <form onSubmit={handleQuickCreate} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label htmlFor="quick-create-nombre" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Nombre Completo *
                   </label>
                   <input
+                    id="quick-create-nombre"
+                    name="quickNombre"
                     type="text"
                     required
                     value={quickNombre}
@@ -296,10 +301,12 @@ export function SmartClientAutocomplete({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="quick-create-dni" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                       DNI (Opcional)
                     </label>
                     <input
+                      id="quick-create-dni"
+                      name="quickDni"
                       type="text"
                       maxLength={8}
                       value={quickDni}
@@ -310,10 +317,12 @@ export function SmartClientAutocomplete({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="quick-create-celular" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                       Celular (WhatsApp)
                     </label>
                     <input
+                      id="quick-create-celular"
+                      name="quickCelular"
                       type="tel"
                       maxLength={9}
                       value={quickCelular}

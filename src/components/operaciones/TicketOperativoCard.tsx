@@ -78,6 +78,9 @@ export default function TicketOperativoCard({
             <div className="relative mt-2 w-full max-w-[280px]">
               <div className="flex items-center gap-1.5">
                 <input
+                  id={`edit-cliente-nombre-${oatc.id}`}
+                  name={`editClienteNombre_${oatc.id}`}
+                  aria-label="Nombre del cliente"
                   type="text"
                   value={newName}
                   onChange={(e) => {

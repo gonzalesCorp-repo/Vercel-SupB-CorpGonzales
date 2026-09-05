@@ -34,6 +34,9 @@ export default function OperacionesHistorialTab({
           <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200 text-sm">
             <span className="text-xs font-bold text-gray-500 uppercase">Desde:</span>
             <input
+              id="historial-fecha-inicio"
+              name="fechaInicio"
+              aria-label="Fecha inicio"
               type="date"
               value={fechaInicio}
               onChange={(e) => setFechaInicio(e.target.value)}
@@ -43,6 +46,9 @@ export default function OperacionesHistorialTab({
           <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200 text-sm">
             <span className="text-xs font-bold text-gray-500 uppercase">Hasta:</span>
             <input
+              id="historial-fecha-fin"
+              name="fechaFin"
+              aria-label="Fecha fin"
               type="date"
               value={fechaFin}
               onChange={(e) => setFechaFin(e.target.value)}

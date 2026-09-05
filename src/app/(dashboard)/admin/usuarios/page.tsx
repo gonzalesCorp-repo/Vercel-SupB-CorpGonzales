@@ -813,9 +813,9 @@ export default function UsuariosPage() {
           </div>
           
           <div className="pt-3 border-t border-slate-100 space-y-3">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <span className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
               💼 Régimen Laboral & Compensación
-            </label>
+            </span>
             
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -937,7 +937,7 @@ export default function UsuariosPage() {
           </div>
           
           <div className="pt-3 border-t border-slate-100">
-            <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Sedes Asignadas</label>
+            <span className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Sedes Asignadas</span>
             <div className="space-y-2 max-h-36 overflow-y-auto custom-scrollbar pr-1">
               {todasSedes.map(sede => (
                 <label key={sede.id} className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer p-2 hover:bg-slate-50 rounded-xl border border-slate-200 transition-colors">
@@ -1013,9 +1013,9 @@ export default function UsuariosPage() {
 
           {/* Barra de Presets Rápidos */}
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
               ⚡ Presets Rápidos de 1 Clic
-            </label>
+            </span>
             <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
               {PRESETS.map((preset) => (
                 <button

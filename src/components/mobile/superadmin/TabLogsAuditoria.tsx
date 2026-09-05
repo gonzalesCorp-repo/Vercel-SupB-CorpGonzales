@@ -76,6 +76,9 @@ export function TabLogsAuditoria({ sedeId }: TabLogsAuditoriaProps) {
         <div className="relative">
           <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
+            id="busqueda_logs_auditoria"
+            name="busqueda_logs_auditoria"
+            aria-label="Buscar por usuario, acción o módulo"
             type="text"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}

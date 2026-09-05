@@ -690,8 +690,11 @@ export default function KioskoDualPage() {
                 <form onSubmit={handleBuscarClienteSubmit} className="max-w-md mx-auto space-y-3">
                   <div className="relative">
                     <input
+                      id="kiosk_busqueda_cliente"
+                      name="kiosk_busqueda_cliente"
                       type="text"
                       placeholder="DNI / Celular / Nombre"
+                      aria-label="DNI, Celular o Nombre del Cliente VIP"
                       value={busquedaCliente}
                       onChange={(e) => setBusquedaCliente(e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 text-center text-lg font-mono tracking-wider text-white focus:outline-none focus:border-purple-500"
@@ -1002,10 +1005,12 @@ export default function KioskoDualPage() {
 
                 <form onSubmit={handleCrearNuevoCliente} className="space-y-3.5">
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                    <label htmlFor="kiosk_nuevo_cliente_nombre" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
                       Nombre Completo *
                     </label>
                     <input
+                      id="kiosk_nuevo_cliente_nombre"
+                      name="kiosk_nuevo_cliente_nombre"
                       type="text"
                       placeholder="Ej. Valeria Mendoza"
                       value={nuevoClienteForm.nombre}
@@ -1018,10 +1023,12 @@ export default function KioskoDualPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                      <label htmlFor="kiosk_nuevo_cliente_dni" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
                         DNI / Documento
                       </label>
                       <input
+                        id="kiosk_nuevo_cliente_dni"
+                        name="kiosk_nuevo_cliente_dni"
                         type="text"
                         placeholder="72918234"
                         value={nuevoClienteForm.dni}
@@ -1030,10 +1037,12 @@ export default function KioskoDualPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                      <label htmlFor="kiosk_nuevo_cliente_celular" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
                         Celular / WhatsApp
                       </label>
                       <input
+                        id="kiosk_nuevo_cliente_celular"
+                        name="kiosk_nuevo_cliente_celular"
                         type="text"
                         placeholder="999888777"
                         value={nuevoClienteForm.celular}
@@ -1279,7 +1288,7 @@ export default function KioskoDualPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Servicios en Curso</label>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Servicios en Curso</span>
                         <div className="space-y-1.5 bg-slate-950 p-3 rounded-2xl border border-slate-800">
                           {oatcActiva.servicios && oatcActiva.servicios.length > 0 ? (
                             oatcActiva.servicios.map((s: any, idx: number) => (
@@ -1338,10 +1347,12 @@ export default function KioskoDualPage() {
                       </div>
 
                       <div className="max-w-xs mx-auto space-y-2 text-left">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                        <label htmlFor="kiosk_sillon_cabina" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
                           🪑 Seleccionar Sillón / Cabina
                         </label>
                         <select
+                          id="kiosk_sillon_cabina"
+                          name="kiosk_sillon_cabina"
                           value={estacionSeleccionada}
                           onChange={(e) => setEstacionSeleccionada(e.target.value)}
                           className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-xs text-white font-bold cursor-pointer"
@@ -1377,10 +1388,12 @@ export default function KioskoDualPage() {
 
                   <form onSubmit={handleEnviarLab} className="space-y-3.5">
                     <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                      <label htmlFor="kiosk_lab_insumo" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
                         Insumo / Tinte / Cosmecéutico
                       </label>
                       <input
+                        id="kiosk_lab_insumo"
+                        name="kiosk_lab_insumo"
                         type="text"
                         value={labInsumo}
                         onChange={(e) => setLabInsumo(e.target.value)}
@@ -1391,10 +1404,12 @@ export default function KioskoDualPage() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                        <label htmlFor="kiosk_lab_gramos" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
                           Gramos Tinte / Base (g)
                         </label>
                         <input
+                          id="kiosk_lab_gramos"
+                          name="kiosk_lab_gramos"
                           type="number"
                           value={labGramos}
                           onChange={(e) => setLabGramos(e.target.value)}
@@ -1403,10 +1418,12 @@ export default function KioskoDualPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                        <label htmlFor="kiosk_lab_oxidante" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
                           Gramos Oxidante / Activador (g)
                         </label>
                         <input
+                          id="kiosk_lab_oxidante"
+                          name="kiosk_lab_oxidante"
                           type="number"
                           value={labOxidante}
                           onChange={(e) => setLabOxidante(e.target.value)}

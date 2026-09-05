@@ -184,6 +184,9 @@ export function ModalCatalogoPicker({
           <div className="relative">
             <Search className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3 top-3" />
             <input
+              id="busqueda_catalogo_picker"
+              name="busqueda_catalogo_picker"
+              aria-label="Buscar en catálogo"
               type="text"
               placeholder={`Buscar en catálogo de ${tipoActivo === 'servicio' ? 'servicios' : 'productos retail'}...`}
               value={busqueda}

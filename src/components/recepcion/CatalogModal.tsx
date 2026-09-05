@@ -93,6 +93,9 @@ export default function CatalogModal({ isOpen, onClose, tipo, onAdd }: CatalogMo
         <div className="px-6 py-4 border-b border-gray-100 flex flex-col gap-4 bg-gray-50/50">
           <div className="relative">
             <input 
+              id="catalog-search-query"
+              name="catalogSearchQuery"
+              aria-label="Buscar por nombre, categoría o marca"
               type="text" 
               value={query}
               onChange={(e) => setQuery(e.target.value)}

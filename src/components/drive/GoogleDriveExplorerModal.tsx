@@ -134,6 +134,9 @@ export function GoogleDriveExplorerModal({
           <div className="flex items-center gap-2.5">
             {/* Selector de Cuentas de Drive */}
             <select
+              id="drive-cuenta-selector"
+              name="selectedCuentaId"
+              aria-label="Seleccionar cuenta de Google Drive"
               value={selectedCuentaId}
               onChange={(e) => setSelectedCuentaId(e.target.value)}
               className="bg-slate-900 border border-slate-700 text-xs font-bold text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 max-w-xs truncate"
@@ -148,9 +151,9 @@ export function GoogleDriveExplorerModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition"
+              className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -168,6 +171,7 @@ export function GoogleDriveExplorerModal({
             ].map(f => (
               <button
                 key={f.id}
+                type="button"
                 onClick={() => setFiltroTipo(f.id)}
                 className={`px-3 py-1.5 rounded-xl font-bold text-[11px] flex items-center gap-1.5 transition ${
                   filtroTipo === f.id
@@ -185,6 +189,9 @@ export function GoogleDriveExplorerModal({
           <div className="relative w-full sm:w-64">
             <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
+              id="drive-buscador-archivos"
+              name="busquedaDrive"
+              aria-label="Buscar archivos en Drive"
               type="text"
               placeholder="Buscar archivos en Drive..."
               value={busqueda}
@@ -222,6 +229,9 @@ export function GoogleDriveExplorerModal({
             }`}
           >
             <input
+              id="drive-file-input"
+              name="fileUpload"
+              aria-label="Subir archivos a Drive"
               type="file"
               ref={fileInputRef}
               multiple

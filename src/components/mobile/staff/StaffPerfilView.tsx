@@ -303,6 +303,9 @@ export default function StaffPerfilView({
 
             <form onSubmit={handleGuardarPin} className="space-y-3">
               <input
+                id="staff_nuevo_pin"
+                name="staff_nuevo_pin"
+                aria-label="Nuevo PIN secreto de 4 dígitos"
                 type="password"
                 maxLength={4}
                 value={nuevoPin}
@@ -350,6 +353,9 @@ export default function StaffPerfilView({
 
             <form onSubmit={handleGuardarApodo} className="space-y-3">
               <input
+                id="staff_nuevo_apodo"
+                name="staff_nuevo_apodo"
+                aria-label="Nuevo apodo o nombre corto en salón"
                 type="text"
                 value={nuevoApodo}
                 onChange={(e) => setNuevoApodo(e.target.value)}

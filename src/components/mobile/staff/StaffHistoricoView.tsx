@@ -99,8 +99,10 @@ export default function StaffHistoricoView({
 
         <div className="grid grid-cols-2 gap-2 pt-1">
           <div>
-            <label className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 block mb-1">Desde:</label>
+            <label htmlFor="staff_hist_fecha_desde" className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 block mb-1">Desde:</label>
             <input 
+              id="staff_hist_fecha_desde"
+              name="staff_hist_fecha_desde"
               type="date" 
               value={fechaDesde} 
               onChange={e => setFechaDesde(e.target.value)}
@@ -108,8 +110,10 @@ export default function StaffHistoricoView({
             />
           </div>
           <div>
-            <label className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 block mb-1">Hasta:</label>
+            <label htmlFor="staff_hist_fecha_hasta" className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 block mb-1">Hasta:</label>
             <input 
+              id="staff_hist_fecha_hasta"
+              name="staff_hist_fecha_hasta"
               type="date" 
               value={fechaHasta} 
               onChange={e => setFechaHasta(e.target.value)}

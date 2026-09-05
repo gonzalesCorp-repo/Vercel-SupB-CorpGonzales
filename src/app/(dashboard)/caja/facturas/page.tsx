@@ -122,10 +122,13 @@ export default function FacturasPage() {
           <div className="relative flex-1 min-w-[240px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             <input
+              id="filtro_facturas_busqueda"
+              name="filtro_facturas_busqueda"
               type="text"
               value={filtroTexto}
               onChange={(e) => setFiltroTexto(e.target.value)}
               placeholder="Buscar por serie, número o cliente..."
+              aria-label="Buscar por serie, número o cliente"
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-9 pr-3 py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
             />
           </div>

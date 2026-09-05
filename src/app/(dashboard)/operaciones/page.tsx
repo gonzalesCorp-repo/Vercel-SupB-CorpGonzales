@@ -432,8 +432,10 @@ export default function WorkspaceOperativoPage() {
       <Modal isOpen={showLabModal} onClose={() => setShowLabModal(false)} title="Solicitud a Laboratorio (Autorizada)" maxWidth="max-w-md">
         <form onSubmit={handlePedirInsumo} className="space-y-5 mt-2">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Insumo Necesario</label>
+            <label htmlFor="operaciones_insumo_necesario" className="block text-sm font-bold text-gray-700 mb-1">Insumo Necesario</label>
             <input
+              id="operaciones_insumo_necesario"
+              name="operaciones_insumo_necesario"
               type="text"
               value={insumo}
               onChange={(e) => setInsumo(e.target.value)}
@@ -444,8 +446,10 @@ export default function WorkspaceOperativoPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Ubicación / Cabina Solicitante</label>
+            <label htmlFor="operaciones_cabina_solicitante" className="block text-sm font-bold text-gray-700 mb-1">Ubicación / Cabina Solicitante</label>
             <input
+              id="operaciones_cabina_solicitante"
+              name="operaciones_cabina_solicitante"
               type="text"
               value={cabinaSolicitante}
               onChange={(e) => setCabinaSolicitante(e.target.value)}

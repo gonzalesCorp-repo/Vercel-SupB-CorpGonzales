@@ -44,6 +44,9 @@ export default function PinValidationModal({
         </p>
 
         <input
+          id="operaciones-pin-validation"
+          name="pinValidation"
+          aria-label="PIN Operativo"
           type="password"
           maxLength={4}
           value={pin}

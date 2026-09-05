@@ -188,6 +188,9 @@ export default function StaffTurnoTab({
                 <div className="relative mt-2 w-full max-w-[280px]">
                   <div className="flex items-center gap-1.5">
                     <input
+                      id="staff_turno_cliente_nombre"
+                      name="staff_turno_cliente_nombre"
+                      aria-label="Nombre del cliente"
                       type="text"
                       value={newName}
                       onChange={(e) => {
@@ -276,6 +279,9 @@ export default function StaffTurnoTab({
                   <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-indigo-500/40 focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-400 transition-all">
                     <span className="text-xs font-black text-amber-400">S/</span>
                     <input 
+                      id={`staff_turno_item_precio_${idx}`}
+                      name={`staff_turno_item_precio_${idx}`}
+                      aria-label={`Precio de ${srv.nombre}`}
                       type="number" 
                       inputMode="decimal"
                       value={srv.precio ?? srv.monto ?? srv.precio_venta ?? 0}
@@ -419,8 +425,10 @@ export default function StaffTurnoTab({
               </p>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Motivo de Cancelación</label>
+                <label htmlFor="staff_cancel_motivo" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Motivo de Cancelación</label>
                 <select 
+                  id="staff_cancel_motivo"
+                  name="staff_cancel_motivo"
                   value={selectedMotivoId} 
                   onChange={(e) => setSelectedMotivoId(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-red-500"
@@ -432,8 +440,10 @@ export default function StaffTurnoTab({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Detalle adicional (opcional)</label>
+                <label htmlFor="staff_cancel_detalle" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Detalle adicional (opcional)</label>
                 <textarea 
+                  id="staff_cancel_detalle"
+                  name="staff_cancel_detalle"
                   value={cancelDetalle}
                   onChange={(e) => setCancelDetalle(e.target.value)}
                   placeholder="Explicación del problema o desistimiento del cliente..."

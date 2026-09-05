@@ -171,9 +171,11 @@ export function AgendaCRM() {
       >
         <form onSubmit={handleGuardar} className="space-y-4 mt-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nombre del Cliente *</label>
+            <label htmlFor="agenda-crm-cliente" className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nombre del Cliente *</label>
             <div className="relative">
               <input 
+                id="agenda-crm-cliente"
+                name="clienteNombre"
                 type="text" 
                 value={nuevaCita.cliente_nombre}
                 onChange={e => setNuevaCita({...nuevaCita, cliente_nombre: e.target.value})}
@@ -187,8 +189,10 @@ export function AgendaCRM() {
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Fecha *</label>
+              <label htmlFor="agenda-crm-fecha" className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Fecha *</label>
               <input 
+                id="agenda-crm-fecha"
+                name="fecha"
                 type="date" 
                 value={nuevaCita.fecha}
                 onChange={e => setNuevaCita({...nuevaCita, fecha: e.target.value})}
@@ -197,8 +201,10 @@ export function AgendaCRM() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Hora Inicio *</label>
+              <label htmlFor="agenda-crm-hora" className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Hora Inicio *</label>
               <input 
+                id="agenda-crm-hora"
+                name="horaInicio"
                 type="time" 
                 value={nuevaCita.hora_inicio}
                 onChange={e => setNuevaCita({...nuevaCita, hora_inicio: e.target.value})}
@@ -209,8 +215,10 @@ export function AgendaCRM() {
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Notas Adicionales</label>
+            <label htmlFor="agenda-crm-notas" className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Notas Adicionales</label>
             <textarea 
+              id="agenda-crm-notas"
+              name="notas"
               value={nuevaCita.notas}
               onChange={e => setNuevaCita({...nuevaCita, notas: e.target.value})}
               className="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"

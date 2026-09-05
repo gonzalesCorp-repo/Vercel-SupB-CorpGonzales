@@ -112,10 +112,12 @@ export function LiquidarStaffModal({
         
         {/* Selector de Colaborador */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+          <label htmlFor="liquidar-staff-agente" className="text-xs font-bold text-slate-500 uppercase block mb-1">
             Colaborador / Especialista
           </label>
           <select
+            id="liquidar-staff-agente"
+            name="agenteId"
             value={agenteId}
             onChange={(e) => setAgenteId(e.target.value)}
             className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -131,10 +133,12 @@ export function LiquidarStaffModal({
         {/* Cuenta de Pago & Monto */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            <label htmlFor="liquidar-staff-cuenta" className="text-xs font-bold text-slate-500 uppercase block mb-1">
               Cuenta de Pago (Sale el dinero)
             </label>
             <select
+              id="liquidar-staff-cuenta"
+              name="cuentaId"
               value={cuentaId}
               onChange={(e) => setCuentaId(e.target.value)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -148,8 +152,10 @@ export function LiquidarStaffModal({
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Monto a Liquidar (S/.)</label>
+            <label htmlFor="liquidar-staff-monto" className="text-xs font-bold text-slate-500 uppercase block mb-1">Monto a Liquidar (S/.)</label>
             <input
+              id="liquidar-staff-monto"
+              name="monto"
               type="number"
               step="0.01"
               min="0.50"
@@ -164,8 +170,10 @@ export function LiquidarStaffModal({
 
         {/* Concepto & N° Voucher */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Concepto de la Liquidación</label>
+          <label htmlFor="liquidar-staff-concepto" className="text-xs font-bold text-slate-500 uppercase block mb-1">Concepto de la Liquidación</label>
           <input
+            id="liquidar-staff-concepto"
+            name="concepto"
             type="text"
             required
             value={concepto}
@@ -175,10 +183,12 @@ export function LiquidarStaffModal({
         </div>
 
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+          <label htmlFor="liquidar-staff-operacion" className="text-xs font-bold text-slate-500 uppercase block mb-1">
             N° Operación Yape / Transferencia / Recibo (Opcional)
           </label>
           <input
+            id="liquidar-staff-operacion"
+            name="numeroOperacion"
             type="text"
             value={numeroOperacion}
             onChange={(e) => setNumeroOperacion(e.target.value)}
@@ -189,8 +199,10 @@ export function LiquidarStaffModal({
 
         {/* Checkbox Impresión Térmica */}
         <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+          <label htmlFor="liquidar-staff-imprimir" className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
             <input
+              id="liquidar-staff-imprimir"
+              name="imprimirVoucher"
               type="checkbox"
               checked={imprimirVoucher}
               onChange={(e) => setImprimirVoucher(e.target.checked)}

@@ -75,9 +75,11 @@ export default function RecepcionReportesPage() {
         
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex flex-col">
-            <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Fecha Operación</label>
+            <label htmlFor="filtro_fecha_reporte" className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Fecha Operación</label>
             <div className="relative">
               <input 
+                id="filtro_fecha_reporte"
+                name="filtro_fecha_reporte"
                 type="date" 
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
@@ -87,21 +89,29 @@ export default function RecepcionReportesPage() {
           </div>
           
           <div className="flex flex-col">
-            <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Filtrar por Asesor</label>
-            <select className="px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 bg-white min-w-[180px] focus:ring-2 focus:ring-blue-500 outline-none">
+            <label htmlFor="filtro_asesor_reporte" className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Filtrar por Asesor</label>
+            <select 
+              id="filtro_asesor_reporte"
+              name="filtro_asesor_reporte"
+              className="px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 bg-white min-w-[180px] focus:ring-2 focus:ring-blue-500 outline-none"
+            >
               <option>[ Todos los Asesores ]</option>
             </select>
           </div>
           
           <div className="flex flex-col">
-            <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Filtrar por Categoría</label>
-            <select className="px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 bg-white min-w-[180px] focus:ring-2 focus:ring-blue-500 outline-none">
+            <label htmlFor="filtro_categoria_reporte" className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Filtrar por Categoría</label>
+            <select 
+              id="filtro_categoria_reporte"
+              name="filtro_categoria_reporte"
+              className="px-3 py-1.5 border border-slate-200 rounded-md text-sm text-slate-700 bg-white min-w-[180px] focus:ring-2 focus:ring-blue-500 outline-none"
+            >
               <option>[ Todas las Categorías ]</option>
             </select>
           </div>
 
           <div className="flex flex-col ml-2">
-            <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 opacity-0">Sync</label>
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1 opacity-0">Sync</span>
             <button 
               onClick={() => { setIsRealtimeConnected(!isRealtimeConnected); loadData(); }}
               className="relative p-1.5 border border-slate-200 text-slate-500 rounded-md hover:bg-slate-50 hover:text-blue-600 transition-colors"

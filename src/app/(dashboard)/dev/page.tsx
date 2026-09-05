@@ -141,8 +141,11 @@ export default function DevPage() {
             <div className="relative w-full sm:w-64">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
+                id="dev_search_logs"
+                name="dev_search_logs"
                 type="text"
                 placeholder="Buscar módulo, acción o email..."
+                aria-label="Buscar módulo, acción o email"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition"

@@ -62,9 +62,9 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
 
       {/* 1. MODO DE TEMA (CLARO / OSCURO) */}
       <div>
-        <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5 flex items-center gap-1">
+        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5 flex items-center gap-1">
           <Sun className="w-3.5 h-3.5 text-amber-500" /> Modo Visual (Tema)
-        </label>
+        </span>
         <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
           <button type="button"
             onClick={() => setThemeMode('light', userId)}
@@ -94,9 +94,9 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
       {/* 2. TAMAÑO DE FUENTE (5 NIVELES) */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+          <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
             Tamaño de Letra
-          </label>
+          </span>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30">
             {fontSizes.find(f => f.id === (fontSize || 'normal'))?.desc} ({fontSizes.find(f => f.id === (fontSize || 'normal'))?.px})
           </span>
@@ -124,9 +124,9 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
 
       {/* 3. FAMILIA TIPOGRÁFICA */}
       <div>
-        <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">
+        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">
           Tipo de Letra (Tipografía)
-        </label>
+        </span>
         <div className="grid grid-cols-2 gap-2">
           {fontFamilies.map((f) => {
             const isSelected = (fontFamily || 'inter') === f.id;
@@ -173,9 +173,9 @@ export function MobileAccessibilityCard({ userId, className = '' }: MobileAccess
 
       {/* 5. COLOR DE ACENTO */}
       <div>
-        <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
+        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
           <Palette className="w-3.5 h-3.5 text-indigo-500" /> Color de Acento
-        </label>
+        </span>
         <div className="flex items-center justify-between gap-2 px-1">
           {colors.map((c) => (
             <button key={c.value}

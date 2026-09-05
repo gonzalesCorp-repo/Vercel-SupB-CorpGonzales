@@ -84,10 +84,12 @@ export function TransferenciaModal({
         {/* Selector de Cuentas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            <label htmlFor="transferencia-cuenta-origen" className="text-xs font-bold text-slate-500 uppercase block mb-1">
               Cuenta de Origen (Sale dinero)
             </label>
             <select
+              id="transferencia-cuenta-origen"
+              name="cuentaOrigenId"
               value={cuentaOrigenId}
               onChange={(e) => setCuentaOrigenId(e.target.value)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -101,10 +103,12 @@ export function TransferenciaModal({
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            <label htmlFor="transferencia-cuenta-destino" className="text-xs font-bold text-slate-500 uppercase block mb-1">
               Cuenta de Destino (Ingresa dinero)
             </label>
             <select
+              id="transferencia-cuenta-destino"
+              name="cuentaDestinoId"
               value={cuentaDestinoId}
               onChange={(e) => setCuentaDestinoId(e.target.value)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -121,8 +125,10 @@ export function TransferenciaModal({
         {/* Monto & Comisión */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Monto a Trasladar (S/.)</label>
+            <label htmlFor="transferencia-monto" className="text-xs font-bold text-slate-500 uppercase block mb-1">Monto a Trasladar (S/.)</label>
             <input
+              id="transferencia-monto"
+              name="monto"
               type="number"
               step="0.01"
               min="0.10"
@@ -135,8 +141,10 @@ export function TransferenciaModal({
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Comisión Bancaria / ITF (Opcional)</label>
+            <label htmlFor="transferencia-comision" className="text-xs font-bold text-slate-500 uppercase block mb-1">Comisión Bancaria / ITF (Opcional)</label>
             <input
+              id="transferencia-comision"
+              name="comision"
               type="number"
               step="0.01"
               min="0"
@@ -150,10 +158,12 @@ export function TransferenciaModal({
 
         {/* N° Operación Bancaria */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+          <label htmlFor="transferencia-operacion" className="text-xs font-bold text-slate-500 uppercase block mb-1">
             N° de Operación Bancaria / Voucher
           </label>
           <input
+            id="transferencia-operacion"
+            name="numeroOperacion"
             type="text"
             value={numeroOperacion}
             onChange={(e) => setNumeroOperacion(e.target.value)}
@@ -164,8 +174,10 @@ export function TransferenciaModal({
 
         {/* Motivo / Detalle */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Motivo del Traslado</label>
+          <label htmlFor="transferencia-descripcion" className="text-xs font-bold text-slate-500 uppercase block mb-1">Motivo del Traslado</label>
           <input
+            id="transferencia-descripcion"
+            name="descripcion"
             type="text"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}

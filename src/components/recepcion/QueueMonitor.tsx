@@ -392,13 +392,15 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Colaborador</label>
+              <span className="text-xs font-bold text-slate-500 uppercase block mb-1">Colaborador</span>
               <p className="font-black text-sm text-slate-900 dark:text-white">{agenteParaExcepcion.nombre}</p>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Tipo de Movimiento</label>
+              <label htmlFor="queue-excepcion-tipo" className="text-xs font-bold text-slate-500 uppercase block mb-1">Tipo de Movimiento</label>
               <select
+                id="queue-excepcion-tipo"
+                name="tipoMovExcepcion"
                 value={tipoMovExcepcion}
                 onChange={(e) => setTipoMovExcepcion(e.target.value as any)}
                 className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -411,8 +413,10 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Motivo de la Excepción</label>
+              <label htmlFor="queue-excepcion-motivo" className="text-xs font-bold text-slate-500 uppercase block mb-1">Motivo de la Excepción</label>
               <input
+                id="queue-excepcion-motivo"
+                name="motivoExcepcion"
                 type="text"
                 value={motivoExcepcion}
                 onChange={(e) => setMotivoExcepcion(e.target.value)}

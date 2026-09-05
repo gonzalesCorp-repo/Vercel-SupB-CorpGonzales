@@ -131,6 +131,9 @@ export function TabHistorialAuditoria({ agenteId, agenteNombre }: TabHistorialAu
           <div className="relative">
             <Search className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 absolute left-3 top-3" />
             <input
+              id="search_cliente_historial"
+              name="search_cliente_historial"
+              aria-label="Buscar por nombre de cliente"
               type="text"
               value={searchCliente}
               onChange={(e) => setSearchCliente(e.target.value)}

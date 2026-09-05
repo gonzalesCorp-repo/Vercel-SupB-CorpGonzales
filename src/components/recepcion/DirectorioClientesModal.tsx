@@ -119,6 +119,9 @@ export default function DirectorioClientesModal({
           <form onSubmit={handleSearch} className="flex gap-2">
             <div className="relative flex-1">
               <input
+                id="directorio-modal-busqueda"
+                name="searchQuery"
+                aria-label="Buscar por Nombre, DNI o Teléfono"
                 type="text"
                 placeholder="Buscar por Nombre, DNI o Teléfono..."
                 value={searchQuery}
@@ -152,6 +155,9 @@ export default function DirectorioClientesModal({
               </span>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
+                  id="directorio-nuevo-nombre"
+                  name="nuevoNombre"
+                  aria-label="Nombre y Apellidos"
                   type="text"
                   placeholder="Nombre y Apellidos *"
                   value={nuevoNombre}
@@ -160,6 +166,9 @@ export default function DirectorioClientesModal({
                   required
                 />
                 <input
+                  id="directorio-nuevo-dni"
+                  name="nuevoDni"
+                  aria-label="DNI o Documento"
                   type="text"
                   placeholder="DNI / Documento"
                   value={nuevoDni}
@@ -167,6 +176,9 @@ export default function DirectorioClientesModal({
                   className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100"
                 />
                 <input
+                  id="directorio-nuevo-celular"
+                  name="nuevoCelular"
+                  aria-label="Celular o WhatsApp"
                   type="text"
                   placeholder="Celular / WhatsApp"
                   value={nuevoCelular}

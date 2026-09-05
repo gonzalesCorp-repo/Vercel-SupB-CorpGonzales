@@ -43,9 +43,9 @@ export function PagoMixtoForm({
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center mb-3">
-        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
           Método de Pago
-        </label>
+        </span>
         <button
           type="button"
           onClick={handleAddPago}
@@ -59,6 +59,9 @@ export function PagoMixtoForm({
         {pagosMixtos.map((pago, index) => (
           <div key={index} className="flex gap-2 items-center bg-slate-50 border border-slate-200 rounded-xl p-2 shadow-sm">
             <select
+              id={`pago_mixto_metodo_${index}`}
+              name={`pago_mixto_metodo_${index}`}
+              aria-label={`Método de pago ${index + 1}`}
               value={pago.metodo}
               onChange={(e) => handleMetodoChange(index, e.target.value)}
               className="flex-1 bg-transparent border-none text-sm text-slate-700 font-bold outline-none cursor-pointer"
@@ -73,6 +76,9 @@ export function PagoMixtoForm({
                 <span className="text-slate-400 font-bold">$</span>
               </div>
               <input
+                id={`pago_mixto_monto_${index}`}
+                name={`pago_mixto_monto_${index}`}
+                aria-label={`Monto de pago ${index + 1}`}
                 type="number"
                 min="0"
                 step="0.01"

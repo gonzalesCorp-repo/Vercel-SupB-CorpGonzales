@@ -318,6 +318,9 @@ export function CajaPosFlexibleView() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <input
+                          id={`pos_select_oatc_${oatc.id}`}
+                          name={`pos_select_oatc_${oatc.id}`}
+                          aria-label={`Seleccionar orden ${oatc.cliente_nombre}`}
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => {}} // controlado por el click del div
@@ -395,8 +398,10 @@ export function CajaPosFlexibleView() {
           {/* Datos del Cliente */}
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1 col-span-2">
-              <label className="text-[10px] font-bold text-gray-500 uppercase">Cliente Facturación:</label>
+              <label htmlFor="pos_cliente_nombre" className="text-[10px] font-bold text-gray-500 uppercase">Cliente Facturación:</label>
               <input
+                id="pos_cliente_nombre"
+                name="pos_cliente_nombre"
                 type="text"
                 value={clienteNombreInput}
                 onChange={(e) => setClienteNombreInput(e.target.value)}
@@ -405,8 +410,10 @@ export function CajaPosFlexibleView() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase">{tipoDocInput} / Doc:</label>
+              <label htmlFor="pos_cliente_doc" className="text-[10px] font-bold text-gray-500 uppercase">{tipoDocInput} / Doc:</label>
               <input
+                id="pos_cliente_doc"
+                name="pos_cliente_doc"
                 type="text"
                 value={clienteDocInput}
                 onChange={(e) => setClienteDocInput(e.target.value)}
@@ -466,8 +473,10 @@ export function CajaPosFlexibleView() {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <div>
-                  <label className="text-[10px] font-bold text-gray-500">💵 Efectivo:</label>
+                  <label htmlFor="pos_monto_efectivo" className="text-[10px] font-bold text-gray-500">💵 Efectivo:</label>
                   <input
+                    id="pos_monto_efectivo"
+                    name="pos_monto_efectivo"
                     type="number"
                     step="0.5"
                     value={montoEfectivo}
@@ -477,8 +486,10 @@ export function CajaPosFlexibleView() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-gray-500">💳 Tarjeta POS:</label>
+                  <label htmlFor="pos_monto_tarjeta" className="text-[10px] font-bold text-gray-500">💳 Tarjeta POS:</label>
                   <input
+                    id="pos_monto_tarjeta"
+                    name="pos_monto_tarjeta"
                     type="number"
                     step="0.5"
                     value={montoTarjeta}
@@ -488,8 +499,10 @@ export function CajaPosFlexibleView() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-gray-500">📱 Yape / Plin:</label>
+                  <label htmlFor="pos_monto_yape" className="text-[10px] font-bold text-gray-500">📱 Yape / Plin:</label>
                   <input
+                    id="pos_monto_yape"
+                    name="pos_monto_yape"
                     type="number"
                     step="0.5"
                     value={montoYape}
@@ -499,8 +512,10 @@ export function CajaPosFlexibleView() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-gray-500">🏦 Transferencia:</label>
+                  <label htmlFor="pos_monto_transferencia" className="text-[10px] font-bold text-gray-500">🏦 Transferencia:</label>
                   <input
+                    id="pos_monto_transferencia"
+                    name="pos_monto_transferencia"
                     type="number"
                     step="0.5"
                     value={montoTransf}
@@ -513,8 +528,10 @@ export function CajaPosFlexibleView() {
               {montoEfectivo > 0 && (
                 <div className="pt-2 flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-gray-200 dark:border-slate-800 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-gray-500">Efectivo Recibido:</span>
+                    <label htmlFor="pos_efectivo_recibido" className="font-bold text-gray-500">Efectivo Recibido:</label>
                     <input
+                      id="pos_efectivo_recibido"
+                      name="pos_efectivo_recibido"
                       type="number"
                       step="0.5"
                       value={efectivoRecibido}
@@ -565,8 +582,10 @@ export function CajaPosFlexibleView() {
 
             <form onSubmit={handleAbrirCaja} className="space-y-3">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400">Cajero Responsable:</label>
+                <label htmlFor="pos_apertura_cajero" className="text-xs font-bold text-gray-600 dark:text-slate-400">Cajero Responsable:</label>
                 <input
+                  id="pos_apertura_cajero"
+                  name="pos_apertura_cajero"
                   type="text"
                   required
                   value={cajeroNombre}
@@ -576,8 +595,10 @@ export function CajaPosFlexibleView() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400">Fondo Inicial en Efectivo (S/):</label>
+                <label htmlFor="pos_apertura_monto" className="text-xs font-bold text-gray-600 dark:text-slate-400">Fondo Inicial en Efectivo (S/):</label>
                 <input
+                  id="pos_apertura_monto"
+                  name="pos_apertura_monto"
                   type="number"
                   step="0.5"
                   required
@@ -620,18 +641,23 @@ export function CajaPosFlexibleView() {
 
             <form onSubmit={handleCerrarCajaCiega} className="space-y-3">
               <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
-                {Object.keys(conteoEfectivo).map((den) => (
-                  <div key={den} className="p-2 bg-gray-50 dark:bg-slate-950 rounded-xl border border-gray-200 dark:border-slate-800 text-center">
-                    <span className="text-[10px] font-bold text-gray-500 block">S/ {den}</span>
-                    <input
-                      type="number"
-                      min="0"
-                      value={conteoEfectivo[den]}
-                      onChange={(e) => setConteoEfectivo({ ...conteoEfectivo, [den]: Number(e.target.value) })}
-                      className="w-full p-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg text-center text-xs font-mono font-bold"
-                    />
-                  </div>
-                ))}
+                {Object.keys(conteoEfectivo).map((den) => {
+                  const inputId = `pos_conteo_den_${den.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                  return (
+                    <div key={den} className="p-2 bg-gray-50 dark:bg-slate-950 rounded-xl border border-gray-200 dark:border-slate-800 text-center">
+                      <label htmlFor={inputId} className="text-[10px] font-bold text-gray-500 block cursor-pointer">S/ {den}</label>
+                      <input
+                        id={inputId}
+                        name={inputId}
+                        type="number"
+                        min="0"
+                        value={conteoEfectivo[den]}
+                        onChange={(e) => setConteoEfectivo({ ...conteoEfectivo, [den]: Number(e.target.value) })}
+                        className="w-full p-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg text-center text-xs font-mono font-bold"
+                      />
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="pt-3 flex justify-end gap-2 border-t border-gray-100 dark:border-slate-800">

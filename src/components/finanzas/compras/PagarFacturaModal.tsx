@@ -133,10 +133,12 @@ export function PagarFacturaModal({
 
           {/* Monto de Abono */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="pagar-factura-monto" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Monto a Pagar (S/)
             </label>
             <input
+              id="pagar-factura-monto"
+              name="montoAbono"
               type="number"
               step="0.01"
               max={Number(factura.saldo_pendiente)}
@@ -149,10 +151,12 @@ export function PagarFacturaModal({
 
           {/* Cuenta Financiera de Salida */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="pagar-factura-cuenta" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Cuenta de Origen (Egreso)
             </label>
             <select
+              id="pagar-factura-cuenta"
+              name="cuentaId"
               required
               value={cuentaId}
               onChange={(e) => setCuentaId(e.target.value)}
@@ -168,10 +172,12 @@ export function PagarFacturaModal({
 
           {/* N° Operación / Voucher */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="pagar-factura-operacion" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               N° Operación / Referencia Bancaria
             </label>
             <input
+              id="pagar-factura-operacion"
+              name="numeroOperacion"
               type="text"
               placeholder="Ej. OP-9831204"
               value={numeroOperacion}

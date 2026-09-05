@@ -339,19 +339,42 @@ export default function WFMConfigPage() {
       {/* Modal Peticiones */}
       <Modal isOpen={isPetModalOpen} onClose={() => setIsPetModalOpen(false)} title={editPetId ? "Editar Petición WFM" : "Nueva Petición WFM"}>
         <form onSubmit={handleSubmitPet} className="space-y-4">
-          <div><label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label><input required type="text" className="w-full px-4 py-2 border rounded-xl" value={petFormData.nombre} onChange={e => setPetFormData({...petFormData, nombre: e.target.value})} /></div>
+          <div>
+            <label htmlFor="admin-cfg-pet-nombre" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Nombre</label>
+            <input id="admin-cfg-pet-nombre" name="pet_nombre" required type="text" className="w-full px-4 py-2 border rounded-xl" value={petFormData.nombre} onChange={e => setPetFormData({...petFormData, nombre: e.target.value})} />
+          </div>
           
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Alcance de la Configuración</label>
-            <select className="w-full px-4 py-2 border rounded-xl" value={petFormData.isGlobal ? 'global' : 'local'} onChange={e => setPetFormData({...petFormData, isGlobal: e.target.value === 'global'})}>
+            <label htmlFor="admin-cfg-pet-alcance" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Alcance de la Configuración</label>
+            <select id="admin-cfg-pet-alcance" name="pet_alcance" className="w-full px-4 py-2 border rounded-xl" value={petFormData.isGlobal ? 'global' : 'local'} onChange={e => setPetFormData({...petFormData, isGlobal: e.target.value === 'global'})}>
               <option value="global">Global (Todas las Sedes)</option>
               <option value="local">Local (Solo esta Sede)</option>
             </select>
           </div>
 
-          <div><label className="block text-sm font-medium text-slate-700 mb-1">Color del Badge</label><select className="w-full px-4 py-2 border rounded-xl" value={petFormData.color} onChange={e => setPetFormData({...petFormData, color: e.target.value})}>{colorOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
-          <div><label className="block text-sm font-medium text-slate-700 mb-1">Estado de Sistema (Destino)</label><select className="w-full px-4 py-2 border rounded-xl" value={petFormData.estado_destino} onChange={e => setPetFormData({...petFormData, estado_destino: e.target.value})}><option value="DISPONIBLE">DISPONIBLE</option><option value="OCUPADO">OCUPADO</option><option value="INACTIVO">INACTIVO</option></select></div>
-          <div className="pt-2"><label className="flex items-center gap-3 cursor-pointer p-4 border rounded-xl hover:bg-slate-50"><input type="checkbox" className="w-5 h-5 text-indigo-600" checked={petFormData.actualiza_timestamp} onChange={e => setPetFormData({...petFormData, actualiza_timestamp: e.target.checked})} /><div><div className="font-bold text-slate-800 text-sm">Actualiza Timestamp</div><div className="text-xs text-slate-500">Reinicia antigüedad al regresar a disponible.</div></div></label></div>
+          <div>
+            <label htmlFor="admin-cfg-pet-color" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Color del Badge</label>
+            <select id="admin-cfg-pet-color" name="pet_color" className="w-full px-4 py-2 border rounded-xl" value={petFormData.color} onChange={e => setPetFormData({...petFormData, color: e.target.value})}>
+              {colorOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="admin-cfg-pet-estado" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Estado de Sistema (Destino)</label>
+            <select id="admin-cfg-pet-estado" name="pet_estado_destino" className="w-full px-4 py-2 border rounded-xl" value={petFormData.estado_destino} onChange={e => setPetFormData({...petFormData, estado_destino: e.target.value})}>
+              <option value="DISPONIBLE">DISPONIBLE</option>
+              <option value="OCUPADO">OCUPADO</option>
+              <option value="INACTIVO">INACTIVO</option>
+            </select>
+          </div>
+          <div className="pt-2">
+            <label htmlFor="admin-cfg-pet-timestamp" className="flex items-center gap-3 cursor-pointer p-4 border rounded-xl hover:bg-slate-50">
+              <input id="admin-cfg-pet-timestamp" name="pet_actualiza_timestamp" type="checkbox" className="w-5 h-5 text-indigo-600" checked={petFormData.actualiza_timestamp} onChange={e => setPetFormData({...petFormData, actualiza_timestamp: e.target.checked})} />
+              <div>
+                <div className="font-bold text-slate-800 text-sm">Actualiza Timestamp</div>
+                <div className="text-xs text-slate-500">Reinicia antigüedad al regresar a disponible.</div>
+              </div>
+            </label>
+          </div>
           <div className="pt-4 flex justify-end gap-3"><button type="button" onClick={() => setIsPetModalOpen(false)} className="px-5 py-2 text-sm bg-white border rounded-xl hover:bg-slate-50">Cancelar</button><button disabled={isSaving} type="submit" className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700">{isSaving ? 'Guardando...' : 'Guardar'}</button></div>
         </form>
       </Modal>
@@ -359,20 +382,23 @@ export default function WFMConfigPage() {
       {/* Modal Demandas */}
       <Modal isOpen={isDemModalOpen} onClose={() => setIsDemModalOpen(false)} title={editDemId ? "Editar Tipo Demanda" : "Nuevo Tipo Demanda"}>
         <form onSubmit={handleSubmitDem} className="space-y-4">
-          <div><label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Demanda (Ej. Apoyo Interno)</label><input required type="text" className="w-full px-4 py-2 border rounded-xl" value={demFormData.nombre} onChange={e => setDemFormData({...demFormData, nombre: e.target.value})} /></div>
+          <div>
+            <label htmlFor="admin-cfg-dem-nombre" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Nombre de la Demanda (Ej. Apoyo Interno)</label>
+            <input id="admin-cfg-dem-nombre" name="dem_nombre" required type="text" className="w-full px-4 py-2 border rounded-xl" value={demFormData.nombre} onChange={e => setDemFormData({...demFormData, nombre: e.target.value})} />
+          </div>
           
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Alcance de la Configuración</label>
-            <select className="w-full px-4 py-2 border rounded-xl" value={demFormData.isGlobal ? 'global' : 'local'} onChange={e => setDemFormData({...demFormData, isGlobal: e.target.value === 'global'})}>
+            <label htmlFor="admin-cfg-dem-alcance" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Alcance de la Configuración</label>
+            <select id="admin-cfg-dem-alcance" name="dem_alcance" className="w-full px-4 py-2 border rounded-xl" value={demFormData.isGlobal ? 'global' : 'local'} onChange={e => setDemFormData({...demFormData, isGlobal: e.target.value === 'global'})}>
               <option value="global">Global (Todas las Sedes)</option>
               <option value="local">Local (Solo esta Sede)</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Estado Operativo (Disparador)</label>
+            <label htmlFor="admin-cfg-dem-disparador" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Estado Operativo (Disparador)</label>
             <p className="text-xs text-slate-500 mb-2">Estado que tomará la OATC y el agente al iniciar esta demanda.</p>
-            <input required type="text" className="w-full px-4 py-2 border rounded-xl uppercase" placeholder="Ej. TRABAJANDO, CORRIGIENDO, APOYANDO..." value={demFormData.estado_disparador} onChange={e => setDemFormData({...demFormData, estado_disparador: e.target.value.toUpperCase()})} />
+            <input id="admin-cfg-dem-disparador" name="dem_estado_disparador" required type="text" className="w-full px-4 py-2 border rounded-xl uppercase" placeholder="Ej. TRABAJANDO, CORRIGIENDO, APOYANDO..." value={demFormData.estado_disparador} onChange={e => setDemFormData({...demFormData, estado_disparador: e.target.value.toUpperCase()})} />
           </div>
           <div className="pt-4 flex justify-end gap-3"><button type="button" onClick={() => setIsDemModalOpen(false)} className="px-5 py-2 text-sm bg-white border rounded-xl hover:bg-slate-50">Cancelar</button><button disabled={isSaving} type="submit" className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700">{isSaving ? 'Guardando...' : 'Guardar'}</button></div>
         </form>
@@ -381,9 +407,20 @@ export default function WFMConfigPage() {
       {/* Modal Motivos */}
       <Modal isOpen={isMotModalOpen} onClose={() => setIsMotModalOpen(false)} title={editMotId ? "Editar Motivo" : "Nuevo Motivo"}>
         <form onSubmit={handleSubmitMot} className="space-y-4">
-          <div><label className="block text-sm font-medium text-slate-700 mb-1">Nombre del Motivo</label><input required type="text" className="w-full px-4 py-2 border rounded-xl" value={motFormData.motivo} onChange={e => setMotFormData({...motFormData, motivo: e.target.value})} /></div>
+          <div>
+            <label htmlFor="admin-cfg-mot-nombre" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Nombre del Motivo</label>
+            <input id="admin-cfg-mot-nombre" name="mot_motivo" required type="text" className="w-full px-4 py-2 border rounded-xl" value={motFormData.motivo} onChange={e => setMotFormData({...motFormData, motivo: e.target.value})} />
+          </div>
           
-          <div className="pt-2"><label className="flex items-center gap-3 cursor-pointer p-4 border rounded-xl hover:bg-slate-50"><input type="checkbox" className="w-5 h-5 text-indigo-600" checked={motFormData.activo} onChange={e => setMotFormData({...motFormData, activo: e.target.checked})} /><div><div className="font-bold text-slate-800 text-sm">Motivo Activo</div><div className="text-xs text-slate-500">Si está inactivo, no aparecerá en las opciones de Recepción.</div></div></label></div>
+          <div className="pt-2">
+            <label htmlFor="admin-cfg-mot-activo" className="flex items-center gap-3 cursor-pointer p-4 border rounded-xl hover:bg-slate-50">
+              <input id="admin-cfg-mot-activo" name="mot_activo" type="checkbox" className="w-5 h-5 text-indigo-600" checked={motFormData.activo} onChange={e => setMotFormData({...motFormData, activo: e.target.checked})} />
+              <div>
+                <div className="font-bold text-slate-800 text-sm">Motivo Activo</div>
+                <div className="text-xs text-slate-500">Si está inactivo, no aparecerá en las opciones de Recepción.</div>
+              </div>
+            </label>
+          </div>
           <div className="pt-4 flex justify-end gap-3"><button type="button" onClick={() => setIsMotModalOpen(false)} className="px-5 py-2 text-sm bg-white border rounded-xl hover:bg-slate-50">Cancelar</button><button disabled={isSaving} type="submit" className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700">{isSaving ? 'Guardando...' : 'Guardar'}</button></div>
         </form>
       </Modal>

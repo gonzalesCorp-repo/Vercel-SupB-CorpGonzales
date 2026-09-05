@@ -168,9 +168,9 @@ export function ModalConfiguracionBalanza({
 
         {/* Selector de Protocolo */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-slate-400 uppercase block">
+          <span className="text-[10px] font-bold text-slate-400 uppercase block">
             Seleccionar Protocolo de Hardware:
-          </label>
+          </span>
           <div className="grid grid-cols-2 gap-2">
             
             {/* BLE */}

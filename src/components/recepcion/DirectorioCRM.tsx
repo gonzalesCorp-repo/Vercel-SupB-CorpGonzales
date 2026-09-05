@@ -156,6 +156,9 @@ export function DirectorioCRM() {
         <form onSubmit={handleSearch} className="flex gap-3">
           <div className="relative flex-grow">
             <input 
+              id="directorio-crm-busqueda"
+              name="searchQuery"
+              aria-label="Buscar por nombre, DNI o celular"
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -265,8 +268,10 @@ export function DirectorioCRM() {
           )}
           
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nombre Completo *</label>
+            <label htmlFor="directorio-crm-nuevo-nombre" className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Nombre Completo *</label>
             <input 
+              id="directorio-crm-nuevo-nombre"
+              name="nombre"
               type="text" 
               value={nuevoCliente.nombre}
               onChange={e => setNuevoCliente({...nuevoCliente, nombre: e.target.value})}
@@ -278,8 +283,10 @@ export function DirectorioCRM() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">DNI</label>
+              <label htmlFor="directorio-crm-nuevo-dni" className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">DNI</label>
               <input 
+                id="directorio-crm-nuevo-dni"
+                name="dni"
                 type="text" 
                 value={nuevoCliente.dni || ''}
                 onChange={e => setNuevoCliente({...nuevoCliente, dni: e.target.value})}
@@ -288,8 +295,10 @@ export function DirectorioCRM() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Celular</label>
+              <label htmlFor="directorio-crm-nuevo-celular" className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Celular</label>
               <input 
+                id="directorio-crm-nuevo-celular"
+                name="celular"
                 type="tel" 
                 value={nuevoCliente.celular || ''}
                 onChange={e => setNuevoCliente({...nuevoCliente, celular: e.target.value})}

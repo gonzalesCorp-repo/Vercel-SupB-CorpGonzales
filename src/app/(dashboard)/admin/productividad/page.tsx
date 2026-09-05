@@ -151,9 +151,11 @@ export default function AdminProductividadPage() {
           <p className="text-slate-500 mt-2">Métricas globales y configuración de comisiones.</p>
         </div>
         <div className="flex items-center gap-3">
-          <input type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="border border-slate-200 rounded-lg p-2 text-sm outline-none font-bold text-slate-700" />
+          <label htmlFor="admin-prod-fecha-inicio" className="sr-only">Fecha Inicio</label>
+          <input id="admin-prod-fecha-inicio" name="fecha_inicio" type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="border border-slate-200 rounded-lg p-2 text-sm outline-none font-bold text-slate-700" />
           <span className="text-slate-400 font-bold">-</span>
-          <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="border border-slate-200 rounded-lg p-2 text-sm outline-none font-bold text-slate-700" />
+          <label htmlFor="admin-prod-fecha-fin" className="sr-only">Fecha Fin</label>
+          <input id="admin-prod-fecha-fin" name="fecha_fin" type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="border border-slate-200 rounded-lg p-2 text-sm outline-none font-bold text-slate-700" />
           
           <button onClick={openConfigModal} className="bg-slate-800 hover:bg-slate-900 text-white p-2 rounded-lg transition-colors ml-2" title="Configurar Comisiones">
             <Settings className="w-5 h-5" />
@@ -270,22 +272,22 @@ export default function AdminProductividadPage() {
 
               <form onSubmit={handleSaveComision} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6 flex items-end gap-4">
                 <div className="flex-1">
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Agente / Operativo</label>
-                  <select required value={selectedAgente} onChange={e => setSelectedAgente(e.target.value)} className="w-full border border-slate-200 p-2 rounded-lg outline-none text-sm font-medium">
+                  <label htmlFor="admin-prod-agente" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Agente / Operativo</label>
+                  <select id="admin-prod-agente" name="agente_id" required value={selectedAgente} onChange={e => setSelectedAgente(e.target.value)} className="w-full border border-slate-200 p-2 rounded-lg outline-none text-sm font-medium">
                     <option value="">Seleccione...</option>
                     {agentesList.map(a => <option key={a.id} value={a.id}>{a.nombre}</option>)}
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Servicio</label>
-                  <select required value={selectedBien} onChange={e => setSelectedBien(e.target.value)} className="w-full border border-slate-200 p-2 rounded-lg outline-none text-sm font-medium">
+                  <label htmlFor="admin-prod-servicio" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Servicio</label>
+                  <select id="admin-prod-servicio" name="servicio_id" required value={selectedBien} onChange={e => setSelectedBien(e.target.value)} className="w-full border border-slate-200 p-2 rounded-lg outline-none text-sm font-medium">
                     <option value="">Seleccione...</option>
                     {bienesList.map(b => <option key={b.id} value={b.id}>{b.nombre} (Base: {b.comision_porcentaje}%)</option>)}
                   </select>
                 </div>
                 <div className="w-32">
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Comisión (%)</label>
-                  <input type="number" required step="0.1" value={comisionValue} onChange={e => setComisionValue(e.target.value)} placeholder="Ej. 60" className="w-full border border-slate-200 p-2 rounded-lg outline-none text-sm font-bold text-indigo-600" />
+                  <label htmlFor="admin-prod-comision" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Comisión (%)</label>
+                  <input id="admin-prod-comision" name="comision_porcentaje" type="number" required step="0.1" value={comisionValue} onChange={e => setComisionValue(e.target.value)} placeholder="Ej. 60" className="w-full border border-slate-200 p-2 rounded-lg outline-none text-sm font-bold text-indigo-600" />
                 </div>
                 <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors h-[38px]">
                   Guardar

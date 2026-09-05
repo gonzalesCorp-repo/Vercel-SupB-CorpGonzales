@@ -57,7 +57,7 @@ export function ModalDerivarTicketCruzado({
           
           {/* Selector de Triple Destino */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Destino de la atención:</label>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Destino de la atención:</span>
             <div className="grid grid-cols-3 gap-1.5 bg-slate-50 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
               <button type="button"
                 onClick={() => setDestinoTicket('PROPIO')}
@@ -89,8 +89,10 @@ export function ModalDerivarTicketCruzado({
           {/* Selector de Colega si destino === COLEGA */}
           {destinoTicket === 'COLEGA' && (
             <div className="space-y-1 animate-in fade-in">
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Seleccionar Colega:</label>
+              <label htmlFor="derivar-ticket-colega" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Seleccionar Colega:</label>
               <select
+                id="derivar-ticket-colega"
+                name="colegaSeleccionadoId"
                 value={colegaSeleccionadoId}
                 onChange={(e) => {
                   setColegaSeleccionadoId(e.target.value);
@@ -112,7 +114,7 @@ export function ModalDerivarTicketCruzado({
 
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Servicio o Producto:</label>
+              <label htmlFor="derivar-ticket-item-nombre" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Servicio o Producto:</label>
               <button type="button"
                 onClick={onAbrirCatalogo}
                 className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 bg-indigo-950/60 px-2 py-0.5 rounded-lg border border-indigo-800/60 transition active:scale-95 cursor-pointer"
@@ -121,6 +123,8 @@ export function ModalDerivarTicketCruzado({
               </button>
             </div>
             <input
+              id="derivar-ticket-item-nombre"
+              name="nuevoItemNombre"
               type="text"
               required
               value={nuevoItemNombre}
@@ -132,8 +136,10 @@ export function ModalDerivarTicketCruzado({
 
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Tipo:</label>
+              <label htmlFor="derivar-ticket-item-tipo" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Tipo:</label>
               <select
+                id="derivar-ticket-item-tipo"
+                name="nuevoItemTipo"
                 value={nuevoItemTipo}
                 onChange={(e) => setNuevoItemTipo(e.target.value as any)}
                 className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none"
@@ -144,8 +150,10 @@ export function ModalDerivarTicketCruzado({
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Precio (S/):</label>
+              <label htmlFor="derivar-ticket-item-precio" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Precio (S/):</label>
               <input
+                id="derivar-ticket-item-precio"
+                name="nuevoItemPrecio"
                 type="number"
                 step="0.5"
                 value={nuevoItemPrecio}

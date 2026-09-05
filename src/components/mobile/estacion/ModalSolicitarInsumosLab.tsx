@@ -45,10 +45,12 @@ export function ModalSolicitarInsumosLab({
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">
+            <label htmlFor="insumos_formula_lab" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">
               Fórmula / Insumos Requeridos:
             </label>
             <textarea
+              id="insumos_formula_lab"
+              name="insumos_formula_lab"
               rows={3}
               value={insumoTexto}
               onChange={(e) => setInsumoTexto(e.target.value)}

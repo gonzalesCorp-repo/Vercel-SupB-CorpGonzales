@@ -103,6 +103,9 @@ export default function KudosModal({ isOpen, onClose, receiverId, receiverName, 
                     className="space-y-4"
                   >
                     <textarea
+                      id="kudos_message"
+                      name="kudos_message"
+                      aria-label="Mensaje de felicitación opcional"
                       placeholder="Escribe un mensaje (opcional)..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}

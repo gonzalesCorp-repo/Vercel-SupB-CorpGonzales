@@ -319,10 +319,12 @@ export default function MetricasPanel() {
 
             <form onSubmit={handleCrearLote} className="space-y-3.5">
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+                <label htmlFor="lote_subreceta" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
                   Sub-Receta / Bien Intermedio:
                 </label>
                 <select
+                  id="lote_subreceta"
+                  name="lote_subreceta"
                   value={subrecetaSeleccionadaId}
                   onChange={(e) => setSubrecetaSeleccionadaId(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-purple-500 font-semibold"
@@ -342,10 +344,12 @@ export default function MetricasPanel() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+                  <label htmlFor="lote_cantidad_producir" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
                     Cantidad a Producir (g):
                   </label>
                   <input
+                    id="lote_cantidad_producir"
+                    name="lote_cantidad_producir"
                     type="number"
                     value={cantidadProducirInput}
                     onChange={(e) => setCantidadProducirInput(Number(e.target.value))}
@@ -357,10 +361,12 @@ export default function MetricasPanel() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+                  <label htmlFor="lote_dias_vencimiento" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
                     Vida Útil (Días):
                   </label>
                   <input
+                    id="lote_dias_vencimiento"
+                    name="lote_dias_vencimiento"
                     type="number"
                     value={diasVencimientoInput}
                     onChange={(e) => setDiasVencimientoInput(Number(e.target.value))}
@@ -373,10 +379,12 @@ export default function MetricasPanel() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+                <label htmlFor="lote_area_produccion" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
                   Área de Producción BOH:
                 </label>
                 <select
+                  id="lote_area_produccion"
+                  name="lote_area_produccion"
                   value={areaProduccionInput}
                   onChange={(e) => setAreaProduccionInput(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-purple-500 font-semibold"

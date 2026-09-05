@@ -47,7 +47,7 @@ export function ModalTiempoExposicion({
 
           {/* Minutos Presets */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Tiempo de Pose (Minutos):</label>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Tiempo de Pose (Minutos):</span>
             <div className="grid grid-cols-4 gap-1.5">
               {[15, 20, 30, 45].map((m) => (
                 <button key={m}
@@ -67,8 +67,10 @@ export function ModalTiempoExposicion({
 
           {/* Motivo de Exposición */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Tratamiento / Motivo:</label>
+            <label htmlFor="motivo_tratamiento_pose" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Tratamiento / Motivo:</label>
             <select
+              id="motivo_tratamiento_pose"
+              name="motivo_tratamiento_pose"
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none"

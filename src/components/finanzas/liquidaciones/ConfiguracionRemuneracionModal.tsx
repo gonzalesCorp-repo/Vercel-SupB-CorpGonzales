@@ -106,9 +106,9 @@ export function ConfiguracionRemuneracionModal({
         
         {/* Tipo de Remuneración */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+          <span className="text-xs font-bold text-slate-500 uppercase block mb-1">
             Esquema de Remuneración
-          </label>
+          </span>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <button
               type="button"

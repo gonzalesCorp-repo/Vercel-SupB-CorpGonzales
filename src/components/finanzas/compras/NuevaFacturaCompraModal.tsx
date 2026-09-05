@@ -174,10 +174,12 @@ export function NuevaFacturaCompraModal({
           {/* Datos del Proveedor */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="nueva-compra-ruc" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 RUC Proveedor
               </label>
               <input
+                id="nueva-compra-ruc"
+                name="nuevaCompraRuc"
                 type="text"
                 required
                 maxLength={11}
@@ -189,10 +191,12 @@ export function NuevaFacturaCompraModal({
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="nueva-compra-razon-social" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Razón Social / Proveedor
               </label>
               <input
+                id="nueva-compra-razon-social"
+                name="nuevaCompraRazonSocial"
                 type="text"
                 required
                 placeholder="Ej. L'Oréal Perú S.A."
@@ -206,10 +210,12 @@ export function NuevaFacturaCompraModal({
           {/* Tipo de Comprobante, Serie y Número */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="nueva-compra-tipo-comprobante" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Tipo Comprobante
               </label>
               <select
+                id="nueva-compra-tipo-comprobante"
+                name="nuevaCompraTipoComprobante"
                 value={tipoComprobante}
                 onChange={(e) => setTipoComprobante(e.target.value as TipoComprobanteCompra)}
                 className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
@@ -222,10 +228,12 @@ export function NuevaFacturaCompraModal({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="nueva-compra-serie" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Serie
               </label>
               <input
+                id="nueva-compra-serie"
+                name="nuevaCompraSerie"
                 type="text"
                 required
                 placeholder="F001"
@@ -236,10 +244,12 @@ export function NuevaFacturaCompraModal({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="nueva-compra-numero" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Número
               </label>
               <input
+                id="nueva-compra-numero"
+                name="nuevaCompraNumero"
                 type="text"
                 required
                 placeholder="004821"
@@ -253,10 +263,12 @@ export function NuevaFacturaCompraModal({
           {/* Fechas y Condición de Pago */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-indigo-50/40 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/60">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="nueva-compra-fecha-emision" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Fecha Emisión
               </label>
               <input
+                id="nueva-compra-fecha-emision"
+                name="nuevaCompraFechaEmision"
                 type="date"
                 required
                 value={fechaEmision}
@@ -266,10 +278,12 @@ export function NuevaFacturaCompraModal({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="nueva-compra-condicion-pago" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Condición de Pago
               </label>
               <select
+                id="nueva-compra-condicion-pago"
+                name="nuevaCompraCondicionPago"
                 value={condicionPago}
                 onChange={(e) => setCondicionPago(e.target.value as CondicionPagoCompra)}
                 className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none cursor-pointer"
@@ -283,10 +297,12 @@ export function NuevaFacturaCompraModal({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">
+              <label htmlFor="nueva-compra-fecha-vencimiento" className="block text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">
                 Fecha Vencimiento
               </label>
               <input
+                id="nueva-compra-fecha-vencimiento"
+                name="nuevaCompraFechaVencimiento"
                 type="date"
                 required
                 disabled={condicionPago === 'CONTADO'}
@@ -300,10 +316,12 @@ export function NuevaFacturaCompraModal({
           {/* Desglose de Montos */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="nueva-compra-subtotal" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Subtotal (S/)
               </label>
               <input
+                id="nueva-compra-subtotal"
+                name="nuevaCompraSubtotal"
                 type="number"
                 step="0.01"
                 value={subtotal || ''}
@@ -314,10 +332,12 @@ export function NuevaFacturaCompraModal({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="nueva-compra-igv" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 IGV 18% (S/)
               </label>
               <input
+                id="nueva-compra-igv"
+                name="nuevaCompraIgv"
                 type="number"
                 step="0.01"
                 value={igv || ''}
@@ -332,10 +352,12 @@ export function NuevaFacturaCompraModal({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">
+              <label htmlFor="nueva-compra-total" className="block text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">
                 Total Factura (S/)
               </label>
               <input
+                id="nueva-compra-total"
+                name="nuevaCompraTotal"
                 type="number"
                 step="0.01"
                 required
@@ -350,10 +372,12 @@ export function NuevaFacturaCompraModal({
           {/* Si es al CONTADO, seleccionar cuenta de salida */}
           {condicionPago === 'CONTADO' && (
             <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-2">
-              <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block">
+              <label htmlFor="nueva-compra-cuenta-pago" className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block">
                 💵 Salida Inmediata de Dinero (Al Contado)
-              </span>
+              </label>
               <select
+                id="nueva-compra-cuenta-pago"
+                name="nuevaCompraCuentaPago"
                 value={cuentaPagoId}
                 onChange={(e) => setCuentaPagoId(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-emerald-300 dark:border-emerald-700 rounded-2xl text-xs font-bold text-slate-800 dark:text-white outline-none cursor-pointer"

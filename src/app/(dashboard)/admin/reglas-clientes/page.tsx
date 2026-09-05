@@ -388,10 +388,12 @@ export default function ReglasClientesAdminPage() {
               {/* Nombre & Slug */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
+                  <label htmlFor="regla_nombre" className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
                     Nombre de la Etiqueta *
                   </label>
                   <input
+                    id="regla_nombre"
+                    name="regla_nombre"
                     type="text"
                     required
                     value={nombre}
@@ -402,10 +404,12 @@ export default function ReglasClientesAdminPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
+                  <label htmlFor="regla_codigo_slug" className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
                     Código Slug
                   </label>
                   <input
+                    id="regla_codigo_slug"
+                    name="regla_codigo_slug"
                     type="text"
                     value={codigoSlug}
                     onChange={(e) => setCodigoSlug(e.target.value)}
@@ -417,10 +421,12 @@ export default function ReglasClientesAdminPage() {
 
               {/* Descripción */}
               <div>
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="regla_descripcion" className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
                   Descripción Operativa
                 </label>
                 <input
+                  id="regla_descripcion"
+                  name="regla_descripcion"
                   type="text"
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
@@ -432,9 +438,9 @@ export default function ReglasClientesAdminPage() {
               {/* Icono & Color Selector */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
+                  <span className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
                     Icono
-                  </label>
+                  </span>
                   <div className="flex flex-wrap gap-2">
                     {Object.keys(ICON_COMPONENTS).map((iconName) => {
                       const IconComp = ICON_COMPONENTS[iconName];
@@ -458,9 +464,9 @@ export default function ReglasClientesAdminPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
+                  <span className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">
                     Estilo de Color
-                  </label>
+                  </span>
                   <div className="space-y-1.5">
                     {COLOR_PRESETS.map((preset) => {
                       const isSel = colorBadge === preset.value;
@@ -496,10 +502,12 @@ export default function ReglasClientesAdminPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
+                    <label htmlFor="regla_min_visitas" className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
                       Mín. Visitas (Últimos 30 días)
                     </label>
                     <input
+                      id="regla_min_visitas"
+                      name="regla_min_visitas"
                       type="number"
                       min="0"
                       value={minVisitas30d}
@@ -510,10 +518,12 @@ export default function ReglasClientesAdminPage() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
+                    <label htmlFor="regla_min_consumo_total" className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
                       Mín. Consumo Total S/ (Últimos 30 días)
                     </label>
                     <input
+                      id="regla_min_consumo_total"
+                      name="regla_min_consumo_total"
                       type="number"
                       step="0.01"
                       min="0"
@@ -525,10 +535,12 @@ export default function ReglasClientesAdminPage() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
+                    <label htmlFor="regla_min_atenciones" className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
                       Mín. Atenciones Históricas Totales
                     </label>
                     <input
+                      id="regla_min_atenciones"
+                      name="regla_min_atenciones"
                       type="number"
                       min="0"
                       value={minAtencionesHistoricas}
@@ -539,10 +551,12 @@ export default function ReglasClientesAdminPage() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
+                    <label htmlFor="regla_min_compras_retail" className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
                       Mín. Compras Retail (Últimos 30 días)
                     </label>
                     <input
+                      id="regla_min_compras_retail"
+                      name="regla_min_compras_retail"
                       type="number"
                       min="0"
                       value={minComprasRetail30d}
@@ -553,10 +567,12 @@ export default function ReglasClientesAdminPage() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
+                    <label htmlFor="regla_min_consumo_retail" className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
                       Mín. Consumo Retail S/ (Últimos 30 días)
                     </label>
                     <input
+                      id="regla_min_consumo_retail"
+                      name="regla_min_consumo_retail"
                       type="number"
                       step="0.01"
                       min="0"
@@ -568,10 +584,12 @@ export default function ReglasClientesAdminPage() {
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
+                    <label htmlFor="regla_min_atenciones_staff" className="text-[11px] font-bold text-gray-600 dark:text-slate-300 block mb-1">
                       Mín. Atenciones con el Mismo Staff
                     </label>
                     <input
+                      id="regla_min_atenciones_staff"
+                      name="regla_min_atenciones_staff"
                       type="number"
                       min="0"
                       value={minAtencionesMismoStaff}
@@ -586,8 +604,10 @@ export default function ReglasClientesAdminPage() {
               {/* Prioridad y Estado */}
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Prioridad:</label>
+                  <label htmlFor="regla_prioridad" className="text-xs font-bold text-gray-700 dark:text-slate-300">Prioridad:</label>
                   <input
+                    id="regla_prioridad"
+                    name="regla_prioridad"
                     type="number"
                     min="1"
                     max="100"
@@ -597,8 +617,10 @@ export default function ReglasClientesAdminPage() {
                   />
                 </div>
 
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700 dark:text-slate-300">
+                <label htmlFor="regla_activo" className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700 dark:text-slate-300">
                   <input
+                    id="regla_activo"
+                    name="regla_activo"
                     type="checkbox"
                     checked={activo}
                     onChange={(e) => setActivo(e.target.checked)}

@@ -132,6 +132,8 @@ export default function RecursosPanel() {
         
         <div className="w-full max-w-xs">
           <input 
+            id="pin_portal_empleados"
+            name="pin_portal_empleados"
             type="password"
             maxLength={6}
             value={pin}
@@ -141,6 +143,7 @@ export default function RecursosPanel() {
             }}
             onKeyDown={(e) => e.key === 'Enter' && handleVerificarPin()}
             placeholder="••••"
+            aria-label="PIN operativo de acceso"
             className={`w-full text-center text-3xl tracking-[1em] p-4 rounded-xl border-2 outline-none transition-all ${
               pinError ? 'border-rose-500 bg-rose-50' : 'border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20'
             }`}

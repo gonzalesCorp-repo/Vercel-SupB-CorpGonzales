@@ -164,6 +164,9 @@ export default function RecepcionMobileView({ agente, sedeId }: { agente: any; s
             <div className="relative">
               <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500 dark:text-slate-400" />
               <input
+                id="busqueda_clientes_recepcion"
+                name="busqueda_clientes_recepcion"
+                aria-label="Buscar por nombre, DNI o celular"
                 type="text"
                 placeholder="Buscar por nombre, DNI o celular..."
                 value={busquedaCliente}

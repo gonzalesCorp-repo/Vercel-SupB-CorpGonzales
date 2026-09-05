@@ -207,6 +207,9 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
       <div className="relative">
         <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
         <input
+          id="busqueda_citas_tab_agenda"
+          name="busqueda_citas_tab_agenda"
+          aria-label="Buscar citas por cliente o servicio"
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -351,10 +354,12 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
               {tipoRegistro === 'CITA' ? (
                 <>
                   <div>
-                    <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                    <label htmlFor="tab_agenda_nombre_cliente" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
                       Nombre del Cliente *
                     </label>
                     <input
+                      id="tab_agenda_nombre_cliente"
+                      name="tab_agenda_nombre_cliente"
                       type="text"
                       required
                       value={nombreCliente}
@@ -365,10 +370,12 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                    <label htmlFor="tab_agenda_servicio_nombre" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
                       Servicio Solicitado
                     </label>
                     <input
+                      id="tab_agenda_servicio_nombre"
+                      name="tab_agenda_servicio_nombre"
                       type="text"
                       value={servicioNombre}
                       onChange={(e) => setServicioNombre(e.target.value)}
@@ -379,10 +386,12 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
                 </>
               ) : (
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                  <label htmlFor="tab_agenda_motivo_bloqueo" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
                     Motivo de Bloqueo
                   </label>
                   <select
+                    id="tab_agenda_motivo_bloqueo"
+                    name="tab_agenda_motivo_bloqueo"
                     value={motivoBloqueo}
                     onChange={(e) => setMotivoBloqueo(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl py-2.5 px-3.5 text-xs text-slate-900 dark:text-white font-medium focus:outline-none focus:border-amber-500"
@@ -396,10 +405,12 @@ export function TabAgenda({ agenteNombre, agenteRol, onBloqueoRegistrado }: TabA
               )}
 
               <div>
-                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                <label htmlFor="tab_agenda_hora_programada" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1">
                   Hora Programada
                 </label>
                 <input
+                  id="tab_agenda_hora_programada"
+                  name="tab_agenda_hora_programada"
                   type="text"
                   value={horaSeleccionada}
                   onChange={(e) => setHoraSeleccionada(e.target.value)}

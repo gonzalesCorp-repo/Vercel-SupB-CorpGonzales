@@ -61,10 +61,12 @@ export function NuevaCuentaModal({ isOpen, onClose, sedeId, onCuentaCreada }: Nu
         
         {/* Nombre de la Cuenta */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+          <label htmlFor="nueva-cuenta-nombre" className="text-xs font-bold text-slate-500 uppercase block mb-1">
             Nombre Identificador de la Cuenta
           </label>
           <input
+            id="nueva-cuenta-nombre"
+            name="nombre"
             type="text"
             required
             value={nombre}
@@ -77,8 +79,10 @@ export function NuevaCuentaModal({ isOpen, onClose, sedeId, onCuentaCreada }: Nu
         {/* Tipo de Cuenta & Entidad */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Tipo de Cuenta</label>
+            <label htmlFor="nueva-cuenta-tipo" className="text-xs font-bold text-slate-500 uppercase block mb-1">Tipo de Cuenta</label>
             <select
+              id="nueva-cuenta-tipo"
+              name="tipoCuenta"
               value={tipoCuenta}
               onChange={(e) => setTipoCuenta(e.target.value as TipoCuentaFinanciera)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -91,8 +95,10 @@ export function NuevaCuentaModal({ isOpen, onClose, sedeId, onCuentaCreada }: Nu
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Entidad / Banco</label>
+            <label htmlFor="nueva-cuenta-banco" className="text-xs font-bold text-slate-500 uppercase block mb-1">Entidad / Banco</label>
             <input
+              id="nueva-cuenta-banco"
+              name="bancoEntidad"
               type="text"
               required
               value={bancoEntidad}
@@ -105,10 +111,12 @@ export function NuevaCuentaModal({ isOpen, onClose, sedeId, onCuentaCreada }: Nu
 
         {/* Número de Cuenta / CCI */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+          <label htmlFor="nueva-cuenta-numero" className="text-xs font-bold text-slate-500 uppercase block mb-1">
             Número de Cuenta / Teléfono / CCI (Opcional)
           </label>
           <input
+            id="nueva-cuenta-numero"
+            name="numeroCuenta"
             type="text"
             value={numeroCuenta}
             onChange={(e) => setNumeroCuenta(e.target.value)}
@@ -120,8 +128,10 @@ export function NuevaCuentaModal({ isOpen, onClose, sedeId, onCuentaCreada }: Nu
         {/* Saldo Inicial & Moneda */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Saldo Inicial (S/.)</label>
+            <label htmlFor="nueva-cuenta-saldo" className="text-xs font-bold text-slate-500 uppercase block mb-1">Saldo Inicial (S/.)</label>
             <input
+              id="nueva-cuenta-saldo"
+              name="saldoInicial"
               type="number"
               step="0.01"
               min="0"
@@ -132,8 +142,10 @@ export function NuevaCuentaModal({ isOpen, onClose, sedeId, onCuentaCreada }: Nu
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Moneda</label>
+            <label htmlFor="nueva-cuenta-moneda" className="text-xs font-bold text-slate-500 uppercase block mb-1">Moneda</label>
             <select
+              id="nueva-cuenta-moneda"
+              name="moneda"
               value={moneda}
               onChange={(e) => setMoneda(e.target.value)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"

@@ -44,8 +44,10 @@ export function ModalRechazoAsesoria({
 
         <div className="space-y-3">
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Motivo del Rechazo:</label>
+            <label htmlFor="rechazo-asesoria-motivo" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Motivo del Rechazo:</label>
             <select
+              id="rechazo-asesoria-motivo"
+              name="motivoSeleccionado"
               value={motivoSeleccionado}
               onChange={(e) => setMotivoSeleccionado(e.target.value)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors rounded-xl text-xs text-white outline-none"
@@ -57,8 +59,10 @@ export function ModalRechazoAsesoria({
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Detalles adicionales (opcional):</label>
+            <label htmlFor="rechazo-asesoria-detalle" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block">Detalles adicionales (opcional):</label>
             <textarea
+              id="rechazo-asesoria-detalle"
+              name="detalleInput"
               value={detalleInput}
               onChange={(e) => setDetalleInput(e.target.value)}
               placeholder="ej. El cliente solo disponía de 30 min o el presupuesto superó los S/ 150..."

@@ -90,6 +90,9 @@ export function DataTable<T extends { id?: string | number }>({
         <div className="relative w-full sm:w-72">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
+            id="data-table-search-input"
+            name="dataTableSearch"
+            aria-label={searchPlaceholder || "Buscar registros..."}
             type="text"
             value={searchQuery}
             onChange={(e) => {

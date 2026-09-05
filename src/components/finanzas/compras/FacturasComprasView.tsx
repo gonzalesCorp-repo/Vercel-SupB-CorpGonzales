@@ -239,8 +239,11 @@ export function FacturasComprasView({
             <div className="relative flex-1 min-w-[220px]">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
+                id="filtro_facturas_compras"
+                name="filtro_facturas_compras"
                 type="text"
                 placeholder="Buscar por proveedor, RUC o serie-número..."
+                aria-label="Buscar por proveedor, RUC o serie-número"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 className="w-full pl-9 pr-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500"

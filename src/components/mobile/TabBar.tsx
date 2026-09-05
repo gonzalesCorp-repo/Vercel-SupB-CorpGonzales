@@ -135,8 +135,10 @@ export function TabBar({ clienteNombre }: TabBarProps) {
 
           {pedido.infusion > 0 && (
             <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80 animate-in fade-in">
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block mb-1 uppercase">Variedad:</label>
+              <label htmlFor="variedad_infusion_bar" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block mb-1 uppercase">Variedad:</label>
               <select
+                id="variedad_infusion_bar"
+                name="variedad_infusion_bar"
                 value={pedido.tipoInfusion}
                 onChange={(e) => setPedido({ ...pedido, tipoInfusion: e.target.value })}
                 className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-2 font-semibold outline-none"

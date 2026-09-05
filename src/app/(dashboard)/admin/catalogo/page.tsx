@@ -891,7 +891,7 @@ export default function CatalogoMasterPage() {
                 </div>
 
                 <div className="space-y-1 md:col-span-2">
-                  <label className="text-sm font-bold text-gray-700">Clasificación del Bien</label>
+                  <span className="text-sm font-bold text-gray-700">Clasificación del Bien</span>
                   <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                     <button
                       type="button"
@@ -977,10 +977,10 @@ export default function CatalogoMasterPage() {
                 {formData.tipo_catalogo === 'servicio' && (
                   <div className="space-y-3 md:col-span-2 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 animate-in fade-in">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-black text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-xs font-black text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
                         <Sparkles className="w-4 h-4 text-indigo-600" />
                         Seleccionar Molde / Plantilla de Servicio
-                      </label>
+                      </span>
                       <span className="text-[10px] text-indigo-600 font-bold bg-indigo-100 px-2 py-0.5 rounded-full">
                         1-Clic Preset
                       </span>
@@ -1012,10 +1012,12 @@ export default function CatalogoMasterPage() {
                     {/* Parámetros Operativos del Servicio */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-indigo-100/60">
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_serv_duracion_minutos" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-indigo-600" /> Duración (min)
                         </label>
                         <input
+                          id="form_serv_duracion_minutos"
+                          name="duracion_minutos"
                           type="number"
                           value={formData.duracion_minutos}
                           onChange={e => setFormData({...formData, duracion_minutos: e.target.value})}
@@ -1026,10 +1028,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_serv_estacion_sugerida" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Armchair className="w-3.5 h-3.5 text-indigo-600" /> Estación Sugerida
                         </label>
                         <select
+                          id="form_serv_estacion_sugerida"
+                          name="estacion_sugerida"
                           value={formData.estacion_sugerida}
                           onChange={e => setFormData({...formData, estacion_sugerida: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -1044,10 +1048,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_serv_comision_porcentaje" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Percent className="w-3.5 h-3.5 text-indigo-600" /> % Comisión Staff
                         </label>
                         <input
+                          id="form_serv_comision_porcentaje"
+                          name="comision_porcentaje"
                           type="number"
                           value={formData.comision_porcentaje}
                           onChange={e => setFormData({...formData, comision_porcentaje: e.target.value})}
@@ -1058,10 +1064,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_serv_puntos_vp_otorgados" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Award className="w-3.5 h-3.5 text-amber-500" /> Puntos VP (💎)
                         </label>
                         <input
+                          id="form_serv_puntos_vp_otorgados"
+                          name="puntos_vp_otorgados"
                           type="number"
                           value={formData.puntos_vp_otorgados}
                           onChange={e => setFormData({...formData, puntos_vp_otorgados: e.target.value})}
@@ -1074,8 +1082,10 @@ export default function CatalogoMasterPage() {
                     {/* Sub-Receta de Insumos en Taller */}
                     <div className="pt-3 border-t border-indigo-100/60 space-y-2">
                       <div className="flex items-center justify-between">
-                        <label className="flex items-center gap-2 text-xs font-bold text-gray-800 cursor-pointer">
+                        <label htmlFor="form_serv_requiere_insumos_taller" className="flex items-center gap-2 text-xs font-bold text-gray-800 cursor-pointer">
                           <input
+                            id="form_serv_requiere_insumos_taller"
+                            name="requiere_insumos_taller"
                             type="checkbox"
                             checked={formData.requiere_insumos_taller}
                             onChange={e => setFormData({...formData, requiere_insumos_taller: e.target.checked})}
@@ -1106,6 +1116,9 @@ export default function CatalogoMasterPage() {
                           {(formData.receta_insumos || []).map((ins: any, idx: number) => (
                             <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-indigo-100 text-xs">
                               <input
+                                id={'form_serv_insumo_nombre_' + idx}
+                                name={'serv_insumo_nombre_' + idx}
+                                aria-label="Nombre de insumo o químico"
                                 type="text"
                                 placeholder="Nombre de insumo o químico..."
                                 value={ins.nombre}
@@ -1118,6 +1131,9 @@ export default function CatalogoMasterPage() {
                               />
                               <div className="flex items-center gap-1 w-24">
                                 <input
+                                  id={'form_serv_insumo_gramos_' + idx}
+                                  name={'serv_insumo_gramos_' + idx}
+                                  aria-label="Gramos estimados de insumo"
                                   type="number"
                                   placeholder="Gramos"
                                   value={ins.gramos_estimados}
@@ -1152,10 +1168,10 @@ export default function CatalogoMasterPage() {
                 {formData.tipo_catalogo === 'insumo' && (
                   <div className="space-y-3 md:col-span-2 p-4 bg-amber-50/50 rounded-2xl border border-amber-200 animate-in fade-in">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-black text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-xs font-black text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
                         <Scale className="w-4 h-4 text-amber-600" />
                         Seleccionar Molde / Plantilla de Insumo Metrológico IoT
-                      </label>
+                      </span>
                       <span className="text-[10px] text-amber-800 font-bold bg-amber-100 px-2 py-0.5 rounded-full">
                         1-Clic Preset Taller
                       </span>
@@ -1187,10 +1203,12 @@ export default function CatalogoMasterPage() {
                     {/* Parámetros Metrológicos para Balanzas IoT */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-amber-200/60">
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ins_peso_neto_total_gramos" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Scale className="w-3.5 h-3.5 text-amber-600" /> Peso Neto (g/ml)
                         </label>
                         <input
+                          id="form_ins_peso_neto_total_gramos"
+                          name="peso_neto_total_gramos"
                           type="number"
                           value={formData.peso_neto_total_gramos}
                           onChange={e => setFormData({...formData, peso_neto_total_gramos: e.target.value})}
@@ -1201,10 +1219,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ins_peso_envase_tara_gramos" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Box className="w-3.5 h-3.5 text-amber-600" /> Tara Envase Vacío (g)
                         </label>
                         <input
+                          id="form_ins_peso_envase_tara_gramos"
+                          name="peso_envase_tara_gramos"
                           type="number"
                           value={formData.peso_envase_tara_gramos}
                           onChange={e => setFormData({...formData, peso_envase_tara_gramos: e.target.value})}
@@ -1215,10 +1235,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ins_factor_densidad" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Droplet className="w-3.5 h-3.5 text-amber-600" /> Densidad (g/ml)
                         </label>
                         <input
+                          id="form_ins_factor_densidad"
+                          name="factor_densidad"
                           type="number"
                           value={formData.factor_densidad}
                           onChange={e => setFormData({...formData, factor_densidad: e.target.value})}
@@ -1229,10 +1251,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ins_merma_tolerancia_porcentaje" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Activity className="w-3.5 h-3.5 text-amber-600" /> % Merma Tolerada
                         </label>
                         <input
+                          id="form_ins_merma_tolerancia_porcentaje"
+                          name="merma_tolerancia_porcentaje"
                           type="number"
                           value={formData.merma_tolerancia_porcentaje}
                           onChange={e => setFormData({...formData, merma_tolerancia_porcentaje: e.target.value})}
@@ -1244,10 +1268,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ins_stock_minimo_alerta_gramos" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Shield className="w-3.5 h-3.5 text-amber-600" /> Alerta Quiebre (g/ml)
                         </label>
                         <input
+                          id="form_ins_stock_minimo_alerta_gramos"
+                          name="stock_minimo_alerta_gramos"
                           type="number"
                           value={formData.stock_minimo_alerta_gramos}
                           onChange={e => setFormData({...formData, stock_minimo_alerta_gramos: e.target.value})}
@@ -1258,10 +1284,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ins_pao_meses" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-amber-600" /> PAO (Meses Abierto)
                         </label>
                         <input
+                          id="form_ins_pao_meses"
+                          name="pao_meses"
                           type="number"
                           value={formData.pao_meses}
                           onChange={e => setFormData({...formData, pao_meses: e.target.value})}
@@ -1271,10 +1299,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ins_unidad_medida" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Tag className="w-3.5 h-3.5 text-amber-600" /> Unidad Medida
                         </label>
                         <select
+                          id="form_ins_unidad_medida"
+                          name="unidad_medida"
                           value={formData.unidad_medida}
                           onChange={e => setFormData({...formData, unidad_medida: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -1287,10 +1317,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ins_area_produccion_boh" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Box className="w-3.5 h-3.5 text-amber-600" /> Centro de Uso BOH
                         </label>
                         <select
+                          id="form_ins_area_produccion_boh"
+                          name="area_produccion_boh"
                           value={formData.area_produccion_boh}
                           onChange={e => setFormData({...formData, area_produccion_boh: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -1322,10 +1354,10 @@ export default function CatalogoMasterPage() {
                 {formData.tipo_catalogo === 'retail' && (
                   <div className="space-y-3 md:col-span-2 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 animate-in fade-in">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-black text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-xs font-black text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
                         <Package className="w-4 h-4 text-emerald-600" />
                         Seleccionar Molde / Plantilla de Producto Retail
-                      </label>
+                      </span>
                       <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">
                         1-Clic Preset
                       </span>
@@ -1357,10 +1389,12 @@ export default function CatalogoMasterPage() {
                     {/* Parámetros Específicos de Producto Retail */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-emerald-100/60">
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ret_codigo_barras" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Barcode className="w-3.5 h-3.5 text-emerald-600" /> Código EAN / Barras
                         </label>
                         <input
+                          id="form_ret_codigo_barras"
+                          name="codigo_barras"
                           type="text"
                           placeholder="7751234567890"
                           value={formData.codigo_barras}
@@ -1370,10 +1404,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ret_stock_minimo_alerta" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Shield className="w-3.5 h-3.5 text-emerald-600" /> Stock Mín. Alerta
                         </label>
                         <input
+                          id="form_ret_stock_minimo_alerta"
+                          name="stock_minimo_alerta"
                           type="number"
                           value={formData.stock_minimo_alerta}
                           onChange={e => setFormData({...formData, stock_minimo_alerta: e.target.value})}
@@ -1383,10 +1419,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ret_comision_venta_porcentaje" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Percent className="w-3.5 h-3.5 text-emerald-600" /> % Com. Venta
                         </label>
                         <input
+                          id="form_ret_comision_venta_porcentaje"
+                          name="comision_venta_porcentaje"
                           type="number"
                           value={formData.comision_venta_porcentaje}
                           onChange={e => setFormData({...formData, comision_venta_porcentaje: e.target.value})}
@@ -1397,10 +1435,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_ret_puntos_vp_otorgados" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Award className="w-3.5 h-3.5 text-amber-500" /> Puntos VP (💎)
                         </label>
                         <input
+                          id="form_ret_puntos_vp_otorgados"
+                          name="puntos_vp_otorgados"
                           type="number"
                           value={formData.puntos_vp_otorgados}
                           onChange={e => setFormData({...formData, puntos_vp_otorgados: e.target.value})}
@@ -1416,10 +1456,10 @@ export default function CatalogoMasterPage() {
                 {formData.tipo_catalogo === 'equipo' && (
                   <div className="space-y-4 md:col-span-2 p-4 bg-cyan-50/50 rounded-2xl border border-cyan-200 animate-in fade-in">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-black text-cyan-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-xs font-black text-cyan-900 uppercase tracking-wider flex items-center gap-1.5">
                         <Cpu className="w-4 h-4 text-cyan-600" />
                         Seleccionar Molde / Plantilla de Equipo o Dispositivo IoT
-                      </label>
+                      </span>
                       <span className="text-[10px] text-cyan-800 font-bold bg-cyan-100 px-2 py-0.5 rounded-full">
                         1-Clic Preset Hardware
                       </span>
@@ -1451,10 +1491,12 @@ export default function CatalogoMasterPage() {
                     {/* Parámetros de Hardware y Conectividad */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-cyan-200/60">
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_eq_numero_serie" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Barcode className="w-3.5 h-3.5 text-cyan-600" /> N° de Serie
                         </label>
                         <input
+                          id="form_eq_numero_serie"
+                          name="numero_serie"
                           type="text"
                           placeholder="SN-998234-A"
                           value={formData.numero_serie}
@@ -1464,10 +1506,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_eq_protocolo_comunicacion" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Wifi className="w-3.5 h-3.5 text-cyan-600" /> Protocolo Conexión
                         </label>
                         <select
+                          id="form_eq_protocolo_comunicacion"
+                          name="protocolo_comunicacion"
                           value={formData.protocolo_comunicacion}
                           onChange={e => setFormData({...formData, protocolo_comunicacion: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -1481,10 +1525,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_eq_estacion_asignada" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Armchair className="w-3.5 h-3.5 text-cyan-600" /> Estación Asignada
                         </label>
                         <select
+                          id="form_eq_estacion_asignada"
+                          name="estacion_asignada"
                           value={formData.estacion_asignada}
                           onChange={e => setFormData({...formData, estacion_asignada: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -1500,10 +1546,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_eq_estado_operativo" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Activity className="w-3.5 h-3.5 text-cyan-600" /> Estado Operativo
                         </label>
                         <select
+                          id="form_eq_estado_operativo"
+                          name="estado_operativo"
                           value={formData.estado_operativo}
                           onChange={e => setFormData({...formData, estado_operativo: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -1532,8 +1580,10 @@ export default function CatalogoMasterPage() {
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-cyan-100">
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Vida Útil Base (Meses)</label>
+                          <label htmlFor="form_eq_vida_util_meses_base" className="block text-[10px] font-bold text-gray-600 mb-1">Vida Útil Base (Meses)</label>
                           <input
+                            id="form_eq_vida_util_meses_base"
+                            name="vida_util_meses_base"
                             type="number"
                             value={formData.vida_util_meses_base}
                             onChange={e => setFormData({...formData, vida_util_meses_base: e.target.value})}
@@ -1543,8 +1593,10 @@ export default function CatalogoMasterPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Extensión (+Meses)</label>
+                          <label htmlFor="form_eq_meses_extension_reparacion" className="block text-[10px] font-bold text-gray-600 mb-1">Extensión (+Meses)</label>
                           <input
+                            id="form_eq_meses_extension_reparacion"
+                            name="meses_extension_reparacion"
                             type="number"
                             value={formData.meses_extension_reparacion}
                             onChange={e => setFormData({...formData, meses_extension_reparacion: e.target.value})}
@@ -1554,8 +1606,10 @@ export default function CatalogoMasterPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Mantenimiento (Días)</label>
+                          <label htmlFor="form_eq_frecuencia_mantenimiento_dias" className="block text-[10px] font-bold text-gray-600 mb-1">Mantenimiento (Días)</label>
                           <input
+                            id="form_eq_frecuencia_mantenimiento_dias"
+                            name="frecuencia_mantenimiento_dias"
                             type="number"
                             value={formData.frecuencia_mantenimiento_dias}
                             onChange={e => setFormData({...formData, frecuencia_mantenimiento_dias: e.target.value})}
@@ -1565,8 +1619,10 @@ export default function CatalogoMasterPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Fecha Adquisición</label>
+                          <label htmlFor="form_eq_fecha_adquisicion" className="block text-[10px] font-bold text-gray-600 mb-1">Fecha Adquisición</label>
                           <input
+                            id="form_eq_fecha_adquisicion"
+                            name="fecha_adquisicion"
                             type="date"
                             value={formData.fecha_adquisicion}
                             onChange={e => setFormData({...formData, fecha_adquisicion: e.target.value})}
@@ -1617,6 +1673,9 @@ export default function CatalogoMasterPage() {
                         {(formData.historial_reparaciones_partes || []).map((rep: any, idx: number) => (
                           <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-cyan-100 text-xs">
                             <input
+                              id={'form_eq_rep_fecha_' + idx}
+                              name={'eq_rep_fecha_' + idx}
+                              aria-label="Fecha de reparación"
                               type="date"
                               value={rep.fecha}
                               onChange={e => {
@@ -1627,6 +1686,9 @@ export default function CatalogoMasterPage() {
                               className="w-28 px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-xs"
                             />
                             <input
+                              id={'form_eq_rep_desc_' + idx}
+                              name={'eq_rep_desc_' + idx}
+                              aria-label="Pieza cambiada o detalle técnico"
                               type="text"
                               placeholder="Pieza cambiada / detalle técnico..."
                               value={rep.descripcion}
@@ -1640,6 +1702,9 @@ export default function CatalogoMasterPage() {
                             <div className="flex items-center gap-1">
                               <span className="text-[10px] text-gray-400">Vida:</span>
                               <input
+                                id={'form_eq_rep_meses_' + idx}
+                                name={'eq_rep_meses_' + idx}
+                                aria-label="Meses agregados a la vida útil"
                                 type="number"
                                 placeholder="+Meses"
                                 value={rep.meses_agregados}
@@ -1683,10 +1748,10 @@ export default function CatalogoMasterPage() {
                 {formData.tipo_catalogo === 'mueble' && (
                   <div className="space-y-4 md:col-span-2 p-4 bg-purple-50/50 rounded-2xl border border-purple-200 animate-in fade-in">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-black text-purple-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-xs font-black text-purple-900 uppercase tracking-wider flex items-center gap-1.5">
                         <Armchair className="w-4 h-4 text-purple-600" />
                         Seleccionar Molde / Plantilla de Mobiliario y Estaciones
-                      </label>
+                      </span>
                       <span className="text-[10px] text-purple-800 font-bold bg-purple-100 px-2 py-0.5 rounded-full">
                         1-Clic Preset Mueble
                       </span>
@@ -1718,10 +1783,12 @@ export default function CatalogoMasterPage() {
                     {/* Parámetros Ergonómicos y Físicos de Mobiliario */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-purple-200/60">
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_mue_codigo_patrimonial_tag" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Tag className="w-3.5 h-3.5 text-purple-600" /> Tag Patrimonial
                         </label>
                         <input
+                          id="form_mue_codigo_patrimonial_tag"
+                          name="codigo_patrimonial_tag"
                           type="text"
                           placeholder="ACT-MUE-001"
                           value={formData.codigo_patrimonial_tag}
@@ -1731,10 +1798,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_mue_tipo_mueble" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Armchair className="w-3.5 h-3.5 text-purple-600" /> Tipo Mobiliario
                         </label>
                         <select
+                          id="form_mue_tipo_mueble"
+                          name="tipo_mueble"
                           value={formData.tipo_mueble}
                           onChange={e => setFormData({...formData, tipo_mueble: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -1749,10 +1818,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_mue_capacidad_carga_kg" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Scale className="w-3.5 h-3.5 text-purple-600" /> Carga Máx (kg)
                         </label>
                         <input
+                          id="form_mue_capacidad_carga_kg"
+                          name="capacidad_carga_kg"
                           type="number"
                           value={formData.capacidad_carga_kg}
                           onChange={e => setFormData({...formData, capacidad_carga_kg: e.target.value})}
@@ -1763,10 +1834,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_mue_grados_reclinacion" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Activity className="w-3.5 h-3.5 text-purple-600" /> Reclinación (°)
                         </label>
                         <input
+                          id="form_mue_grados_reclinacion"
+                          name="grados_reclinacion"
                           type="number"
                           value={formData.grados_reclinacion}
                           onChange={e => setFormData({...formData, grados_reclinacion: e.target.value})}
@@ -1777,10 +1850,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div className="md:col-span-2">
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_mue_material_tapiz" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Shield className="w-3.5 h-3.5 text-purple-600" /> Material de Tapiz / Estructura
                         </label>
                         <input
+                          id="form_mue_material_tapiz"
+                          name="material_tapiz"
                           type="text"
                           placeholder="Vinil Náutico Antimanchas / Cuero PU Hidrófugo"
                           value={formData.material_tapiz}
@@ -1790,10 +1865,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_mue_estacion_asignada" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Armchair className="w-3.5 h-3.5 text-purple-600" /> Estación Asignada
                         </label>
                         <select
+                          id="form_mue_estacion_asignada"
+                          name="estacion_asignada"
                           value={formData.estacion_asignada}
                           onChange={e => setFormData({...formData, estacion_asignada: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -1808,10 +1885,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_mue_estado_operativo" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Activity className="w-3.5 h-3.5 text-purple-600" /> Estado Físico
                         </label>
                         <select
+                          id="form_mue_estado_operativo"
+                          name="estado_operativo"
                           value={formData.estado_operativo}
                           onChange={e => setFormData({...formData, estado_operativo: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -1838,8 +1917,10 @@ export default function CatalogoMasterPage() {
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-purple-100">
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Vida Útil Base (Meses)</label>
+                          <label htmlFor="form_mue_vida_util_meses_base" className="block text-[10px] font-bold text-gray-600 mb-1">Vida Útil Base (Meses)</label>
                           <input
+                            id="form_mue_vida_util_meses_base"
+                            name="vida_util_meses_base"
                             type="number"
                             value={formData.vida_util_meses_base}
                             onChange={e => setFormData({...formData, vida_util_meses_base: e.target.value})}
@@ -1849,8 +1930,10 @@ export default function CatalogoMasterPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Extensión (+Meses)</label>
+                          <label htmlFor="form_mue_meses_extension_reparacion" className="block text-[10px] font-bold text-gray-600 mb-1">Extensión (+Meses)</label>
                           <input
+                            id="form_mue_meses_extension_reparacion"
+                            name="meses_extension_reparacion"
                             type="number"
                             value={formData.meses_extension_reparacion}
                             onChange={e => setFormData({...formData, meses_extension_reparacion: e.target.value})}
@@ -1860,8 +1943,10 @@ export default function CatalogoMasterPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Revisión (Días)</label>
+                          <label htmlFor="form_mue_frecuencia_mantenimiento_dias" className="block text-[10px] font-bold text-gray-600 mb-1">Revisión (Días)</label>
                           <input
+                            id="form_mue_frecuencia_mantenimiento_dias"
+                            name="frecuencia_mantenimiento_dias"
                             type="number"
                             value={formData.frecuencia_mantenimiento_dias}
                             onChange={e => setFormData({...formData, frecuencia_mantenimiento_dias: e.target.value})}
@@ -1871,8 +1956,10 @@ export default function CatalogoMasterPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Fecha Compra</label>
+                          <label htmlFor="form_mue_fecha_adquisicion" className="block text-[10px] font-bold text-gray-600 mb-1">Fecha Compra</label>
                           <input
+                            id="form_mue_fecha_adquisicion"
+                            name="fecha_adquisicion"
                             type="date"
                             value={formData.fecha_adquisicion}
                             onChange={e => setFormData({...formData, fecha_adquisicion: e.target.value})}
@@ -1923,6 +2010,9 @@ export default function CatalogoMasterPage() {
                         {(formData.historial_reparaciones_partes || []).map((rep: any, idx: number) => (
                           <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-purple-100 text-xs">
                             <input
+                              id={'form_mue_rep_fecha_' + idx}
+                              name={'mue_rep_fecha_' + idx}
+                              aria-label="Fecha de reparación"
                               type="date"
                               value={rep.fecha}
                               onChange={e => {
@@ -1933,6 +2023,9 @@ export default function CatalogoMasterPage() {
                               className="w-28 px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-xs"
                             />
                             <input
+                              id={'form_mue_rep_desc_' + idx}
+                              name={'mue_rep_desc_' + idx}
+                              aria-label="Detalle de retapizado o cambio hidráulico"
                               type="text"
                               placeholder="Detalle de retapizado o cambio hidráulico..."
                               value={rep.descripcion}
@@ -1946,6 +2039,9 @@ export default function CatalogoMasterPage() {
                             <div className="flex items-center gap-1">
                               <span className="text-[10px] text-gray-400">Vida:</span>
                               <input
+                                id={'form_mue_rep_meses_' + idx}
+                                name={'mue_rep_meses_' + idx}
+                                aria-label="Meses agregados por reparación"
                                 type="number"
                                 placeholder="+Meses"
                                 value={rep.meses_agregados}
@@ -1989,10 +2085,10 @@ export default function CatalogoMasterPage() {
                 {formData.tipo_catalogo === 'maquina' && (
                   <div className="space-y-4 md:col-span-2 p-4 bg-rose-50/50 rounded-2xl border border-rose-200 animate-in fade-in">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-black text-rose-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-xs font-black text-rose-900 uppercase tracking-wider flex items-center gap-1.5">
                         <Zap className="w-4 h-4 text-rose-600" />
                         Seleccionar Molde / Plantilla de Máquinas & Aparatología
-                      </label>
+                      </span>
                       <span className="text-[10px] text-rose-800 font-bold bg-rose-100 px-2 py-0.5 rounded-full">
                         1-Clic Preset Máquina
                       </span>
@@ -2024,10 +2120,12 @@ export default function CatalogoMasterPage() {
                     {/* Parámetros Electromecánicos & Horómetro */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-rose-200/60">
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_maq_codigo_patrimonial_tag" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Tag className="w-3.5 h-3.5 text-rose-600" /> Tag Patrimonial / Serie
                         </label>
                         <input
+                          id="form_maq_codigo_patrimonial_tag"
+                          name="codigo_patrimonial_tag"
                           type="text"
                           placeholder="ACT-MAQ-001"
                           value={formData.codigo_patrimonial_tag}
@@ -2037,10 +2135,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_maq_tipo_maquina" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Zap className="w-3.5 h-3.5 text-rose-600" /> Tipo de Máquina
                         </label>
                         <select
+                          id="form_maq_tipo_maquina"
+                          name="tipo_maquina"
                           value={formData.tipo_maquina}
                           onChange={e => setFormData({...formData, tipo_maquina: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -2054,10 +2154,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_maq_potencia_watts" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Zap className="w-3.5 h-3.5 text-rose-600" /> Potencia (Watts)
                         </label>
                         <input
+                          id="form_maq_potencia_watts"
+                          name="potencia_watts"
                           type="number"
                           value={formData.potencia_watts}
                           onChange={e => setFormData({...formData, potencia_watts: e.target.value})}
@@ -2068,10 +2170,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_maq_voltaje_operacion" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Activity className="w-3.5 h-3.5 text-rose-600" /> Voltaje
                         </label>
                         <select
+                          id="form_maq_voltaje_operacion"
+                          name="voltaje_operacion"
                           value={formData.voltaje_operacion}
                           onChange={e => setFormData({...formData, voltaje_operacion: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -2084,10 +2188,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_maq_horas_uso_acumuladas" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-rose-600" /> Horas Uso (Horómetro)
                         </label>
                         <input
+                          id="form_maq_horas_uso_acumuladas"
+                          name="horas_uso_acumuladas"
                           type="number"
                           value={formData.horas_uso_acumuladas}
                           onChange={e => setFormData({...formData, horas_uso_acumuladas: e.target.value})}
@@ -2097,10 +2203,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_maq_horas_vida_util_maxima" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Shield className="w-3.5 h-3.5 text-rose-600" /> Vida Máx (Horas)
                         </label>
                         <input
+                          id="form_maq_horas_vida_util_maxima"
+                          name="horas_vida_util_maxima"
                           type="number"
                           value={formData.horas_vida_util_maxima}
                           onChange={e => setFormData({...formData, horas_vida_util_maxima: e.target.value})}
@@ -2111,10 +2219,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_maq_frecuencia_overhaul_horas" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Wrench className="w-3.5 h-3.5 text-rose-600" /> Overhaul cada (Hrs)
                         </label>
                         <input
+                          id="form_maq_frecuencia_overhaul_horas"
+                          name="frecuencia_overhaul_horas"
                           type="number"
                           value={formData.frecuencia_overhaul_horas}
                           onChange={e => setFormData({...formData, frecuencia_overhaul_horas: e.target.value})}
@@ -2125,10 +2235,12 @@ export default function CatalogoMasterPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
+                        <label htmlFor="form_maq_estado_operativo" className="block text-[11px] font-bold text-gray-700 mb-1 flex items-center gap-1">
                           <Activity className="w-3.5 h-3.5 text-rose-600" /> Estado Operativo
                         </label>
                         <select
+                          id="form_maq_estado_operativo"
+                          name="estado_operativo"
                           value={formData.estado_operativo}
                           onChange={e => setFormData({...formData, estado_operativo: e.target.value})}
                           className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"
@@ -2156,8 +2268,10 @@ export default function CatalogoMasterPage() {
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-rose-100">
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Vida Útil Base (Meses)</label>
+                          <label htmlFor="form_maq_vida_util_meses_base" className="block text-[10px] font-bold text-gray-600 mb-1">Vida Útil Base (Meses)</label>
                           <input
+                            id="form_maq_vida_util_meses_base"
+                            name="vida_util_meses_base"
                             type="number"
                             value={formData.vida_util_meses_base}
                             onChange={e => setFormData({...formData, vida_util_meses_base: e.target.value})}
@@ -2167,8 +2281,10 @@ export default function CatalogoMasterPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Extensión (+Meses)</label>
+                          <label htmlFor="form_maq_meses_extension_reparacion" className="block text-[10px] font-bold text-gray-600 mb-1">Extensión (+Meses)</label>
                           <input
+                            id="form_maq_meses_extension_reparacion"
+                            name="meses_extension_reparacion"
                             type="number"
                             value={formData.meses_extension_reparacion}
                             onChange={e => setFormData({...formData, meses_extension_reparacion: e.target.value})}
@@ -2178,8 +2294,10 @@ export default function CatalogoMasterPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Revisión (Días)</label>
+                          <label htmlFor="form_maq_frecuencia_mantenimiento_dias" className="block text-[10px] font-bold text-gray-600 mb-1">Revisión (Días)</label>
                           <input
+                            id="form_maq_frecuencia_mantenimiento_dias"
+                            name="frecuencia_mantenimiento_dias"
                             type="number"
                             value={formData.frecuencia_mantenimiento_dias}
                             onChange={e => setFormData({...formData, frecuencia_mantenimiento_dias: e.target.value})}
@@ -2189,8 +2307,10 @@ export default function CatalogoMasterPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-600 mb-1">Fecha Compra</label>
+                          <label htmlFor="form_maq_fecha_adquisicion" className="block text-[10px] font-bold text-gray-600 mb-1">Fecha Compra</label>
                           <input
+                            id="form_maq_fecha_adquisicion"
+                            name="fecha_adquisicion"
                             type="date"
                             value={formData.fecha_adquisicion}
                             onChange={e => setFormData({...formData, fecha_adquisicion: e.target.value})}
@@ -2242,6 +2362,9 @@ export default function CatalogoMasterPage() {
                         {(formData.historial_reparaciones_partes || []).map((rep: any, idx: number) => (
                           <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-rose-100 text-xs">
                             <input
+                              id={'form_maq_rep_fecha_' + idx}
+                              name={'maq_rep_fecha_' + idx}
+                              aria-label="Fecha de overhaul o reparación"
                               type="date"
                               value={rep.fecha}
                               onChange={e => {
@@ -2252,6 +2375,9 @@ export default function CatalogoMasterPage() {
                               className="w-28 px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-xs"
                             />
                             <input
+                              id={'form_maq_rep_desc_' + idx}
+                              name={'maq_rep_desc_' + idx}
+                              aria-label="Detalle de overhaul o cambio de partes"
                               type="text"
                               placeholder="Detalle de overhaul / cambio de bomba o resistencias..."
                               value={rep.descripcion}
@@ -2265,6 +2391,9 @@ export default function CatalogoMasterPage() {
                             <div className="flex items-center gap-1">
                               <span className="text-[10px] text-gray-400">Vida:</span>
                               <input
+                                id={'form_maq_rep_meses_' + idx}
+                                name={'maq_rep_meses_' + idx}
+                                aria-label="Meses agregados por reparación"
                                 type="number"
                                 placeholder="+Meses"
                                 value={rep.meses_agregados}

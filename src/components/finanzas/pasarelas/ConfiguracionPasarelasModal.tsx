@@ -153,10 +153,12 @@ export function ConfiguracionPasarelasModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Nombre de la Pasarela */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="pasarela-config-nombre" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Nombre Identificador
                   </label>
                   <input
+                    id="pasarela-config-nombre"
+                    name="nombre"
                     type="text"
                     required
                     value={pasarelaEditando.nombre || ''}
@@ -168,10 +170,12 @@ export function ConfiguracionPasarelasModal({
 
                 {/* Medio de Pago */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="pasarela-config-medio-pago" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Medio de Pago Asociado
                   </label>
                   <select
+                    id="pasarela-config-medio-pago"
+                    name="medioPago"
                     value={pasarelaEditando.medio_pago || 'TARJETA_CREDITO'}
                     onChange={(e) => setPasarelaEditando({ ...pasarelaEditando, medio_pago: e.target.value as MedioPagoPasarela })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs text-slate-800 dark:text-white font-medium focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
@@ -186,11 +190,13 @@ export function ConfiguracionPasarelasModal({
 
                 {/* % Comisión */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="pasarela-config-comision" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Tasa de Comisión (%)
                   </label>
                   <div className="relative">
                     <input
+                      id="pasarela-config-comision"
+                      name="porcentajeComision"
                       type="number"
                       step="0.01"
                       min="0"
@@ -208,11 +214,13 @@ export function ConfiguracionPasarelasModal({
 
                 {/* Costo Fijo por Transacción */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="pasarela-config-costo-fijo" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Costo Fijo por Operación (S/)
                   </label>
                   <div className="relative">
                     <input
+                      id="pasarela-config-costo-fijo"
+                      name="costoFijo"
                       type="number"
                       step="0.01"
                       min="0"
@@ -230,8 +238,10 @@ export function ConfiguracionPasarelasModal({
 
               {/* Toggles de Impuestos y Liquidación */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60">
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label htmlFor="pasarela-config-aplica-igv" className="flex items-center gap-3 cursor-pointer">
                   <input
+                    id="pasarela-config-aplica-igv"
+                    name="aplicaIgvComision"
                     type="checkbox"
                     checked={pasarelaEditando.aplica_igv_comision ?? true}
                     onChange={(e) => setPasarelaEditando({ ...pasarelaEditando, aplica_igv_comision: e.target.checked })}
@@ -248,10 +258,12 @@ export function ConfiguracionPasarelasModal({
                 </label>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 dark:text-white mb-1">
+                  <label htmlFor="pasarela-config-tipo-acreditacion" className="block text-xs font-bold text-slate-800 dark:text-white mb-1">
                     Esquema de Acreditación
                   </label>
                   <select
+                    id="pasarela-config-tipo-acreditacion"
+                    name="tipoAcreditacion"
                     value={pasarelaEditando.tipo_acreditacion || 'EN_TRANSITO_LOTE'}
                     onChange={(e) => setPasarelaEditando({ ...pasarelaEditando, tipo_acreditacion: e.target.value as TipoAcreditacionPasarela })}
                     className="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white font-medium"
@@ -266,10 +278,12 @@ export function ConfiguracionPasarelasModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {pasarelaEditando.tipo_acreditacion === 'EN_TRANSITO_LOTE' && (
                   <div>
-                    <label className="block text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">
+                    <label htmlFor="pasarela-config-cuenta-puente" className="block text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">
                       Cuenta Puente (Fondos en Tránsito)
                     </label>
                     <select
+                      id="pasarela-config-cuenta-puente"
+                      name="cuentaPuenteId"
                       value={pasarelaEditando.cuenta_puente_id || ''}
                       onChange={(e) => setPasarelaEditando({ ...pasarelaEditando, cuenta_puente_id: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-amber-50/50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl text-xs text-slate-800 dark:text-white font-medium outline-none cursor-pointer"
@@ -287,10 +301,12 @@ export function ConfiguracionPasarelasModal({
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">
+                  <label htmlFor="pasarela-config-cuenta-destino" className="block text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">
                     Cuenta Bancaria Destino Final
                   </label>
                   <select
+                    id="pasarela-config-cuenta-destino"
+                    name="cuentaDestinoId"
                     required
                     value={pasarelaEditando.cuenta_destino_id || ''}
                     onChange={(e) => setPasarelaEditando({ ...pasarelaEditando, cuenta_destino_id: e.target.value })}

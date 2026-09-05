@@ -250,8 +250,10 @@ export default function ClientePerfilView({
         {editandoDatos ? (
           <form onSubmit={handleGuardarDatos} className="space-y-3">
             <div>
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">WhatsApp / Celular</label>
+              <label htmlFor="cliente-perfil-celular" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">WhatsApp / Celular</label>
               <input 
+                id="cliente-perfil-celular"
+                name="celular"
                 type="tel"
                 value={celular}
                 onChange={e => setCelular(e.target.value)}
@@ -261,8 +263,10 @@ export default function ClientePerfilView({
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Correo Electrónico</label>
+              <label htmlFor="cliente-perfil-email" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Correo Electrónico</label>
               <input 
+                id="cliente-perfil-email"
+                name="email"
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -272,8 +276,10 @@ export default function ClientePerfilView({
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Notas / Diagnóstico Capilar</label>
+              <label htmlFor="cliente-perfil-notas" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Notas / Diagnóstico Capilar</label>
               <textarea 
+                id="cliente-perfil-notas"
+                name="notas"
                 value={notas}
                 onChange={e => setNotas(e.target.value)}
                 placeholder="Preferencias de corte, productos favoritos, etc."

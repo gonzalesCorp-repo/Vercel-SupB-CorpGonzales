@@ -185,6 +185,9 @@ export default function MobileConfigPage() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">Descuenta pesaje real de tintes y químicos.</p>
                 </div>
                 <input
+                  id="config-laboratorio-gramos"
+                  name="moduloLaboratorioGramos"
+                  aria-label="Módulo Laboratorio (Gramos)"
                   type="checkbox"
                   checked={toggles.moduloLaboratorioGramos}
                   onChange={(e) => setToggles(prev => ({ ...prev, moduloLaboratorioGramos: e.target.checked }))}
@@ -199,6 +202,9 @@ export default function MobileConfigPage() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">Check-in táctil de clientes y staff.</p>
                 </div>
                 <input
+                  id="config-kiosko-autoservicio"
+                  name="kioskoAutoservicioHabilitado"
+                  aria-label="Tótem Kiosko Autoservicio"
                   type="checkbox"
                   checked={toggles.kioskoAutoservicioHabilitado}
                   onChange={(e) => setToggles(prev => ({ ...prev, kioskoAutoservicioHabilitado: e.target.checked }))}
@@ -216,6 +222,9 @@ export default function MobileConfigPage() {
                     <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono font-bold">Admin Theme</span>
                   </div>
                   <select
+                    id="config-kiosk-theme"
+                    name="kioskTheme"
+                    aria-label="Propuesta Visual del Tótem Kiosko"
                     value={toggles.kioskTheme || 'lumina'}
                     onChange={(e) => setToggles(prev => ({ ...prev, kioskTheme: e.target.value as any }))}
                     className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-amber-600 dark:text-amber-300 font-bold outline-none cursor-pointer"
@@ -235,6 +244,9 @@ export default function MobileConfigPage() {
               <div className="p-3 bg-slate-50 dark:bg-slate-950/70 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 transition-colors">
                 <p className="font-bold text-slate-900 dark:text-slate-200 text-xs">Modo Gestión de Estaciones</p>
                 <select
+                  id="config-modo-estaciones"
+                  name="modoEstaciones"
+                  aria-label="Modo Gestión de Estaciones"
                   value={toggles.modoEstaciones}
                   onChange={(e) => setToggles(prev => ({ ...prev, modoEstaciones: e.target.value as any }))}
                   className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400 font-bold outline-none cursor-pointer"
@@ -261,6 +273,9 @@ export default function MobileConfigPage() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">Entrada/salida autónoma con tag NFC fuera de turno.</p>
                 </div>
                 <input
+                  id="config-cron-auto-nfc"
+                  name="cronAutoAprobacionNfc"
+                  aria-label="Auto-Aprobación Web NFC"
                   type="checkbox"
                   checked={toggles.cronAutoAprobacionNfc ?? true}
                   onChange={(e) => setToggles(prev => ({ ...prev, cronAutoAprobacionNfc: e.target.checked }))}
@@ -275,6 +290,9 @@ export default function MobileConfigPage() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">Cierre nocturno de órdenes 100% pre-cobradas.</p>
                 </div>
                 <input
+                  id="config-cron-auto-cierre"
+                  name="cronAutoCierreOatcFueraHorario"
+                  aria-label="Auto-Cierre Pre-Cobradas"
                   type="checkbox"
                   checked={toggles.cronAutoCierreOatcFueraHorario ?? true}
                   onChange={(e) => setToggles(prev => ({ ...prev, cronAutoCierreOatcFueraHorario: e.target.checked }))}
@@ -289,6 +307,9 @@ export default function MobileConfigPage() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">Emisión física de comandas y comprobantes 80mm.</p>
                 </div>
                 <input
+                  id="config-auto-impresion"
+                  name="autoImpresionTermicaTickets"
+                  aria-label="Auto-Impresión Térmica"
                   type="checkbox"
                   checked={toggles.autoImpresionTermicaTickets ?? true}
                   onChange={(e) => setToggles(prev => ({ ...prev, autoImpresionTermicaTickets: e.target.checked }))}
@@ -303,6 +324,9 @@ export default function MobileConfigPage() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">Pesaje Bluetooth y comanda de taller automática.</p>
                 </div>
                 <input
+                  id="config-balanza-iot"
+                  name="balanzaIotLecturaExacta"
+                  aria-label="Balanza IoT + Ticket ODI"
                   type="checkbox"
                   checked={toggles.balanzaIotLecturaExacta ?? true}
                   onChange={(e) => setToggles(prev => ({ ...prev, balanzaIotLecturaExacta: e.target.checked }))}
@@ -329,6 +353,9 @@ export default function MobileConfigPage() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">Despliega Diagnóstico IA, Fichas Clínicas y V.AI en el menú.</p>
                 </div>
                 <input
+                  id="config-plugin-lumina"
+                  name="pluginLuminaHqActivo"
+                  aria-label="Habilitar LuminaHQ AI Suite"
                   type="checkbox"
                   checked={toggles.pluginLuminaHqActivo || false}
                   onChange={(e) => setToggles(prev => ({ ...prev, pluginLuminaHqActivo: e.target.checked }))}
@@ -349,8 +376,10 @@ export default function MobileConfigPage() {
 
               <div className="space-y-2.5">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">RUC Sede</label>
+                  <label htmlFor="config-sunat-ruc" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">RUC Sede</label>
                   <input
+                    id="config-sunat-ruc"
+                    name="sunatRuc"
                     type="text"
                     value={toggles.sunatRuc || ''}
                     onChange={(e) => setToggles(prev => ({ ...prev, sunatRuc: e.target.value }))}
@@ -360,8 +389,10 @@ export default function MobileConfigPage() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Razón Social</label>
+                  <label htmlFor="config-sunat-razon-social" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Razón Social</label>
                   <input
+                    id="config-sunat-razon-social"
+                    name="sunatRazonSocial"
                     type="text"
                     value={toggles.sunatRazonSocial || ''}
                     onChange={(e) => setToggles(prev => ({ ...prev, sunatRazonSocial: e.target.value }))}
@@ -372,8 +403,10 @@ export default function MobileConfigPage() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Serie Boleta</label>
+                    <label htmlFor="config-sunat-serie-boleta" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Serie Boleta</label>
                     <input
+                      id="config-sunat-serie-boleta"
+                      name="sunatSerieBoleta"
                       type="text"
                       value={toggles.sunatSerieBoleta || 'B001'}
                       onChange={(e) => setToggles(prev => ({ ...prev, sunatSerieBoleta: e.target.value }))}
@@ -381,8 +414,10 @@ export default function MobileConfigPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Serie Factura</label>
+                    <label htmlFor="config-sunat-serie-factura" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Serie Factura</label>
                     <input
+                      id="config-sunat-serie-factura"
+                      name="sunatSerieFactura"
                       type="text"
                       value={toggles.sunatSerieFactura || 'F001'}
                       onChange={(e) => setToggles(prev => ({ ...prev, sunatSerieFactura: e.target.value }))}

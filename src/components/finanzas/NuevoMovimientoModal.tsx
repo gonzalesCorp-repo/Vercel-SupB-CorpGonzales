@@ -138,10 +138,12 @@ export function NuevoMovimientoModal({
         {/* Cuenta & Categoría */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            <label htmlFor="nuevo-movimiento-cuenta" className="text-xs font-bold text-slate-500 uppercase block mb-1">
               {tipo === 'EGRESO' ? 'Cuenta de Origen (Debitar)' : 'Cuenta de Destino (Abonar)'}
             </label>
             <select
+              id="nuevo-movimiento-cuenta"
+              name="cuentaId"
               value={cuentaId}
               onChange={(e) => setCuentaId(e.target.value)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -155,8 +157,10 @@ export function NuevoMovimientoModal({
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Categoría</label>
+            <label htmlFor="nuevo-movimiento-categoria" className="text-xs font-bold text-slate-500 uppercase block mb-1">Categoría</label>
             <select
+              id="nuevo-movimiento-categoria"
+              name="categoria"
               value={categoria}
               onChange={(e) => setCategoria(e.target.value as CategoriaMovimientoTesoreria)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -182,8 +186,10 @@ export function NuevoMovimientoModal({
         {/* Monto & Beneficiario */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Monto (S/.)</label>
+            <label htmlFor="nuevo-movimiento-monto" className="text-xs font-bold text-slate-500 uppercase block mb-1">Monto (S/.)</label>
             <input
+              id="nuevo-movimiento-monto"
+              name="monto"
               type="number"
               step="0.01"
               min="0.10"
@@ -196,10 +202,12 @@ export function NuevoMovimientoModal({
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            <label htmlFor="nuevo-movimiento-beneficiario" className="text-xs font-bold text-slate-500 uppercase block mb-1">
               {tipo === 'EGRESO' ? 'Beneficiario / Proveedor' : 'Depositante / Origen'}
             </label>
             <input
+              id="nuevo-movimiento-beneficiario"
+              name="beneficiario"
               type="text"
               value={beneficiario}
               onChange={(e) => setBeneficiario(e.target.value)}
@@ -211,8 +219,10 @@ export function NuevoMovimientoModal({
 
         {/* Concepto / Descripción */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Concepto / Detalle del Gasto</label>
+          <label htmlFor="nuevo-movimiento-descripcion" className="text-xs font-bold text-slate-500 uppercase block mb-1">Concepto / Detalle del Gasto</label>
           <input
+            id="nuevo-movimiento-descripcion"
+            name="descripcion"
             type="text"
             required
             value={descripcion}
@@ -224,10 +234,12 @@ export function NuevoMovimientoModal({
 
         {/* N° Comprobante o Factura Física */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+          <label htmlFor="nuevo-movimiento-comprobante" className="text-xs font-bold text-slate-500 uppercase block mb-1">
             N° Boleta / Factura / Recibo Físico (Opcional)
           </label>
           <input
+            id="nuevo-movimiento-comprobante"
+            name="numeroComprobante"
             type="text"
             value={numeroComprobante}
             onChange={(e) => setNumeroComprobante(e.target.value)}
@@ -246,11 +258,12 @@ export function NuevoMovimientoModal({
           </div>
         )}
 
-        {/* Checkbox Impresión Térmica */}
         {tipo === 'EGRESO' && (
           <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+            <label htmlFor="nuevo-movimiento-imprimir" className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
               <input
+                id="nuevo-movimiento-imprimir"
+                name="imprimirTicket"
                 type="checkbox"
                 checked={imprimirTicket}
                 onChange={(e) => setImprimirTicket(e.target.checked)}
