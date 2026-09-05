@@ -137,10 +137,12 @@ export function PagarLiquidacionModal({
 
         {/* Selector de Cuenta de Pago */}
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+          <label htmlFor="pagar-liq-cuenta-id" className="text-xs font-bold text-slate-500 uppercase block mb-1">
             Cuenta de Pago (Sale el dinero)
           </label>
           <select
+            id="pagar-liq-cuenta-id"
+            name="cuenta_pago_id"
             value={cuentaId}
             onChange={(e) => setCuentaId(e.target.value)}
             className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -155,8 +157,10 @@ export function PagarLiquidacionModal({
 
         {/* Checkbox Impresión Térmica */}
         <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+          <label htmlFor="pagar-liq-imprimir-voucher" className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
             <input
+              id="pagar-liq-imprimir-voucher"
+              name="imprimir_voucher"
               type="checkbox"
               checked={imprimirVoucher}
               onChange={(e) => setImprimirVoucher(e.target.checked)}

@@ -127,15 +127,23 @@ export function LiquidacionesSoporteView() {
           </h3>
           
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400 font-semibold">Período:</span>
+            <label htmlFor="liquidaciones-soporte-periodo-inicio" className="text-slate-400 font-semibold">
+              Período:
+            </label>
             <input
+              id="liquidaciones-soporte-periodo-inicio"
+              name="periodo_inicio"
               type="date"
               value={periodoInicio}
               onChange={(e) => setPeriodoInicio(e.target.value)}
               className="p-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs outline-none"
             />
-            <span className="text-slate-400 font-semibold">al</span>
+            <label htmlFor="liquidaciones-soporte-periodo-fin" className="text-slate-400 font-semibold">
+              al
+            </label>
             <input
+              id="liquidaciones-soporte-periodo-fin"
+              name="periodo_fin"
               type="date"
               value={periodoFin}
               onChange={(e) => setPeriodoFin(e.target.value)}
@@ -191,8 +199,13 @@ export function LiquidacionesSoporteView() {
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <div className="relative flex-1 sm:w-60">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <label htmlFor="liquidaciones-soporte-busqueda" className="sr-only">
+                Buscar colaborador
+              </label>
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
+                id="liquidaciones-soporte-busqueda"
+                name="busqueda_soporte"
                 type="text"
                 value={filtroBusqueda}
                 onChange={(e) => setFiltroBusqueda(e.target.value)}

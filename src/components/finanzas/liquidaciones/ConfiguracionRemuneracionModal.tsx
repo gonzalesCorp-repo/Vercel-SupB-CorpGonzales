@@ -154,10 +154,12 @@ export function ConfiguracionRemuneracionModal({
         {/* Sueldo Base & Frecuencia */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            <label htmlFor="config-remun-sueldo-base" className="text-xs font-bold text-slate-500 uppercase block mb-1">
               Sueldo Base Acordado (S/.)
             </label>
             <input
+              id="config-remun-sueldo-base"
+              name="sueldo_base"
               type="number"
               step="any"
               min="0"
@@ -169,10 +171,12 @@ export function ConfiguracionRemuneracionModal({
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            <label htmlFor="config-remun-frecuencia-corte" className="text-xs font-bold text-slate-500 uppercase block mb-1">
               Frecuencia de Corte Negociada
             </label>
             <select
+              id="config-remun-frecuencia-corte"
+              name="frecuencia_corte"
               value={frecuenciaCorte}
               onChange={(e) => setFrecuenciaCorte(e.target.value as FrecuenciaCorte)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
@@ -189,11 +193,13 @@ export function ConfiguracionRemuneracionModal({
         {/* Porcentajes de Comisiones */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            <label htmlFor="config-remun-comision-servicios" className="text-xs font-bold text-slate-500 uppercase block mb-1">
               % Comisión Servicios
             </label>
             <div className="relative">
               <input
+                id="config-remun-comision-servicios"
+                name="comision_servicios"
                 type="number"
                 step="any"
                 min="0"
@@ -208,11 +214,13 @@ export function ConfiguracionRemuneracionModal({
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+            <label htmlFor="config-remun-comision-productos" className="text-xs font-bold text-slate-500 uppercase block mb-1">
               % Comisión Productos Retail
             </label>
             <div className="relative">
               <input
+                id="config-remun-comision-productos"
+                name="comision_productos"
                 type="number"
                 step="any"
                 min="0"
@@ -242,8 +250,10 @@ export function ConfiguracionRemuneracionModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">Banco / App</label>
+              <label htmlFor="config-remun-banco" className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">Banco / App</label>
               <input
+                id="config-remun-banco"
+                name="banco_preferido"
                 type="text"
                 value={bancoPreferido}
                 onChange={(e) => setBancoPreferido(e.target.value)}
@@ -253,8 +263,10 @@ export function ConfiguracionRemuneracionModal({
             </div>
 
             <div className="sm:col-span-2">
-              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">N° Cuenta / CCI / Celular Yape</label>
+              <label htmlFor="config-remun-cuenta-bancaria" className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">N° Cuenta / CCI / Celular Yape</label>
               <input
+                id="config-remun-cuenta-bancaria"
+                name="cuenta_bancaria"
                 type="text"
                 value={cuentaBancaria}
                 onChange={(e) => setCuentaBancaria(e.target.value)}
@@ -267,8 +279,10 @@ export function ConfiguracionRemuneracionModal({
 
         {/* Permite Solicitud Manual en Móvil */}
         <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+          <label htmlFor="config-remun-permite-solicitud" className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
             <input
+              id="config-remun-permite-solicitud"
+              name="permite_solicitud_manual"
               type="checkbox"
               checked={permiteSolicitudManual}
               onChange={(e) => setPermiteSolicitudManual(e.target.checked)}

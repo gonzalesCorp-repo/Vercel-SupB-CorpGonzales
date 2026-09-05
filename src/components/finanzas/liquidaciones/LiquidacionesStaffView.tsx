@@ -161,15 +161,23 @@ export function LiquidacionesStaffView() {
           
           {/* Selector de Rango de Fechas */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400 font-semibold">Desde:</span>
+            <label htmlFor="liquidaciones-staff-periodo-inicio" className="text-slate-400 font-semibold">
+              Desde:
+            </label>
             <input
+              id="liquidaciones-staff-periodo-inicio"
+              name="periodo_inicio"
               type="date"
               value={periodoInicio}
               onChange={(e) => setPeriodoInicio(e.target.value)}
               className="p-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs outline-none"
             />
-            <span className="text-slate-400 font-semibold">Hasta:</span>
+            <label htmlFor="liquidaciones-staff-periodo-fin" className="text-slate-400 font-semibold">
+              Hasta:
+            </label>
             <input
+              id="liquidaciones-staff-periodo-fin"
+              name="periodo_fin"
               type="date"
               value={periodoFin}
               onChange={(e) => setPeriodoFin(e.target.value)}
@@ -226,8 +234,13 @@ export function LiquidacionesStaffView() {
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <div className="relative flex-1 sm:w-60">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <label htmlFor="liquidaciones-staff-busqueda" className="sr-only">
+                Buscar especialista
+              </label>
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
+                id="liquidaciones-staff-busqueda"
+                name="busqueda_staff"
                 type="text"
                 value={filtroBusqueda}
                 onChange={(e) => setFiltroBusqueda(e.target.value)}
@@ -236,7 +249,12 @@ export function LiquidacionesStaffView() {
               />
             </div>
 
+            <label htmlFor="liquidaciones-staff-filtro-estado" className="sr-only">
+              Filtrar por estado
+            </label>
             <select
+              id="liquidaciones-staff-filtro-estado"
+              name="filtro_estado"
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
               className="p-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none"
