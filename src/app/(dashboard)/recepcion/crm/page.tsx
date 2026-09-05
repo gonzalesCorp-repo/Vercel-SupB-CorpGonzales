@@ -186,8 +186,13 @@ export default function DirectorioCRMPage() {
         
         {/* Buscador de Texto */}
         <div className="relative">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <label htmlFor="crm-clientes-busqueda" className="sr-only">
+            Buscar por nombre, DNI o teléfono
+          </label>
+          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
+            id="crm-clientes-busqueda"
+            name="busqueda"
             type="text"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
@@ -198,8 +203,12 @@ export default function DirectorioCRMPage() {
 
         {/* Filtro por Cartera de Staff */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-gray-500 dark:text-slate-400 shrink-0">Cartera de:</span>
+          <label htmlFor="crm-filtro-staff" className="text-xs font-bold text-gray-500 dark:text-slate-400 shrink-0">
+            Cartera de:
+          </label>
           <select
+            id="crm-filtro-staff"
+            name="staff_filtro"
             value={staffFiltro}
             onChange={(e) => setStaffFiltro(e.target.value)}
             className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500"
@@ -213,8 +222,12 @@ export default function DirectorioCRMPage() {
 
         {/* Filtro por Insignia */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-gray-500 dark:text-slate-400 shrink-0">Insignia:</span>
+          <label htmlFor="crm-filtro-insignia" className="text-xs font-bold text-gray-500 dark:text-slate-400 shrink-0">
+            Insignia:
+          </label>
           <select
+            id="crm-filtro-insignia"
+            name="insignia_filtro"
             value={etiquetaFiltro}
             onChange={(e) => setEtiquetaFiltro(e.target.value)}
             className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500"
@@ -380,6 +393,7 @@ export default function DirectorioCRMPage() {
         {/* Paginación Reactiva */}
         {!loading && clientesFiltrados.length > 0 && (
           <TablePagination
+            id="crm-clientes-pagination"
             currentPage={currentPage}
             totalItems={clientesFiltrados.length}
             pageSize={pageSize}
