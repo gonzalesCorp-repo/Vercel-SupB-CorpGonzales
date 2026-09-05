@@ -127,42 +127,42 @@ export default function ComprobantesPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Desde</label>
-            <input type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500" />
+            <label htmlFor="comprobantes-filtro-fecha-inicio" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Desde</label>
+            <input id="comprobantes-filtro-fecha-inicio" name="fecha_inicio" type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Hasta</label>
-            <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500" />
+            <label htmlFor="comprobantes-filtro-fecha-fin" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Hasta</label>
+            <input id="comprobantes-filtro-fecha-fin" name="fecha_fin" type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Estado</label>
-            <select value={estadoFiltro} onChange={e => setEstadoFiltro(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500">
+            <label htmlFor="comprobantes-filtro-estado" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Estado</label>
+            <select id="comprobantes-filtro-estado" name="filtro_estado" value={estadoFiltro} onChange={e => setEstadoFiltro(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500">
               <option value="TODOS">Todos</option>
               <option value="EMITIDO">Emitidos</option>
               <option value="ANULADO">Anulados</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Cliente</label>
+            <label htmlFor="comprobantes-filtro-cliente" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Cliente</label>
             <div className="relative">
               <Search className="w-4 h-4 absolute left-2 top-2.5 text-slate-400" />
-              <input type="text" placeholder="Buscar cliente..." value={searchCliente} onChange={e => setSearchCliente(e.target.value)} className="w-full pl-8 pr-2 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-500" />
+              <input id="comprobantes-filtro-cliente" name="filtro_cliente" type="text" placeholder="Buscar cliente..." value={searchCliente} onChange={e => setSearchCliente(e.target.value)} className="w-full pl-8 pr-2 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-500" />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Documento</label>
-            <input type="text" placeholder="Ej. B001" value={searchDoc} onChange={e => setSearchDoc(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500" />
+            <label htmlFor="comprobantes-filtro-doc" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Documento</label>
+            <input id="comprobantes-filtro-doc" name="filtro_documento" type="text" placeholder="Ej. B001" value={searchDoc} onChange={e => setSearchDoc(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Emisor</label>
-            <select value={filtroEmisor} onChange={e => setFiltroEmisor(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500">
+            <label htmlFor="comprobantes-filtro-emisor" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Emisor</label>
+            <select id="comprobantes-filtro-emisor" name="filtro_emisor" value={filtroEmisor} onChange={e => setFiltroEmisor(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500">
               <option value="">Todos los Emisores</option>
               {emisoresList.map(e => <option key={e.id} value={e.id}>{e.razon_social}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Operativo / Cajero</label>
-            <select value={filtroOperativo} onChange={e => setFiltroOperativo(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500">
+            <label htmlFor="comprobantes-filtro-operativo" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Operativo / Cajero</label>
+            <select id="comprobantes-filtro-operativo" name="filtro_operativo" value={filtroOperativo} onChange={e => setFiltroOperativo(e.target.value)} className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500">
               <option value="">Todos los Cajeros</option>
               {operativosList.map(a => <option key={a.id} value={a.id}>{a.nombre}</option>)}
             </select>
