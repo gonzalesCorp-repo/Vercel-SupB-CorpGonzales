@@ -89,8 +89,11 @@ export default function TransferenciaPanel() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
           <div className="relative w-96">
+            <label htmlFor="transferencia-lab-buscar" className="sr-only">Buscar por Nombre, SKU o Tipo</label>
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
+              id="transferencia-lab-buscar"
+              name="busqueda_transferencia"
               type="text" 
               placeholder="Buscar por Nombre, SKU o Tipo..." 
               value={search}
@@ -146,23 +149,31 @@ export default function TransferenciaPanel() {
                   </div>
 
                   <div className="pt-4 border-t border-slate-100">
-                    <label className="text-xs font-medium text-slate-600 mb-2 block">Cantidad a trasladar</label>
+                    <label htmlFor={`mover-cant-${item.id}`} className="text-xs font-medium text-slate-600 mb-2 block cursor-pointer">
+                      Cantidad a trasladar
+                    </label>
                     <div className="flex items-center gap-2">
                       <input 
+                        id={`mover-range-${item.id}`}
+                        name={`rango_mover_${item.id}`}
                         type="range"
                         min="0"
                         max={item.stock}
                         value={item.cantidad_mover}
                         onChange={(e) => updateCantMover(item.id, Number(e.target.value))}
                         className="flex-1 accent-indigo-600"
+                        aria-label={`Rango de cantidad a trasladar de ${item.bienes?.nombre || 'insumo'}`}
                       />
                       <input 
+                        id={`mover-cant-${item.id}`}
+                        name={`cantidad_mover_${item.id}`}
                         type="number" 
                         min="0"
                         max={item.stock}
                         value={item.cantidad_mover}
                         onChange={(e) => updateCantMover(item.id, Number(e.target.value))}
                         className="w-16 border border-slate-200 rounded-lg px-2 py-1.5 text-center text-sm font-semibold text-indigo-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none bg-slate-50"
+                        aria-label={`Cantidad a trasladar de ${item.bienes?.nombre || 'insumo'}`}
                       />
                     </div>
                   </div>
