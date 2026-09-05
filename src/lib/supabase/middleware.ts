@@ -41,22 +41,30 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Define public routes (Login, Home, Portal Cliente QR y Tótem Kiosko)
+  // Define public routes (Login, Home, Portal Cliente QR, Tótem Kiosko, Manifest PWA, Branding e Iconos)
   const isPublicRoute = 
     request.nextUrl.pathname === '/login' || 
     request.nextUrl.pathname === '/' ||
     request.nextUrl.pathname.startsWith('/cliente') ||
-    request.nextUrl.pathname.startsWith('/kiosk');
+    request.nextUrl.pathname.startsWith('/kiosk') ||
+    request.nextUrl.pathname.startsWith('/api/manifest') ||
+    request.nextUrl.pathname.startsWith('/api/branding') ||
+    request.nextUrl.pathname.startsWith('/api/cron');
 
   // Protect all private routes
   if (!user && !isPublicRoute) {
+    // Para endpoints de API, devolver JSON 401 en lugar de redirigir a HTML /login
+    if (request.nextUrl.pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'No autorizado. Se requiere sesión activa.' }, { status: 401 });
+    }
+
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // If user is logged in and tries to go to login, redirect to dashboard
-  if (user && isPublicRoute) {
+  // If user is logged in and tries to go to login or home, redirect to dashboard
+  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/')) {
     const url = request.nextUrl.clone()
     url.pathname = '/recepcion'
     return NextResponse.redirect(url)

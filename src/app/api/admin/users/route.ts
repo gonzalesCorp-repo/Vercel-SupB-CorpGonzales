@@ -12,23 +12,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No autorizado. Se requiere sesión activa.' }, { status: 401 });
     }
 
-    // Verificar si el usuario solicitante tiene rol de ADMIN o SUPERADMIN
-    const { data: callerAgente } = await supabaseServer
-      .from('agentes')
-      .select('rol, estado')
-      .eq('id', user.id)
-      .single();
-
-    const esAdmin = callerAgente?.rol === 'SUPERADMIN' || callerAgente?.rol === 'ADMIN';
-    if (!esAdmin) {
-      return NextResponse.json({ error: 'Acceso denegado. Se requiere rol de Administrador.' }, { status: 403 });
-    }
-
-    // Inicializar cliente con service role para la creación del usuario en Auth
+    // Inicializar cliente con service role
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+
+    // Resolución híbrida del agente: por user.id (Auth) o por user.email
+    let callerAgente: { id: string; rol: string } | null = null;
+    const { data: agById } = await supabaseAdmin
+      .from('agentes')
+      .select('id, rol')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (agById) {
+      callerAgente = agById;
+    } else if (user.email) {
+      const { data: agByEmail } = await supabaseAdmin
+        .from('agentes')
+        .select('id, rol')
+        .ilike('email', user.email.trim())
+        .maybeSingle();
+      if (agByEmail) {
+        callerAgente = agByEmail;
+      }
+    }
+
+    const esAdmin = callerAgente?.rol === 'SUPERADMIN' || callerAgente?.rol === 'ADMIN';
+    if (!esAdmin || !callerAgente) {
+      return NextResponse.json({ error: 'Acceso denegado. Se requiere rol de Administrador.' }, { status: 403 });
+    }
 
     const body = await request.json();
     const { 
@@ -46,7 +60,7 @@ export async function POST(request: Request) {
       const { data: callerSedes } = await supabaseAdmin
         .from('sedes_usuarios')
         .select('sede_id')
-        .eq('agente_id', user.id);
+        .eq('agente_id', callerAgente.id);
       
       const permittedSedeIds = (callerSedes || []).map((s: any) => s.sede_id);
       const sedesValidas = (sedes_ids || []).every((sid: string) => permittedSedeIds.includes(sid));

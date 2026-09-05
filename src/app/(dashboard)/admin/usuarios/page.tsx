@@ -90,11 +90,17 @@ export default function UsuariosPage() {
 
       if (userRol !== 'SUPERADMIN') {
         const { data: { user } } = await supabase.auth.getUser();
-        let agenteId = user?.id;
+        let agenteId: string | undefined = undefined;
 
-        if (!agenteId && userEmail) {
-          const { data: ag } = await supabase.from('agentes').select('id').eq('email', userEmail).maybeSingle();
-          if (ag?.id) agenteId = ag.id;
+        if (user?.id) {
+          const { data: agById } = await supabase.from('agentes').select('id').eq('id', user.id).maybeSingle();
+          if (agById?.id) agenteId = agById.id;
+        }
+
+        const emailToSearch = user?.email || userEmail;
+        if (!agenteId && emailToSearch) {
+          const { data: agByEmail } = await supabase.from('agentes').select('id').ilike('email', emailToSearch.trim()).maybeSingle();
+          if (agByEmail?.id) agenteId = agByEmail.id;
         }
 
         if (agenteId) {

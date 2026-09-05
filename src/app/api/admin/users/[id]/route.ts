@@ -12,21 +12,36 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'No autorizado. Se requiere sesión activa.' }, { status: 401 });
     }
 
-    const { data: callerAgente } = await supabaseServer
-      .from('agentes')
-      .select('rol')
-      .eq('id', user.id)
-      .single();
-
-    const esAdmin = callerAgente?.rol === 'SUPERADMIN' || callerAgente?.rol === 'ADMIN';
-    if (!esAdmin) {
-      return NextResponse.json({ error: 'Acceso denegado. Se requiere rol de Administrador.' }, { status: 403 });
-    }
-
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+
+    // Resolución híbrida del agente: por user.id (Auth) o por user.email
+    let callerAgente: { id: string; rol: string } | null = null;
+    const { data: agById } = await supabaseAdmin
+      .from('agentes')
+      .select('id, rol')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (agById) {
+      callerAgente = agById;
+    } else if (user.email) {
+      const { data: agByEmail } = await supabaseAdmin
+        .from('agentes')
+        .select('id, rol')
+        .ilike('email', user.email.trim())
+        .maybeSingle();
+      if (agByEmail) {
+        callerAgente = agByEmail;
+      }
+    }
+
+    const esAdmin = callerAgente?.rol === 'SUPERADMIN' || callerAgente?.rol === 'ADMIN';
+    if (!esAdmin || !callerAgente) {
+      return NextResponse.json({ error: 'Acceso denegado. Se requiere rol de Administrador.' }, { status: 403 });
+    }
 
     const body = await request.json();
     const { 
@@ -42,7 +57,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     // 0.1 Validación de seguridad para Administradores locales (ADMIN)
-    if (callerAgente?.rol === 'ADMIN') {
+    if (callerAgente.rol === 'ADMIN') {
       const { data: targetUser } = await supabaseAdmin
         .from('agentes')
         .select('rol, sedes_usuarios(sede_id)')
@@ -63,11 +78,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         return NextResponse.json({ error: 'Acceso denegado. Un Administrador local no puede promover usuarios a Administrador.' }, { status: 403 });
       }
 
-      // Obtener sedes autorizadas del caller
+      // Obtener sedes autorizadas del caller utilizando su id canónico de agentes
       const { data: callerSedes } = await supabaseAdmin
         .from('sedes_usuarios')
         .select('sede_id')
-        .eq('agente_id', user.id);
+        .eq('agente_id', callerAgente.id);
       
       const permittedSedeIds = (callerSedes || []).map((s: any) => s.sede_id);
       const targetSedesIds = (targetUser.sedes_usuarios || []).map((s: any) => s.sede_id);
