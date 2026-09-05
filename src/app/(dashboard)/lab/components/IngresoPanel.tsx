@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
 import { createClient } from '@/lib/supabase/client';
 import { registrarIngresoCentral } from '@/services/lab';
 import { obtenerFacturasCompras } from '@/services/facturasCompras';
 import { FacturaCompra } from '@/types/facturasCompras';
+import { TablePagination } from '@/components/ui/TablePagination';
 import { 
   Download, Search, Plus, Trash2, FileText, CheckCircle2, 
   PackageSearch, Building2, Calendar, DollarSign, Layers,
@@ -41,6 +42,10 @@ export default function IngresoCentralPanel() {
   const [bienes, setBienes] = useState<any[]>(CATALOGO_DEMO_SEED);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<CategoriaBienFiltro>('TODOS');
   const [search, setSearch] = useState('');
+
+  // Paginación para Catálogo de Bienes
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   
   // Enlace con Facturas de Compras
   const [facturasDisponibles, setFacturasDisponibles] = useState<FacturaCompra[]>([]);
@@ -59,7 +64,7 @@ export default function IngresoCentralPanel() {
     const loadBienesYFacturas = async () => {
       try {
         const [resBienes, facturas] = await Promise.all([
-          supabase.from('bienes').select('*').limit(100),
+          supabase.from('bienes').select('*').order('nombre').limit(1000),
           obtenerFacturasCompras({ sedeId: sedeActiva?.id })
         ]);
 
@@ -82,6 +87,11 @@ export default function IngresoCentralPanel() {
     };
     loadBienesYFacturas();
   }, [sedeActiva]);
+
+  // Reiniciar a la primera página ante cambios en búsqueda o categoría
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, categoriaSeleccionada]);
 
   // Factura activa seleccionada
   const facturaSeleccionada = facturasDisponibles.find(f => f.id === facturaSeleccionadaId);
@@ -108,6 +118,12 @@ export default function IngresoCentralPanel() {
 
     return cumpleCategoria && cumpleTexto;
   });
+
+  // Bienes paginados para la vista actual
+  const paginatedBienes = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredBienes.slice(startIndex, startIndex + pageSize);
+  }, [filteredBienes, currentPage, pageSize]);
 
   const getDestinoBadge = (tipoBien: string) => {
     const t = (tipoBien || '').toUpperCase();
@@ -262,13 +278,13 @@ export default function IngresoCentralPanel() {
             </div>
 
             {/* Lista de Bienes */}
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-              {filteredBienes.length === 0 ? (
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[300px]">
+              {paginatedBienes.length === 0 ? (
                 <div className="text-center py-10 text-slate-400 text-xs">
                   No hay bienes en esta categoría o con ese criterio de búsqueda.
                 </div>
               ) : (
-                filteredBienes.map(b => {
+                paginatedBienes.map(b => {
                   const badge = getDestinoBadge(b.tipo_bien || b.categoria);
                   return (
                     <div 
@@ -303,6 +319,20 @@ export default function IngresoCentralPanel() {
                 })
               )}
             </div>
+
+            {/* Paginación Reactiva de Bienes */}
+            {filteredBienes.length > 0 && (
+              <TablePagination
+                currentPage={currentPage}
+                totalItems={filteredBienes.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+                itemName="bienes"
+                compact={true}
+              />
+            )}
 
           </div>
         </div>

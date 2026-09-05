@@ -12,6 +12,7 @@ export interface TablePaginationProps {
   pageSizeOptions?: number[];
   itemName?: string;
   className?: string;
+  compact?: boolean;
 }
 
 export function TablePagination({
@@ -22,7 +23,8 @@ export function TablePagination({
   onPageSizeChange,
   pageSizeOptions = [10, 25, 50, 100],
   itemName = 'registros',
-  className = ''
+  className = '',
+  compact = false
 }: TablePaginationProps) {
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
@@ -63,6 +65,91 @@ export function TablePagination({
   };
 
   const pageNumbers = getPageNumbers();
+
+  if (compact) {
+    return (
+      <div
+        className={`flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-3 mt-2 border-t border-gray-100 dark:border-slate-800 text-xs select-none ${className}`}
+      >
+        {/* 📊 Indicador Compacto */}
+        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[11px]">
+          <span>
+            <strong className="font-bold text-slate-700 dark:text-slate-200">{startItem}</strong>-
+            <strong className="font-bold text-slate-700 dark:text-slate-200">{endItem}</strong> de{' '}
+            <strong className="font-bold text-slate-700 dark:text-slate-200">{totalItems}</strong> {itemName}
+          </span>
+
+          {onPageSizeChange && (
+            <div className="flex items-center gap-1 pl-1.5 border-l border-gray-200 dark:border-slate-800">
+              <span className="text-[10px] text-slate-400">Ver:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  const newSize = Number(e.target.value);
+                  onPageSizeChange(newSize);
+                  onPageChange(1);
+                }}
+                className="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-1.5 py-0.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+              >
+                {pageSizeOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        {/* 🕹️ Controles Compactos */}
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => onPageChange(1)}
+            disabled={safeCurrentPage <= 1}
+            className="p-1 rounded-lg border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+            title="Primera página"
+          >
+            <ChevronsLeft className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onPageChange(safeCurrentPage - 1)}
+            disabled={safeCurrentPage <= 1}
+            className="p-1 rounded-lg border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+            title="Página anterior"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+
+          <span className="px-2 py-0.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 bg-gray-100 dark:bg-slate-800/80 rounded-lg border border-gray-200 dark:border-slate-700">
+            {safeCurrentPage} / {totalPages}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => onPageChange(safeCurrentPage + 1)}
+            disabled={safeCurrentPage >= totalPages}
+            className="p-1 rounded-lg border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+            title="Página siguiente"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onPageChange(totalPages)}
+            disabled={safeCurrentPage >= totalPages}
+            className="p-1 rounded-lg border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer"
+            title="Última página"
+          >
+            <ChevronsRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
