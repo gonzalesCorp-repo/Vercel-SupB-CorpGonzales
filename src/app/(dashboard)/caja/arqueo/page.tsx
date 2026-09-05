@@ -71,8 +71,12 @@ export default function ArqueoCiegoPage() {
           <div className="space-y-3">
             {[200, 100, 50, 20, 10].map((den) => (
               <div key={den} className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Billetes S/. {den}</span>
+                <label htmlFor={`arqueo-billetes-${den}`} className="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
+                  Billetes S/. {den}
+                </label>
                 <input
+                  id={`arqueo-billetes-${den}`}
+                  name={`billetes_${den}`}
                   type="number"
                   min="0"
                   value={conteo[`billetes${den}` as keyof ConteoCiego] || ''}
@@ -93,8 +97,12 @@ export default function ArqueoCiegoPage() {
           <div className="space-y-3">
             {[5, 2, 1].map((den) => (
               <div key={den} className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Monedas S/. {den}</span>
+                <label htmlFor={`arqueo-monedas-${den}`} className="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
+                  Monedas S/. {den}
+                </label>
                 <input
+                  id={`arqueo-monedas-${den}`}
+                  name={`monedas_${den}`}
                   type="number"
                   min="0"
                   value={conteo[`monedas${den}` as keyof ConteoCiego] || ''}
@@ -106,8 +114,12 @@ export default function ArqueoCiegoPage() {
             ))}
 
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Monedas Céntimos (Total S/.)</span>
+              <label htmlFor="arqueo-monedas-centimos" className="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
+                Monedas Céntimos (Total S/.)
+              </label>
               <input
+                id="arqueo-monedas-centimos"
+                name="monedas_centimos"
                 type="number"
                 step="0.10"
                 min="0"
@@ -119,8 +131,12 @@ export default function ArqueoCiegoPage() {
             </div>
 
             <div className="flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800 pt-2">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Vouchers Tarjeta (Total S/.)</span>
+              <label htmlFor="arqueo-vouchers-tarjeta" className="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
+                Vouchers Tarjeta (Total S/.)
+              </label>
               <input
+                id="arqueo-vouchers-tarjeta"
+                name="total_vouchers_tarjeta"
                 type="number"
                 step="0.50"
                 min="0"
@@ -132,8 +148,12 @@ export default function ArqueoCiegoPage() {
             </div>
 
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Yape / Plin (Total S/.)</span>
+              <label htmlFor="arqueo-vouchers-digitales" className="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
+                Yape / Plin (Total S/.)
+              </label>
               <input
+                id="arqueo-vouchers-digitales"
+                name="total_vouchers_digitales"
                 type="number"
                 step="0.50"
                 min="0"
@@ -150,10 +170,12 @@ export default function ArqueoCiegoPage() {
         <div className="bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-4">
           <div>
             <h2 className="text-base font-black text-slate-900 dark:text-white mb-3">Cierre de Arqueo</h2>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">
+            <label htmlFor="arqueo-notas-cierre" className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 cursor-pointer">
               Notas de Cierre / Observaciones
             </label>
             <textarea
+              id="arqueo-notas-cierre"
+              name="notas_cierre"
               rows={4}
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
