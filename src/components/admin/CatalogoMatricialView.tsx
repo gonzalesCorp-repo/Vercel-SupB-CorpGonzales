@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Table, Search, Plus, Filter, Save, X, ChevronRight, Layers, 
   Scissors, Package, Sparkles, DollarSign, Clock, Users, CheckCircle2,
@@ -11,6 +11,7 @@ import {
   obtenerBienesCatalogo, guardarBienCatalogo, calcularRentabilidadBien 
 } from '@/services/catalogo';
 import { createClient } from '@/lib/supabase/client';
+import { TablePagination } from '@/components/ui/TablePagination';
 
 export function CatalogoMatricialView() {
   const [bienes, setBienes] = useState<BienItem[]>([]);
@@ -20,6 +21,10 @@ export function CatalogoMatricialView() {
   const [query, setQuery] = useState('');
   const [filtroTipo, setFiltroTipo] = useState<string>('todos');
   const [filtroDivision, setFiltroDivision] = useState<string>('todas');
+  
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   
   // Panel Lateral (Drawer) para edición profunda
   const [selectedBien, setSelectedBien] = useState<BienItem | null>(null);
@@ -141,6 +146,17 @@ export function CatalogoMatricialView() {
     return matchQuery && matchTipo;
   });
 
+  // Resetear a página 1 cuando cambian los filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, filtroTipo, filtroDivision]);
+
+  // Segmentación por paginación
+  const paginatedBienes = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtrados.slice(start, start + pageSize);
+  }, [filtrados, currentPage, pageSize]);
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto font-sans">
       
@@ -235,7 +251,7 @@ export function CatalogoMatricialView() {
                   </td>
                 </tr>
               ) : (
-                filtrados.map((bien) => {
+                paginatedBienes.map((bien) => {
                   const rent = calcularRentabilidadBien(
                     bien.precio_venta || 0,
                     bien.costo_base || 0,
@@ -323,6 +339,16 @@ export function CatalogoMatricialView() {
             </tbody>
           </table>
         </div>
+
+        {/* Paginación Reactiva de la Matriz */}
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filtrados.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          itemName="bienes y servicios"
+        />
       </div>
 
       {/* Panel Lateral Desplegable (Drawer) */}

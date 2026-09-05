@@ -13,6 +13,7 @@ import {
   evaluarEtiquetas, MetricasCliente 
 } from '@/services/reglasClientes';
 import { useAppStore } from '@/store/useAppStore';
+import { TablePagination } from '@/components/ui/TablePagination';
 
 const ICON_MAP: Record<string, any> = {
   Crown,
@@ -44,6 +45,10 @@ export default function DirectorioCRMPage() {
   const [staffFiltro, setStaffFiltro] = useState<string>('TODOS');
   const [etiquetaFiltro, setEtiquetaFiltro] = useState<string>('TODOS');
   const userRol = useAppStore((state) => state.userRol);
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const cargarDatos = async () => {
     setLoading(true);
@@ -127,6 +132,17 @@ export default function DirectorioCRMPage() {
       return matchTexto && matchStaff && matchEtiqueta;
     });
   }, [clientes, busqueda, staffFiltro, etiquetaFiltro]);
+
+  // Resetear a página 1 al cambiar filtros o búsqueda
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [busqueda, staffFiltro, etiquetaFiltro]);
+
+  // Segmentación por paginación
+  const paginatedClientes = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return clientesFiltrados.slice(start, start + pageSize);
+  }, [clientesFiltrados, currentPage, pageSize]);
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
@@ -244,7 +260,7 @@ export default function DirectorioCRMPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-slate-800/60 font-medium">
-                {clientesFiltrados.map((c) => {
+                {paginatedClientes.map((c) => {
                   return (
                     <tr key={c.id} className="hover:bg-gray-50/80 dark:hover:bg-slate-800/40 transition">
                       
@@ -361,6 +377,17 @@ export default function DirectorioCRMPage() {
           </div>
         )}
 
+        {/* Paginación Reactiva */}
+        {!loading && clientesFiltrados.length > 0 && (
+          <TablePagination
+            currentPage={currentPage}
+            totalItems={clientesFiltrados.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+            itemName="clientes"
+          />
+        )}
       </div>
 
     </div>
