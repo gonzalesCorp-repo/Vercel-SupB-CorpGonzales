@@ -113,8 +113,11 @@ export default function KardexPanel() {
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative">
+              <label htmlFor="kardex-filtro-busqueda" className="sr-only">Buscar por SKU, insumo o lote</label>
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                id="kardex-filtro-busqueda"
+                name="filtro_busqueda"
                 type="text"
                 value={filtroTexto}
                 onChange={(e) => setFiltroTexto(e.target.value)}
@@ -123,29 +126,39 @@ export default function KardexPanel() {
               />
             </div>
 
-            <select
-              value={filtroTipo}
-              onChange={(e) => setFiltroTipo(e.target.value)}
-              className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 font-semibold focus:outline-none"
-            >
-              <option value="TODOS">Todos los Tipos</option>
-              <option value="DESPACHO_ODI_IOT">⚖️ Despachos Balanza IoT</option>
-              <option value="INGRESO_PRODUCCION_LOTE">🧪 Lotes Sub-Recetas (Entrada)</option>
-              <option value="CONSUMO_PRODUCCION_LOTE">🥗 Insumos de Sub-Recetas (Salida)</option>
-              <option value="INGRESO">📦 Ingresos Central</option>
-              <option value="TRANSFERENCIA">🔄 Traslados a Lab</option>
-            </select>
+            <div>
+              <label htmlFor="kardex-filtro-tipo" className="sr-only">Tipo de Movimiento</label>
+              <select
+                id="kardex-filtro-tipo"
+                name="filtro_tipo"
+                value={filtroTipo}
+                onChange={(e) => setFiltroTipo(e.target.value)}
+                className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 font-semibold focus:outline-none"
+              >
+                <option value="TODOS">Todos los Tipos</option>
+                <option value="DESPACHO_ODI_IOT">⚖️ Despachos Balanza IoT</option>
+                <option value="INGRESO_PRODUCCION_LOTE">🧪 Lotes Sub-Recetas (Entrada)</option>
+                <option value="CONSUMO_PRODUCCION_LOTE">🥗 Insumos de Sub-Recetas (Salida)</option>
+                <option value="INGRESO">📦 Ingresos Central</option>
+                <option value="TRANSFERENCIA">🔄 Traslados a Lab</option>
+              </select>
+            </div>
 
-            <select
-              value={filtroEstadoMerma}
-              onChange={(e) => setFiltroEstadoMerma(e.target.value)}
-              className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 font-semibold focus:outline-none"
-            >
-              <option value="TODOS">Todas las Tolerancias</option>
-              <option value="DENTRO_TOLERANCIA">✅ Calibrado Exacto (≤ ±3%)</option>
-              <option value="EXCESO_DESPERDICIO">⚠️ Exceso / Desperdicio (&gt; +3%)</option>
-              <option value="SUB_DOSIFICACION">📉 Sub-dosificación (&lt; -3%)</option>
-            </select>
+            <div>
+              <label htmlFor="kardex-filtro-estado-merma" className="sr-only">Tolerancia de Merma</label>
+              <select
+                id="kardex-filtro-estado-merma"
+                name="filtro_estado_merma"
+                value={filtroEstadoMerma}
+                onChange={(e) => setFiltroEstadoMerma(e.target.value)}
+                className="border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 font-semibold focus:outline-none"
+              >
+                <option value="TODOS">Todas las Tolerancias</option>
+                <option value="DENTRO_TOLERANCIA">✅ Calibrado Exacto (≤ ±3%)</option>
+                <option value="EXCESO_DESPERDICIO">⚠️ Exceso / Desperdicio (&gt; +3%)</option>
+                <option value="SUB_DOSIFICACION">📉 Sub-dosificación (&lt; -3%)</option>
+              </select>
+            </div>
           </div>
 
           <div className="text-[11px] font-mono text-slate-400">
