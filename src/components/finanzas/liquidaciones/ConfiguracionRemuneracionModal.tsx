@@ -33,9 +33,9 @@ export function ConfiguracionRemuneracionModal({
   onConfiguracionGuardada
 }: ConfiguracionRemuneracionModalProps) {
   const [tipoRemuneracion, setTipoRemuneracion] = useState<TipoRemuneracion>('SOLO_COMISIONES');
-  const [sueldoBase, setSueldoBase] = useState<number>(0);
-  const [comisionServicios, setComisionServicios] = useState<number>(40);
-  const [comisionProductos, setComisionProductos] = useState<number>(10);
+  const [sueldoBase, setSueldoBase] = useState<number | string>(0);
+  const [comisionServicios, setComisionServicios] = useState<number | string>(40);
+  const [comisionProductos, setComisionProductos] = useState<number | string>(10);
   const [frecuenciaCorte, setFrecuenciaCorte] = useState<FrecuenciaCorte>('DIARIA');
   const [permiteSolicitudManual, setPermiteSolicitudManual] = useState<boolean>(true);
   const [cuentaBancaria, setCuentaBancaria] = useState('');
@@ -76,9 +76,9 @@ export function ConfiguracionRemuneracionModal({
       await guardarConfiguracionRemunerativa({
         agente_id: agente.id,
         tipo_remuneracion: tipoRemuneracion,
-        sueldo_base: sueldoBase,
-        porcentaje_comision_servicios: comisionServicios,
-        porcentaje_comision_productos: comisionProductos,
+        sueldo_base: sueldoBase === '' ? 0 : Number(sueldoBase || 0),
+        porcentaje_comision_servicios: comisionServicios === '' ? 0 : Number(comisionServicios || 0),
+        porcentaje_comision_productos: comisionProductos === '' ? 0 : Number(comisionProductos || 0),
         frecuencia_corte: frecuenciaCorte,
         permite_solicitud_manual: permiteSolicitudManual,
         cuenta_bancaria_pago_preferida: cuentaBancaria,
@@ -155,11 +155,11 @@ export function ConfiguracionRemuneracionModal({
             </label>
             <input
               type="number"
-              step="0.01"
+              step="any"
               min="0"
               disabled={tipoRemuneracion === 'SOLO_COMISIONES'}
-              value={sueldoBase}
-              onChange={(e) => setSueldoBase(parseFloat(e.target.value) || 0)}
+              value={sueldoBase ?? ''}
+              onChange={(e) => setSueldoBase(e.target.value)}
               className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-black outline-none disabled:opacity-40"
             />
           </div>
@@ -191,12 +191,12 @@ export function ConfiguracionRemuneracionModal({
             <div className="relative">
               <input
                 type="number"
-                step="0.5"
+                step="any"
                 min="0"
                 max="100"
                 disabled={tipoRemuneracion === 'SOLO_SUELDO_BASE'}
-                value={comisionServicios}
-                onChange={(e) => setComisionServicios(parseFloat(e.target.value) || 0)}
+                value={comisionServicios ?? ''}
+                onChange={(e) => setComisionServicios(e.target.value)}
                 className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-black outline-none disabled:opacity-40"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
@@ -210,11 +210,11 @@ export function ConfiguracionRemuneracionModal({
             <div className="relative">
               <input
                 type="number"
-                step="0.5"
+                step="any"
                 min="0"
                 max="100"
-                value={comisionProductos}
-                onChange={(e) => setComisionProductos(parseFloat(e.target.value) || 0)}
+                value={comisionProductos ?? ''}
+                onChange={(e) => setComisionProductos(e.target.value)}
                 className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-black outline-none"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>

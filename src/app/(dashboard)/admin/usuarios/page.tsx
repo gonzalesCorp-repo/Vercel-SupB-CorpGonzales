@@ -34,11 +34,11 @@ interface AgenteAdmin extends Agente {
   sedes_ids?: string[];
   herramientas_count?: number;
   regimen_laboral?: string;
-  sueldo_base?: number;
+  sueldo_base?: number | string;
   tipo_pension?: string;
   asignacion_familiar?: boolean;
-  porcentaje_comision?: number;
-  tarifa_hora?: number;
+  porcentaje_comision?: number | string;
+  tarifa_hora?: number | string;
 }
 
 export default function UsuariosPage() {
@@ -173,7 +173,14 @@ export default function UsuariosPage() {
     setIsSaving(true);
     
     try {
-      const exito = await guardarAgente({ ...formData, id: editId }, formData.sedes_ids || []);
+      const payload = {
+        ...formData,
+        id: editId,
+        sueldo_base: formData.sueldo_base === '' ? 0 : Number(formData.sueldo_base ?? 0),
+        porcentaje_comision: formData.porcentaje_comision === '' ? 40 : Number(formData.porcentaje_comision ?? 40),
+        tarifa_hora: formData.tarifa_hora === '' ? 0 : Number(formData.tarifa_hora ?? 0)
+      };
+      const exito = await guardarAgente(payload, formData.sedes_ids || []);
       if (exito) {
         await cargarDatos();
         closeModal();
@@ -798,10 +805,11 @@ export default function UsuariosPage() {
                     <label className="block text-[10px] font-bold text-slate-600 mb-1">Sueldo Base Mensual (S/):</label>
                     <input 
                       type="number"
-                      value={formData.sueldo_base || ''}
-                      onChange={e => setFormData({...formData, sueldo_base: Number(e.target.value)})}
-                      placeholder="1500"
+                      step="any"
                       min={0}
+                      value={formData.sueldo_base ?? ''}
+                      onChange={e => setFormData({...formData, sueldo_base: e.target.value})}
+                      placeholder="1500"
                       className="w-full bg-white border border-slate-300 rounded-lg p-2 font-mono font-bold text-slate-800"
                     />
                   </div>
@@ -834,11 +842,12 @@ export default function UsuariosPage() {
                     <label className="block text-[10px] font-bold text-slate-600 mb-1">% Comisión por Servicios:</label>
                     <input 
                       type="number"
-                      value={formData.porcentaje_comision || ''}
-                      onChange={e => setFormData({...formData, porcentaje_comision: Number(e.target.value)})}
-                      placeholder="40"
+                      step="any"
                       min={0}
                       max={100}
+                      value={formData.porcentaje_comision ?? ''}
+                      onChange={e => setFormData({...formData, porcentaje_comision: e.target.value})}
+                      placeholder="40"
                       className="w-full bg-white border border-slate-300 rounded-lg p-2 font-mono font-bold text-slate-800"
                     />
                   </div>
@@ -846,10 +855,11 @@ export default function UsuariosPage() {
                     <label className="block text-[10px] font-bold text-slate-600 mb-1">Tarifa por Hora / Turno (S/):</label>
                     <input 
                       type="number"
-                      value={formData.tarifa_hora || ''}
-                      onChange={e => setFormData({...formData, tarifa_hora: Number(e.target.value)})}
-                      placeholder="0"
+                      step="any"
                       min={0}
+                      value={formData.tarifa_hora ?? ''}
+                      onChange={e => setFormData({...formData, tarifa_hora: e.target.value})}
+                      placeholder="0"
                       className="w-full bg-white border border-slate-300 rounded-lg p-2 font-mono font-bold text-slate-800"
                     />
                   </div>
