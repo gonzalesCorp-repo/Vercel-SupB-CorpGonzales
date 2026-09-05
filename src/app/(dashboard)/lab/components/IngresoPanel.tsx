@@ -267,8 +267,13 @@ export default function IngresoCentralPanel() {
 
             {/* Buscador de Texto */}
             <div className="relative mb-3">
+              <label htmlFor="ingreso-central-buscar" className="sr-only">
+                Buscar por nombre o SKU
+              </label>
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input 
+                id="ingreso-central-buscar"
+                name="busqueda_bienes"
                 type="text" 
                 placeholder="Buscar por nombre o SKU..." 
                 value={search}
@@ -379,10 +384,12 @@ export default function IngresoCentralPanel() {
               {modoReferencia === 'FACTURA_REGISTRADA' ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0">
+                    <label htmlFor="ingreso-factura-seleccionada" className="text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0 cursor-pointer">
                       Vincular Factura:
                     </label>
                     <select
+                      id="ingreso-factura-seleccionada"
+                      name="factura_compra_id"
                       value={facturaSeleccionadaId}
                       onChange={(e) => setFacturaSeleccionadaId(e.target.value)}
                       className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
@@ -422,10 +429,12 @@ export default function IngresoCentralPanel() {
               ) : (
                 /* Entrada Manual de Guía */
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0">
+                  <label htmlFor="ingreso-referencia-manual" className="text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0 cursor-pointer">
                     Doc. Referencia:
                   </label>
                   <input 
+                    id="ingreso-referencia-manual"
+                    name="referencia_manual"
                     type="text" 
                     value={referenciaManual}
                     onChange={(e) => setReferenciaManual(e.target.value)}
@@ -479,21 +488,27 @@ export default function IngresoCentralPanel() {
 
                           <td className="px-4 py-3 text-right">
                             <input 
+                              id={`ingreso-costo-${item.bien_id}`}
+                              name={`costo_unitario_${item.bien_id}`}
                               type="number" 
                               min="0"
                               step="0.01"
                               value={item.costo_unitario}
                               onChange={(e) => updateCost(item.bien_id, Number(e.target.value))}
+                              aria-label={`Costo unitario de ${item.nombre}`}
                               className="w-20 px-2 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-right text-xs font-bold text-slate-800 dark:text-white outline-none"
                             />
                           </td>
 
                           <td className="px-4 py-3 text-center">
                             <input 
+                              id={`ingreso-cant-${item.bien_id}`}
+                              name={`cantidad_${item.bien_id}`}
                               type="number" 
                               min="1"
                               value={item.cantidad}
                               onChange={(e) => updateQuantity(item.bien_id, Number(e.target.value))}
+                              aria-label={`Cantidad a ingresar de ${item.nombre}`}
                               className="w-16 px-2 py-1 bg-indigo-50/50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-lg text-center text-xs font-black text-indigo-700 dark:text-indigo-300 outline-none"
                             />
                           </td>
