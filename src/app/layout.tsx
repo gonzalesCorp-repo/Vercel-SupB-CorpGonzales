@@ -59,7 +59,23 @@ export default function RootLayout({
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden font-sans transition-colors duration-200">
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=localStorage.getItem('theme-storage');if(s){var p=JSON.parse(s);if(p&&p.state&&p.state.themeMode==='light'){document.documentElement.classList.remove('dark');}}else{var m=localStorage.getItem('vaikuntha_theme_mode');if(m==='light'){document.documentElement.classList.remove('dark');}}}catch(e){}})();`
+            __html: `(function(){
+              try{
+                var s=localStorage.getItem('theme-storage');
+                if(s){var p=JSON.parse(s);if(p&&p.state&&p.state.themeMode==='light'){document.documentElement.classList.remove('dark');}}
+                else{var m=localStorage.getItem('vaikuntha_theme_mode');if(m==='light'){document.documentElement.classList.remove('dark');}}
+              }catch(e){}
+              
+              /* Supresión preventiva del bug interno de Chromium DevTools Live Metrics (reportAllChanges / startTime) */
+              if(typeof window !== 'undefined'){
+                window.addEventListener('error', function(e){
+                  if(e && e.message && (e.message.indexOf("reading 'startTime'") !== -1 || (e.error && e.error.stack && e.error.stack.indexOf('reportAllChanges') !== -1))){
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }, true);
+              }
+            })();`
           }}
         />
         <QueryProvider>
