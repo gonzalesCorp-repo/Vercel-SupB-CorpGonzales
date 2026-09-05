@@ -121,6 +121,8 @@ export function ComisionesGranularesEditor({
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
+                id="comisiones-granulares-search-input"
+                name="comisiones_granulares_search"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Buscar servicio por nombre o categoría..."
@@ -199,6 +201,8 @@ export function ComisionesGranularesEditor({
                           step="any"
                           min="0"
                           max="100"
+                          id={`comision-override-${s.id}`}
+                          name={`comision_override_${s.id}`}
                           disabled={disabled}
                           value={valorActual}
                           onChange={e => handleUpdateOverride(s.id, e.target.value)}

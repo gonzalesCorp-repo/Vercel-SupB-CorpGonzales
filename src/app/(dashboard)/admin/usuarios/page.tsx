@@ -491,6 +491,8 @@ export default function UsuariosPage() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
               type="text" 
+              id="usuarios-search-input"
+              name="usuarios_search"
               placeholder="Buscar por nombre, correo, cargo o especialidad..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -500,6 +502,8 @@ export default function UsuariosPage() {
 
           <div className="w-full md:w-64">
             <select 
+              id="usuarios-sede-filter-select"
+              name="usuarios_sede_filter"
               value={sedeFilter}
               onChange={(e) => setSedeFilter(e.target.value)}
               className="w-full px-4 py-2.5 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-slate-50 focus:bg-white cursor-pointer"
@@ -722,9 +726,11 @@ export default function UsuariosPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Nombre Completo *</label>
+            <label htmlFor="usuario-nombre-input" className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Nombre Completo *</label>
             <input 
               type="text" 
+              id="usuario-nombre-input"
+              name="nombre"
               value={formData.nombre}
               onChange={e => setFormData({...formData, nombre: e.target.value})}
               className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -734,9 +740,11 @@ export default function UsuariosPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Correo Electrónico (Login)</label>
+            <label htmlFor="usuario-email-input" className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Correo Electrónico (Login)</label>
             <input 
               type="email" 
+              id="usuario-email-input"
+              name="email"
               value={formData.email}
               onChange={e => setFormData({...formData, email: e.target.value})}
               className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -745,9 +753,11 @@ export default function UsuariosPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Especialidad / Cargo</label>
+            <label htmlFor="usuario-especialidad-input" className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Especialidad / Cargo</label>
             <input 
               type="text" 
+              id="usuario-especialidad-input"
+              name="especialidad"
               value={formData.especialidad}
               onChange={e => setFormData({...formData, especialidad: e.target.value})}
               className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -757,9 +767,11 @@ export default function UsuariosPage() {
           
           {!editId && (
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Contraseña Inicial *</label>
+              <label htmlFor="usuario-password-input" className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Contraseña Inicial *</label>
               <input 
                 type="password" 
+                id="usuario-password-input"
+                name="password"
                 value={formData.password}
                 onChange={e => setFormData({...formData, password: e.target.value})}
                 className="w-full text-sm text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -771,8 +783,10 @@ export default function UsuariosPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Rol Jerárquico</label>
+              <label htmlFor="usuario-rol-select" className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Rol Jerárquico</label>
               <select 
+                id="usuario-rol-select"
+                name="rol"
                 value={formData.rol}
                 onChange={e => setFormData({...formData, rol: e.target.value})}
                 className="w-full text-xs font-bold text-slate-800 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all cursor-pointer"
@@ -784,8 +798,10 @@ export default function UsuariosPage() {
             </div>
             
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Estado de Cuenta</label>
+              <label htmlFor="usuario-estado-select" className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Estado de Cuenta</label>
               <select 
+                id="usuario-estado-select"
+                name="estado"
                 value={formData.estado || 'ACTIVO'}
                 onChange={e => setFormData({...formData, estado: e.target.value})}
                 className="w-full text-xs font-bold text-slate-800 bg-white border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all cursor-pointer"
@@ -833,11 +849,13 @@ export default function UsuariosPage() {
               <div className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2.5 text-xs">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-600 mb-1">Sueldo Base Mensual (S/):</label>
+                    <label htmlFor="usuario-sueldo-base-input" className="block text-[10px] font-bold text-slate-600 mb-1">Sueldo Base Mensual (S/):</label>
                     <input 
                       type="number"
                       step="any"
                       min={0}
+                      id="usuario-sueldo-base-input"
+                      name="sueldo_base"
                       value={formData.sueldo_base ?? ''}
                       onChange={e => setFormData({...formData, sueldo_base: e.target.value})}
                       placeholder="1500"
@@ -845,8 +863,10 @@ export default function UsuariosPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-600 mb-1">Régimen Pensionario:</label>
+                    <label htmlFor="usuario-tipo-pension-select" className="block text-[10px] font-bold text-slate-600 mb-1">Régimen Pensionario:</label>
                     <select
+                      id="usuario-tipo-pension-select"
+                      name="tipo_pension"
                       value={formData.tipo_pension || 'AFP'}
                       onChange={e => setFormData({...formData, tipo_pension: e.target.value})}
                       className="w-full bg-white border border-slate-300 rounded-lg p-2 font-bold text-slate-800"
@@ -859,6 +879,8 @@ export default function UsuariosPage() {
                 <label className="flex items-center gap-2 text-[11px] font-bold text-slate-700 cursor-pointer pt-1">
                   <input
                     type="checkbox"
+                    id="usuario-asignacion-familiar-checkbox"
+                    name="asignacion_familiar"
                     checked={formData.asignacion_familiar || false}
                     onChange={e => setFormData({...formData, asignacion_familiar: e.target.checked})}
                     className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
@@ -870,12 +892,14 @@ export default function UsuariosPage() {
               <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-100 space-y-2.5 text-xs">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-600 mb-1">% Comisión por Servicios:</label>
+                    <label htmlFor="usuario-porcentaje-comision-input" className="block text-[10px] font-bold text-slate-600 mb-1">% Comisión por Servicios:</label>
                     <input 
                       type="number"
                       step="any"
                       min={0}
                       max={100}
+                      id="usuario-porcentaje-comision-input"
+                      name="porcentaje_comision"
                       value={formData.porcentaje_comision ?? ''}
                       onChange={e => setFormData({...formData, porcentaje_comision: e.target.value})}
                       placeholder="40"
@@ -883,11 +907,13 @@ export default function UsuariosPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-600 mb-1">Tarifa por Hora / Turno (S/):</label>
+                    <label htmlFor="usuario-tarifa-hora-input" className="block text-[10px] font-bold text-slate-600 mb-1">Tarifa por Hora / Turno (S/):</label>
                     <input 
                       type="number"
                       step="any"
                       min={0}
+                      id="usuario-tarifa-hora-input"
+                      name="tarifa_hora"
                       value={formData.tarifa_hora ?? ''}
                       onChange={e => setFormData({...formData, tarifa_hora: e.target.value})}
                       placeholder="0"
@@ -917,6 +943,8 @@ export default function UsuariosPage() {
                 <label key={sede.id} className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer p-2 hover:bg-slate-50 rounded-xl border border-slate-200 transition-colors">
                   <input 
                     type="checkbox"
+                    id={`usuario-sede-${sede.id}`}
+                    name={`usuario_sede_${sede.id}`}
                     checked={formData.sedes_ids?.includes(sede.id) || false}
                     onChange={(e) => {
                       const checked = e.target.checked;
@@ -1009,6 +1037,8 @@ export default function UsuariosPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
               type="text" 
+              id="delegar-herramientas-search-input"
+              name="herramientas_search"
               placeholder="Filtrar herramientas por nombre o módulo..." 
               value={herramientaSearch}
               onChange={(e) => setHerramientaSearch(e.target.value)}
