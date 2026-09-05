@@ -167,51 +167,61 @@ export default function AdminSedeConfigPage() {
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition">
+                <label htmlFor="toggle-lab-gramos" className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer">
                   <div className="space-y-0.5 max-w-md">
                     <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">Módulo de Laboratorio (Pesaje en Gramos)</p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Descuenta gramos de tintes y químicos en taller físico.</p>
                   </div>
                   <input
                     type="checkbox"
+                    id="toggle-lab-gramos"
+                    name="modulo_laboratorio_gramos"
                     checked={toggles.moduloLaboratorioGramos}
                     onChange={(e) => setToggles(prev => ({ ...prev, moduloLaboratorioGramos: e.target.checked }))}
                     className="w-5 h-5 accent-emerald-500 rounded cursor-pointer shrink-0"
                   />
-                </div>
+                </label>
 
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition">
+                <label htmlFor="toggle-balanzas-iot" className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer">
                   <div className="space-y-0.5 max-w-md">
                     <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">Balanzas Digitales IoT & Flujo Rápido</p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Habilita drivers de pesaje en tiempo real (Bluetooth BLE, WiFi, USB Serial).</p>
                   </div>
                   <input
                     type="checkbox"
+                    id="toggle-balanzas-iot"
+                    name="habilitar_balanzas_iot"
                     checked={toggles.habilitarBalanzasIot ?? false}
                     onChange={(e) => setToggles(prev => ({ ...prev, habilitarBalanzasIot: e.target.checked }))}
                     className="w-5 h-5 accent-emerald-500 rounded cursor-pointer shrink-0"
                   />
-                </div>
+                </label>
 
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition">
+                <label htmlFor="toggle-kiosko-autoservicio" className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer">
                   <div className="space-y-0.5 max-w-md">
                     <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">Tótem Kiosko de Autoservicio (/kiosk)</p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Habilita la interfaz táctil de recepción para check-in de clientes.</p>
                   </div>
                   <input
                     type="checkbox"
+                    id="toggle-kiosko-autoservicio"
+                    name="kiosko_autoservicio_habilitado"
                     checked={toggles.kioskoAutoservicioHabilitado}
                     onChange={(e) => setToggles(prev => ({ ...prev, kioskoAutoservicioHabilitado: e.target.checked }))}
                     className="w-5 h-5 accent-emerald-500 rounded cursor-pointer shrink-0"
                   />
-                </div>
+                </label>
 
                 <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 space-y-2">
                   <div className="flex justify-between items-center">
-                    <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">Modo de Orquestación de Estaciones de Piso</p>
+                    <label htmlFor="select-modo-estaciones" className="font-bold text-slate-800 dark:text-slate-200 text-xs cursor-pointer">
+                      Modo de Orquestación de Estaciones de Piso
+                    </label>
                     <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400">{toggles.modoEstaciones}</span>
                   </div>
                   <select
+                    id="select-modo-estaciones"
+                    name="modo_estaciones"
                     value={toggles.modoEstaciones}
                     onChange={(e) => setToggles(prev => ({ ...prev, modoEstaciones: e.target.value as any }))}
                     className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-emerald-400 font-bold outline-none cursor-pointer"
@@ -236,44 +246,50 @@ export default function AdminSedeConfigPage() {
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition">
+                <label htmlFor="toggle-cron-auto-aprobacion-nfc" className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer">
                   <div className="space-y-0.5 max-w-md">
                     <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">Auto-Aprobación de Asistencia Web NFC</p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Registra entrada/salida autónoma con tag NFC fuera de turno.</p>
                   </div>
                   <input
                     type="checkbox"
+                    id="toggle-cron-auto-aprobacion-nfc"
+                    name="cron_auto_aprobacion_nfc"
                     checked={toggles.cronAutoAprobacionNfc ?? true}
                     onChange={(e) => setToggles(prev => ({ ...prev, cronAutoAprobacionNfc: e.target.checked }))}
                     className="w-5 h-5 accent-emerald-500 rounded cursor-pointer shrink-0"
                   />
-                </div>
+                </label>
 
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition">
+                <label htmlFor="toggle-cron-auto-cierre-oatc" className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer">
                   <div className="space-y-0.5 max-w-md">
                     <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">Auto-Cierre de Órdenes Pre-Cobradas (100%)</p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Finaliza y liquida órdenes de noche sin personal de caja.</p>
                   </div>
                   <input
                     type="checkbox"
+                    id="toggle-cron-auto-cierre-oatc"
+                    name="cron_auto_cierre_oatc_fuera_horario"
                     checked={toggles.cronAutoCierreOatcFueraHorario ?? true}
                     onChange={(e) => setToggles(prev => ({ ...prev, cronAutoCierreOatcFueraHorario: e.target.checked }))}
                     className="w-5 h-5 accent-emerald-500 rounded cursor-pointer shrink-0"
                   />
-                </div>
+                </label>
 
-                <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition">
+                <label htmlFor="toggle-auto-reset-diario" className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition cursor-pointer">
                   <div className="space-y-0.5 max-w-md">
                     <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">Auto-Reset Diario Nocturno (Midnight Reset)</p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Pasa automáticamente a 'FUERA_TURNO' al personal del día anterior.</p>
                   </div>
                   <input
                     type="checkbox"
+                    id="toggle-auto-reset-diario"
+                    name="auto_reset_diario_nocturno"
                     checked={toggles.autoResetDiarioNocturno ?? true}
                     onChange={(e) => setToggles(prev => ({ ...prev, autoResetDiarioNocturno: e.target.checked }))}
                     className="w-5 h-5 accent-emerald-500 rounded cursor-pointer shrink-0"
                   />
-                </div>
+                </label>
               </div>
             </div>
 
@@ -293,7 +309,7 @@ export default function AdminSedeConfigPage() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <label htmlFor="toggle-plugin-lumina-hq" className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800 cursor-pointer">
                 <div className="space-y-1 max-w-md">
                   <p className="font-bold text-slate-800 dark:text-slate-100 text-xs">Habilitar Suite LuminaHQ en Barra de Navegación</p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -302,11 +318,13 @@ export default function AdminSedeConfigPage() {
                 </div>
                 <input
                   type="checkbox"
+                  id="toggle-plugin-lumina-hq"
+                  name="plugin_lumina_hq_activo"
                   checked={toggles.pluginLuminaHqActivo || false}
                   onChange={(e) => setToggles(prev => ({ ...prev, pluginLuminaHqActivo: e.target.checked }))}
                   className="w-6 h-6 accent-indigo-600 rounded cursor-pointer shrink-0"
                 />
-              </div>
+              </label>
             </div>
 
             {/* Card 4: Facturación Fiscal SUNAT */}
@@ -322,9 +340,11 @@ export default function AdminSedeConfigPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1.5">RUC de Sede</label>
+                  <label htmlFor="sunat-ruc-input" className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1.5 cursor-pointer">RUC de Sede</label>
                   <input
                     type="text"
+                    id="sunat-ruc-input"
+                    name="sunat_ruc"
                     value={toggles.sunatRuc || ''}
                     onChange={(e) => setToggles(prev => ({ ...prev, sunatRuc: e.target.value }))}
                     placeholder="20601234567"
@@ -333,9 +353,11 @@ export default function AdminSedeConfigPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Razón Social</label>
+                  <label htmlFor="sunat-razon-social-input" className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1.5 cursor-pointer">Razón Social</label>
                   <input
                     type="text"
+                    id="sunat-razon-social-input"
+                    name="sunat_razon_social"
                     value={toggles.sunatRazonSocial || ''}
                     onChange={(e) => setToggles(prev => ({ ...prev, sunatRazonSocial: e.target.value }))}
                     placeholder="Vaikuntha Salon & Spa S.A.C."
@@ -344,9 +366,11 @@ export default function AdminSedeConfigPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Serie Boletas (B001)</label>
+                  <label htmlFor="sunat-serie-boleta-input" className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1.5 cursor-pointer">Serie Boletas (B001)</label>
                   <input
                     type="text"
+                    id="sunat-serie-boleta-input"
+                    name="sunat_serie_boleta"
                     value={toggles.sunatSerieBoleta || 'B001'}
                     onChange={(e) => setToggles(prev => ({ ...prev, sunatSerieBoleta: e.target.value }))}
                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono outline-none focus:border-purple-500 transition"
@@ -354,9 +378,11 @@ export default function AdminSedeConfigPage() {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Serie Facturas (F001)</label>
+                  <label htmlFor="sunat-serie-factura-input" className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1.5 cursor-pointer">Serie Facturas (F001)</label>
                   <input
                     type="text"
+                    id="sunat-serie-factura-input"
+                    name="sunat_serie_factura"
                     value={toggles.sunatSerieFactura || 'F001'}
                     onChange={(e) => setToggles(prev => ({ ...prev, sunatSerieFactura: e.target.value }))}
                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono outline-none focus:border-purple-500 transition"
@@ -442,11 +468,13 @@ export default function AdminSedeConfigPage() {
 
             <div className="space-y-3">
               <div className="flex justify-between items-center text-xs font-bold text-slate-600 dark:text-slate-300">
-                <span>Intensidad de Resplandor Glow</span>
+                <label htmlFor="houdini-glow-range" className="cursor-pointer">Intensidad de Resplandor Glow</label>
                 <span className="font-mono text-indigo-500 font-black">{Math.round(glowOpacity * 100)}%</span>
               </div>
               <input
                 type="range"
+                id="houdini-glow-range"
+                name="houdini_glow_range"
                 min="0.2"
                 max="0.9"
                 step="0.05"

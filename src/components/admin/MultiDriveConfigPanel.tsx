@@ -239,11 +239,13 @@ export function MultiDriveConfigPanel() {
 
               <form onSubmit={handleGuardar} className="space-y-3.5">
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                  <label htmlFor="drive-nombre-descriptivo" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1 cursor-pointer">
                     Nombre Descriptivo
                   </label>
                   <input
                     type="text"
+                    id="drive-nombre-descriptivo"
+                    name="nombre_descriptivo"
                     required
                     placeholder="Ej. Drive Videos 4K & Campañas"
                     value={nombreDescriptivo}
@@ -254,11 +256,13 @@ export function MultiDriveConfigPanel() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                    <label htmlFor="drive-email-cuenta" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1 cursor-pointer">
                       Email de la Cuenta
                     </label>
                     <input
                       type="email"
+                      id="drive-email-cuenta"
+                      name="email_cuenta"
                       required
                       placeholder="multimedia@empresa.com"
                       value={emailCuenta}
@@ -268,13 +272,15 @@ export function MultiDriveConfigPanel() {
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                    <label htmlFor="drive-tipo-auth" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1 cursor-pointer">
                       Tipo de Autenticación
                     </label>
                     <select
+                      id="drive-tipo-auth"
+                      name="tipo_autenticacion"
                       value={tipoAuth}
                       onChange={(e) => setTipoAuth(e.target.value as any)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 cursor-pointer"
                     >
                       <option value="SERVICE_ACCOUNT">🤖 Service Account Key</option>
                       <option value="OAUTH_CLIENT">🔑 OAuth 2.0 User Auth</option>
@@ -284,13 +290,15 @@ export function MultiDriveConfigPanel() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                    <label htmlFor="drive-proposito" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1 cursor-pointer">
                       Propósito del Drive
                     </label>
                     <select
+                      id="drive-proposito"
+                      name="proposito"
                       value={proposito}
                       onChange={(e) => setProposito(e.target.value as any)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 cursor-pointer"
                     >
                       <option value="MULTIMEDIA">🎬 Multimedia (Videos & Fotos)</option>
                       <option value="DOCUMENTOS">📄 Fichas Técnicas & Clientes</option>
@@ -300,11 +308,13 @@ export function MultiDriveConfigPanel() {
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                    <label htmlFor="drive-root-folder-id" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1 cursor-pointer">
                       Root Folder ID (Google Drive)
                     </label>
                     <input
                       type="text"
+                      id="drive-root-folder-id"
+                      name="root_folder_id"
                       placeholder="1A2B3C... o 'root'"
                       value={rootFolderId}
                       onChange={(e) => setRootFolderId(e.target.value)}
@@ -315,11 +325,13 @@ export function MultiDriveConfigPanel() {
 
                 {tipoAuth === 'SERVICE_ACCOUNT' && (
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">
+                    <label htmlFor="drive-service-account-json" className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1 cursor-pointer">
                       Service Account Credentials (JSON)
                     </label>
                     <textarea
                       rows={3}
+                      id="drive-service-account-json"
+                      name="service_account_json"
                       placeholder='{"type": "service_account", "project_id": "...", ...}'
                       value={serviceAccountJson}
                       onChange={(e) => setServiceAccountJson(e.target.value)}
@@ -332,11 +344,12 @@ export function MultiDriveConfigPanel() {
                   <input
                     type="checkbox"
                     id="esDefault"
+                    name="es_default"
                     checked={esDefault}
                     onChange={(e) => setEsDefault(e.target.checked)}
-                    className="rounded border-slate-800 text-amber-500 focus:ring-0"
+                    className="rounded border-slate-800 text-amber-500 focus:ring-0 cursor-pointer"
                   />
-                  <label htmlFor="esDefault" className="text-xs text-slate-300 font-bold">
+                  <label htmlFor="esDefault" className="text-xs text-slate-300 font-bold cursor-pointer">
                     Establecer como cuenta predeterminada para {proposito}
                   </label>
                 </div>
