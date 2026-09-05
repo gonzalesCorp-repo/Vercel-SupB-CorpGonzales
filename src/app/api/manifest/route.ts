@@ -35,6 +35,22 @@ export async function GET(request: NextRequest) {
         purpose: 'any maskable'
       }
     ],
+    screenshots: [
+      {
+        src: brand.icon512,
+        sizes: '512x512',
+        type: 'image/png',
+        form_factor: 'wide',
+        label: `${brand.name} - Pantalla Principal`
+      },
+      {
+        src: brand.icon512,
+        sizes: '512x512',
+        type: 'image/png',
+        form_factor: 'narrow',
+        label: `${brand.name} - Móvil`
+      }
+    ],
     categories: ['business', 'lifestyle', 'productivity'],
     shortcuts: [
       {
