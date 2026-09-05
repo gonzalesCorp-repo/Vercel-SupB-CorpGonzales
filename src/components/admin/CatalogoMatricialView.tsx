@@ -193,8 +193,13 @@ export function CatalogoMatricialView() {
       {/* Barra de Filtros & Búsqueda */}
       <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-gray-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
         <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 absolute left-3.5 top-3 text-gray-400" />
+          <label htmlFor="catalogo-matricial-search" className="sr-only">
+            Buscar por nombre o categoría
+          </label>
+          <Search className="w-4 h-4 absolute left-3.5 top-3 text-gray-400 pointer-events-none" />
           <input
+            id="catalogo-matricial-search"
+            name="catalogo_matricial_search"
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -342,6 +347,7 @@ export function CatalogoMatricialView() {
 
         {/* Paginación Reactiva de la Matriz */}
         <TablePagination
+          id="catalogo-matricial-pagination"
           currentPage={currentPage}
           totalItems={filtrados.length}
           pageSize={pageSize}
@@ -375,8 +381,10 @@ export function CatalogoMatricialView() {
               
               {/* Nombre y Tipo */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Nombre del Bien / Servicio:</label>
+                <label htmlFor="matricial-bien-nombre" className="text-xs font-bold text-gray-700 dark:text-slate-300">Nombre del Bien / Servicio:</label>
                 <input
+                  id="matricial-bien-nombre"
+                  name="nombre"
                   type="text"
                   required
                   value={formData.nombre || ''}
@@ -388,8 +396,10 @@ export function CatalogoMatricialView() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Tipo de Bien:</label>
+                  <label htmlFor="matricial-bien-tipo" className="text-xs font-bold text-gray-700 dark:text-slate-300">Tipo de Bien:</label>
                   <select
+                    id="matricial-bien-tipo"
+                    name="tipo_bien"
                     value={formData.tipo_bien || 'servicio'}
                     onChange={(e) => setFormData({ ...formData, tipo_bien: e.target.value as any })}
                     className="w-full p-2.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xs text-gray-900 dark:text-white outline-none focus:border-indigo-500"
@@ -402,8 +412,10 @@ export function CatalogoMatricialView() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Categoría / Línea:</label>
+                  <label htmlFor="matricial-bien-categoria" className="text-xs font-bold text-gray-700 dark:text-slate-300">Categoría / Línea:</label>
                   <input
+                    id="matricial-bien-categoria"
+                    name="categoria"
                     type="text"
                     value={formData.categoria || ''}
                     onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
@@ -421,8 +433,10 @@ export function CatalogoMatricialView() {
 
                 <div className="grid grid-cols-3 gap-2.5">
                   <div>
-                    <label className="text-[10px] font-bold text-gray-500">Precio Venta (S/):</label>
+                    <label htmlFor="matricial-bien-precio-venta" className="text-[10px] font-bold text-gray-500">Precio Venta (S/):</label>
                     <input
+                      id="matricial-bien-precio-venta"
+                      name="precio_venta"
                       type="number"
                       step="0.5"
                       value={formData.precio_venta || 0}
@@ -432,8 +446,10 @@ export function CatalogoMatricialView() {
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-gray-500">Costo Insumos (S/):</label>
+                    <label htmlFor="matricial-bien-costo-base" className="text-[10px] font-bold text-gray-500">Costo Insumos (S/):</label>
                     <input
+                      id="matricial-bien-costo-base"
+                      name="costo_base"
                       type="number"
                       step="0.5"
                       value={formData.costo_base || 0}
@@ -443,8 +459,10 @@ export function CatalogoMatricialView() {
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-gray-500">Comisión (%):</label>
+                    <label htmlFor="matricial-bien-comision" className="text-[10px] font-bold text-gray-500">Comisión (%):</label>
                     <input
+                      id="matricial-bien-comision"
+                      name="comision_porcentaje"
                       type="number"
                       value={formData.comision_porcentaje || 0}
                       onChange={(e) => setFormData({ ...formData, comision_porcentaje: Number(e.target.value) })}
@@ -464,10 +482,12 @@ export function CatalogoMatricialView() {
               {/* Duración en minutos */}
               {formData.tipo_bien === 'servicio' && (
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center gap-1">
+                  <label htmlFor="matricial-bien-duracion" className="text-xs font-bold text-gray-700 dark:text-slate-300 flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-gray-400" /> Tiempo Estimado de Ejecución (Minutos):
                   </label>
                   <input
+                    id="matricial-bien-duracion"
+                    name="duracion_minutos"
                     type="number"
                     value={formData.duracion_minutos || 30}
                     onChange={(e) => setFormData({ ...formData, duracion_minutos: Number(e.target.value) })}

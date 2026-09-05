@@ -619,8 +619,10 @@ export default function CatalogoMasterPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <label className="flex items-center gap-2 text-sm font-bold text-gray-600 bg-white border border-gray-100 px-4 py-3 rounded-2xl cursor-pointer hover:bg-gray-50 transition-all shadow-sm">
+            <label htmlFor="catalogo-jerarquico-mostrar-inactivos" className="flex items-center gap-2 text-sm font-bold text-gray-600 bg-white border border-gray-100 px-4 py-3 rounded-2xl cursor-pointer hover:bg-gray-50 transition-all shadow-sm">
               <input 
+                id="catalogo-jerarquico-mostrar-inactivos"
+                name="mostrar_inactivos"
                 type="checkbox" 
                 checked={mostrarInactivos} 
                 onChange={e => setMostrarInactivos(e.target.checked)} 
@@ -680,8 +682,13 @@ export default function CatalogoMasterPage() {
         {/* Search Bar Bento Section */}
         <div className="p-6 border-b border-gray-100/50 flex flex-col md:flex-row gap-4 items-center justify-between bg-white/40">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <label htmlFor="catalogo-jerarquico-search" className="sr-only">
+              Buscar por nombre, SKU, marca
+            </label>
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
             <input 
+              id="catalogo-jerarquico-search"
+              name="catalogo_jerarquico_search"
               type="text" 
               placeholder="Buscar por nombre, SKU, marca..." 
               value={filtroTexto}
@@ -859,28 +866,28 @@ export default function CatalogoMasterPage() {
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1 md:col-span-2">
-                  <label className="text-sm font-bold text-gray-700">Nombre Comercial</label>
-                  <input required type="text" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} placeholder="Ej. Olaplex Nº3 Hair Perfector" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <label htmlFor="form-bien-nombre" className="text-sm font-bold text-gray-700">Nombre Comercial</label>
+                  <input id="form-bien-nombre" name="nombre" required type="text" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} placeholder="Ej. Olaplex Nº3 Hair Perfector" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-sm font-bold text-gray-700">Marca / Fabricante</label>
-                  <input required type="text" value={formData.marca} onChange={e => setFormData({...formData, marca: e.target.value})} placeholder="Ej. L'Oréal, Olaplex" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <label htmlFor="form-bien-marca" className="text-sm font-bold text-gray-700">Marca / Fabricante</label>
+                  <input id="form-bien-marca" name="marca" required type="text" value={formData.marca} onChange={e => setFormData({...formData, marca: e.target.value})} placeholder="Ej. L'Oréal, Olaplex" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-sm font-bold text-gray-700">Línea / Subcategoría</label>
-                  <input required type="text" value={formData.linea} onChange={e => setFormData({...formData, linea: e.target.value})} placeholder="Ej. Blondage, Nutritive" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <label htmlFor="form-bien-linea" className="text-sm font-bold text-gray-700">Línea / Subcategoría</label>
+                  <input id="form-bien-linea" name="linea" required type="text" value={formData.linea} onChange={e => setFormData({...formData, linea: e.target.value})} placeholder="Ej. Blondage, Nutritive" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-sm font-bold text-gray-700">Presentación / Formato</label>
-                  <input type="text" value={formData.presentacion} onChange={e => setFormData({...formData, presentacion: e.target.value})} placeholder="Ej. 250ml, Tubo 60g, Frasco" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <label htmlFor="form-bien-presentacion" className="text-sm font-bold text-gray-700">Presentación / Formato</label>
+                  <input id="form-bien-presentacion" name="presentacion" type="text" value={formData.presentacion} onChange={e => setFormData({...formData, presentacion: e.target.value})} placeholder="Ej. 250ml, Tubo 60g, Frasco" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-sm font-bold text-gray-700">Proveedor Principal</label>
-                  <input type="text" value={formData.proveedor} onChange={e => setFormData({...formData, proveedor: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <label htmlFor="form-bien-proveedor" className="text-sm font-bold text-gray-700">Proveedor Principal</label>
+                  <input id="form-bien-proveedor" name="proveedor" type="text" value={formData.proveedor} onChange={e => setFormData({...formData, proveedor: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
 
                 <div className="space-y-1 md:col-span-2">
@@ -2298,12 +2305,12 @@ export default function CatalogoMasterPage() {
                 )}
                 
                 <div className="space-y-1">
-                  <label className="text-sm font-bold text-gray-700">Precio Venta (PVP S/)</label>
-                  <input type="number" step="0.01" value={formData.precio_venta} onChange={e => setFormData({...formData, precio_venta: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <label htmlFor="form-bien-precio-venta" className="text-sm font-bold text-gray-700">Precio Venta (PVP S/)</label>
+                  <input id="form-bien-precio-venta" name="precio_venta" type="number" step="0.01" value={formData.precio_venta} onChange={e => setFormData({...formData, precio_venta: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-bold text-gray-700">Costo Unitario Ref. (S/)</label>
-                  <input type="number" step="0.01" value={formData.costo_unitario} onChange={e => setFormData({...formData, costo_unitario: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <label htmlFor="form-bien-costo-unitario" className="text-sm font-bold text-gray-700">Costo Unitario Ref. (S/)</label>
+                  <input id="form-bien-costo-unitario" name="costo_unitario" type="number" step="0.01" value={formData.costo_unitario} onChange={e => setFormData({...formData, costo_unitario: e.target.value})} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" />
                 </div>
 
                 {/* Cálculo Dinámico de Margen Comercial */}
@@ -2340,8 +2347,8 @@ export default function CatalogoMasterPage() {
                 
                 {!editItem && formData.tipo_catalogo !== 'servicio' && (
                   <div className="space-y-1 md:col-span-2">
-                    <label className="text-sm font-bold text-indigo-700">Stock Inicial (Admin)</label>
-                    <input type="number" min="0" value={formData.stockInicial} onChange={e => setFormData({...formData, stockInicial: e.target.value})} className="w-full px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-indigo-900 font-bold" />
+                    <label htmlFor="form-bien-stock-inicial" className="text-sm font-bold text-indigo-700">Stock Inicial (Admin)</label>
+                    <input id="form-bien-stock-inicial" name="stock_inicial" type="number" min="0" value={formData.stockInicial} onChange={e => setFormData({...formData, stockInicial: e.target.value})} className="w-full px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-indigo-900 font-bold" />
                     <p className="text-[10px] text-indigo-500 leading-tight">Solo llenar si se desea inicializar inventario en esta Sede inmediatamente.</p>
                   </div>
                 )}

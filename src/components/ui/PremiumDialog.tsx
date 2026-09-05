@@ -33,7 +33,16 @@ export function PromptDialog({ isOpen, title, message, defaultValue, onConfirm, 
         <div className="p-6">
           <h3 className="text-lg font-black text-gray-900 mb-2">{title}</h3>
           <p className="text-sm text-gray-500 font-medium mb-4">{message}</p>
-          <input type="text" value={val} onChange={e=>setVal(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-gray-800" autoFocus />
+          <input
+            id="prompt-dialog-input"
+            name="prompt_value"
+            aria-label={title || "Valor"}
+            type="text"
+            value={val}
+            onChange={e=>setVal(e.target.value)}
+            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-gray-800"
+            autoFocus
+          />
         </div>
         <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-100">
           <button onClick={onCancel} className="px-4 py-2 text-sm font-bold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50">Cancelar</button>

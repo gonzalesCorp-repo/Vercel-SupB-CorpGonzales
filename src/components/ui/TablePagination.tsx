@@ -13,6 +13,7 @@ export interface TablePaginationProps {
   itemName?: string;
   className?: string;
   compact?: boolean;
+  id?: string;
 }
 
 export function TablePagination({
@@ -24,8 +25,11 @@ export function TablePagination({
   pageSizeOptions = [10, 25, 50, 100],
   itemName = 'registros',
   className = '',
-  compact = false
+  compact = false,
+  id
 }: TablePaginationProps) {
+  const generatedId = React.useId().replace(/:/g, '');
+  const selectId = id || `table-page-size-${generatedId}`;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
 
@@ -81,8 +85,10 @@ export function TablePagination({
 
           {onPageSizeChange && (
             <div className="flex items-center gap-1 pl-1.5 border-l border-gray-200 dark:border-slate-800">
-              <span className="text-[10px] text-slate-400">Ver:</span>
+              <label htmlFor={`${selectId}-compact`} className="text-[10px] text-slate-400 cursor-pointer">Ver:</label>
               <select
+                id={`${selectId}-compact`}
+                name="page_size"
                 value={pageSize}
                 onChange={(e) => {
                   const newSize = Number(e.target.value);
@@ -165,8 +171,10 @@ export function TablePagination({
 
         {onPageSizeChange && (
           <div className="flex items-center gap-1.5 pl-2 border-l border-gray-200 dark:border-slate-800">
-            <span className="text-[11px] text-slate-400">Filas:</span>
+            <label htmlFor={selectId} className="text-[11px] text-slate-400 cursor-pointer">Filas:</label>
             <select
+              id={selectId}
+              name="page_size"
               value={pageSize}
               onChange={(e) => {
                 const newSize = Number(e.target.value);
