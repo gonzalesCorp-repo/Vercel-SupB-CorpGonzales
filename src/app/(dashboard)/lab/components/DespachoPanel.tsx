@@ -473,8 +473,13 @@ export default function DespachoPanel() {
           </div>
 
           <div className="relative mb-3">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+            <label htmlFor="despacho-filtro-historial" className="sr-only">
+              Buscar en historial de despachos
+            </label>
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             <input
+              id="despacho-filtro-historial"
+              name="filtro_historial"
               type="text"
               value={filtroHistorial}
               onChange={(e) => setFiltroHistorial(e.target.value)}

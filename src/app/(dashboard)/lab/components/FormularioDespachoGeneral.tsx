@@ -263,10 +263,12 @@ export function FormularioDespachoGeneral({
         
         {/* Insumo Base */}
         <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+          <label htmlFor="despacho-insumo-principal" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
             Insumo Principal (Catálogo):
           </label>
           <select
+            id="despacho-insumo-principal"
+            name="insumo_principal"
             value={insumoPrincipalId}
             onChange={(e) => setInsumoPrincipalId(e.target.value)}
             className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
@@ -281,11 +283,13 @@ export function FormularioDespachoGeneral({
 
         {/* Gramos / Dosis */}
         <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+          <label htmlFor="despacho-gramos-principal" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
             Gramos Requeridos (Base):
           </label>
           <div className="relative">
             <input
+              id="despacho-gramos-principal"
+              name="gramos_principal"
               type="number"
               value={gramosPrincipal}
               onChange={(e) => setGramosPrincipal(Math.max(1, Number(e.target.value)))}
@@ -299,10 +303,12 @@ export function FormularioDespachoGeneral({
 
         {/* Ratio de Mezcla */}
         <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
+          <label htmlFor="despacho-ratio-oxigenta" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
             Ratio de Mezcla Dinámico:
           </label>
           <select
+            id="despacho-ratio-oxigenta"
+            name="ratio_oxigenta"
             value={valoresAtributos.ratio_oxigenta}
             onChange={(e) => setValoresAtributos(prev => ({ ...prev, ratio_oxigenta: e.target.value }))}
             className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs font-semibold text-indigo-600 dark:text-indigo-300 focus:outline-none focus:border-indigo-500"
@@ -508,7 +514,12 @@ export function FormularioDespachoGeneral({
                       </button>
 
                       <div className="relative flex items-center">
+                        <label htmlFor={`despacho-fila-gramos-${idx}`} className="sr-only">
+                          Gramos de {f.nombre}
+                        </label>
                         <input
+                          id={`despacho-fila-gramos-${idx}`}
+                          name={`gramos_fila_${idx}`}
                           type="number"
                           step={0.5}
                           min={0}

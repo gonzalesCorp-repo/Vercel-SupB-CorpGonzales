@@ -249,8 +249,10 @@ export function ModalConfiguracionBalanza({
           <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-2xl space-y-3 animate-in fade-in">
             <div className="grid grid-cols-3 gap-2">
               <div className="col-span-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">IP Local de Balanza:</label>
+                <label htmlFor="balanza-wifi-ip" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">IP Local de Balanza:</label>
                 <input
+                  id="balanza-wifi-ip"
+                  name="wifi_ip"
                   type="text"
                   value={config.wifiIp}
                   onChange={(e) => setConfig({ ...config, wifiIp: e.target.value })}
@@ -259,8 +261,10 @@ export function ModalConfiguracionBalanza({
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Puerto WS:</label>
+                <label htmlFor="balanza-wifi-puerto" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Puerto WS:</label>
                 <input
+                  id="balanza-wifi-puerto"
+                  name="wifi_puerto"
                   type="number"
                   value={config.wifiPuerto}
                   onChange={(e) => setConfig({ ...config, wifiPuerto: Number(e.target.value) })}
@@ -276,8 +280,10 @@ export function ModalConfiguracionBalanza({
 
         {config.protocolo === 'SERIAL_USB' && (
           <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-2xl space-y-2 animate-in fade-in">
-            <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Baudrate COM:</label>
+            <label htmlFor="balanza-serial-baudrate" className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Baudrate COM:</label>
             <select
+              id="balanza-serial-baudrate"
+              name="serial_baudrate"
               value={config.serialBaudRate}
               onChange={(e) => setConfig({ ...config, serialBaudRate: Number(e.target.value) })}
               className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs font-mono text-white focus:outline-none focus:border-emerald-500"
