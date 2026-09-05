@@ -34,6 +34,7 @@ export interface AgenteConfigRemunerativa {
   cuenta_bancaria_pago_preferida?: string;
   banco_preferido?: string;
   numero_documento_pago?: string;
+  comisiones_servicios_override?: Record<string, number>;
   updated_at?: string;
 }
 

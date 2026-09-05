@@ -13,6 +13,7 @@ import {
 } from '@/services/liquidaciones';
 import { useUIStore } from '@/store/useUIStore';
 import { Sliders, DollarSign, Percent, Calendar, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { ComisionesGranularesEditor } from '@/components/admin/ComisionesGranularesEditor';
 
 interface ConfiguracionRemuneracionModalProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ export function ConfiguracionRemuneracionModal({
   const [sueldoBase, setSueldoBase] = useState<number | string>(0);
   const [comisionServicios, setComisionServicios] = useState<number | string>(40);
   const [comisionProductos, setComisionProductos] = useState<number | string>(10);
+  const [comisionesOverride, setComisionesOverride] = useState<Record<string, number>>({});
   const [frecuenciaCorte, setFrecuenciaCorte] = useState<FrecuenciaCorte>('DIARIA');
   const [permiteSolicitudManual, setPermiteSolicitudManual] = useState<boolean>(true);
   const [cuentaBancaria, setCuentaBancaria] = useState('');
@@ -60,6 +62,7 @@ export function ConfiguracionRemuneracionModal({
         setCuentaBancaria(conf.cuenta_bancaria_pago_preferida || '');
         setBancoPreferido(conf.banco_preferido || 'BCP');
         setDocumentoPago(conf.numero_documento_pago || '');
+        setComisionesOverride(conf.comisiones_servicios_override || {});
       } catch (e) {
         console.error('Error cargando configuración remunerativa:', e);
       } finally {
@@ -83,7 +86,8 @@ export function ConfiguracionRemuneracionModal({
         permite_solicitud_manual: permiteSolicitudManual,
         cuenta_bancaria_pago_preferida: cuentaBancaria,
         banco_preferido: bancoPreferido,
-        numero_documento_pago: documentoPago
+        numero_documento_pago: documentoPago,
+        comisiones_servicios_override: comisionesOverride
       });
 
       showAlert(`¡Contrato remunerativo de ${agente.nombre} actualizado con éxito!`, 'success');
@@ -221,6 +225,14 @@ export function ConfiguracionRemuneracionModal({
             </div>
           </div>
         </div>
+
+        {/* Excepciones Granulares por Servicio */}
+        <ComisionesGranularesEditor
+          overrides={comisionesOverride}
+          onChange={setComisionesOverride}
+          comisionGeneral={comisionServicios}
+          disabled={tipoRemuneracion === 'SOLO_SUELDO_BASE' || isSubmitting}
+        />
 
         {/* Datos Bancarios de Pago del Colaborador */}
         <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2.5">

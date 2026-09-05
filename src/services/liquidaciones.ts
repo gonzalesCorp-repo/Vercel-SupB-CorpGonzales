@@ -73,6 +73,7 @@ export async function guardarConfiguracionRemunerativa(config: AgenteConfigRemun
       cuenta_bancaria_pago_preferida: config.cuenta_bancaria_pago_preferida,
       banco_preferido: config.banco_preferido,
       numero_documento_pago: config.numero_documento_pago,
+      comisiones_servicios_override: config.comisiones_servicios_override || {},
       updated_at: new Date().toISOString()
     })
     .select()
@@ -134,7 +135,24 @@ export async function obtenerVentasAuditadasPorColaborador(
       itemsList.forEach((it: any, index: number) => {
         const itemOriginId = `${o.id}_serv_${index}`;
         const montoVenta = Number(it.precio || it.precio_final || it.precio_base || 0);
-        const porcentaje = it.tipo_bien === 'producto' ? config.porcentaje_comision_productos : config.porcentaje_comision_servicios;
+        let porcentaje = it.tipo_bien === 'producto' ? config.porcentaje_comision_productos : config.porcentaje_comision_servicios;
+
+        // Cascada de Precedencia Granular: Excepción de Agente > Contrato General de Servicios
+        if (it.tipo_bien !== 'producto' && config.comisiones_servicios_override) {
+          const bienId = it.bien_id || it.id;
+          if (bienId && config.comisiones_servicios_override[bienId] !== undefined) {
+            porcentaje = Number(config.comisiones_servicios_override[bienId]);
+          } else if (it.nombre) {
+            // Coincidencia secundaria por nombre si el ítem no guardó el UUID del bien
+            const matchEntry = Object.entries(config.comisiones_servicios_override).find(([key]) => 
+              key.toLowerCase() === it.nombre.toLowerCase() || (it.sku && key === it.sku)
+            );
+            if (matchEntry) {
+              porcentaje = Number(matchEntry[1]);
+            }
+          }
+        }
+
         const comisionMonto = (montoVenta * porcentaje) / 100;
         const yaLiquidado = mapLiquidados.has(itemOriginId);
 

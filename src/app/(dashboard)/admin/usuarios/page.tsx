@@ -25,6 +25,8 @@ import {
   HerramientaDefinicion
 } from '@/services/permisos';
 import { obtenerRolesSistema, RolSistema } from '@/services/roles';
+import { ComisionesGranularesEditor } from '@/components/admin/ComisionesGranularesEditor';
+import { obtenerConfiguracionRemunerativa, guardarConfiguracionRemunerativa } from '@/services/liquidaciones';
 
 interface AgenteAdmin extends Agente {
   email?: string;
@@ -72,6 +74,7 @@ export default function UsuariosPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [todasSedes, setTodasSedes] = useState<{id: string, nombre: string}[]>([]);
+  const [comisionesOverride, setComisionesOverride] = useState<Record<string, number>>({});
 
   // Modal de Delegación Quirúrgica
   const [isDelegarModalOpen, setIsDelegarModalOpen] = useState(false);
@@ -182,6 +185,20 @@ export default function UsuariosPage() {
       };
       const exito = await guardarAgente(payload, formData.sedes_ids || []);
       if (exito) {
+        if (editId) {
+          try {
+            const confActual = await obtenerConfiguracionRemunerativa(editId, formData.rol);
+            await guardarConfiguracionRemunerativa({
+              ...confActual,
+              agente_id: editId,
+              sueldo_base: Number(payload.sueldo_base),
+              porcentaje_comision_servicios: Number(payload.porcentaje_comision),
+              comisiones_servicios_override: comisionesOverride
+            });
+          } catch (confErr) {
+            console.warn('Error sincronizando contrato remunerativo:', confErr);
+          }
+        }
         await cargarDatos();
         closeModal();
       }
@@ -194,6 +211,7 @@ export default function UsuariosPage() {
 
   const openNewUserModal = () => {
     setEditId(null);
+    setComisionesOverride({});
     const defaultSedeId = todasSedes.length === 1 
       ? [todasSedes[0].id] 
       : (sedeActiva?.id && todasSedes.some(s => s.id === sedeActiva.id) ? [sedeActiva.id] : (todasSedes[0]?.id ? [todasSedes[0].id] : []));
@@ -235,12 +253,25 @@ export default function UsuariosPage() {
       porcentaje_comision: Number(user.porcentaje_comision || 40),
       tarifa_hora: Number(user.tarifa_hora || 0)
     });
+
+    if (user.id) {
+      obtenerConfiguracionRemunerativa(user.id, user.rol).then(conf => {
+        setComisionesOverride(conf.comisiones_servicios_override || {});
+      }).catch(err => {
+        console.error('Error cargando excepciones de comisiones:', err);
+        setComisionesOverride({});
+      });
+    } else {
+      setComisionesOverride({});
+    }
+
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setEditId(null);
+    setComisionesOverride({});
     setFormData({ 
       nombre: '', email: '', password: '', rol: 'STAFF', especialidad: '', estado: 'ACTIVO', sedes_ids: [],
       regimen_laboral: 'HONORARIOS_RHE', sueldo_base: 0, tipo_pension: 'AFP', asignacion_familiar: false, porcentaje_comision: 40, tarifa_hora: 0
@@ -867,6 +898,16 @@ export default function UsuariosPage() {
                 <p className="text-[10px] text-amber-700">Liquidación quincenal/mensual con emisión de Recibo por Honorarios Electrónico (RHE).</p>
               </div>
             )}
+          </div>
+
+          {/* Excepciones Granulares de Comisión por Servicio */}
+          <div className="pt-3 border-t border-slate-100">
+            <ComisionesGranularesEditor
+              overrides={comisionesOverride}
+              onChange={setComisionesOverride}
+              comisionGeneral={formData.porcentaje_comision || 40}
+              disabled={isSaving}
+            />
           </div>
           
           <div className="pt-3 border-t border-slate-100">
