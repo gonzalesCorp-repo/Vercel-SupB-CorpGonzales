@@ -120,15 +120,25 @@ export default function HistorialOATCsTable() {
             
             <div className="flex items-center gap-3">
               <div className="flex items-center bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
-                <Calendar className="w-4 h-4 text-slate-400 mr-2" />
+                <Calendar className="w-4 h-4 text-slate-400 mr-2 pointer-events-none" />
+                <label htmlFor="historial-fecha-inicio" className="sr-only">
+                  Fecha inicial
+                </label>
                 <input 
+                  id="historial-fecha-inicio"
+                  name="fecha_inicio"
                   type="date" 
                   value={fechaInicio}
                   onChange={(e) => setFechaInicio(e.target.value)}
                   className="bg-transparent text-sm text-slate-700 outline-none w-32"
                 />
-                <span className="text-slate-400 mx-2">-</span>
+                <span className="text-slate-400 mx-2" aria-hidden="true">-</span>
+                <label htmlFor="historial-fecha-fin" className="sr-only">
+                  Fecha final
+                </label>
                 <input 
+                  id="historial-fecha-fin"
+                  name="fecha_fin"
                   type="date" 
                   value={fechaFin}
                   onChange={(e) => setFechaFin(e.target.value)}

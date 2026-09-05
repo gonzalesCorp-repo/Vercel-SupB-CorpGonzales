@@ -381,11 +381,13 @@ export function BulkUploader({
             {allowTableSelection && (
               <div className="px-6 py-3.5 bg-slate-50 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-800 space-y-2">
                 <div className="flex items-center gap-3">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0 flex items-center gap-1">
+                  <label htmlFor="bulk-uploader-target-table" className="text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0 flex items-center gap-1">
                     <Layers className="w-3.5 h-3.5 text-indigo-600" />
                     Tabla Destino:
                   </label>
                   <select
+                    id="bulk-uploader-target-table"
+                    name="target_table"
                     value={targetTable}
                     onChange={(e) => {
                       setTargetTable(e.target.value);
@@ -432,7 +434,12 @@ export function BulkUploader({
                   className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl p-12 flex flex-col items-center justify-center hover:border-indigo-500 hover:bg-indigo-50/20 transition-all cursor-pointer text-center"
                   onClick={() => fileInputRef.current?.click()}
                 >
+                  <label htmlFor="bulk-uploader-file-input" className="sr-only">
+                    Seleccionar archivo Excel o CSV
+                  </label>
                   <input 
+                    id="bulk-uploader-file-input"
+                    name="file_input"
                     type="file" 
                     accept=".xlsx, .xls, .csv" 
                     className="hidden" 
