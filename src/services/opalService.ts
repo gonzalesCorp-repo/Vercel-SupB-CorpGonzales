@@ -1,4 +1,13 @@
-import { OpalWorkflowInputPayload, OpalWorkflowOutputPayload, PasoRecetaOpal } from '@/types/opal';
+import { 
+  OpalWorkflowInputPayload, 
+  OpalWorkflowOutputPayload, 
+  PasoRecetaOpal,
+  StaffChairsideInput,
+  StaffChairsideOutput,
+  ClientBeautyInput,
+  ClientBeautyOutput,
+  ProductoCrossSellingOpal
+} from '@/types/opal';
 import { KioskConciergeInput, KioskConciergeOutput } from '@/components/kiosk/types';
 
 /**
@@ -166,7 +175,6 @@ function generarDiagnosticoHeuristicoOpal(
 
 /**
  * Servicio de Concierge de Kiosko impulsado por Google Opal AI (Breadboard).
- * Recomienda bebidas de cortesía y servicios personalizados según el cliente VIP y disponibilidad.
  */
 export async function procesarKioskConciergeOpal(
   input: KioskConciergeInput
@@ -192,7 +200,6 @@ export async function procesarKioskConciergeOpal(
     }
   }
 
-  // Motor Heurístico de Kiosk Concierge
   const horaActual = new Date().getHours();
   const esManana = horaActual < 12;
   const esTardeNoche = horaActual >= 17;
@@ -210,13 +217,13 @@ export async function procesarKioskConciergeOpal(
   if (esTardeNoche) {
     bebidaSugerida = {
       nombre: '🥂 Cocktail de Bienvenida VIP',
-      temperatura: 'FRIA' as const,
+      temperatura: 'FRIA',
       descripcion: 'Bebida de autor refrescante para relajarte durante tu visita.'
     };
   } else if (!esManana) {
     bebidaSugerida = {
       nombre: '🧃 Jugo de Naranja Natural Prensado',
-      temperatura: 'FRIA' as const,
+      temperatura: 'FRIA',
       descripcion: 'Vitamina C pura y energizante recién exprimida.'
     };
   }
@@ -244,5 +251,155 @@ export async function procesarKioskConciergeOpal(
     bebida_sugerida: bebidaSugerida,
     servicios_sugeridos: servicios,
     tiempo_espera_estimado_minutos: 5
+  };
+}
+
+/**
+ * Asistente de Estación Móvil (Chairside Assistant) para Estilistas.
+ * Calcula tiempos de exposición, comisiones devengadas y ventas cruzadas en el sillón.
+ */
+export async function procesarStaffChairsideOpal(
+  input: StaffChairsideInput
+): Promise<StaffChairsideOutput> {
+  const webhookUrl = process.env.NEXT_PUBLIC_OPAL_CHAIRSIDE_WEBHOOK_URL;
+
+  if (webhookUrl) {
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPAL_API_KEY || ''}`
+        },
+        body: JSON.stringify(input)
+      });
+      if (response.ok) {
+        return (await response.json()) as StaffChairsideOutput;
+      }
+    } catch (e) {
+      console.warn('Error en webhook Chairside, usando motor local:', e);
+    }
+  }
+
+  // Motor Heurístico Chairside
+  const servicios = input.servicios_activos || [];
+  const pctComision = (input.porcentaje_comision_staff || 40) / 100;
+  const totalServicios = servicios.reduce((acc, s) => acc + Number(s.precio || 0), 0);
+  const comisionServicio = Math.round(totalServicios * pctComision * 100) / 100;
+
+  // Analizar si hay química o color
+  const nombresText = servicios.map(s => s.nombre.toLowerCase()).join(' ');
+  let tiempoExpo = 0;
+  let alerta: string | undefined = undefined;
+
+  if (nombresText.includes('decolora') || nombresText.includes('balayage') || nombresText.includes('mechas')) {
+    tiempoExpo = 35;
+    alerta = 'Realizar prueba de elasticidad de mecha testigo a los 20 minutos.';
+  } else if (nombresText.includes('tinte') || nombresText.includes('color')) {
+    tiempoExpo = 30;
+    alerta = 'Emulsionar en bacha con abundante agua templada.';
+  } else if (nombresText.includes('alisado') || nombresText.includes('keratina') || nombresText.includes('botox')) {
+    tiempoExpo = 40;
+    alerta = 'Secar al 100% antes del sellado térmico con plancha.';
+  }
+
+  // Productos de Venta Cruzada Recomendados
+  const productos: ProductoCrossSellingOpal[] = [];
+
+  if (nombresText.includes('decolora') || nombresText.includes('balayage') || nombresText.includes('color')) {
+    productos.push({
+      id: 'PROD-MATIZ-01',
+      nombre: 'Shampoo Matizador Violeta Gloss 300ml',
+      categoria: 'Cuidado Post-Color',
+      precio: 75.00,
+      comision_estimada: 15.00,
+      motivo_recomendacion: 'Evita la oxidación de tonos rubios y neutraliza reflejos dorados en casa.'
+    });
+    productos.push({
+      id: 'PROD-PLEX-02',
+      nombre: 'Mascarilla Selladora Bond-Plex 250ml',
+      categoria: 'Tratamiento Intensivo',
+      precio: 90.00,
+      comision_estimada: 18.00,
+      motivo_recomendacion: 'Reconstruye puentes de queratina dañados tras la decoloración.'
+    });
+  } else {
+    productos.push({
+      id: 'PROD-ARGAN-03',
+      nombre: 'Serum Protector de Argán & Macadamia 60ml',
+      categoria: 'Termoprotector',
+      precio: 65.00,
+      comision_estimada: 13.00,
+      motivo_recomendacion: 'Protección térmica de 230°C y sellado de puntas abiertas.'
+    });
+    productos.push({
+      id: 'PROD-SHAMP-04',
+      nombre: 'Shampoo Nutritivo Libre de Sulfatos 300ml',
+      categoria: 'Higiene Capilar',
+      precio: 70.00,
+      comision_estimada: 14.00,
+      motivo_recomendacion: 'Mantiene la hidratación natural sin desgastar tratamientos de salón.'
+    });
+  }
+
+  const comisionUpsell = productos.reduce((acc, p) => acc + p.comision_estimada, 0);
+
+  return {
+    tiempo_exposicion_sugerido_minutos: tiempoExpo,
+    alerta_tecnica: alerta,
+    productos_cross_selling: productos,
+    comision_servicio_actual: comisionServicio,
+    comision_potencial_upsell: comisionUpsell
+  };
+}
+
+/**
+ * Asesor de Lealtad & Belleza Móvil para Clientes VIP.
+ * Sugiere cuidados post-servicio, re-agendamiento automático y canje de recompensas.
+ */
+export async function procesarClientBeautyAdvisorOpal(
+  input: ClientBeautyInput
+): Promise<ClientBeautyOutput> {
+  const webhookUrl = process.env.NEXT_PUBLIC_OPAL_BEAUTY_WEBHOOK_URL;
+
+  if (webhookUrl) {
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPAL_API_KEY || ''}`
+        },
+        body: JSON.stringify(input)
+      });
+      if (response.ok) {
+        return (await response.json()) as ClientBeautyOutput;
+      }
+    } catch (e) {
+      console.warn('Error en webhook Beauty Advisor, usando motor local:', e);
+    }
+  }
+
+  // Motor Heurístico Beauty Advisor
+  const puntos = input.puntos_actuales || 0;
+  const fechaHoy = new Date();
+  const fechaEstimada = new Date(fechaHoy.getTime() + 25 * 24 * 60 * 60 * 1000);
+  const fechaStr = fechaEstimada.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+
+  const consejo = 'Para maximizar la duración de tu tratamiento, te recomendamos lavar tu cabello con agua tibia o fría y aplicar tu mascarilla nutritiva de medios a puntas una vez por semana.';
+
+  return {
+    consejo_personalizado: consejo,
+    proxima_cita_recomendada: {
+      dias_sugeridos: 25,
+      fecha_estimada: fechaStr,
+      servicio_sugerido: 'Retoque de Raíz & Nutrición Profunda',
+      motivo: 'Mantiene la armonía del color antes de que el crecimiento natural supere 1.5 cm.'
+    },
+    beneficio_fidelidad: {
+      recompensa: 'Masaje Capilar Anti-Stress con Aromaterapia en Bacha',
+      puntos_necesarios: 100,
+      disponible_ahora: puntos >= 100
+    }
   };
 }

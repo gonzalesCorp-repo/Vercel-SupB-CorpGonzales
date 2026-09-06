@@ -26,6 +26,8 @@ import {
   rechazarAsesoria, derivarTicketCruzado, iniciarTiempoExposicionTicket, reanudarServicioTicket, finalizarTicketIndividual
 } from '@/services/tickets';
 import { createClient } from '@/lib/supabase/client';
+import { StaffChairsideAssistant } from './staff/StaffChairsideAssistant';
+import { ProductoCrossSellingOpal } from '@/types/opal';
 
 interface TabEstacionProps {
   modoEstaciones?: 'AUTOMATICO_IOT' | 'SEMI_AUTOMATICO_BUZON' | 'MANUAL';
@@ -476,7 +478,34 @@ export function TabEstacion({
     }
   };
 
-
+  const handleAnadirProductoOpal = async (prod: ProductoCrossSellingOpal) => {
+    if (!oatcActiva?.id) return;
+    try {
+      await derivarTicketCruzado({
+        oatcId: oatcActiva.id,
+        destino: 'PROPIO',
+        tipoTicket: 'producto',
+        estacionNombre,
+        solicitadoPor: agenteNombre,
+        items: [{
+          nombre: prod.nombre,
+          tipo: 'producto',
+          precio_base: prod.precio,
+          precio_final: prod.precio,
+          es_cortesia: false,
+          cantidad: 1,
+        }]
+      });
+      await cargarTickets();
+      if (onRefrescar) onRefrescar();
+      setFeedback(`¡"${prod.nombre}" añadido a la orden! Comisión estimada: S/ ${prod.comision_estimada.toFixed(2)}.`);
+      setTimeout(() => setFeedback(''), 4000);
+    } catch (e: any) {
+      console.error('Error al agregar producto sugerido por Opal:', e);
+      setFeedback('Error al agregar el producto a la orden.');
+      setTimeout(() => setFeedback(''), 4000);
+    }
+  };
 
   const handleEliminarItemProforma = (index: number) => {
     if (proformaItems.length <= 1) {
@@ -972,6 +1001,13 @@ export function TabEstacion({
 
                 </div>
               )}
+
+              {/* Asistente Inteligente Opal en Sillón (Chairside Assistant & Cronómetro Químico) */}
+              <StaffChairsideAssistant
+                oatcActiva={oatcActiva}
+                agenteNombre={agenteNombre}
+                onAnadirProductoOatc={handleAnadirProductoOpal}
+              />
 
             </div>
           ) : (

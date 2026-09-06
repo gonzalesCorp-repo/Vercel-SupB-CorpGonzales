@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useUIStore } from '@/store/useUIStore';
 import { calcularEtiquetasCliente, ReglaEtiquetaCliente } from '@/services/reglasClientes';
+import { ClientBeautyAdvisor } from './ClientBeautyAdvisor';
 
 export interface ClientePerfilViewProps {
   cliente: {
@@ -190,6 +191,15 @@ export default function ClientePerfilView({
           </div>
         </div>
       </motion.div>
+      
+      {/* 🔮 ASESOR PERSONAL DE BELLEZA OPAL AI (Google Stitch & Opal AI) */}
+      <ClientBeautyAdvisor
+        cliente={cliente}
+        historialAtenciones={historialAtenciones}
+        onSolicitarCita={(servicio: string) => {
+          showAlert(`Hemos registrado tu solicitud para "${servicio}". Nuestro concierge te contactará para confirmar tu cita.`, 'success');
+        }}
+      />
 
       {/* 🏆 INSIGNIAS Y REGLAS DE FIDELIZACIÓN (Desde admin/reglas-clientes) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">

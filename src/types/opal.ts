@@ -69,3 +69,58 @@ export interface OpalWorkflowOutputPayload {
     sugerencia_venta_cruzada: string[];
   };
 }
+
+// ================= SUITE MÓVIL: STAFF CHAIRSIDE ASSISTANT =================
+export interface ProductoCrossSellingOpal {
+  id: string;
+  nombre: string;
+  categoria: string;
+  precio: number;
+  comision_estimada: number;
+  motivo_recomendacion: string;
+}
+
+export interface StaffChairsideInput {
+  oatc_id?: string;
+  cliente_nombre?: string;
+  servicios_activos?: Array<{
+    nombre: string;
+    precio: number;
+    categoria?: string;
+  }>;
+  porcentaje_comision_staff?: number;
+}
+
+export interface StaffChairsideOutput {
+  tiempo_exposicion_sugerido_minutos: number;
+  alerta_tecnica?: string;
+  productos_cross_selling: ProductoCrossSellingOpal[];
+  comision_servicio_actual: number;
+  comision_potencial_upsell: number;
+}
+
+// ================= SUITE MÓVIL: CLIENT BEAUTY ADVISOR =================
+export interface ClientBeautyInput {
+  cliente_id?: string;
+  nombre_cliente?: string;
+  ultimos_servicios?: Array<{
+    nombre: string;
+    fecha: string;
+  }>;
+  puntos_actuales?: number;
+}
+
+export interface ClientBeautyOutput {
+  consejo_personalizado: string;
+  proxima_cita_recomendada: {
+    dias_sugeridos: number;
+    fecha_estimada: string;
+    servicio_sugerido: string;
+    motivo: string;
+  };
+  beneficio_fidelidad?: {
+    recompensa: string;
+    puntos_necesarios: number;
+    disponible_ahora: boolean;
+  };
+}
