@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import QueryProvider from "@/providers/QueryProvider";
 import { DynamicPwaBranding } from "@/components/branding/DynamicPwaBranding";
+import { BeautySalonJsonLd } from "@/components/seo/BeautySalonJsonLd";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,9 +16,75 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vercel-sup-b-corp-gonzales.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Gloss Salón & Vaikuntha ERP",
-  description: "Enterprise Resource Planning & WFM Engine Multi-Sede",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Gloss Salón and Relax | Santuario de Belleza, Coloración & Spa en Jesús María",
+    template: "%s | Gloss Salón and Relax",
+  },
+  description:
+    "Salón boutique de alta gama con 17 años de maestría en Jesús María, Lima. Coloración experta, balayage luminoso, rescate de fibra capilar con Plex, nail spa y bienestar sensorial asistido por Opal AI.",
+  keywords: [
+    "Gloss Salón and Relax",
+    "Salón de belleza Jesús María",
+    "Balayage Lima",
+    "Coloración capilar Jesús María",
+    "Tratamiento capilar Lima",
+    "Spa capilar Jesús María",
+    "Peluquería Mariscal Luzuriaga",
+    "LuminaHQ",
+    "Vaikuntha ERP",
+    "Cosmiatría Lima",
+    "Corporación Gonzales",
+  ],
+  authors: [{ name: "Corporación Gonzales" }],
+  creator: "Corporación Gonzales",
+  publisher: "Gloss Salón and Relax",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Gloss Salón and Relax | Tu Santuario de Belleza & Bienestar",
+    description:
+      "17 años de maestría artesanal en Jesús María combinados con biotecnología capilar inteligente. Descubre tu ritual de cuidado consciente.",
+    url: siteUrl,
+    siteName: "Gloss Salón and Relax",
+    locale: "es_PE",
+    type: "website",
+    images: [
+      {
+        url: "/api/branding/icon?size=512",
+        width: 512,
+        height: 512,
+        alt: "Gloss Salón and Relax - Corporación Gonzales",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Gloss Salón and Relax | 17 Años de Maestría",
+    description:
+      "Tu santuario de belleza, coloración consciente y relajación integral en Jesús María, Lima.",
+    images: ["/api/branding/icon?size=512"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/api/branding/icon?size=favicon", type: "image/png" },
@@ -31,8 +98,8 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Gloss Salón"
-  }
+    title: "Gloss Salón",
+  },
 };
 
 export const viewport: Viewport = {
@@ -41,7 +108,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#18181b"
+  themeColor: "#18181b",
 };
 
 export default function RootLayout({
@@ -57,6 +124,7 @@ export default function RootLayout({
     >
       <head>
         <link rel="manifest" href="/api/manifest" crossOrigin="use-credentials" />
+        <BeautySalonJsonLd />
       </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden font-sans transition-colors duration-200">
         <script

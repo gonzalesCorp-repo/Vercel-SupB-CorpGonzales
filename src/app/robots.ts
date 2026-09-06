@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/kiosk', '/cliente', '/login', '/llms.txt', '/llms-full.txt'],
+        allow: ['/', '/kiosk', '/cliente', '/mobile/cliente', '/login', '/llms.txt', '/llms-full.txt'],
         disallow: [
           '/admin/',
           '/caja/',
@@ -16,7 +16,13 @@ export default function robots(): MetadataRoute.Robots {
           '/operaciones/',
           '/recepcion/',
           '/wfm/',
-          '/mobile/',
+          '/mobile/admin',
+          '/mobile/operacion',
+          '/mobile/soporte',
+          '/mobile/superadmin',
+          '/mobile/cuenta',
+          '/mobile/config',
+          '/mobile/liquidacion',
           '/api/',
           '/dev/',
           '/perfil/',
@@ -24,7 +30,7 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: ['GPTBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended', 'CCBot'],
-        allow: ['/', '/kiosk', '/cliente', '/llms.txt', '/llms-full.txt'],
+        allow: ['/', '/kiosk', '/cliente', '/mobile/cliente', '/llms.txt', '/llms-full.txt'],
         disallow: [
           '/admin/',
           '/caja/',
@@ -33,7 +39,13 @@ export default function robots(): MetadataRoute.Robots {
           '/operaciones/',
           '/recepcion/',
           '/wfm/',
-          '/mobile/',
+          '/mobile/admin',
+          '/mobile/operacion',
+          '/mobile/soporte',
+          '/mobile/superadmin',
+          '/mobile/cuenta',
+          '/mobile/config',
+          '/mobile/liquidacion',
           '/api/',
         ],
       },

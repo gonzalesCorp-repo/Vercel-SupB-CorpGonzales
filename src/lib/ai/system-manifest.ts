@@ -181,6 +181,11 @@ export const SYSTEM_MANIFEST: SystemManifest = {
       description: 'Consulta de citas agendadas, puntos acumulados y estado de atención.',
     },
     {
+      path: '/mobile/cliente',
+      title: 'Suite Móvil de Bienestar PWA',
+      description: 'Santuario personal de autocuidado, rutinas climatológicas Opal AI, diagnóstico capilar y Club Lumina.',
+    },
+    {
       path: '/login',
       title: 'Acceso Corporativo',
       description: 'Autenticación segura para colaboradores y administradores.',
