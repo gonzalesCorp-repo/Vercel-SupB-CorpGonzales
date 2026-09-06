@@ -147,6 +147,22 @@ export const SYSTEM_MANIFEST: SystemManifest = {
       description: 'Pantalla de auto-registro para clientes que ingresan a la sucursal.',
       capabilities: ['Registro por DNI', 'Selección rápida de servicio', 'Pase a cola de espera'],
     },
+    {
+      id: 'admin',
+      name: 'Administración & Catálogo',
+      path: '/admin',
+      isPublic: false,
+      description: 'Catálogo maestro de servicios y retail, reglas de clientes, control de accesos y configuración.',
+      capabilities: ['Gestión de catálogo', 'Reglas de clientes', 'Control de usuarios', 'Configuración de sede'],
+    },
+    {
+      id: 'wfm',
+      name: 'Workforce Management & Productividad',
+      path: '/wfm',
+      isPublic: false,
+      description: 'Monitor de productividad en tiempo real, supervisión de colas y control de tiempos operativos.',
+      capabilities: ['Monitor de cola', 'Métricas de productividad', 'Control de refrigerios', 'Supervisión en vivo'],
+    },
   ],
   publicRoutes: [
     {
