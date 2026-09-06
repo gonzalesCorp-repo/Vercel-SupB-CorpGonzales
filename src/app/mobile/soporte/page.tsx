@@ -8,6 +8,7 @@ import { Users, CreditCard, Beaker, LogOut, ShieldCheck, Sparkles, Building2, Be
 import RecepcionMobileView from '@/components/mobile/RecepcionMobileView';
 import CajaMobileView from '@/components/mobile/CajaMobileView';
 import DespachoMobileView from '@/components/mobile/DespachoMobileView';
+import { SoporteLabDespachoStitch } from '@/components/mobile/soporte/SoporteLabDespachoStitch';
 import { MobileAccessibilityCard } from '@/components/mobile/MobileAccessibilityCard';
 import { obtenerHerramientasAgente } from '@/services/permisos';
 
@@ -182,7 +183,12 @@ export default function MobileSoportePage() {
           )}
 
           {activeTab === 'despacho' && (
-            <DespachoMobileView agente={agente} sedeId={sedeId} />
+            <div className="space-y-4">
+              <SoporteLabDespachoStitch agente={agente} sedeId={sedeId} />
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+                <DespachoMobileView agente={agente} sedeId={sedeId} />
+              </div>
+            </div>
           )}
 
           {activeTab === 'ajustes' && (
