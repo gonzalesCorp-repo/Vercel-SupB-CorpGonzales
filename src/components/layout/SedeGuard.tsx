@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { obtenerTodasLasSedes } from '@/services/admin';
+import { obtenerSedesUsuario } from '@/services/sedes';
+import { createClient } from '@/lib/supabase/client';
 import { Building2, ShieldCheck, ArrowRight } from 'lucide-react';
 
 interface SedeGuardProps {
@@ -23,8 +25,24 @@ export default function SedeGuard({ children }: SedeGuardProps) {
   const cargarSedes = async () => {
     setLoading(true);
     try {
-      const data = await obtenerTodasLasSedes();
-      const list = data || [];
+      const supabase = createClient();
+      const userEmail = useAppStore.getState().userEmail;
+      let list: any[] = [];
+
+      if (userEmail) {
+        list = await obtenerSedesUsuario(userEmail);
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          list = await obtenerSedesUsuario(user.email);
+        }
+      }
+
+      if (!list || list.length === 0) {
+        const data = await obtenerTodasLasSedes();
+        list = data || [];
+      }
+
       setSedes(list);
 
       // Auto-recuperación de sede si no está activa

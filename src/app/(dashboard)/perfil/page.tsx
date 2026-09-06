@@ -12,6 +12,7 @@ import { useUIStore } from '@/store/useUIStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { createClient } from '@/lib/supabase/client';
 import { PwaInstallButton } from '@/components/mobile/PwaInstallButton';
+import { obtenerSedesUsuario, Sede } from '@/services/sedes';
 
 export default function PerfilPage() {
   const [agente, setAgente] = useState<any>(null);
@@ -55,15 +56,7 @@ export default function PerfilPage() {
       const soundPref = localStorage.getItem('vaikuntha_live_feed_sound');
       setLiveSoundEnabled(soundPref !== 'disabled');
 
-      // 2. Cargar sede predeterminada guardada
-      const sedePref = localStorage.getItem('vaikuntha_default_sede_id');
-      if (sedePref) setSedePredeterminada(sedePref);
-
-      // 3. Cargar lista de sedes reales de Supabase
-      const { data: dataSedes } = await supabase.from('sedes').select('id, nombre, codigo');
-      if (dataSedes) setSedesList(dataSedes);
-
-      // 4. Cargar agente activo
+      // 2. Cargar agente activo y usuario logueado
       const { data: { user } } = await supabase.auth.getUser();
       const userEmail = user?.email || (typeof window !== 'undefined' ? localStorage.getItem('vaikuntha_user_email') : null);
 
@@ -73,6 +66,31 @@ export default function PerfilPage() {
           setAgente(data);
           if (data.pin) setPin(data.pin);
           await cargarPreferenciasNube(data.id);
+        }
+      }
+
+      // 3. Cargar lista de sedes autorizadas para el usuario (filtrando Sandbox salvo que sea SUPERADMIN)
+      const emailTarget = userEmail || '';
+      const sedesAutorizadas = emailTarget ? await obtenerSedesUsuario(emailTarget) : [];
+      const sedesFinal = sedesAutorizadas.length > 0 
+        ? sedesAutorizadas 
+        : (sedeActiva ? [sedeActiva] : []);
+      setSedesList(sedesFinal);
+
+      // 4. Validar y cargar sede predeterminada guardada
+      const sedePref = localStorage.getItem('vaikuntha_default_sede_id');
+      if (sedePref) {
+        if (sedesFinal.some(s => s.id === sedePref)) {
+          setSedePredeterminada(sedePref);
+        } else {
+          // Si la sede guardada era Sandbox u otra no autorizada, corregir automáticamente a la sede autorizada
+          const fallbackSede = sedesFinal[0]?.id || '';
+          setSedePredeterminada(fallbackSede);
+          if (fallbackSede) {
+            localStorage.setItem('vaikuntha_default_sede_id', fallbackSede);
+          } else {
+            localStorage.removeItem('vaikuntha_default_sede_id');
+          }
         }
       }
     }

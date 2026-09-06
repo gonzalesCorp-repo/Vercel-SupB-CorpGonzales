@@ -6,6 +6,7 @@ export interface Sede {
   id: string;
   nombre: string;
   direccion?: string;
+  codigo?: string;
 }
 
 export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
@@ -31,7 +32,7 @@ export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
   if (agente.rol && agente.rol.toUpperCase() === 'SUPERADMIN') {
     const { data: todasSedes, error: errTodas } = await supabase
       .from('sedes')
-      .select('id, nombre, direccion');
+      .select('id, nombre, direccion, codigo');
       
     if (!errTodas && todasSedes) {
       return todasSedes;
@@ -41,7 +42,7 @@ export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
   // 2. Obtener sedes permitidas si no es SUPERADMIN
   const { data: sedesUsuarios, error: errSedes } = await supabase
     .from('sedes_usuarios')
-    .select('sede_id, sedes(id, nombre, direccion)')
+    .select('sede_id, sedes(id, nombre, direccion, codigo)')
     .eq('agente_id', agente.id);
 
   if (errSedes) {
@@ -50,11 +51,14 @@ export async function obtenerSedesUsuario(userEmail: string): Promise<Sede[]> {
   }
 
   // Mapear el inner join
-  const sedes: Sede[] = (sedesUsuarios || []).map((item: any) => ({
-    id: item.sedes.id,
-    nombre: item.sedes.nombre,
-    direccion: item.sedes.direccion
-  }));
+  const sedes: Sede[] = (sedesUsuarios || [])
+    .filter((item: any) => item.sedes)
+    .map((item: any) => ({
+      id: item.sedes.id,
+      nombre: item.sedes.nombre,
+      direccion: item.sedes.direccion,
+      codigo: item.sedes.codigo
+    }));
 
   return sedes;
 }
