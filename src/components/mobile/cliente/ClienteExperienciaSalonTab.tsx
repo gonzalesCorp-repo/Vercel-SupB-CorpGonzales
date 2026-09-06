@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { 
   Calendar, Clock, QrCode, Sparkles, CheckCircle2, 
-  MapPin, Scissors, AlertCircle, ArrowRight, UserCheck 
+  MapPin, Scissors, AlertCircle, ArrowRight, UserCheck, MessageSquare 
 } from 'lucide-react';
 import { PredictorCicloCapilarOpal } from '@/types/clienteLifestyle';
 import { useUIStore } from '@/store/useUIStore';
@@ -114,6 +114,23 @@ export function ClienteExperienciaSalonTab({
           <p className="text-[11px] text-slate-600 dark:text-slate-400 pt-1 border-t border-slate-200 dark:border-slate-800 leading-relaxed">
             {predictorOpal.motivo_tecnico}
           </p>
+
+          <div className="pt-2">
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(
+                `¡Hola Gloss Salón & Relax! ✨ Deseo agendar mi cita recomendada por el Predictor de Ciclo Capilar Opal AI:\n` +
+                `🌿 Tratamiento: ${predictorOpal.proximo_servicio_recomendado}\n` +
+                `📅 Días transcurridos: ${predictorOpal.dias_desde_ultimo_servicio} días (${predictorOpal.nivel_urgencia})\n` +
+                `👤 Cliente: ${cliente.nombre}${cliente.dni ? ` (DNI: ${cliente.dni})` : ''}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition cursor-pointer active:scale-98"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>✨ Agendar Fecha Recomendada vía WhatsApp</span>
+            </a>
+          </div>
         </div>
       </div>
 

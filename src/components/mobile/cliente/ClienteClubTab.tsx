@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { 
   Award, Sparkles, User, Phone, Mail, Edit3, 
-  LogOut, Dna, ShieldCheck, CheckCircle2, ChevronRight, Gift 
+  LogOut, Dna, ShieldCheck, CheckCircle2, ChevronRight, Gift, Share2, Copy, HeartHandshake 
 } from 'lucide-react';
 import { LuminaHqPluginConfig } from '@/types/clienteLifestyle';
 import { StitchHolographicVipCard } from './StitchHolographicVipCard';
@@ -100,6 +100,62 @@ export function ClienteClubTab({
             </>
           )}
         </button>
+      </div>
+
+      {/* 2.5 Programa de Referidos: Invita a una Amiga al Santuario (Growth Loop) */}
+      <div className="bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-amber-500/10 border border-pink-500/30 dark:border-pink-500/20 rounded-3xl p-5 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <HeartHandshake className="w-4 h-4 text-pink-500" />
+            <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+              Invita a una Amiga al Santuario
+            </h3>
+          </div>
+          <span className="text-[10px] font-bold text-pink-600 dark:text-pink-400 bg-pink-500/15 px-2.5 py-0.5 rounded-full border border-pink-500/20">
+            +150 LuminaCoins
+          </span>
+        </div>
+
+        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          Comparte la experiencia boutique de <strong>Gloss Salón and Relax</strong>. Tu amiga recibe <strong>S/ 30 de descuento</strong> en su primer servicio y tú recibes <strong>150 LuminaCoins</strong> de bienestar cuando complete su visita.
+        </p>
+
+        <div className="p-3 bg-white/70 dark:bg-slate-950/70 border border-pink-200 dark:border-pink-500/20 rounded-2xl flex items-center justify-between">
+          <div className="text-left">
+            <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest block">Tu Código VIP</span>
+            <span className="text-sm font-mono font-black text-purple-600 dark:text-purple-400">
+              {cliente.dni ? `GLOSS-${cliente.dni.slice(-4)}` : `GLOSS-${cliente.id.slice(0, 4).toUpperCase()}`}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              const code = cliente.dni ? `GLOSS-${cliente.dni.slice(-4)}` : `GLOSS-${cliente.id.slice(0, 4).toUpperCase()}`;
+              navigator.clipboard?.writeText(code);
+              showAlert(`Código ${code} copiado al portapapeles.`, 'success');
+            }}
+            className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-300 hover:bg-purple-100 transition cursor-pointer"
+            title="Copiar Código"
+          >
+            <Copy className="w-4 h-4" />
+          </button>
+        </div>
+
+        <a
+          href={`https://wa.me/?text=${encodeURIComponent(
+            `¡Hola! 🌸 Te invito a conocer Gloss Salón and Relax en Jesús María (17 años de maestría y bienestar boutique). ` +
+            `Usa mi código de pase VIP: *${cliente.dni ? `GLOSS-${cliente.dni.slice(-4)}` : `GLOSS-${cliente.id.slice(0, 4).toUpperCase()}`}* ` +
+            `para recibir S/ 30 de cortesía en tu primera visita.\n` +
+            `👉 Descubre el santuario: https://gloss.pe/cliente`
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full h-11 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition cursor-pointer active:scale-95"
+        >
+          <Share2 className="w-4 h-4" />
+          <span>Compartir Invitación por WhatsApp</span>
+        </a>
       </div>
 
       {/* 3. Insignias de Bienestar y Lealtad */}

@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [mostrarPruebas, setMostrarPruebas] = useState(false);
   const router = useRouter();
   const supabase = createClient();
   const clearSede = useAppStore((state) => state.clearSede);
@@ -142,39 +143,49 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-50 bg-opacity-95 p-4 overflow-y-auto">
-      <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-3xl shadow-xl border border-gray-100 my-auto">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-3xl shadow-2xl border border-purple-100 my-auto">
         <div className="text-center mb-6 flex flex-col items-center">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xl mb-2 shadow-lg shadow-indigo-500/20">
-            V
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 via-pink-600 to-amber-400 flex items-center justify-center text-white font-black text-2xl mb-3 shadow-lg shadow-purple-500/25">
+            G
           </div>
-          <h1 className="text-xl font-black text-gray-900">Vaikuntha ERP</h1>
-          <p className="text-gray-500 text-xs mt-0.5">Acceso al Sistema Sandbox</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Gloss Salón and Relax</h1>
+          <p className="text-[11px] text-purple-700 font-extrabold mt-0.5 uppercase tracking-widest">
+            Corporación Gonzales • 17 Años de Maestría
+          </p>
+          <p className="text-xs text-slate-400 mt-1">
+            Portal Corporativo & Sistema Operativo Vaikuntha
+          </p>
         </div>
         
-        <form onSubmit={handleLogin} className="space-y-3.5">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label htmlFor="login_email" className="block mb-1 text-[11px] font-bold text-gray-700 uppercase tracking-wider">Correo Electrónico</label>
+            <label htmlFor="login_email" className="block mb-1 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+              Correo Electrónico Corporativo
+            </label>
             <input
               id="login_email"
               name="login_email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 block w-full p-2.5 transition-all"
-              placeholder="usuario@vaikuntha.com"
+              className="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 block w-full p-3 transition-all outline-none"
+              placeholder="colaborador@gloss.pe"
               required
             />
           </div>
           <div>
-            <label htmlFor="login_password" className="block mb-1 text-[11px] font-bold text-gray-700 uppercase tracking-wider">Contraseña</label>
+            <label htmlFor="login_password" className="block mb-1 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+              Contraseña
+            </label>
             <input 
               id="login_password"
               name="login_password"
               type="password" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)}
-              className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 block w-full p-2.5 transition-all" 
+              className="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 block w-full p-3 transition-all outline-none" 
+              placeholder="••••••••"
               required 
             />
           </div>
@@ -188,130 +199,99 @@ export default function LoginPage() {
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full text-white bg-indigo-600 hover:bg-indigo-700 font-bold rounded-xl text-sm px-4 py-3 text-center transition disabled:opacity-70 shadow-lg shadow-indigo-600/20 active:scale-98"
+            className="w-full text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 font-bold rounded-xl text-sm px-4 py-3.5 text-center transition disabled:opacity-70 shadow-lg shadow-purple-600/25 active:scale-98 cursor-pointer"
           >
-            {!isLoading ? 'Ingresar al Sistema' : 'Iniciando Sesión...'}
+            {!isLoading ? 'Ingresar al Sistema' : 'Validando Credenciales...'}
           </button>
         </form>
 
-        <div className="mt-5 pt-4 border-t border-gray-100">
-          <p className="text-[10px] text-gray-400 font-bold mb-2 text-center uppercase tracking-widest">
-            Ingreso Rápido en 1-Clic (Sandbox)
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => quickSandboxLogin('cristian@gonzales.page', '123456')}
-              className="p-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl border border-purple-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-            >
-              👑 SUPERADMIN
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => quickSandboxLogin('platon@vaikuntha.com', '123456')}
-              className="p-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl border border-indigo-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-            >
-              🏢 ADMIN (Platón)
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => quickSandboxLogin('socrates@vaikuntha.com', '123456')}
-              className="p-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl border border-emerald-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-            >
-              🛎️ SOPORTE Recepción (Sócrates)
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => quickSandboxLogin('tales@vaikuntha.com', '123456')}
-              className="p-2.5 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-xl border border-teal-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-            >
-              💵 SOPORTE Caja & POS (Tales)
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => quickSandboxLogin('democrito@vaikuntha.com', '123456')}
-              className="p-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl border border-amber-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-            >
-              💈 STAFF (Demócrito)
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => quickSandboxLogin('diogenes@vaikuntha.com', '123456')}
-              className="p-2.5 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-xl border border-orange-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-            >
-              ✂️ STAFF Estilismo (Diógenes)
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => quickSandboxLogin('parmenides@vaikuntha.com', '123456')}
-              className="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-            >
-              💆 STAFF Cosmiatría (Parménides)
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => quickSandboxLogin('pitagoras@vaikuntha.com', '123456')}
-              className="p-2.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 rounded-xl border border-cyan-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-            >
-              🎯 JEFE OPERATIVO (Pitágoras)
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => quickSandboxLogin('kiosko@vaikuntha.com', '123456')}
-              className="p-2.5 bg-pink-50 hover:bg-pink-100 text-pink-700 rounded-xl border border-pink-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-            >
-              🪪 TÓTEM KIOSKO (Autoservicio)
-            </button>
-          </div>
+        {/* Accesos rápidos a Touchpoints de Sala */}
+        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-semibold">
+          <a href="/kiosk" className="hover:text-purple-600 transition flex items-center gap-1.5 p-1 rounded-lg hover:bg-purple-50">
+            <span>🖥️</span> Tótem Kiosko Sala
+          </a>
+          <a href="/mobile/cliente" className="hover:text-purple-600 transition flex items-center gap-1.5 p-1 rounded-lg hover:bg-purple-50">
+            <span>📱</span> Suite Cliente PWA
+          </a>
+        </div>
 
-          <div className="mt-4 pt-3 border-t border-gray-100">
-            <p className="text-[10px] text-pink-600 font-black mb-2 text-center uppercase tracking-widest flex items-center justify-center gap-1">
-              <span>🌸</span> Gloss Salón and Relax — Acceso Directo
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() => quickSandboxLogin('diana.laiza@gloss.pe', 'Gloss2026!')}
-                className="p-2.5 bg-pink-50 hover:bg-pink-100 text-pink-700 rounded-xl border border-pink-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-              >
-                🏢 Diana Laiza (ADMIN)
-              </button>
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() => quickSandboxLogin('jeferson.ayala@gloss.pe', 'Gloss2026!')}
-                className="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-              >
-                ✂️ Jeferson (ESTILISMO)
-              </button>
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() => quickSandboxLogin('yoncivis.colina@gloss.pe', 'Gloss2026!')}
-                className="p-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl border border-purple-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-              >
-                💇 Yovi (ESTILISMO)
-              </button>
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() => quickSandboxLogin('iriana.roa@gloss.pe', 'Gloss2026!')}
-                className="p-2.5 bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-700 rounded-xl border border-fuchsia-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
-              >
-                💆 Iriana (COSMIATRÍA)
-              </button>
+        {/* Panel de accesos directos colapsado */}
+        <div className="mt-4 pt-3 border-t border-slate-100 text-center">
+          <button
+            type="button"
+            onClick={() => setMostrarPruebas(!mostrarPruebas)}
+            className="text-[11px] text-slate-400 hover:text-slate-600 font-medium transition cursor-pointer"
+          >
+            {mostrarPruebas ? '▲ Ocultar accesos rápidos de personal' : '▼ Accesos Rápidos de Personal & Equipo'}
+          </button>
+
+          {mostrarPruebas && (
+            <div className="mt-3 space-y-3 animate-in fade-in">
+              <div className="pt-2">
+                <p className="text-[10px] text-pink-600 font-black mb-2 text-center uppercase tracking-widest flex items-center justify-center gap-1">
+                  <span>🌸</span> Equipo Gloss Salón and Relax
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => quickSandboxLogin('diana.laiza@gloss.pe', 'Gloss2026!')}
+                    className="p-2.5 bg-pink-50 hover:bg-pink-100 text-pink-700 rounded-xl border border-pink-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
+                  >
+                    🏢 Diana Laiza (ADMIN)
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => quickSandboxLogin('jeferson.ayala@gloss.pe', 'Gloss2026!')}
+                    className="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
+                  >
+                    ✂️ Jeferson (ESTILISMO)
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => quickSandboxLogin('yoncivis.colina@gloss.pe', 'Gloss2026!')}
+                    className="p-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl border border-purple-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
+                  >
+                    💇 Yovi (ESTILISMO)
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => quickSandboxLogin('iriana.roa@gloss.pe', 'Gloss2026!')}
+                    className="p-2.5 bg-fuchsia-50 hover:bg-fuchsia-100 text-fuchsia-700 rounded-xl border border-fuchsia-200 text-left font-semibold transition active:scale-95 disabled:opacity-50"
+                  >
+                    💆 Iriana (COSMIATRÍA)
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <p className="text-[10px] text-slate-400 font-bold mb-2 text-center uppercase tracking-widest">
+                  Perfiles Técnicos & Kiosko
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => quickSandboxLogin('cristian@gonzales.page', '123456')}
+                    className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200 text-left font-medium transition active:scale-95 disabled:opacity-50"
+                  >
+                    👑 SUPERADMIN
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => quickSandboxLogin('kiosko@vaikuntha.com', '123456')}
+                    className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200 text-left font-medium transition active:scale-95 disabled:opacity-50"
+                  >
+                    🪪 TÓTEM KIOSKO
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

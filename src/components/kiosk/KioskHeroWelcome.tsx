@@ -21,14 +21,14 @@ export function KioskHeroWelcome({ branding, onSelectModo }: KioskHeroWelcomePro
           <Crown className="w-8 h-8 text-amber-300" />
         </div>
         <div className="space-y-2">
-          <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Experiencia VIP para Clientes</span>
+          <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Experiencia VIP & Santuario de Bienestar</span>
           <h2 className="text-3xl font-black text-white">Soy Cliente</h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            Registra tu llegada, consulta tu posición en sala, pide bebidas de cortesía y acumula tus <strong className="text-purple-300">{branding.loyalty?.pointsName || 'Puntos VIP'}</strong>.
+          <p className="text-sm text-slate-300 leading-relaxed">
+            Bienvenida a tu santuario. Confirma tu llegada, solicita tu café de especialidad o infusión zen de cortesía y acumula tus <strong className="text-purple-300">{branding.loyalty?.pointsName || 'LuminaCoins'}</strong>.
           </p>
         </div>
         <div className="pt-4 flex items-center text-sm font-bold text-purple-400 gap-2">
-          <span>Ingresar como Cliente</span> →
+          <span>✨ Confirmar Mi Llegada</span> →
         </div>
       </div>
 
@@ -41,10 +41,10 @@ export function KioskHeroWelcome({ branding, onSelectModo }: KioskHeroWelcomePro
           <Briefcase className="w-8 h-8 text-indigo-400" />
         </div>
         <div className="space-y-2">
-          <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Para Especialistas & Equipo</span>
+          <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Para Especialistas & Concierge</span>
           <h2 className="text-3xl font-black text-white">Soy Equipo / Staff</h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            Estación táctil protegida por PIN: autoriza marcaciones físicas, atiende tu orden OATC, pide insumos lab y bar.
+          <p className="text-sm text-slate-300 leading-relaxed">
+            Terminal de servicio con acceso PIN: marca tu asistencia, gestiona atenciones en sillón, formula en laboratorio e interactúa con Opal AI.
           </p>
         </div>
         <div className="pt-4 flex items-center text-sm font-bold text-indigo-400 gap-2">

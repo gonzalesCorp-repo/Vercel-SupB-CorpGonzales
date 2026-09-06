@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Star, Trophy, Award, ShoppingBag, ChevronRight, Sparkles, X, Check } from 'lucide-react';
+import { Gift, Star, Trophy, Award, ShoppingBag, ChevronRight, Sparkles, X, Check, Search, ArrowRight, User } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { obtenerPerfilCliente, obtenerRecompensasCliente, canjearRecompensa, CLIENTE_BADGES, ClienteGamProfile } from '@/lib/gamification/clientEngine';
 import { getNivelPorXP } from '@/lib/gamification/config';
@@ -103,14 +103,102 @@ export default function ClientePortalPage() {
 
   const nivelInfo = profile ? getNivelPorXP(profile.xp_total) : null;
 
+  const [docBusqueda, setDocBusqueda] = useState('');
+  const [buscandoManual, setBuscandoManual] = useState(false);
+  const [errorBusqueda, setErrorBusqueda] = useState('');
+
+  const handleBuscarClienteManual = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!docBusqueda.trim()) return;
+    setBuscandoManual(true);
+    setErrorBusqueda('');
+    try {
+      const term = docBusqueda.trim();
+      const { data: found } = await supabase
+        .from('clientes')
+        .select('id, nombre, dni, celular')
+        .or(`dni.eq.${term},celular.eq.${term}`)
+        .limit(1)
+        .maybeSingle();
+
+      if (found?.id) {
+        window.location.href = `/cliente?id=${found.id}`;
+      } else {
+        setErrorBusqueda('No encontramos una cuenta con ese DNI o celular. Puedes consultar en recepción o ingresar a la app móvil.');
+      }
+    } catch (err: any) {
+      setErrorBusqueda('Error de conexión al consultar. Intenta nuevamente.');
+    } finally {
+      setBuscandoManual(false);
+    }
+  };
+
   if (!clienteId) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-8">
-        <Sparkles className="w-12 h-12 text-purple-400 mb-4" />
-        <h1 className="text-xl font-black">Portal de Fidelidad</h1>
-        <p className="text-sm text-slate-400 mt-2 text-center">
-          Escanea el código QR proporcionado por el salón para acceder a tu perfil de fidelidad.
-        </p>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 select-none font-sans">
+        <div className="w-full max-w-md bg-slate-900 border border-purple-500/30 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
+          
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center mx-auto shadow-lg shadow-purple-500/25">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">
+              Gloss Salón and Relax • Corporación Gonzales
+            </span>
+            <h1 className="text-2xl font-black text-white tracking-tight">
+              Portal de Fidelidad & Bienestar
+            </h1>
+            <p className="text-xs text-slate-400">
+              Ingresa tu DNI o celular para consultar tus puntos, nivel VIP y recompensas activas.
+            </p>
+          </div>
+
+          <form onSubmit={handleBuscarClienteManual} className="space-y-3">
+            <div className="relative">
+              <input
+                type="text"
+                value={docBusqueda}
+                onChange={(e) => setDocBusqueda(e.target.value)}
+                placeholder="Número de DNI o Celular"
+                aria-label="Número de DNI o Celular"
+                className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3.5 text-center text-base font-mono tracking-wider text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-all"
+                autoFocus
+                required
+              />
+            </div>
+
+            {errorBusqueda && (
+              <p className="text-xs text-rose-400 font-medium text-left bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20">
+                {errorBusqueda}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={buscandoManual || !docBusqueda.trim()}
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-lg shadow-purple-600/25 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+            >
+              <Search className="w-4 h-4" />
+              <span>{buscandoManual ? 'Consultando...' : 'Consultar Mi Perfil VIP'}</span>
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-slate-800 space-y-3">
+            <a
+              href="/mobile/cliente"
+              className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-purple-300 font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>📱 Abrir Suite Móvil de Bienestar PWA</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+
+            <p className="text-[11px] text-slate-500">
+              ¿Estás en el salón? Puedes acercarte al <strong>Tótem Kiosko</strong> en sala para auto-checkin en 1 solo toque.
+            </p>
+          </div>
+
+        </div>
       </div>
     );
   }

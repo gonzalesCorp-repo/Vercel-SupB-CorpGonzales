@@ -45,8 +45,8 @@ export function KioskVipCheckIn({
           <div className="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center mx-auto mb-2">
             <User className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-black text-white">Ingreso de Clientes VIP</h2>
-          <p className="text-xs text-slate-400">Ingresa tu número de DNI o celular para acceder a tu pasaporte digital</p>
+          <h2 className="text-2xl font-black text-white">Confirmación de Llegada VIP</h2>
+          <p className="text-xs text-slate-300">Ingresa tu DNI o celular para confirmar tu llegada y abrir tu pasaporte de bienestar</p>
         </div>
 
         <form onSubmit={onBuscarSubmit} className="max-w-md mx-auto space-y-3">
@@ -77,19 +77,19 @@ export function KioskVipCheckIn({
             <button
               type="submit"
               disabled={buscandoCliente || !busquedaCliente.trim()}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-purple-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-lg shadow-purple-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
             >
               <Search className="w-3.5 h-3.5" />
-              <span>{buscandoCliente ? 'Buscando...' : 'Consultar Mi Perfil'}</span>
+              <span>{buscandoCliente ? 'Buscando...' : '✨ Confirmar Mi Llegada'}</span>
             </button>
 
             <button
               type="button"
               onClick={onOpenNuevoCliente}
-              className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-purple-300 font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-purple-300 font-bold py-3.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Soy Nuevo / Registrarme</span>
+              <span>🌿 Es mi Primera Visita</span>
             </button>
           </div>
         </form>
@@ -218,12 +218,16 @@ export function KioskVipCheckIn({
                 </div>
               </div>
 
+              <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+                🔒 Solo para enviarte tu fórmula capilar personalizada y recordatorios. Respetamos tu privacidad, cero spam.
+              </p>
+
               <button
                 type="submit"
                 disabled={guardandoCliente}
                 className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-2xl shadow-lg shadow-purple-600/30 transition cursor-pointer active:scale-95 disabled:opacity-50"
               >
-                {guardandoCliente ? 'Registrando...' : '✨ Registrarme y Obtener Mis 100 Puntos'}
+                {guardandoCliente ? 'Creando tu perfil VIP...' : '✨ Registrarme y Recibir 100 LuminaCoins'}
               </button>
             </form>
           </div>
