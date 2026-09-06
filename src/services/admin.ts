@@ -127,7 +127,9 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
           tipo_pension: agente.tipo_pension,
           asignacion_familiar: agente.asignacion_familiar,
           porcentaje_comision: agente.porcentaje_comision,
-          tarifa_hora: agente.tarifa_hora
+          tarifa_hora: agente.tarifa_hora,
+          frecuencia_corte: agente.frecuencia_corte,
+          dia_pago: agente.dia_pago
         })
       });
       const result = await response.json();
@@ -158,7 +160,9 @@ export async function guardarAgente(agente: any, sedes_ids: string[] = []): Prom
           tipo_pension: agente.tipo_pension,
           asignacion_familiar: agente.asignacion_familiar,
           porcentaje_comision: agente.porcentaje_comision,
-          tarifa_hora: agente.tarifa_hora
+          tarifa_hora: agente.tarifa_hora,
+          frecuencia_corte: agente.frecuencia_corte,
+          dia_pago: agente.dia_pago
         })
       });
       const result = await response.json();

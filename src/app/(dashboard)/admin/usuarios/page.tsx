@@ -41,6 +41,8 @@ interface AgenteAdmin extends Agente {
   asignacion_familiar?: boolean;
   porcentaje_comision?: number | string;
   tarifa_hora?: number | string;
+  frecuencia_corte?: string;
+  dia_pago?: string;
 }
 
 export default function UsuariosPage() {
@@ -64,12 +66,14 @@ export default function UsuariosPage() {
     especialidad: '',
     estado: 'ACTIVO',
     sedes_ids: [],
-    regimen_laboral: 'HONORARIOS_RHE',
+    regimen_laboral: 'FREELANCER_COMISION',
     sueldo_base: 0,
     tipo_pension: 'AFP',
     asignacion_familiar: false,
     porcentaje_comision: 40,
-    tarifa_hora: 0
+    tarifa_hora: 0,
+    frecuencia_corte: 'DIARIA',
+    dia_pago: '30'
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -181,18 +185,34 @@ export default function UsuariosPage() {
         id: editId,
         sueldo_base: formData.sueldo_base === '' ? 0 : Number(formData.sueldo_base ?? 0),
         porcentaje_comision: formData.porcentaje_comision === '' ? 40 : Number(formData.porcentaje_comision ?? 40),
-        tarifa_hora: formData.tarifa_hora === '' ? 0 : Number(formData.tarifa_hora ?? 0)
+        tarifa_hora: formData.tarifa_hora === '' ? 0 : Number(formData.tarifa_hora ?? 0),
+        frecuencia_corte: formData.frecuencia_corte,
+        dia_pago: formData.dia_pago
       };
       const exito = await guardarAgente(payload, formData.sedes_ids || []);
       if (exito) {
         if (editId) {
           try {
             const confActual = await obtenerConfiguracionRemunerativa(editId, formData.rol);
+            const tipoRemun = formData.regimen_laboral === 'FREELANCER_COMISION' 
+              ? 'FREELANCER_COMISION' 
+              : formData.regimen_laboral === 'PLANILLA_5TA' 
+                ? 'SOLO_SUELDO_BASE' 
+                : 'SOLO_COMISIONES';
+            
+            const autoLiquidar = formData.regimen_laboral === 'FREELANCER_COMISION' || 
+              formData.frecuencia_corte === 'DIARIA' || 
+              formData.frecuencia_corte === 'POR_SERVICIO';
+
             await guardarConfiguracionRemunerativa({
               ...confActual,
               agente_id: editId,
+              tipo_remuneracion: tipoRemun as any,
               sueldo_base: Number(payload.sueldo_base),
               porcentaje_comision_servicios: Number(payload.porcentaje_comision),
+              frecuencia_corte: (formData.frecuencia_corte || confActual.frecuencia_corte) as any,
+              dia_pago: formData.dia_pago || confActual.dia_pago || '30',
+              auto_liquidar_cierre: autoLiquidar,
               comisiones_servicios_override: comisionesOverride
             });
           } catch (confErr) {
@@ -224,12 +244,14 @@ export default function UsuariosPage() {
       especialidad: '', 
       estado: 'ACTIVO', 
       sedes_ids: defaultSedeId,
-      regimen_laboral: 'HONORARIOS_RHE',
+      regimen_laboral: 'FREELANCER_COMISION',
       sueldo_base: 0,
       tipo_pension: 'AFP',
       asignacion_familiar: false,
       porcentaje_comision: 40,
-      tarifa_hora: 0
+      tarifa_hora: 0,
+      frecuencia_corte: 'DIARIA',
+      dia_pago: '30'
     });
     setIsModalOpen(true);
   };
@@ -239,6 +261,12 @@ export default function UsuariosPage() {
     if (user.rol === 'ADMIN' && userRol !== 'SUPERADMIN') return;
 
     setEditId(user.id!);
+    const frecDefault = user.regimen_laboral === 'FREELANCER_COMISION' 
+      ? 'DIARIA' 
+      : user.regimen_laboral === 'PLANILLA_5TA' 
+        ? 'MENSUAL' 
+        : 'QUINCENAL';
+
     setFormData({
       nombre: user.nombre,
       email: user.email || '',
@@ -246,17 +274,26 @@ export default function UsuariosPage() {
       especialidad: user.especialidad || '',
       estado: user.estado,
       sedes_ids: user.sedes_ids || [],
-      regimen_laboral: user.regimen_laboral || 'HONORARIOS_RHE',
+      regimen_laboral: user.regimen_laboral || 'FREELANCER_COMISION',
       sueldo_base: Number(user.sueldo_base || 0),
       tipo_pension: user.tipo_pension || 'AFP',
       asignacion_familiar: Boolean(user.asignacion_familiar),
       porcentaje_comision: Number(user.porcentaje_comision || 40),
-      tarifa_hora: Number(user.tarifa_hora || 0)
+      tarifa_hora: Number(user.tarifa_hora || 0),
+      frecuencia_corte: user.frecuencia_corte || frecDefault,
+      dia_pago: user.dia_pago || '30'
     });
 
     if (user.id) {
       obtenerConfiguracionRemunerativa(user.id, user.rol).then(conf => {
         setComisionesOverride(conf.comisiones_servicios_override || {});
+        if (conf.frecuencia_corte || conf.dia_pago) {
+          setFormData(prev => ({
+            ...prev,
+            frecuencia_corte: conf.frecuencia_corte || prev.frecuencia_corte,
+            dia_pago: conf.dia_pago || prev.dia_pago || '30'
+          }));
+        }
       }).catch(err => {
         console.error('Error cargando excepciones de comisiones:', err);
         setComisionesOverride({});
@@ -274,7 +311,8 @@ export default function UsuariosPage() {
     setComisionesOverride({});
     setFormData({ 
       nombre: '', email: '', password: '', rol: 'STAFF', especialidad: '', estado: 'ACTIVO', sedes_ids: [],
-      regimen_laboral: 'HONORARIOS_RHE', sueldo_base: 0, tipo_pension: 'AFP', asignacion_familiar: false, porcentaje_comision: 40, tarifa_hora: 0
+      regimen_laboral: 'FREELANCER_COMISION', sueldo_base: 0, tipo_pension: 'AFP', asignacion_familiar: false, porcentaje_comision: 40, tarifa_hora: 0,
+      frecuencia_corte: 'DIARIA', dia_pago: '30'
     });
   };
 
@@ -633,11 +671,17 @@ export default function UsuariosPage() {
                           </span>
                           
                           <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border block w-fit ${
-                            u.regimen_laboral === 'PLANILLA_5TA'
-                              ? 'bg-indigo-50/70 text-indigo-700 border-indigo-200'
-                              : 'bg-amber-50/70 text-amber-700 border-amber-200'
+                            u.regimen_laboral === 'FREELANCER_COMISION'
+                              ? 'bg-emerald-50/80 text-emerald-700 border-emerald-200'
+                              : u.regimen_laboral === 'PLANILLA_5TA'
+                                ? 'bg-indigo-50/70 text-indigo-700 border-indigo-200'
+                                : 'bg-amber-50/70 text-amber-700 border-amber-200'
                           }`}>
-                            {u.regimen_laboral === 'PLANILLA_5TA' ? '📄 Planilla 5ta' : '🧾 RHE 4ta'}
+                            {u.regimen_laboral === 'FREELANCER_COMISION'
+                              ? '⚡ Freelancer'
+                              : u.regimen_laboral === 'PLANILLA_5TA'
+                                ? '📄 Planilla 5ta'
+                                : '🧾 RHE 4ta'}
                           </span>
                         </div>
                       </td>
@@ -722,7 +766,7 @@ export default function UsuariosPage() {
         isOpen={isModalOpen} 
         onClose={closeModal}
         title={editId ? 'Editar Colaborador' : 'Nuevo Colaborador'}
-        maxWidth="max-w-md"
+        maxWidth="max-w-lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
@@ -817,37 +861,168 @@ export default function UsuariosPage() {
               💼 Régimen Laboral & Compensación
             </span>
             
-            <div className="grid grid-cols-2 gap-2">
+            {/* Tríada de Regímenes */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => setFormData({...formData, regimen_laboral: 'HONORARIOS_RHE'})}
+                onClick={() => setFormData({
+                  ...formData, 
+                  regimen_laboral: 'FREELANCER_COMISION',
+                  frecuencia_corte: formData.frecuencia_corte === 'SEMANAL' || formData.frecuencia_corte === 'QUINCENAL' || formData.frecuencia_corte === 'MENSUAL' ? 'DIARIA' : (formData.frecuencia_corte || 'DIARIA'),
+                  sueldo_base: 0
+                })}
                 className={`p-2.5 rounded-xl border text-xs font-bold transition text-left cursor-pointer ${
-                  formData.regimen_laboral === 'HONORARIOS_RHE'
-                    ? 'bg-amber-500/10 border-amber-500 text-amber-700 dark:text-amber-400 ring-2 ring-amber-500/20'
+                  formData.regimen_laboral === 'FREELANCER_COMISION'
+                    ? 'bg-emerald-50 border-emerald-500 text-emerald-800 ring-2 ring-emerald-500/20 shadow-sm'
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                 }`}
               >
-                <span className="block text-sm mb-0.5">🧾 Honorarios RHE</span>
-                <span className="text-[10px] text-slate-500 font-normal">Comisiones + 4ta Cat.</span>
+                <span className="block text-xs mb-0.5 font-black">⚡ Freelancer / Destajo</span>
+                <span className="text-[10px] text-slate-500 font-normal leading-tight block">Comisión diaria al cierre</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => setFormData({...formData, regimen_laboral: 'PLANILLA_5TA'})}
+                onClick={() => setFormData({
+                  ...formData, 
+                  regimen_laboral: 'HONORARIOS_RHE',
+                  frecuencia_corte: formData.frecuencia_corte === 'DIARIA' || formData.frecuencia_corte === 'POR_SERVICIO' ? 'QUINCENAL' : (formData.frecuencia_corte || 'QUINCENAL'),
+                  sueldo_base: 0
+                })}
                 className={`p-2.5 rounded-xl border text-xs font-bold transition text-left cursor-pointer ${
-                  formData.regimen_laboral === 'PLANILLA_5TA'
-                    ? 'bg-indigo-500/10 border-indigo-500 text-indigo-700 dark:text-indigo-400 ring-2 ring-indigo-500/20'
+                  formData.regimen_laboral === 'HONORARIOS_RHE'
+                    ? 'bg-amber-500/10 border-amber-500 text-amber-700 ring-2 ring-amber-500/20 shadow-sm'
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                 }`}
               >
-                <span className="block text-sm mb-0.5">📄 Planilla de Sueldos</span>
-                <span className="text-[10px] text-slate-500 font-normal">Sueldo Base + 5ta Cat.</span>
+                <span className="block text-xs mb-0.5 font-black">🧾 Honorarios RHE</span>
+                <span className="text-[10px] text-slate-500 font-normal leading-tight block">Locación + 4ta Cat.</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({
+                  ...formData, 
+                  regimen_laboral: 'PLANILLA_5TA',
+                  frecuencia_corte: 'MENSUAL',
+                  dia_pago: formData.dia_pago || '30'
+                })}
+                className={`p-2.5 rounded-xl border text-xs font-bold transition text-left cursor-pointer ${
+                  formData.regimen_laboral === 'PLANILLA_5TA'
+                    ? 'bg-indigo-500/10 border-indigo-500 text-indigo-700 ring-2 ring-indigo-500/20 shadow-sm'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                }`}
+              >
+                <span className="block text-xs mb-0.5 font-black">📄 Planilla 5ta</span>
+                <span className="text-[10px] text-slate-500 font-normal leading-tight block">Sueldo Base + Beneficios</span>
               </button>
             </div>
 
-            {formData.regimen_laboral === 'PLANILLA_5TA' ? (
-              <div className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2.5 text-xs">
-                <div className="grid grid-cols-2 gap-2">
+            {/* Configuración contextual según régimen */}
+            {formData.regimen_laboral === 'FREELANCER_COMISION' && (
+              <div className="p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-200 space-y-3 text-xs">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label htmlFor="usuario-porcentaje-comision-freelancer" className="block text-[10px] font-bold text-slate-600 mb-1">% Comisión General:</label>
+                    <input 
+                      type="number"
+                      step="any"
+                      min={0}
+                      max={100}
+                      id="usuario-porcentaje-comision-freelancer"
+                      name="porcentaje_comision"
+                      value={formData.porcentaje_comision ?? ''}
+                      onChange={e => setFormData({...formData, porcentaje_comision: e.target.value})}
+                      placeholder="40"
+                      className="w-full bg-white border border-slate-300 rounded-lg p-2 font-mono font-bold text-slate-800"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="usuario-frecuencia-freelancer" className="block text-[10px] font-bold text-slate-600 mb-1">Frecuencia Liquidación:</label>
+                    <select
+                      id="usuario-frecuencia-freelancer"
+                      name="frecuencia_corte"
+                      value={formData.frecuencia_corte || 'DIARIA'}
+                      onChange={e => setFormData({...formData, frecuencia_corte: e.target.value})}
+                      className="w-full bg-white border border-slate-300 rounded-lg p-2 font-bold text-slate-800"
+                    >
+                      <option value="DIARIA">Diaria (Al cierre de jornada)</option>
+                      <option value="POR_SERVICIO">Por Servicio (Inmediata)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Banner de Blindaje Jurídico */}
+                <div className="p-3 bg-white/90 rounded-lg border border-emerald-300 text-emerald-900 space-y-1 shadow-2xs">
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-800">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span>Blindaje Legal & Prevención de Laboralidad (SUNAFIL)</span>
+                  </div>
+                  <p className="text-[11px] text-emerald-700 leading-relaxed font-medium">
+                    Al registrar <strong>SALIDA</strong> o cierre masivo de tienda, se emitirá de inmediato la solicitud de liquidación en Caja/POS para extinguir los saldos pendientes antes del retiro del colaborador. Si no atendió servicios, se registrará constancia formal de S/ 0.00.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {formData.regimen_laboral === 'HONORARIOS_RHE' && (
+              <div className="p-3.5 bg-amber-50/60 rounded-xl border border-amber-200 space-y-3 text-xs">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label htmlFor="usuario-porcentaje-comision-rhe" className="block text-[10px] font-bold text-slate-600 mb-1">% Comisión por Servicios:</label>
+                    <input 
+                      type="number"
+                      step="any"
+                      min={0}
+                      max={100}
+                      id="usuario-porcentaje-comision-rhe"
+                      name="porcentaje_comision"
+                      value={formData.porcentaje_comision ?? ''}
+                      onChange={e => setFormData({...formData, porcentaje_comision: e.target.value})}
+                      placeholder="40"
+                      className="w-full bg-white border border-slate-300 rounded-lg p-2 font-mono font-bold text-slate-800"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="usuario-tarifa-hora-rhe" className="block text-[10px] font-bold text-slate-600 mb-1">Tarifa por Turno / Hora (S/):</label>
+                    <input 
+                      type="number"
+                      step="any"
+                      min={0}
+                      id="usuario-tarifa-hora-rhe"
+                      name="tarifa_hora"
+                      value={formData.tarifa_hora ?? ''}
+                      onChange={e => setFormData({...formData, tarifa_hora: e.target.value})}
+                      placeholder="0"
+                      className="w-full bg-white border border-slate-300 rounded-lg p-2 font-mono font-bold text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="usuario-frecuencia-rhe" className="block text-[10px] font-bold text-slate-600 mb-1">Frecuencia de Pago (Corte RHE):</label>
+                  <select
+                    id="usuario-frecuencia-rhe"
+                    name="frecuencia_corte"
+                    value={formData.frecuencia_corte || 'QUINCENAL'}
+                    onChange={e => setFormData({...formData, frecuencia_corte: e.target.value})}
+                    className="w-full bg-white border border-slate-300 rounded-lg p-2 font-bold text-slate-800"
+                  >
+                    <option value="QUINCENAL">Quincenal (Corte cada 15 días - Estándar)</option>
+                    <option value="SEMANAL">Semanal (Corte cada 7 días)</option>
+                    <option value="MENSUAL">Mensual (Fin de mes)</option>
+                  </select>
+                </div>
+
+                <p className="text-[10px] text-amber-700 leading-tight">
+                  Locación de servicios con emisión obligatoria de Recibo por Honorarios Electrónico (RHE) y retención del 8% de 4ta Categoría según calendario SUNAT.
+                </p>
+              </div>
+            )}
+
+            {formData.regimen_laboral === 'PLANILLA_5TA' && (
+              <div className="p-3.5 bg-indigo-50/60 rounded-xl border border-indigo-200 space-y-3 text-xs">
+                <div className="grid grid-cols-2 gap-2.5">
                   <div>
                     <label htmlFor="usuario-sueldo-base-input" className="block text-[10px] font-bold text-slate-600 mb-1">Sueldo Base Mensual (S/):</label>
                     <input 
@@ -876,7 +1051,24 @@ export default function UsuariosPage() {
                     </select>
                   </div>
                 </div>
-                <label className="flex items-center gap-2 text-[11px] font-bold text-slate-700 cursor-pointer pt-1">
+
+                <div>
+                  <label htmlFor="usuario-dia-pago-select" className="block text-[10px] font-bold text-slate-600 mb-1">Día de Pago en Planilla:</label>
+                  <select
+                    id="usuario-dia-pago-select"
+                    name="dia_pago"
+                    value={formData.dia_pago || '30'}
+                    onChange={e => setFormData({...formData, dia_pago: e.target.value})}
+                    className="w-full bg-white border border-slate-300 rounded-lg p-2 font-bold text-slate-800"
+                  >
+                    <option value="30">Fin de Mes (Día 30/31)</option>
+                    <option value="28">Día 28 de cada mes</option>
+                    <option value="15">Quincena (Día 15 de cada mes)</option>
+                    <option value="15_30">Quincena y Fin de Mes (Días 15 y 30)</option>
+                  </select>
+                </div>
+
+                <label className="flex items-center gap-2 text-[11px] font-bold text-slate-700 cursor-pointer pt-0.5">
                   <input
                     type="checkbox"
                     id="usuario-asignacion-familiar-checkbox"
@@ -887,41 +1079,6 @@ export default function UsuariosPage() {
                   />
                   <span>Percibe Asignación Familiar (+10% RMV)</span>
                 </label>
-              </div>
-            ) : (
-              <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-100 space-y-2.5 text-xs">
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label htmlFor="usuario-porcentaje-comision-input" className="block text-[10px] font-bold text-slate-600 mb-1">% Comisión por Servicios:</label>
-                    <input 
-                      type="number"
-                      step="any"
-                      min={0}
-                      max={100}
-                      id="usuario-porcentaje-comision-input"
-                      name="porcentaje_comision"
-                      value={formData.porcentaje_comision ?? ''}
-                      onChange={e => setFormData({...formData, porcentaje_comision: e.target.value})}
-                      placeholder="40"
-                      className="w-full bg-white border border-slate-300 rounded-lg p-2 font-mono font-bold text-slate-800"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="usuario-tarifa-hora-input" className="block text-[10px] font-bold text-slate-600 mb-1">Tarifa por Hora / Turno (S/):</label>
-                    <input 
-                      type="number"
-                      step="any"
-                      min={0}
-                      id="usuario-tarifa-hora-input"
-                      name="tarifa_hora"
-                      value={formData.tarifa_hora ?? ''}
-                      onChange={e => setFormData({...formData, tarifa_hora: e.target.value})}
-                      placeholder="0"
-                      className="w-full bg-white border border-slate-300 rounded-lg p-2 font-mono font-bold text-slate-800"
-                    />
-                  </div>
-                </div>
-                <p className="text-[10px] text-amber-700">Liquidación quincenal/mensual con emisión de Recibo por Honorarios Electrónico (RHE).</p>
               </div>
             )}
           </div>

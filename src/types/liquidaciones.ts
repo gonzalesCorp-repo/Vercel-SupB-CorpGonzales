@@ -1,14 +1,16 @@
 export type TipoRemuneracion = 
   | 'SOLO_COMISIONES' 
   | 'SOLO_SUELDO_BASE' 
-  | 'SUELDO_BASE_MAS_COMISIONES';
+  | 'SUELDO_BASE_MAS_COMISIONES'
+  | 'FREELANCER_COMISION';
 
 export type FrecuenciaCorte = 
   | 'DIARIA' 
   | 'SEMANAL' 
   | 'QUINCENAL' 
   | 'MENSUAL' 
-  | 'A_DEMANDA';
+  | 'A_DEMANDA'
+  | 'POR_SERVICIO';
 
 export type EstadoLiquidacion = 
   | 'BORRADOR_AUTOMATICO' 
@@ -31,6 +33,8 @@ export interface AgenteConfigRemunerativa {
   porcentaje_comision_productos: number;
   frecuencia_corte: FrecuenciaCorte;
   permite_solicitud_manual: boolean;
+  dia_pago?: string;
+  auto_liquidar_cierre?: boolean;
   cuenta_bancaria_pago_preferida?: string;
   banco_preferido?: string;
   numero_documento_pago?: string;

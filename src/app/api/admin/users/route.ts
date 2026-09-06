@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     const { 
       nombre, email, password, rol, especialidad, sedes_ids,
       regimen_laboral, sueldo_base, tipo_pension, asignacion_familiar,
-      porcentaje_comision, tarifa_hora
+      porcentaje_comision, tarifa_hora, frecuencia_corte, dia_pago
     } = body;
 
     // Validación de alcance para Administradores locales (ADMIN)
@@ -116,6 +116,35 @@ export async function POST(request: Request) {
       console.error("Error insertando en agentes:", agenteError);
       await supabaseAdmin.auth.admin.deleteUser(userId);
       return NextResponse.json({ error: 'Error creando perfil de agente' }, { status: 500 });
+    }
+
+    // 2.1 Sincronizar contrato remunerativo en agente_configuracion_remunerativa
+    try {
+      const autoLiquidar = regimen_laboral === 'FREELANCER_COMISION' || frecuencia_corte === 'DIARIA' || frecuencia_corte === 'POR_SERVICIO';
+      const tipoRemun = regimen_laboral === 'FREELANCER_COMISION' 
+        ? 'FREELANCER_COMISION' 
+        : regimen_laboral === 'PLANILLA_5TA' 
+          ? 'SOLO_SUELDO_BASE' 
+          : 'SOLO_COMISIONES';
+      
+      const frecCorte = frecuencia_corte || (regimen_laboral === 'FREELANCER_COMISION' ? 'DIARIA' : regimen_laboral === 'PLANILLA_5TA' ? 'MENSUAL' : 'QUINCENAL');
+
+      await supabaseAdmin
+        .from('agente_configuracion_remunerativa')
+        .upsert({
+          agente_id: userId,
+          tipo_remuneracion: tipoRemun,
+          sueldo_base: Number(sueldo_base || 0),
+          porcentaje_comision_servicios: Number(porcentaje_comision || 40),
+          porcentaje_comision_productos: 10,
+          frecuencia_corte: frecCorte,
+          dia_pago: dia_pago || (regimen_laboral === 'PLANILLA_5TA' ? '30' : undefined),
+          auto_liquidar_cierre: autoLiquidar,
+          permite_solicitud_manual: regimen_laboral !== 'PLANILLA_5TA',
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'agente_id' });
+    } catch (confErr) {
+      console.warn("Fallo no bloqueante inicializando agente_configuracion_remunerativa:", confErr);
     }
 
     // 3. Asignar sedes (opcional)

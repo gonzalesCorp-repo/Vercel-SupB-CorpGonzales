@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { registrarLog } from './logger';
+import { evaluarYDispararLiquidacionCierreJornada } from './liquidaciones';
 
 export type TipoMovimientoAsistencia = 
   | 'ENTRADA' 
@@ -218,6 +219,20 @@ export async function validarYRegistrarAsistenciaNfc(params: RegistroAsistencia)
           ultimo_cambio_estado: new Date().toISOString()
         })
         .eq('id', params.agente_id);
+
+      // Disparar liquidación automática al registrar SALIDA
+      if (params.tipo_movimiento === 'SALIDA') {
+        try {
+          await evaluarYDispararLiquidacionCierreJornada({
+            agenteId: params.agente_id,
+            agenteNombre: params.agente_nombre,
+            sedeId: params.sede_id,
+            cerradoPor: 'MARCACION_SALIDA_COLABORADOR'
+          });
+        } catch (errLiq) {
+          console.warn('Fallo no bloqueante al evaluar liquidación en salida:', errLiq);
+        }
+      }
     }
 
     const horaConfirmada = formatearHoraLima(new Date());
@@ -325,6 +340,20 @@ export async function registrarMarcacionManualExcepcion(params: {
           ultimo_cambio_estado: new Date().toISOString()
         })
         .eq('id', params.agenteId);
+
+      // Disparar liquidación automática al registrar SALIDA manual
+      if (params.tipoMovimiento === 'SALIDA') {
+        try {
+          await evaluarYDispararLiquidacionCierreJornada({
+            agenteId: params.agenteId,
+            agenteNombre: params.agenteNombre,
+            sedeId: params.sedeId,
+            cerradoPor: `SUPERVISOR_${params.supervisorNombre}`
+          });
+        } catch (errLiq) {
+          console.warn('Fallo no bloqueante al evaluar liquidación en salida manual:', errLiq);
+        }
+      }
     }
 
     return {
@@ -604,6 +633,18 @@ export async function cerrarJornadaMasivaSede(sedeId: string, adminNombre: strin
           hora_lima: formatearHoraLima(new Date())
         }
       }]);
+
+      // Disparar evaluación de liquidación al cierre masivo de jornada
+      try {
+        await evaluarYDispararLiquidacionCierreJornada({
+          agenteId: ag.id,
+          agenteNombre: ag.nombre,
+          sedeId: sedeId,
+          cerradoPor: `CIERRE_MASIVO_${adminNombre}`
+        });
+      } catch (errLiq) {
+        console.warn(`Fallo no bloqueante al evaluar liquidación masiva para ${ag.nombre}:`, errLiq);
+      }
     }
 
     return { cerrados: agentesActivos.length, ok: true };

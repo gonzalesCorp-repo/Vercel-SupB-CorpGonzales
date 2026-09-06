@@ -22,7 +22,18 @@ export const CONFIG_DEFAULT_STAFF: Omit<AgenteConfigRemunerativa, 'agente_id'> =
   porcentaje_comision_servicios: 40.00,
   porcentaje_comision_productos: 10.00,
   frecuencia_corte: 'DIARIA',
-  permite_solicitud_manual: true
+  permite_solicitud_manual: true,
+  auto_liquidar_cierre: true
+};
+
+export const CONFIG_DEFAULT_FREELANCER: Omit<AgenteConfigRemunerativa, 'agente_id'> = {
+  tipo_remuneracion: 'FREELANCER_COMISION',
+  sueldo_base: 0.00,
+  porcentaje_comision_servicios: 45.00,
+  porcentaje_comision_productos: 10.00,
+  frecuencia_corte: 'DIARIA',
+  permite_solicitud_manual: true,
+  auto_liquidar_cierre: true
 };
 
 export const CONFIG_DEFAULT_SOPORTE: Omit<AgenteConfigRemunerativa, 'agente_id'> = {
@@ -31,7 +42,9 @@ export const CONFIG_DEFAULT_SOPORTE: Omit<AgenteConfigRemunerativa, 'agente_id'>
   porcentaje_comision_servicios: 0.00,
   porcentaje_comision_productos: 5.00,
   frecuencia_corte: 'QUINCENAL',
-  permite_solicitud_manual: false
+  permite_solicitud_manual: false,
+  dia_pago: '30',
+  auto_liquidar_cierre: false
 };
 
 export async function obtenerConfiguracionRemunerativa(agenteId: string, rol?: string): Promise<AgenteConfigRemunerativa> {
@@ -70,6 +83,12 @@ export async function guardarConfiguracionRemunerativa(config: AgenteConfigRemun
       porcentaje_comision_productos: Number(config.porcentaje_comision_productos || 0),
       frecuencia_corte: config.frecuencia_corte,
       permite_solicitud_manual: config.permite_solicitud_manual,
+      dia_pago: config.dia_pago || '30',
+      auto_liquidar_cierre: config.auto_liquidar_cierre ?? (
+        config.tipo_remuneracion === 'FREELANCER_COMISION' ||
+        config.frecuencia_corte === 'DIARIA' ||
+        config.frecuencia_corte === 'POR_SERVICIO'
+      ),
       cuenta_bancaria_pago_preferida: config.cuenta_bancaria_pago_preferida,
       banco_preferido: config.banco_preferido,
       numero_documento_pago: config.numero_documento_pago,
@@ -191,6 +210,7 @@ export async function solicitarLiquidacionStaff(params: {
   solicitadoPor: string;
   sedeId?: string;
   notas?: string;
+  permitirCero?: boolean;
 }): Promise<LiquidacionPersonal> {
   const config = await obtenerConfiguracionRemunerativa(params.agenteId, params.agenteRol);
   const ventas = await obtenerVentasAuditadasPorColaborador(
@@ -212,13 +232,18 @@ export async function solicitarLiquidacionStaff(params: {
     .reduce((acc, v) => acc + v.monto_comision, 0);
 
   let sueldoBaseProrrateado = 0;
-  if (config.tipo_remuneracion !== 'SOLO_COMISIONES' && config.sueldo_base > 0) {
+  if (config.tipo_remuneracion !== 'SOLO_COMISIONES' && config.tipo_remuneracion !== 'FREELANCER_COMISION' && config.sueldo_base > 0) {
     sueldoBaseProrrateado = config.sueldo_base; // Monto base acordado
   }
 
   const totalNeto = (config.tipo_remuneracion === 'SOLO_SUELDO_BASE')
     ? sueldoBaseProrrateado + comisionProductos
     : sueldoBaseProrrateado + comisionServicios + comisionProductos;
+
+  // Validación de seguridad para evitar solicitudes vacías accidentales cuando no es cierre formal de constancia
+  if (!params.permitirCero && totalNeto <= 0 && ventasPendientes.length === 0) {
+    throw new Error('No existen comisiones ni montos devengados pendientes por liquidar.');
+  }
 
   const correlativo = `LIQ-${(params.agenteRol || 'STAFF').toUpperCase()}-${Date.now().toString().slice(-6)}`;
 
@@ -242,7 +267,7 @@ export async function solicitarLiquidacionStaff(params: {
       estado: 'SOLICITADO_STAFF',
       solicitado_por: params.solicitadoPor,
       sede_id: params.sedeId,
-      notas: params.notas
+      notas: params.notas || (totalNeto === 0 ? 'Constancia formal de cierre de jornada sin saldos devengados pendientes' : undefined)
     }])
     .select()
     .single();
@@ -277,6 +302,105 @@ export async function solicitarLiquidacionStaff(params: {
   });
 
   return liqData as LiquidacionPersonal;
+}
+
+/**
+ * Evalúa y dispara automáticamente la liquidación diaria al cierre de jornada
+ * para colaboradores bajo régimen Freelancer / Destajo o con corte diario / por servicio.
+ * Protege legalmente al negocio emitiendo la liquidación para su desembolso inmediato antes de retirarse,
+ * o la constancia formal de S/ 0.00 en caso de no registrar ventas en la jornada,
+ * extinguiendo la deuda diaria y previniendo contingencias de relación laboral (SUNAFIL / MTPE).
+ */
+export async function evaluarYDispararLiquidacionCierreJornada(params: {
+  agenteId: string;
+  agenteNombre: string;
+  agenteRol?: string;
+  sedeId?: string;
+  cerradoPor?: string;
+}): Promise<{ liquidacion?: LiquidacionPersonal; omitido: boolean; motivo?: string }> {
+  try {
+    // 1. Consultar datos del colaborador y su configuración remunerativa
+    const [agenteRes, config] = await Promise.all([
+      supabase.from('agentes').select('id, nombre, rol, regimen_laboral').eq('id', params.agenteId).maybeSingle(),
+      obtenerConfiguracionRemunerativa(params.agenteId, params.agenteRol)
+    ]);
+
+    const regimen = agenteRes.data?.regimen_laboral || config.tipo_remuneracion;
+    const esFreelancer = regimen === 'FREELANCER_COMISION';
+    const esCorteDiario = config.frecuencia_corte === 'DIARIA' || config.frecuencia_corte === 'POR_SERVICIO';
+    const debeLiquidarCierre = config.auto_liquidar_cierre || esFreelancer || esCorteDiario;
+
+    if (!debeLiquidarCierre) {
+      return { 
+        omitido: true, 
+        motivo: `El régimen ${regimen} con frecuencia ${config.frecuencia_corte} no requiere liquidación automática al cierre.` 
+      };
+    }
+
+    // 2. Determinar la fecha de hoy (Lima / UTC local)
+    const hoyIso = new Date().toISOString().split('T')[0];
+
+    // 3. Verificar si ya existe una liquidación hoy para este agente en estado ACTIVO (no anulada)
+    const { data: liqExistente } = await supabase
+      .from('liquidaciones_personal')
+      .select('id, numero_correlativo, estado, monto_total_neto, created_at')
+      .eq('agente_id', params.agenteId)
+      .gte('created_at', `${hoyIso}T00:00:00.000Z`)
+      .neq('estado', 'ANULADO')
+      .maybeSingle();
+
+    // 4. Obtener ventas auditadas del día
+    const ventas = await obtenerVentasAuditadasPorColaborador(
+      params.agenteId,
+      params.agenteNombre,
+      hoyIso,
+      hoyIso
+    );
+    const ventasPendientes = ventas.filter(v => !v.esta_liquidado);
+
+    // Si ya existe una liquidación hoy Y no hay nuevas ventas pendientes, evitamos duplicar
+    if (liqExistente && ventasPendientes.length === 0) {
+      return {
+        omitido: true,
+        motivo: `Ya existe liquidación ${liqExistente.numero_correlativo} registrada hoy (${liqExistente.estado}) y no hay nuevos ítems pendientes.`
+      };
+    }
+
+    // 5. Proceder a generar la liquidación
+    const esCero = ventasPendientes.length === 0;
+    const notas = esCero
+      ? 'Constancia formal de cierre de jornada sin saldos devengados pendientes (SUNAFIL Compliance)'
+      : `Liquidación automática al cierre de jornada (${params.cerradoPor || 'Sistema'})`;
+
+    const liq = await solicitarLiquidacionStaff({
+      agenteId: params.agenteId,
+      agenteNombre: params.agenteNombre,
+      agenteRol: params.agenteRol || agenteRes.data?.rol || 'STAFF',
+      periodoInicio: hoyIso,
+      periodoFin: hoyIso,
+      solicitadoPor: params.cerradoPor || 'AUTOMATIZACION_CIERRE_JORNADA',
+      sedeId: params.sedeId,
+      notas,
+      permitirCero: true
+    });
+
+    await registrarLog(
+      'CIERRE_JORNADA_LIQUIDACION',
+      `Auto-liquidación de cierre generada para ${params.agenteNombre}: ${liq.numero_correlativo} (S/ ${liq.monto_total_neto.toFixed(2)})`,
+      {
+        agente_id: params.agenteId,
+        regimen,
+        items_count: ventasPendientes.length,
+        total: liq.monto_total_neto,
+        es_constancia_cero: esCero
+      }
+    );
+
+    return { liquidacion: liq, omitido: false };
+  } catch (err: any) {
+    console.error(`Error al evaluar liquidación de cierre para ${params.agenteNombre}:`, err);
+    return { omitido: true, motivo: err.message || 'Error inesperado evaluando liquidación' };
+  }
 }
 
 // ============================================================================
