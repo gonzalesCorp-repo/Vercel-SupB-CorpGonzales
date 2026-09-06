@@ -1,4 +1,5 @@
 import { OpalWorkflowInputPayload, OpalWorkflowOutputPayload, PasoRecetaOpal } from '@/types/opal';
+import { KioskConciergeInput, KioskConciergeOutput } from '@/components/kiosk/types';
 
 /**
  * Servicio de integración con Google Opal AI (Breadboard / Agentic Workflows).
@@ -9,7 +10,6 @@ export async function procesarDiagnosticoCapilarOpal(
 ): Promise<OpalWorkflowOutputPayload> {
   const webhookUrl = process.env.NEXT_PUBLIC_OPAL_WEBHOOK_URL;
 
-  // 1. Si hay webhook configurado en producción/staging, intentar invocarlo
   if (webhookUrl) {
     try {
       const response = await fetch(webhookUrl, {
@@ -31,27 +31,19 @@ export async function procesarDiagnosticoCapilarOpal(
     }
   }
 
-  // 2. Motor Heurístico Resiliente (Breadboard / Gemini 2.5 Heuristic Rules)
-  // Modela fielmente las reglas profesionales de colorimetría y seguridad capilar
   return generarDiagnosticoHeuristicoOpal(input);
 }
 
-/**
- * Motor heurístico que replica las decisiones del flujo Breadboard de Opal
- * basado en colorimetría profesional y control de riesgos químicos.
- */
 function generarDiagnosticoHeuristicoOpal(
   input: OpalWorkflowInputPayload
 ): OpalWorkflowOutputPayload {
   const { evaluacion_actual, cliente } = input.contexto;
   const { porosidad, elasticidad, tono_base, tono_deseado, tipo_cuero_cabelludo } = evaluacion_actual;
 
-  // Extraer alturas numéricas de tono (1 a 10)
   const baseNum = parseInt(tono_base) || 4;
   const deseadoNum = parseInt(tono_deseado) || 8;
   const nivelesAclaracion = Math.max(0, deseadoNum - baseNum);
 
-  // Evaluar riesgo químico
   let riesgo: 'BAJO' | 'MODERADO' | 'ALTO' | 'CRITICO' = 'BAJO';
   let scoreSalud = 85;
 
@@ -75,7 +67,6 @@ function generarDiagnosticoHeuristicoOpal(
 
   scoreSalud = Math.max(10, Math.min(100, scoreSalud));
 
-  // Determinar pasos de receta según los niveles de aclaración y salud de la hebra
   const pasos: PasoRecetaOpal[] = [];
 
   if (nivelesAclaracion > 0) {
@@ -126,7 +117,6 @@ function generarDiagnosticoHeuristicoOpal(
     });
   }
 
-  // Paso final de sellado cuticular
   pasos.push({
     orden: pasos.length + 1,
     accion: 'Sellado Cuticular Ácido y Nutrición Lipídica Intensiva',
@@ -171,5 +161,88 @@ function generarDiagnosticoHeuristicoOpal(
       confianza: 0.94,
       sugerencia_venta_cruzada: ventaCruzada
     }
+  };
+}
+
+/**
+ * Servicio de Concierge de Kiosko impulsado por Google Opal AI (Breadboard).
+ * Recomienda bebidas de cortesía y servicios personalizados según el cliente VIP y disponibilidad.
+ */
+export async function procesarKioskConciergeOpal(
+  input: KioskConciergeInput
+): Promise<KioskConciergeOutput> {
+  const webhookUrl = process.env.NEXT_PUBLIC_OPAL_CONCIERGE_WEBHOOK_URL;
+
+  if (webhookUrl) {
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPAL_API_KEY || ''}`
+        },
+        body: JSON.stringify(input)
+      });
+
+      if (response.ok) {
+        return (await response.json()) as KioskConciergeOutput;
+      }
+    } catch (e) {
+      console.warn('Fallo al invocar webhook de Kiosk Concierge, usando motor local:', e);
+    }
+  }
+
+  // Motor Heurístico de Kiosk Concierge
+  const horaActual = new Date().getHours();
+  const esManana = horaActual < 12;
+  const esTardeNoche = horaActual >= 17;
+
+  let bebidaSugerida: {
+    nombre: string;
+    temperatura: 'FRIA' | 'CALIENTE';
+    descripcion: string;
+  } = {
+    nombre: '☕ Capuchino con Canela',
+    temperatura: 'CALIENTE',
+    descripcion: 'Espuma cremosa artesanal recién preparada para iniciar tu sesión.'
+  };
+
+  if (esTardeNoche) {
+    bebidaSugerida = {
+      nombre: '🥂 Cocktail de Bienvenida VIP',
+      temperatura: 'FRIA' as const,
+      descripcion: 'Bebida de autor refrescante para relajarte durante tu visita.'
+    };
+  } else if (!esManana) {
+    bebidaSugerida = {
+      nombre: '🧃 Jugo de Naranja Natural Prensado',
+      temperatura: 'FRIA' as const,
+      descripcion: 'Vitamina C pura y energizante recién exprimida.'
+    };
+  }
+
+  const nombre = input.nombre_cliente?.split(' ')[0] || 'Estimado(a) Cliente';
+  const nivel = input.nivel_vip || 'VIP';
+
+  const saludo = `¡Es un placer recibirte, ${nombre}! Como miembro ${nivel}, hemos preparado tu espacio de atención y cortesía.`;
+
+  const servicios = [
+    {
+      nombre: 'Lavado Premium & Masaje Capilar Anti-Stress',
+      tiempo_estimado_minutos: 15,
+      motivo: 'Ideal para relajarse antes del servicio principal.'
+    },
+    {
+      nombre: 'Tratamiento Sellador de Cutícula Gloss',
+      tiempo_estimado_minutos: 20,
+      motivo: 'Mantiene el brillo y nutrición profunda por hasta 4 semanas.'
+    }
+  ];
+
+  return {
+    saludo_personalizado: saludo,
+    bebida_sugerida: bebidaSugerida,
+    servicios_sugeridos: servicios,
+    tiempo_espera_estimado_minutos: 5
   };
 }
