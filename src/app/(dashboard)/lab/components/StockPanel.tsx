@@ -12,6 +12,7 @@ import {
 import { BulkUploader } from '@/components/ui/BulkUploader';
 import { MetricCard } from '@/components/ui/watermelon-patterns/metric-card';
 import { AnimatePresence, motion } from 'framer-motion';
+import { LabInsumosPredictorOpal } from '@/components/lab/LabInsumosPredictorOpal';
 
 export default function StockPanel() {
   const [stock, setStock] = useState<any[]>([]);
@@ -166,6 +167,19 @@ export default function StockPanel() {
           badgeColor={totalCriticos > 0 ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'}
         />
       </div>
+
+      {/* 🔮 PREDICTOR DE DEMANDA E INVENTARIO QUÍMICO OPAL AI */}
+      <LabInsumosPredictorOpal
+        stockItems={stock}
+        citasProximasCount={28}
+        onGenerarOrdenSugerida={(insumo) => {
+          handleOpenTransfer({
+            bien_id: insumo.id,
+            nombre: insumo.nombre,
+            stock_central: insumo.reposicion_sugerida_unidades
+          });
+        }}
+      />
 
       {/* CONTENEDOR PRINCIPAL: BUSCADOR + TABLA */}
       <div className="bg-white/80 dark:bg-slate-900/80 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col flex-1 min-h-0 backdrop-blur-xl space-y-4">

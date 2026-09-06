@@ -124,3 +124,95 @@ export interface ClientBeautyOutput {
     disponible_ahora: boolean;
   };
 }
+
+// ================= DESKTOP ERP: AUDITOR 360° OPAL =================
+
+// 1. Módulo Caja: Auditoría de Arqueo
+export interface CajaAuditoriaInput {
+  sede_id?: string;
+  total_declarado: number;
+  total_esperado_sistema: number;
+  diferencia: number;
+  diferencia_efectivo: number;
+  diferencia_vouchers: number;
+  total_efectivo_contado: number;
+  total_vouchers_contado: number;
+  notas?: string;
+}
+
+export interface AlertaAuditoriaCaja {
+  id: string;
+  nivel: 'INFO' | 'ADVERTENCIA' | 'CRITICO';
+  titulo: string;
+  descripcion: string;
+  accion_recomendada: string;
+}
+
+export interface CajaAuditoriaOutput {
+  estado_veredicto: 'CONFORME' | 'OBSERVACION_LEVE' | 'DESCUADRE_CRITICO';
+  score_confianza: number; // 0 - 100
+  resumen_ejecutivo: string;
+  alertas: AlertaAuditoriaCaja[];
+  protocolo_cierre_recomendado: string;
+}
+
+// 2. Módulo Laboratorio: Predictor de Demanda de Insumos Químicos
+export interface InsumoQuimicoCritico {
+  id: string;
+  nombre: string;
+  categoria: string;
+  stock_actual: number;
+  stock_minimo: number;
+  demanda_proyectada_7d: number;
+  dias_cobertura_restantes: number;
+  estado_abastecimiento: 'OPTIMO' | 'ALERTA_REPOSICION' | 'QUIEBRE_INMINENTE';
+  reposicion_sugerida_unidades: number;
+}
+
+export interface LabPredictorInput {
+  sede_id?: string;
+  inventario_items: Array<{
+    id: string;
+    nombre: string;
+    categoria: string;
+    stock_total: number;
+    stock_minimo: number;
+  }>;
+  citas_proximas_count?: number;
+}
+
+export interface LabPredictorOutput {
+  score_salud_stock: number; // 0 - 100
+  resumen_diagnostico: string;
+  insumos_criticos: InsumoQuimicoCritico[];
+  recomendacion_compras: string;
+}
+
+// 3. Módulo Finanzas / WFM: Pre-Auditor de Liquidaciones de Personal
+export interface PreAuditoriaLiquidacionInput {
+  sede_id?: string;
+  liquidaciones_pendientes: Array<{
+    id: string;
+    agente_nombre: string;
+    rol?: string;
+    total_servicios: number;
+    total_comisiones: number;
+    items_count?: number;
+  }>;
+}
+
+export interface ObservacionPreAuditoria {
+  liquidacion_id: string;
+  colaborador: string;
+  estado: 'APROBADA' | 'REVISAR' | 'ANOMALIA';
+  mensaje: string;
+  ratio_comision_promedio: number;
+}
+
+export interface PreAuditoriaLiquidacionOutput {
+  total_auditado: number;
+  monto_total_por_desembolsar: number;
+  tasa_conformidad_porcentaje: number;
+  observaciones: ObservacionPreAuditoria[];
+  dictamen_auditoria: string;
+}

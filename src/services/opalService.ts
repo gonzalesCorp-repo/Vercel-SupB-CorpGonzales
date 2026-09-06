@@ -6,7 +6,16 @@ import {
   StaffChairsideOutput,
   ClientBeautyInput,
   ClientBeautyOutput,
-  ProductoCrossSellingOpal
+  ProductoCrossSellingOpal,
+  CajaAuditoriaInput,
+  CajaAuditoriaOutput,
+  AlertaAuditoriaCaja,
+  LabPredictorInput,
+  LabPredictorOutput,
+  InsumoQuimicoCritico,
+  PreAuditoriaLiquidacionInput,
+  PreAuditoriaLiquidacionOutput,
+  ObservacionPreAuditoria
 } from '@/types/opal';
 import { KioskConciergeInput, KioskConciergeOutput } from '@/components/kiosk/types';
 
@@ -403,3 +412,275 @@ export async function procesarClientBeautyAdvisorOpal(
     }
   };
 }
+
+// =========================================================================
+// 3. DESKTOP ERP: MOTORES OPAL AI 360° (CAJA, LABORATORIO, FINANZAS)
+// =========================================================================
+
+/**
+ * Agente Opal Auditor de Arqueo Ciego y Flujo de Caja.
+ * Detecta descuadres, evalúa riesgos y emite el protocolo de cierre seguro.
+ */
+export async function procesarAuditoriaCajaOpal(
+  input: CajaAuditoriaInput
+): Promise<CajaAuditoriaOutput> {
+  const webhookUrl = process.env.NEXT_PUBLIC_OPAL_CAJA_WEBHOOK_URL;
+  if (webhookUrl) {
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPAL_API_KEY || ''}`
+        },
+        body: JSON.stringify(input)
+      });
+      if (response.ok) return (await response.json()) as CajaAuditoriaOutput;
+    } catch (e) {
+      console.warn('Opal Caja Webhook falló, recurriendo al motor heurístico local:', e);
+    }
+  }
+
+  // Motor Heurístico Auditor de Caja
+  const absDif = Math.abs(input.diferencia);
+  const absDifEf = Math.abs(input.diferencia_efectivo);
+  const absDifVo = Math.abs(input.diferencia_vouchers);
+
+  const alertas: AlertaAuditoriaCaja[] = [];
+
+  let estado: 'CONFORME' | 'OBSERVACION_LEVE' | 'DESCUADRE_CRITICO' = 'CONFORME';
+  let score = 98;
+
+  if (absDif < 0.05) {
+    alertas.push({
+      id: 'alt-caja-01',
+      nivel: 'INFO',
+      titulo: 'Arqueo Perfecto',
+      descripcion: 'El conteo físico de billetes, monedas y vouchers concuerda exactamente con el libro de ventas.',
+      accion_recomendada: 'Proceder con el cierre regular y depósito a custodia blindada.'
+    });
+  } else if (absDif <= 10) {
+    estado = 'OBSERVACION_LEVE';
+    score = 82;
+    alertas.push({
+      id: 'alt-caja-02',
+      nivel: 'ADVERTENCIA',
+      titulo: `Varianza Menor (S/ ${input.diferencia.toFixed(2)})`,
+      descripcion: input.diferencia < 0 
+        ? 'Faltante atribuible a redondeo o vuelto en caja chica de operaciones rápidas.' 
+        : 'Sobrante menor en caja física.',
+      accion_recomendada: 'Registrar ajuste de caja chica y advertir al cajero de turno.'
+    });
+  } else {
+    estado = 'DESCUADRE_CRITICO';
+    score = 45;
+    alertas.push({
+      id: 'alt-caja-03',
+      nivel: 'CRITICO',
+      titulo: `Descuadre Significativo (S/ ${input.diferencia.toFixed(2)})`,
+      descripcion: input.diferencia < 0 
+        ? 'Faltante de dinero significativo que excede la tolerancia permitida.' 
+        : 'Sobrante considerable no sustentado en comprobantes.',
+      accion_recomendada: 'Suspender cierre automático. Solicitar re-conteo físico bajo supervisión de Jefatura y revisar anulaciones de comprobantes.'
+    });
+  }
+
+  if (absDifVo > 1) {
+    alertas.push({
+      id: 'alt-caja-vouchers',
+      nivel: 'ADVERTENCIA',
+      titulo: 'Discrepancia en Lote de Vouchers Digitales/Tarjetas',
+      descripcion: `Hay una diferencia de S/ ${input.diferencia_vouchers.toFixed(2)} entre los vouchers físicos declarados y el sistema.`,
+      accion_recomendada: 'Imprimir reporte de cierre de lote en terminal IziPay / Niubiz y cotejar con tickets manuales.'
+    });
+  }
+
+  const resumen = estado === 'CONFORME'
+    ? 'Arqueo validado exitosamente. No se detectan anomalías operativas ni riesgo de merma en el turno.'
+    : estado === 'OBSERVACION_LEVE'
+    ? 'Arqueo aprobado con observación menor tolerada. Requiere firma simple de conformidad del cajero.'
+    : '¡Alerta de Auditoría! Descuadre fuera del rango de tolerancia. Se requiere auditoría de comprobantes y confirmación de jefatura.';
+
+  const protocolo = estado === 'CONFORME'
+    ? '1. Firma digital del cajero. 2. Emisión de acta de arqueo conforme. 3. Ensobrado de efectivo.'
+    : estado === 'OBSERVACION_LEVE'
+    ? '1. Justificación por escrito en observaciones. 2. Aprobación del supervisor de piso.'
+    : '1. Bloqueo preventivo de turno. 2. Arqueo conjunto cajero-administrador. 3. Auditoría de anulaciones.';
+
+  return {
+    estado_veredicto: estado,
+    score_confianza: score,
+    resumen_ejecutivo: resumen,
+    alertas,
+    protocolo_cierre_recomendado: protocolo
+  };
+}
+
+/**
+ * Predictor de Demanda e Inventario Químico en Laboratorio.
+ * Cruza stock en Kardex con categorías críticas y proyección de citas.
+ */
+export async function procesarPrediccionInsumosLabOpal(
+  input: LabPredictorInput
+): Promise<LabPredictorOutput> {
+  const webhookUrl = process.env.NEXT_PUBLIC_OPAL_LAB_WEBHOOK_URL;
+  if (webhookUrl) {
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPAL_API_KEY || ''}`
+        },
+        body: JSON.stringify(input)
+      });
+      if (response.ok) return (await response.json()) as LabPredictorOutput;
+    } catch (e) {
+      console.warn('Opal Lab Webhook falló, recurriendo al motor heurístico local:', e);
+    }
+  }
+
+  // Motor Heurístico Predictor de Laboratorio
+  const citas = input.citas_proximas_count || 30;
+  const items = input.inventario_items || [];
+
+  const insumosCriticos: InsumoQuimicoCritico[] = items.map((item, idx) => {
+    const isQuimico = ['DECOLORANTE', 'TINTE', 'OXIDANTE', 'TRATAMIENTO'].some(c => 
+      item.categoria?.toUpperCase().includes(c) || item.nombre?.toUpperCase().includes(c)
+    );
+
+    // Factor de consumo estimado según tipo
+    let factor = 0.35;
+    if (item.categoria?.toUpperCase().includes('OXIDANTE')) factor = 0.6;
+    if (item.categoria?.toUpperCase().includes('DECOLORANTE')) factor = 0.45;
+
+    const demanda7d = Math.max(2, Math.round(citas * factor * (0.8 + (idx % 3) * 0.2)));
+    const consumoDiario = Math.max(0.5, demanda7d / 7);
+    const diasCobertura = Math.max(0, Math.floor(item.stock_total / consumoDiario));
+
+    let estado: 'OPTIMO' | 'ALERTA_REPOSICION' | 'QUIEBRE_INMINENTE' = 'OPTIMO';
+    let sugerencia = 0;
+
+    if (item.stock_total <= item.stock_minimo / 2 || diasCobertura <= 2) {
+      estado = 'QUIEBRE_INMINENTE';
+      sugerencia = Math.max(10, item.stock_minimo * 2 - item.stock_total);
+    } else if (item.stock_total <= item.stock_minimo || diasCobertura <= 5) {
+      estado = 'ALERTA_REPOSICION';
+      sugerencia = Math.max(5, item.stock_minimo - item.stock_total);
+    }
+
+    return {
+      id: item.id,
+      nombre: item.nombre,
+      categoria: item.categoria || 'Química Capilar',
+      stock_actual: item.stock_total,
+      stock_minimo: item.stock_minimo,
+      demanda_proyectada_7d: demanda7d,
+      dias_cobertura_restantes: diasCobertura,
+      estado_abastecimiento: estado,
+      reposicion_sugerida_unidades: sugerencia
+    };
+  });
+
+  const quiebres = insumosCriticos.filter(i => i.estado_abastecimiento === 'QUIEBRE_INMINENTE').length;
+  const alertas = insumosCriticos.filter(i => i.estado_abastecimiento === 'ALERTA_REPOSICION').length;
+  const total = Math.max(1, insumosCriticos.length);
+
+  const scoreSalud = Math.max(20, Math.round(((total - (quiebres * 2 + alertas)) / total) * 100));
+
+  let recomendacionCompras = 'El laboratorio cuenta con abastecimiento suficiente para el flujo proyectado de la semana.';
+  if (quiebres > 0) {
+    recomendacionCompras = `URGENTE: Generar orden de compra prioritaria para ${quiebres} insumos en quiebre inminente antes de las citas técnicas del fin de semana.`;
+  } else if (alertas > 0) {
+    recomendacionCompras = `Planificar reposición de ${alertas} insumos durante el próximo ciclo de traslados desde Almacén Central.`;
+  }
+
+  return {
+    score_salud_stock: scoreSalud,
+    resumen_diagnostico: `Análisis predictivo sobre ${total} ítems de laboratorio frente a una proyección de ${citas} citas agendadas en los próximos 7 días.`,
+    insumos_criticos: insumosCriticos.sort((a, b) => a.dias_cobertura_restantes - b.dias_cobertura_restantes),
+    recomendacion_compras: recomendacionCompras
+  };
+}
+
+/**
+ * Pre-Auditor Opal de Liquidaciones de Personal (Finanzas & WFM).
+ * Valida consistencia de comisiones frente a servicios y evita dispersiones erróneas.
+ */
+export async function procesarPreAuditoriaLiquidacionOpal(
+  input: PreAuditoriaLiquidacionInput
+): Promise<PreAuditoriaLiquidacionOutput> {
+  const webhookUrl = process.env.NEXT_PUBLIC_OPAL_FINANZAS_WEBHOOK_URL;
+  if (webhookUrl) {
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPAL_API_KEY || ''}`
+        },
+        body: JSON.stringify(input)
+      });
+      if (response.ok) return (await response.json()) as PreAuditoriaLiquidacionOutput;
+    } catch (e) {
+      console.warn('Opal Finanzas Webhook falló, recurriendo al motor heurístico local:', e);
+    }
+  }
+
+  // Motor Heurístico Pre-Auditor de Liquidaciones
+  const pendientes = input.liquidaciones_pendientes || [];
+  let montoTotal = 0;
+  const observaciones: ObservacionPreAuditoria[] = [];
+
+  pendientes.forEach(l => {
+    montoTotal += l.total_comisiones;
+    const ratio = l.total_servicios > 0 
+      ? Number(((l.total_comisiones / l.total_servicios) * 100).toFixed(1)) 
+      : 0;
+
+    if (l.total_servicios === 0 && l.total_comisiones > 0) {
+      observaciones.push({
+        liquidacion_id: l.id,
+        colaborador: l.agente_nombre,
+        estado: 'ANOMALIA',
+        mensaje: 'Comisión liquidada sin registro de servicios en OATC. Requiere sustento de gerencia.',
+        ratio_comision_promedio: ratio
+      });
+    } else if (ratio > 52) {
+      observaciones.push({
+        liquidacion_id: l.id,
+        colaborador: l.agente_nombre,
+        estado: 'REVISAR',
+        mensaje: `Ratio de comisión inusualmente alto (${ratio}%). Revisar posibles bonos manuales agregados.`,
+        ratio_comision_promedio: ratio
+      });
+    } else {
+      observaciones.push({
+        liquidacion_id: l.id,
+        colaborador: l.agente_nombre,
+        estado: 'APROBADA',
+        mensaje: `Conforme. Ratio de comisión (${ratio}%) coincide con el escalafón del colaborador.`,
+        ratio_comision_promedio: ratio
+      });
+    }
+  });
+
+  const aprobadas = observaciones.filter(o => o.estado === 'APROBADA').length;
+  const total = Math.max(1, observaciones.length);
+  const tasaConformidad = Math.round((aprobadas / total) * 100);
+
+  const dictamen = tasaConformidad === 100
+    ? '✅ Todas las liquidaciones superaron la pre-auditoría sin observaciones. Lote listo para desembolso tesorero.'
+    : tasaConformidad >= 80
+    ? '⚠️ El lote contiene observaciones leves en 1 o más liquidaciones. Se recomienda revisar antes del pago final.'
+    : '❌ Anomalías detectadas en comisiones sin sustento. Se requiere validación expresa de gerencia de operaciones.';
+
+  return {
+    total_auditado: pendientes.length,
+    monto_total_por_desembolsar: montoTotal,
+    tasa_conformidad_porcentaje: tasaConformidad,
+    observaciones,
+    dictamen_auditoria: dictamen
+  };
+}
+

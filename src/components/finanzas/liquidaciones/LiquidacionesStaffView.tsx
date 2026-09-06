@@ -17,6 +17,7 @@ import { obtenerTodosLosAgentes } from '@/services/agentes';
 import { ConfiguracionRemuneracionModal } from './ConfiguracionRemuneracionModal';
 import { PagarLiquidacionModal } from './PagarLiquidacionModal';
 import { DetalleLiquidacionModal } from './DetalleLiquidacionModal';
+import { LiquidacionesPreAuditorOpal } from '@/components/finanzas/LiquidacionesPreAuditorOpal';
 import { useAppStore } from '@/store/useAppStore';
 import { useUIStore } from '@/store/useUIStore';
 import { format } from 'date-fns';
@@ -151,6 +152,16 @@ export function LiquidacionesStaffView() {
           <span className="text-[10px] text-emerald-600/80 font-bold">Con voucher y egreso en caja</span>
         </div>
       </div>
+
+      {/* 🔮 PRE-AUDITOR 360° DE LIQUIDACIONES GOOGLE OPAL AI */}
+      {pendientesPago.length > 0 && (
+        <LiquidacionesPreAuditorOpal
+          liquidacionesPendientes={pendientesPago}
+          onLoteAprobado={() => {
+            showAlert('Lote de liquidaciones validado por Opal AI con conformidad.', 'success');
+          }}
+        />
+      )}
 
       {/* Generador Rápido por Especialista */}
       <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">

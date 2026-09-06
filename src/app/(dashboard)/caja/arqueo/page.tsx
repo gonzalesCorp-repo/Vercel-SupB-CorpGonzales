@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ConteoCiego, procesarArqueoCiego, ResultadoArqueo } from '@/services/arqueo';
 import { Banknote, CreditCard, Calculator, ShieldCheck, AlertCircle, CheckCircle2, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { CajaAuditorOpal } from '@/components/caja/CajaAuditorOpal';
 
 export default function ArqueoCiegoPage() {
   const [conteo, setConteo] = useState<ConteoCiego>({
@@ -257,6 +258,25 @@ export default function ArqueoCiegoPage() {
             </div>
           )}
         </motion.div>
+      )}
+
+      {/* 🔮 AUDITOR 360° GOOGLE OPAL AI EN ARQUEO */}
+      {resultado && (
+        <CajaAuditorOpal
+          input={{
+            total_declarado: resultado.totalDeclarado,
+            total_esperado_sistema: resultado.totalEsperadoSistema,
+            diferencia: resultado.diferencia,
+            diferencia_efectivo: resultado.diferenciaEfectivo,
+            diferencia_vouchers: resultado.diferenciaVouchers,
+            total_efectivo_contado: resultado.totalEfectivoContado,
+            total_vouchers_contado: resultado.totalVouchersContado,
+            notas
+          }}
+          onConfirmarCierreAuditado={() => {
+            alert('¡Cierre de turno blindado y auditado por Opal AI registrado!');
+          }}
+        />
       )}
     </div>
   );
