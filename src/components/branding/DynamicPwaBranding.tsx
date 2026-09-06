@@ -14,15 +14,17 @@ export function DynamicPwaBranding() {
     if (typeof document !== 'undefined') {
       document.cookie = `vaikuntha_sede_id=${brand.id}; path=/; max-age=31536000; SameSite=Lax`;
 
-      // 2. Actualizar o crear tag de Manifest dinámico
+      // 2. Actualizar o crear tag de Manifest dinámico con credenciales para evitar bloqueos SSO en Vercel
       let manifestLink = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
       const manifestUrl = `/api/manifest?sedeId=${brand.id}`;
       if (manifestLink) {
         manifestLink.href = manifestUrl;
+        manifestLink.crossOrigin = 'use-credentials';
       } else {
         manifestLink = document.createElement('link');
         manifestLink.rel = 'manifest';
         manifestLink.href = manifestUrl;
+        manifestLink.crossOrigin = 'use-credentials';
         document.head.appendChild(manifestLink);
       }
 

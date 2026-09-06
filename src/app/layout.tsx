@@ -18,7 +18,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Gloss Salón & Vaikuntha ERP",
   description: "Enterprise Resource Planning & WFM Engine Multi-Sede",
-  manifest: "/api/manifest",
   icons: {
     icon: [
       { url: "/api/branding/icon?size=favicon", type: "image/png" },
@@ -56,6 +55,9 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
+      <head>
+        <link rel="manifest" href="/api/manifest" crossOrigin="use-credentials" />
+      </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden font-sans transition-colors duration-200">
         <script
           dangerouslySetInnerHTML={{
