@@ -114,8 +114,9 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/api/branding/icon?size=favicon", type: "image/png" },
+      { url: "/brands/gloss-favicon.png", type: "image/png" },
       { url: "/api/branding/icon?size=192", sizes: "192x192", type: "image/png" },
+      { url: "/api/branding/icon?size=512", sizes: "512x512", type: "image/png" },
     ],
     apple: [
       { url: "/api/branding/icon?size=apple", sizes: "180x180", type: "image/png" },

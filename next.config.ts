@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
   ],
   // Optimización de paquetes y compilación Turbopack
   experimental: {
+    serverActions: {
+      allowedOrigins: [
+        'vercel-sup-b-corp-gonzales.vercel.app',
+        '*.vercel.app',
+        'localhost:3000',
+      ],
+    },
     optimizePackageImports: [
       'lucide-react',
       'framer-motion',
