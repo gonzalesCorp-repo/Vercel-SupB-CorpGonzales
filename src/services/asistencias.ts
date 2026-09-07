@@ -196,7 +196,11 @@ export async function validarYRegistrarAsistenciaNfc(params: RegistroAsistencia)
       .single();
 
     if (insertErr) {
-      console.warn('Error insertando en asistencias_turnos:', insertErr);
+      console.error('Error insertando en asistencias_turnos:', insertErr);
+      return {
+        ok: false,
+        mensaje: `❌ Error al guardar asistencia en el servidor: ${insertErr.message}`
+      };
     }
 
     // Registrar en auditoría
@@ -245,12 +249,12 @@ export async function validarYRegistrarAsistenciaNfc(params: RegistroAsistencia)
       estadoSugerido
     };
 
-  } catch (err) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
     console.error('Fallo en validarYRegistrarAsistenciaNfc:', err);
     return {
-      ok: true,
-      mensaje: `✅ Marcación registrada con éxito.`,
-      estadoSugerido: 'DISPONIBLE'
+      ok: false,
+      mensaje: `❌ Error al procesar marcación: ${errorMsg}`
     };
   }
 }
@@ -823,6 +827,117 @@ export async function obtenerDetalleTurnoColaborador(agenteId: string, agenteNom
       atencionesCanceladas: 0,
       atencionesEnCurso: 0,
       atencionesFinalizadas: 0
+    };
+  }
+}
+
+export interface EstadoDinamicoAgente {
+  estadoOperativo: string;
+  enTurnoHoy: boolean;
+  ultimaMarcacion: RegistroAsistencia | null;
+  horaUltimaMarcacion: string | null;
+}
+
+/**
+ * Computa dinámicamente el estado operativo de un colaborador para el día calendario actual en hora Perú (UTC-5).
+ * Garantiza que si el colaborador no tiene marcaciones de asistencia hoy, su estado efectivo sea 'FUERA_DE_TURNO'.
+ * Además, auto-reconcilia en segundo plano cualquier desfase de días anteriores en la tabla `agentes`.
+ */
+export async function obtenerEstadoOperativoDinamicoAgente(
+  agenteId: string,
+  agenteNombre?: string,
+  estadoActualDb?: string
+): Promise<EstadoDinamicoAgente> {
+  const supabase = createClient();
+  const inicioDiaIso = obtenerInicioDiaLimaIso();
+
+  try {
+    // 1. Consultar última marcación de hoy en hora Perú
+    let queryAsist = supabase
+      .from('asistencias_turnos')
+      .select('*')
+      .gte('timestamp_registro', inicioDiaIso)
+      .order('timestamp_registro', { ascending: false })
+      .limit(1);
+
+    if (agenteId && agenteNombre) {
+      queryAsist = queryAsist.or(`agente_id.eq.${agenteId},agente_nombre.ilike.%${agenteNombre}%`);
+    } else if (agenteId) {
+      queryAsist = queryAsist.eq('agente_id', agenteId);
+    } else if (agenteNombre) {
+      queryAsist = queryAsist.ilike('agente_nombre', `%${agenteNombre}%`);
+    }
+
+    // 2. Consultar si tiene OATC en atención activa hoy
+    let queryOatc = supabase
+      .from('oatc')
+      .select('id, estado_proceso')
+      .in('estado_proceso', ['ASESORIA', 'EN_PROCESO'])
+      .limit(1);
+
+    if (agenteId && agenteNombre) {
+      queryOatc = queryOatc.or(`agente_id.eq.${agenteId},agente_nombre.ilike.%${agenteNombre}%`);
+    } else if (agenteId) {
+      queryOatc = queryOatc.eq('agente_id', agenteId);
+    }
+
+    const [resAsist, resOatc] = await Promise.all([queryAsist, queryOatc]);
+
+    const ultimaMarcacion: RegistroAsistencia | null = resAsist.data?.[0] || null;
+    const tieneOatcActiva = Boolean(resOatc.data && resOatc.data.length > 0);
+
+    let estadoCalculado = 'FUERA_DE_TURNO';
+    let enTurnoHoy = false;
+    let horaUltimaMarcacion: string | null = null;
+
+    if (ultimaMarcacion) {
+      horaUltimaMarcacion = formatearHoraLima(ultimaMarcacion.timestamp_registro || new Date().toISOString());
+
+      if (tieneOatcActiva) {
+        estadoCalculado = 'OCUPADO';
+        enTurnoHoy = true;
+      } else if (ultimaMarcacion.tipo_movimiento === 'INICIO_REFRIGERIO') {
+        estadoCalculado = 'EN_REFRIGERIO';
+        enTurnoHoy = true;
+      } else if (ultimaMarcacion.tipo_movimiento === 'ENTRADA' || ultimaMarcacion.tipo_movimiento === 'FIN_REFRIGERIO') {
+        estadoCalculado = 'DISPONIBLE';
+        enTurnoHoy = true;
+      } else if (ultimaMarcacion.tipo_movimiento === 'SALIDA') {
+        estadoCalculado = 'FUERA_DE_TURNO';
+        enTurnoHoy = false;
+      }
+    } else {
+      // Sin marcación de asistencia registrada hoy -> Estrictamente FUERA_DE_TURNO
+      estadoCalculado = 'FUERA_DE_TURNO';
+      enTurnoHoy = false;
+    }
+
+    // 3. Auto-sanación resiliente de BD: Si el valor en `agentes` está desfasado respecto a hoy, auto-corregir
+    if (agenteId && estadoActualDb && estadoActualDb !== estadoCalculado) {
+      supabase
+        .from('agentes')
+        .update({
+          estado_operativo: estadoCalculado,
+          ultimo_cambio_estado: new Date().toISOString()
+        })
+        .eq('id', agenteId)
+        .then(() => {})
+        .catch((e: unknown) => console.warn('[Auto-Sanación Asistencia] Error actualizando estado agente:', e));
+    }
+
+    return {
+      estadoOperativo: estadoCalculado,
+      enTurnoHoy,
+      ultimaMarcacion,
+      horaUltimaMarcacion
+    };
+  } catch (err) {
+    console.error('Error calculando estado operativo dinámico:', err);
+    return {
+      estadoOperativo: estadoActualDb || 'FUERA_DE_TURNO',
+      enTurnoHoy: false,
+      ultimaMarcacion: null,
+      horaUltimaMarcacion: null
     };
   }
 }

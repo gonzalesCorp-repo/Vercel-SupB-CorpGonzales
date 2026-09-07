@@ -19,7 +19,7 @@ import { ModalLiquidacionStaff } from '@/components/mobile/ModalLiquidacionStaff
 import { createClient } from '@/lib/supabase/client';
 import { reproducirChimeNuevaOrden } from '@/lib/audio/chime';
 import { useNfcBackgroundListener, NfcPayloadParsed } from '@/hooks/useNfcBackgroundListener';
-import { validarYRegistrarAsistenciaNfc, TipoMovimientoAsistencia } from '@/services/asistencias';
+import { validarYRegistrarAsistenciaNfc, obtenerEstadoOperativoDinamicoAgente, TipoMovimientoAsistencia } from '@/services/asistencias';
 import { obtenerConfiguracionSede, SedeFeatureToggles } from '@/services/sedesConfig';
 import { obtenerEstadoCuentaContinuo } from '@/services/compensaciones';
 
@@ -181,13 +181,16 @@ export default function MobileOperacionPage() {
           .eq('estado_proceso', 'FINALIZADO')
           .gte('created_at', `${hoy}T00:00:00`);
 
+        // Reconciliar estado operativo dinámico verificado contra asistencias reales del día
+        const dinamico = await obtenerEstadoOperativoDinamicoAgente(data.id, data.nombre, data.estado_operativo);
+
         setAgente(prev => ({
           ...prev,
           id: data.id,
           nombre: data.nombre,
           rol: data.rol,
           especialidad: data.especialidad || prev.especialidad,
-          estado_operativo: data.estado_operativo || 'FUERA_DE_TURNO',
+          estado_operativo: dinamico.estadoOperativo,
           atributos: data.atributos,
           comisionesHoy: estadoCta.creditosHoy || 0,
           serviciosCompletados: srvCount || 0
@@ -204,6 +207,7 @@ export default function MobileOperacionPage() {
     const channelOatcName = `mobile-oatc-${currentId}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const channelAgenteName = `mobile-agente-${currentId}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const channelPeticionName = `mobile-peticion-${currentId}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const channelAsistName = `mobile-asist-${currentId}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
     const channelOatc = supabase.channel(channelOatcName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, (payload: any) => {
@@ -215,9 +219,10 @@ export default function MobileOperacionPage() {
       .subscribe();
 
     const channelAgente = supabase.channel(channelAgenteName)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'agentes', filter: `id=eq.${currentId}` }, (payload: any) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'agentes', filter: `id=eq.${currentId}` }, async (payload: any) => {
         if (payload.new?.estado_operativo) {
-          setAgente(prev => ({ ...prev, estado_operativo: payload.new.estado_operativo }));
+          const din = await obtenerEstadoOperativoDinamicoAgente(currentId, currentNombre, payload.new.estado_operativo);
+          setAgente(prev => ({ ...prev, estado_operativo: din.estadoOperativo }));
         }
       })
       .subscribe();
@@ -229,11 +234,19 @@ export default function MobileOperacionPage() {
       })
       .subscribe();
 
+    const channelAsist = supabase.channel(channelAsistName)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'asistencias_turnos', filter: `agente_id=eq.${currentId}` }, async () => {
+        const din = await obtenerEstadoOperativoDinamicoAgente(currentId, currentNombre);
+        setAgente(prev => ({ ...prev, estado_operativo: din.estadoOperativo }));
+      })
+      .subscribe();
+
     return () => {
       try {
         supabase.removeChannel(channelOatc);
         supabase.removeChannel(channelAgente);
         supabase.removeChannel(channelPeticion);
+        supabase.removeChannel(channelAsist);
       } catch (e) {
         console.warn('Error removiendo canales móviles:', e);
       }

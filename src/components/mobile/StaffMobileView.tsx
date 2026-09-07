@@ -10,6 +10,7 @@ import { cambiarEstadoAgente } from '@/services/agentes';
 import { obtenerTicketsAsignados, solicitarInicioAtencion, solicitarFinAtencion, solicitarPreCobro, iniciarAtencionOatc, solicitarCancelacionOatc, actualizarServiciosOatc, actualizarClienteNombreOatc } from '@/services/operaciones';
 import { buscarClientes, crearCliente, Cliente } from '@/services/clientes';
 import { OATC, Agente, obtenerAgentesDisponibles, Bien } from '@/services/recepcion';
+import { obtenerEstadoOperativoDinamicoAgente } from '@/services/asistencias';
 import { otorgarXP, actualizarStreak, enviarKudos } from '@/lib/gamification/engine';
 import { calcularFinCiclo, XP_REWARDS } from '@/lib/gamification/config';
 
@@ -94,7 +95,10 @@ export default function StaffMobileView({ agente, sedeId }: StaffMobileViewProps
 
     if (agente?.id) {
       const { data: dbAgente } = await supabase.from('agentes').select('estado_operativo').eq('id', agente.id).single();
-      if (dbAgente) setEstadoActual(dbAgente.estado_operativo || 'DISPONIBLE');
+      if (dbAgente) {
+        const din = await obtenerEstadoOperativoDinamicoAgente(agente.id, agente.nombre, dbAgente.estado_operativo);
+        setEstadoActual(din.estadoOperativo);
+      }
     }
     setIsLoading(false);
   };
