@@ -41,6 +41,7 @@ export default function MobileOperacionPage() {
   const [modalTurnoOpen, setModalTurnoOpen] = useState(false);
   const [modalPuertaNfcOpen, setModalPuertaNfcOpen] = useState(false);
   const [peticionPendiente, setPeticionPendiente] = useState<any>(null);
+  const [peticionRechazada, setPeticionRechazada] = useState<any>(null);
   const [modalLiquidacionOpen, setModalLiquidacionOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [sedeConfig, setSedeConfig] = useState<SedeFeatureToggles | null>(null);
@@ -228,7 +229,25 @@ export default function MobileOperacionPage() {
       .subscribe();
 
     const channelPeticion = supabase.channel(channelPeticionName)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cola_peticiones', filter: `agente_id=eq.${currentId}` }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cola_peticiones', filter: `agente_id=eq.${currentId}` }, (payload: any) => {
+        if (payload.eventType === 'UPDATE' && payload.new) {
+          const rec = payload.new;
+          if (rec.estado === 'RECHAZADO') {
+            setPeticionPendiente(null);
+            setPeticionRechazada(rec);
+            const motivo = rec.metadata?.motivo_rechazo ? ` Motivo: "${rec.metadata.motivo_rechazo}"` : '';
+            showAlert(`❌ Tu solicitud de "${rec.detalle || 'Turno'}" no fue aprobada por Recepción.${motivo}`, 'error');
+            try {
+              if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+              }
+            } catch (e) {}
+          } else if (rec.estado === 'APROBADO') {
+            setPeticionPendiente(null);
+            setPeticionRechazada(null);
+            showAlert(`🎉 ¡Tu solicitud de "${rec.detalle || 'Turno'}" fue aprobada por Recepción!`, 'success');
+          }
+        }
         cargarPeticionPendiente(currentId);
         syncAgente();
       })
@@ -260,15 +279,44 @@ export default function MobileOperacionPage() {
         .from('cola_peticiones')
         .select('*')
         .eq('agente_id', agenteId)
-        .eq('estado', 'PENDIENTE')
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-      setPeticionPendiente(data || null);
+
+      if (data) {
+        if (data.estado === 'PENDIENTE') {
+          setPeticionPendiente(data);
+          setPeticionRechazada(null);
+        } else if (data.estado === 'RECHAZADO') {
+          setPeticionPendiente(null);
+          // Si fue resuelto en la última hora, mostrar feedback al staff
+          const diffMinutos = (Date.now() - new Date(data.resolved_at || data.created_at).getTime()) / 60000;
+          if (diffMinutos < 60) {
+            setPeticionRechazada(data);
+          } else {
+            setPeticionRechazada(null);
+          }
+        } else {
+          setPeticionPendiente(null);
+          setPeticionRechazada(null);
+        }
+      } else {
+        setPeticionPendiente(null);
+        setPeticionRechazada(null);
+      }
     } catch (e) {
       console.warn('Error cargando petición pendiente:', e);
     }
   }, [supabase]);
+
+  // Polling fallback de seguridad cada 8s mientras haya una petición pendiente
+  useEffect(() => {
+    if (!peticionPendiente || !agente.id) return;
+    const pollInterval = setInterval(() => {
+      cargarPeticionPendiente(agente.id);
+    }, 8000);
+    return () => clearInterval(pollInterval);
+  }, [peticionPendiente, agente.id, cargarPeticionPendiente]);
 
   // ⚡ EJECUTOR DIRECTO DE MARCACIÓN FÍSICA NFC (Puerta Principal y Comedor)
   const ejecutarMarcacionNfcDirecta = useCallback(async (tipoMovimiento: TipoMovimientoAsistencia, puntoAcceso: string, rawTag?: string) => {
@@ -572,6 +620,8 @@ export default function MobileOperacionPage() {
             oatcActiva={oatcActiva}
             estadoOperativo={agente.estado_operativo}
             peticionPendiente={peticionPendiente}
+            peticionRechazada={peticionRechazada}
+            onDescartarRechazo={() => setPeticionRechazada(null)}
             onSolicitarCambioTurno={handleSolicitarCambioTurno}
             onEstacionVinculada={(nombre) => setAgente(prev => ({ ...prev, estacion: nombre }))}
             onServicioFinalizado={() => cargarOatcActiva(agente.id, agente.nombre)}
@@ -646,6 +696,24 @@ export default function MobileOperacionPage() {
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {peticionRechazada && (
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-2xl text-xs space-y-1 animate-in fade-in">
+                <div className="flex items-center justify-between text-rose-700 dark:text-rose-300 font-black">
+                  <div className="flex items-center gap-1.5">
+                    <X className="w-3.5 h-3.5" />
+                    <span>Solicitud no aprobada</span>
+                  </div>
+                  <button onClick={() => setPeticionRechazada(null)} className="text-slate-400 hover:text-slate-600">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                  Recepción no aprobó: <strong>{peticionRechazada.detalle || 'Cambio de Turno'}</strong>
+                  {peticionRechazada.metadata?.motivo_rechazo ? ` (${peticionRechazada.metadata.motivo_rechazo})` : ''}.
+                </p>
+              </div>
+            )}
 
             {peticionPendiente && (
               <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-2xl text-xs space-y-1">

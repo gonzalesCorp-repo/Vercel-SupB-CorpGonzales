@@ -36,6 +36,8 @@ interface TabEstacionProps {
   oatcActiva?: any | null;
   estadoOperativo?: string;
   peticionPendiente?: any;
+  peticionRechazada?: any;
+  onDescartarRechazo?: () => void;
   onSolicitarCambioTurno?: (nombrePeticion: string, tipoId: string) => void;
   onEstacionVinculada: (nombre: string) => void;
   onServicioFinalizado: () => void;
@@ -70,6 +72,8 @@ export function TabEstacion({
   oatcActiva,
   estadoOperativo,
   peticionPendiente,
+  peticionRechazada,
+  onDescartarRechazo,
   onSolicitarCambioTurno,
   onEstacionVinculada,
   onServicioFinalizado,
@@ -640,7 +644,53 @@ export function TabEstacion({
                 </p>
               </div>
 
-              {peticionPendiente ? (
+              {peticionRechazada ? (
+                <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-2xl text-xs space-y-2 text-left animate-in zoom-in-95">
+                  <div className="flex items-center justify-between text-rose-700 dark:text-rose-300 font-black">
+                    <div className="flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                      <span>Solicitud No Aprobada por Recepción</span>
+                    </div>
+                    {onDescartarRechazo && (
+                      <button
+                        type="button"
+                        onClick={onDescartarRechazo}
+                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded cursor-pointer"
+                        title="Descartar aviso"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Recepción no aprobó tu solicitud de <strong>{peticionRechazada.detalle || 'Cambio de Turno'}</strong>
+                    {peticionRechazada.metadata?.motivo_rechazo && (
+                      <span>: <em>"{peticionRechazada.metadata.motivo_rechazo}"</em></span>
+                    )}.
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onDescartarRechazo?.();
+                        onSolicitarCambioTurno?.('Inicio de Turno / Asistencia', '11111111-1111-1111-1111-111111111111');
+                      }}
+                      className="text-[11px] bg-rose-600 hover:bg-rose-500 text-white font-black px-3.5 py-2 rounded-xl transition shadow-sm active:scale-95 cursor-pointer"
+                    >
+                      👋 Volver a Solicitar
+                    </button>
+                    {onDescartarRechazo && (
+                      <button
+                        type="button"
+                        onClick={onDescartarRechazo}
+                        className="text-[11px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold px-2.5 py-2 cursor-pointer"
+                      >
+                        Entendido
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : peticionPendiente ? (
                 <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-2xl text-xs space-y-1 text-left">
                   <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-black">
                     <Clock className="w-4 h-4 animate-spin shrink-0" />

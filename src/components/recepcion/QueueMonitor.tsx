@@ -35,6 +35,11 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
   const [motivoExcepcion, setMotivoExcepcion] = useState('Colaborador sin celular / Batería agotada');
   const [isSubmittingExcepcion, setIsSubmittingExcepcion] = useState(false);
 
+  // Modal de Rechazo de Petición con Motivo
+  const [peticionParaRechazo, setPeticionParaRechazo] = useState<Peticion | null>(null);
+  const [motivoRechazoInput, setMotivoRechazoInput] = useState('Horario no programado para hoy');
+  const [isSubmittingRechazo, setIsSubmittingRechazo] = useState(false);
+
   const [tick, setTick] = useState(0);
   
   const sedeActiva = useAppStore((state) => state.sedeActiva);
@@ -96,16 +101,26 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
     };
   }, [sedeActiva?.id]);
 
-  const handleResolver = async (pet: Peticion, estado: 'APROBADO' | 'RECHAZADO') => {
+  const handleResolver = async (pet: Peticion, estado: 'APROBADO' | 'RECHAZADO', motivo?: string) => {
     try {
-      await resolverPeticion(pet, estado);
+      const adminEmail = typeof window !== 'undefined' ? localStorage.getItem('vaikuntha_user_email') || 'Recepción' : 'Recepción';
+      await resolverPeticion(pet, estado, motivo, adminEmail);
       
       if (estado === 'APROBADO' && pet.config_peticiones?.estado_destino !== 'INACTIVO') {
         const { error } = await supabase.from('agentes').update({ badge: pet.config_peticiones?.nombre }).eq('id', pet.agente_id);
         if (error) console.error("Error actualizando badge:", error);
       }
+
+      const solicitante = (pet as any).agente?.nombre || (pet as any).agentes?.nombre || pet.solicitante_nombre || 'Colaborador';
+      showAlert(
+        estado === 'APROBADO'
+          ? `✅ Solicitud de ${solicitante} aprobada.`
+          : `❌ Solicitud de ${solicitante} rechazada. Notificación enviada al colaborador.`,
+        estado === 'APROBADO' ? 'success' : 'info'
+      );
     } catch (error) {
       console.error("Error al resolver peticion:", error);
+      showAlert("Error al procesar la solicitud.", "error");
     } finally {
       cargarDatos();
     }
@@ -267,8 +282,8 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button 
                       type="button"
-                      onClick={() => handleResolver(pet, 'RECHAZADO')} 
-                      title="Rechazar solicitud"
+                      onClick={() => setPeticionParaRechazo(pet)} 
+                      title="Rechazar solicitud con motivo"
                       className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition cursor-pointer"
                     >
                       <XCircle className="w-5 h-5" />
@@ -479,6 +494,90 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50"
               >
                 {isSubmittingExcepcion ? 'Registrando...' : 'Confirmar Marcación'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* MODAL DE RECHAZO DE PETICIÓN CON MOTIVO */}
+      {peticionParaRechazo && (
+        <Modal
+          isOpen={true}
+          onClose={() => setPeticionParaRechazo(null)}
+          title="Rechazar Solicitud de Turno"
+        >
+          <div className="space-y-4">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+              <span className="text-slate-400 block text-[10px] uppercase font-bold">Colaborador:</span>
+              <p className="font-bold text-slate-800 dark:text-slate-100 text-sm">
+                {(peticionParaRechazo as any).agente?.nombre || (peticionParaRechazo as any).agentes?.nombre || peticionParaRechazo.solicitante_nombre || 'Colaborador'}
+              </p>
+              <p className="text-slate-500 mt-0.5">
+                Solicitud: <strong>{peticionParaRechazo.config_peticiones?.nombre || peticionParaRechazo.detalle || 'Cambio de Turno'}</strong>
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
+                Motivo del Rechazo (se informará en la pantalla móvil del staff):
+              </label>
+              
+              {/* Presets rápidos */}
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {[
+                  'Horario no programado para hoy',
+                  'Debe presentarse primero en Recepción',
+                  'Sede o turno equivocado',
+                  'Marcación anticipada no permitida'
+                ].map(preset => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setMotivoRechazoInput(preset)}
+                    className={`text-[10px] px-2.5 py-1 rounded-lg font-semibold border transition cursor-pointer ${
+                      motivoRechazoInput === preset
+                        ? 'bg-rose-500 text-white border-rose-500'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-400'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                type="text"
+                value={motivoRechazoInput}
+                onChange={(e) => setMotivoRechazoInput(e.target.value)}
+                placeholder="Escribe o selecciona el motivo..."
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none"
+              />
+            </div>
+
+            <div className="pt-2 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPeticionParaRechazo(null)}
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isSubmittingRechazo}
+                onClick={async () => {
+                  setIsSubmittingRechazo(true);
+                  try {
+                    await handleResolver(peticionParaRechazo, 'RECHAZADO', motivoRechazoInput.trim() || undefined);
+                    setPeticionParaRechazo(null);
+                  } finally {
+                    setIsSubmittingRechazo(false);
+                  }
+                }}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                {isSubmittingRechazo ? 'Rechazando...' : 'Confirmar Rechazo'}
               </button>
             </div>
           </div>

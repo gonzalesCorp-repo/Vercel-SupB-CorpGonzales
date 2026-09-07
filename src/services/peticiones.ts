@@ -29,6 +29,7 @@ export interface Peticion {
     rol: string;
   };
   oatc_id?: string;
+  metadata?: Record<string, any> | null;
 }
 
 export async function solicitarAsistencia(tipo_id: string): Promise<boolean> {
@@ -180,12 +181,37 @@ export async function obtenerPeticionesPendientesPorSede(): Promise<Peticion[]> 
   }
 }
 
-export async function resolverPeticion(pet: Peticion, estado: 'APROBADO' | 'RECHAZADO'): Promise<boolean> {
+export async function resolverPeticion(
+  pet: Peticion,
+  estado: 'APROBADO' | 'RECHAZADO',
+  motivoRechazo?: string,
+  resolvedBy?: string
+): Promise<boolean> {
   const supabase = createClient();
-  // 1. Update petition state
+  // 1. Update petition state with full audit metadata
+  const updatePayloadPet: Record<string, any> = {
+    estado,
+    resolved_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
+  if (resolvedBy) {
+    updatePayloadPet.resolved_by = resolvedBy;
+  }
+
+  if (motivoRechazo) {
+    const existingMeta = (typeof pet.metadata === 'object' && pet.metadata !== null) ? pet.metadata : {};
+    updatePayloadPet.metadata = {
+      ...existingMeta,
+      motivo_rechazo: motivoRechazo,
+      rechazado_en: new Date().toISOString(),
+      rechazado_por: resolvedBy || 'Recepción'
+    };
+  }
+
   const { error } = await supabase
     .from('cola_peticiones')
-    .update({ estado, resolved_at: new Date().toISOString() })
+    .update(updatePayloadPet)
     .eq('id', pet.id);
 
   if (error) {
