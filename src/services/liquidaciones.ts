@@ -174,6 +174,13 @@ export async function obtenerVentasAuditadasPorColaborador(
 
         const comisionMonto = (montoVenta * porcentaje) / 100;
         const yaLiquidado = mapLiquidados.has(itemOriginId);
+        const esCortesia = Boolean(
+          it.es_cortesia || 
+          it.cortesia || 
+          it.descuento_porcentaje === 100 || 
+          (montoVenta === 0 && it.tipo_bien !== 'producto')
+        );
+        const motivoCortesia = it.motivo_cortesia || (esCortesia ? 'Cortesía de Fidelización' : undefined);
 
         resultados.push({
           origen_id: itemOriginId,
@@ -185,7 +192,9 @@ export async function obtenerVentasAuditadasPorColaborador(
           monto_comision: comisionMonto,
           cliente_nombre: o.cliente_nombre,
           esta_liquidado: yaLiquidado,
-          liquidacion_correlativo: mapLiquidados.get(itemOriginId)
+          liquidacion_correlativo: mapLiquidados.get(itemOriginId),
+          es_cortesia: esCortesia,
+          motivo_cortesia: motivoCortesia
         });
       });
     });

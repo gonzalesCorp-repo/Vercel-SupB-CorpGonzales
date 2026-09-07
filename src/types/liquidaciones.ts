@@ -95,4 +95,6 @@ export interface ItemVentaAuditoria {
   cliente_nombre?: string;
   esta_liquidado: boolean;
   liquidacion_correlativo?: string;
+  es_cortesia?: boolean;
+  motivo_cortesia?: string;
 }

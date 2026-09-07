@@ -19,6 +19,30 @@ export interface MobileHeaderShellProps {
   onOpenCuenta: () => void;
 }
 
+function sanitizarNombreEstacion(nombre?: string | null): string {
+  if (!nombre) return 'Sin estación asignada';
+  const trimmed = nombre.trim();
+  if (
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.includes('docs.google.com') ||
+    trimmed.includes('drive.google.com') ||
+    trimmed.includes('goo.gl')
+  ) {
+    return 'Sin estación asignada';
+  }
+  return trimmed;
+}
+
+function formatearLabelEstado(label: string, estado?: string): string {
+  const s = (estado || label || '').toUpperCase();
+  if (s.includes('DISPONIBLE')) return 'EN TURNO';
+  if (s.includes('OCUPADO')) return 'EN ATENCIÓN';
+  if (s.includes('REFRIGERIO')) return 'REFRIGERIO';
+  if (s.includes('FUERA') || s.includes('INACTIVO') || s.includes('DESCONECTADO')) return 'FUERA DE TURNO';
+  return label;
+}
+
 export function MobileHeaderShell({
   agenteNombre,
   estacionNombre = 'Estación de Piso',
@@ -33,15 +57,18 @@ export function MobileHeaderShell({
   onLogout,
   onOpenCuenta,
 }: MobileHeaderShellProps) {
+  const estacionLimpia = sanitizarNombreEstacion(estacionNombre);
+  const estadoTexto = formatearLabelEstado(badgeLabel, estadoOperativo);
+
   return (
-    <header className="sticky top-0 z-30 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 py-2.5 space-y-1.5 font-sans transition-colors">
+    <header className="sticky top-0 z-30 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 py-2 font-sans transition-colors">
       <div className="flex items-center justify-between gap-3">
         {/* Colaborador Avatar & Info */}
         <div
           onClick={onOpenCuenta}
-          className="flex items-center gap-2.5 cursor-pointer active:scale-95 transition-transform"
+          className="flex items-center gap-2.5 cursor-pointer active:scale-95 transition-transform min-w-0"
         >
-          <div className="relative">
+          <div className="relative shrink-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xs shadow-md">
               {agenteNombre ? agenteNombre.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
             </div>
@@ -51,24 +78,37 @@ export function MobileHeaderShell({
             />
           </div>
 
-          <div className="leading-tight">
-            <h1 className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-[200px]">
-              {agenteNombre}
-            </h1>
+          <div className="leading-tight min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[120px] sm:max-w-[180px]">
+                {agenteNombre || 'Colaborador'}
+              </h1>
+              {/* Micro-indicador NFC activo (sutil, no invasivo) */}
+              {isNfcSupported && isNfcListening && (
+                <span
+                  title="Antena NFC activa: Acerca un tag físico para marcar"
+                  className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shrink-0"
+                >
+                  <Radio className="w-2.5 h-2.5 animate-pulse" />
+                </span>
+              )}
+            </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[130px] sm:max-w-[200px]">
-              {estacionNombre}
+              {estacionLimpia}
             </p>
           </div>
         </div>
 
         {/* Toolbar de Acciones Rápidas */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Badge Estado */}
-          <button onClick={onOpenTurno}
+          <button
+            type="button"
+            onClick={onOpenTurno}
             className={`px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${badgeBg}`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${badgeDot} animate-pulse`} />
-            <span>{badgeLabel.split(' ')[0]}</span>
+            <span className="whitespace-nowrap">{estadoTexto}</span>
           </button>
 
           <Toolbar>
@@ -85,16 +125,6 @@ export function MobileHeaderShell({
           </Toolbar>
         </div>
       </div>
-
-      {/* Sensor NFC en vivo */}
-      {isNfcSupported && isNfcListening && (
-        <div className="flex items-center justify-between text-[9px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-500/20 transition-colors">
-          <span className="flex items-center gap-1 font-semibold">
-            <Radio className="w-2.5 h-2.5 animate-pulse" /> Antena NFC activa
-          </span>
-          <span className="text-slate-500 dark:text-slate-400">Toca tag para marcar</span>
-        </div>
-      )}
     </header>
   );
 }

@@ -239,7 +239,14 @@ export default function StaffLiquidacionesTab({ agente, sedeId }: StaffLiquidaci
                   </div>
 
                   <div className="truncate">
-                    <p className="font-bold truncate">{v.descripcion}</p>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="font-bold truncate">{v.descripcion}</p>
+                      {v.es_cortesia && (
+                        <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800 shrink-0">
+                          🏷️ Cortesía {v.motivo_cortesia ? `(${v.motivo_cortesia})` : ''}
+                        </span>
+                      )}
+                    </div>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">
                       {format(new Date(v.fecha), 'dd/MM HH:mm', { locale: es })} • {v.cliente_nombre || 'Cliente'}
                     </span>

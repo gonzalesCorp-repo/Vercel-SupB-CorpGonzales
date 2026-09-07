@@ -59,20 +59,34 @@ export function useNfcBackgroundListener({
       metodoMarcacion: 'WEB_NFC'
     };
 
+    const isUrl = payloadRaw.startsWith('http://') || payloadRaw.startsWith('https://') || payloadRaw.includes('docs.google.com');
+
     if (payloadRaw.startsWith('VKN:')) {
       const parts = payloadRaw.split(':');
-      // Format: VKN:TIPO:ID:NOMBRE (e.g. VKN:SEDE:LIMA:Puerta_1 o VKN:ESTACION:SILLON_04:Estacion_Central)
+      // Format: VKN:TIPO:ID:NOMBRE (e.g. VKN:SEDE:PUERTA_01:Puerta_Principal o VKN:ESTACION:SILLON_04:Sillon_04)
       parsed.tipo = (parts[1]?.toUpperCase() as any) || 'DESCONOCIDO';
       parsed.id = parts[2] || serial;
       parsed.nombre = parts[3] ? parts[3].replace(/_/g, ' ').trim() : parts[2] || 'Punto de Control';
-    } else if (payloadRaw.toLowerCase().includes('sillon') || payloadRaw.toLowerCase().includes('estacion')) {
+    } else if (!isUrl && (payloadRaw.toLowerCase().includes('sillon') || payloadRaw.toLowerCase().includes('estacion'))) {
       parsed.tipo = 'ESTACION';
       parsed.id = payloadRaw;
       parsed.nombre = payloadRaw;
-    } else {
+    } else if (!isUrl && (payloadRaw.toLowerCase().includes('puerta') || payloadRaw.toLowerCase().includes('acceso') || payloadRaw.toLowerCase().includes('entrada'))) {
+      parsed.tipo = 'SEDE';
+      parsed.id = 'PUERTA_PRINCIPAL';
+      parsed.nombre = 'Puerta Principal';
+    } else if (!isUrl && (payloadRaw.toLowerCase().includes('comedor') || payloadRaw.toLowerCase().includes('refrigerio') || payloadRaw.toLowerCase().includes('cafeteria'))) {
+      parsed.tipo = 'SEDE';
+      parsed.id = 'COMEDOR_REFRIGERIO';
+      parsed.nombre = 'Comedor / Refrigerio';
+    } else if (!isUrl) {
       parsed.tipo = 'SEDE';
       parsed.id = serial;
-      parsed.nombre = 'Tag de Sede';
+      parsed.nombre = 'Punto de Control Sede';
+    } else {
+      parsed.tipo = 'DESCONOCIDO';
+      parsed.id = serial;
+      parsed.nombre = 'Tag No Operativo (URL detectada)';
     }
 
     return parsed;

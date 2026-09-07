@@ -37,6 +37,8 @@ export default function MobileOperacionPage() {
   
   // Modal de control de turno, asistencia y búsqueda táctil
   const [modalTurnoOpen, setModalTurnoOpen] = useState(false);
+  const [modalPuertaNfcOpen, setModalPuertaNfcOpen] = useState(false);
+  const [peticionPendiente, setPeticionPendiente] = useState<any>(null);
   const [modalLiquidacionOpen, setModalLiquidacionOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [sedeConfig, setSedeConfig] = useState<SedeFeatureToggles | null>(null);
@@ -142,6 +144,7 @@ export default function MobileOperacionPage() {
 
         loadGamification(data.id);
         cargarOatcActiva(data.id, data.nombre);
+        cargarPeticionPendiente(data.id);
       }
     }
 
@@ -149,6 +152,7 @@ export default function MobileOperacionPage() {
 
     const channelOatcName = `mobile-oatc-${currentId}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const channelAgenteName = `mobile-agente-${currentId}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const channelPeticionName = `mobile-peticion-${currentId}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
     const channelOatc = supabase.channel(channelOatcName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'oatc' }, (payload: any) => {
@@ -167,19 +171,79 @@ export default function MobileOperacionPage() {
       })
       .subscribe();
 
+    const channelPeticion = supabase.channel(channelPeticionName)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cola_peticiones', filter: `agente_id=eq.${currentId}` }, () => {
+        cargarPeticionPendiente(currentId);
+        syncAgente();
+      })
+      .subscribe();
+
     return () => {
       try {
         supabase.removeChannel(channelOatc);
         supabase.removeChannel(channelAgente);
+        supabase.removeChannel(channelPeticion);
       } catch (e) {
         console.warn('Error removiendo canales móviles:', e);
       }
     };
-  }, [cargarOatcActiva, loadGamification]);
+  }, [cargarOatcActiva, loadGamification, supabase]);
+
+  const cargarPeticionPendiente = useCallback(async (agenteId: string) => {
+    if (!agenteId) return;
+    try {
+      const { data } = await supabase
+        .from('cola_peticiones')
+        .select('*')
+        .eq('agente_id', agenteId)
+        .eq('estado', 'PENDIENTE')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setPeticionPendiente(data || null);
+    } catch (e) {
+      console.warn('Error cargando petición pendiente:', e);
+    }
+  }, [supabase]);
+
+  // ⚡ EJECUTOR DIRECTO DE MARCACIÓN FÍSICA NFC (Puerta Principal y Comedor)
+  const ejecutarMarcacionNfcDirecta = useCallback(async (tipoMovimiento: TipoMovimientoAsistencia, puntoAcceso: string, rawTag?: string) => {
+    try {
+      const res = await validarYRegistrarAsistenciaNfc({
+        agente_id: agente.id,
+        agente_nombre: agente.nombre,
+        sede_id: sedeActiva?.id,
+        sede_nombre: sedeActiva?.nombre,
+        tipo_movimiento: tipoMovimiento,
+        punto_acceso: puntoAcceso,
+        nfc_tag_raw: rawTag,
+        dispositivo: 'Web NFC Designated Tag',
+        metadatos: { metodo: 'WEB_NFC_DESIGNATED', puntoAcceso }
+      });
+
+      if (res.ok && res.estadoSugerido) {
+        setAgente(prev => ({ ...prev, estado_operativo: res.estadoSugerido! }));
+        showAlert(res.mensaje, 'success');
+      } else {
+        showAlert(res.mensaje, res.duplicado ? 'info' : 'warning');
+      }
+    } catch (err: any) {
+      console.error('Error procesando marcación NFC:', err);
+      showAlert('No se pudo procesar la marcación física.', 'error');
+    }
+  }, [agente.id, agente.nombre, sedeActiva, showAlert]);
 
   // 📡 PROCESADOR AUTOMÁTICO DE ESCANEO WEB NFC EN SEGUNDO PLANO
   const handleTagNfcEscaneado = useCallback(async (payload: NfcPayloadParsed) => {
-    // Caso 1: Tag de Estación Física
+    const rawLower = (payload.raw || '').toLowerCase();
+
+    // Caso 0: Ignorar URLs o tags no operativos
+    if (payload.tipo === 'DESCONOCIDO' || rawLower.startsWith('http://') || rawLower.startsWith('https://') || rawLower.includes('docs.google.com')) {
+      showAlert('Tag no reconocido como punto de control operativo.', 'warning');
+      return;
+    }
+
+    // Caso 1: Tag de Estación Física (Sillón / Lavadero / Manicura)
     if (payload.tipo === 'ESTACION') {
       const estacionAutoPermitida = sedeConfig?.modoEstaciones === 'AUTOMATICO_IOT';
       if (estacionAutoPermitida) {
@@ -193,54 +257,49 @@ export default function MobileOperacionPage() {
       return;
     }
 
-    // Caso 2: Tag de Asistencia / Sede (Determinación inteligente y segura del movimiento)
+    // Caso 2: Tag Físico de Sede
     const estadoActual = (agente.estado_operativo || '').toUpperCase();
-    let tipoMovimiento: TipoMovimientoAsistencia = 'ENTRADA';
+    const esPuerta = payload.id === 'PUERTA_PRINCIPAL' || rawLower.includes('puerta') || rawLower.includes('acceso') || rawLower.includes('entrada');
+    const esComedor = payload.id === 'COMEDOR_REFRIGERIO' || rawLower.includes('comedor') || rawLower.includes('cafeteria') || rawLower.includes('refrigerio');
 
-    // A. Si el tag contiene una acción explícita grabada
-    if (payload.raw.toUpperCase().includes('REFRIGERIO')) {
-      tipoMovimiento = estadoActual.includes('REFRIGERIO') ? 'FIN_REFRIGERIO' : 'INICIO_REFRIGERIO';
-    } else if (payload.raw.toUpperCase().includes('SALIDA')) {
-      tipoMovimiento = 'SALIDA';
-    } else {
-      // B. Tag general de Sede / Puerta Principal:
-      if (estadoActual.includes('FUERA') || estadoActual === 'INACTIVO') {
-        tipoMovimiento = 'ENTRADA';
-      } else if (estadoActual.includes('REFRIGERIO')) {
-        // Si estaba en refrigerio y vuelve a pasar el tag de puerta, es retorno
-        tipoMovimiento = 'FIN_REFRIGERIO';
-      } else if (estadoActual === 'DISPONIBLE' || estadoActual === 'OCUPADO') {
-        // Si YA está disponible u ocupado, el tag de puerta NO debe cambiar su estado a refrigerio
-        showAlert(`ℹ️ ¡Hola ${agente.nombre}! Tu turno ya se encuentra activo. ¡Estás disponible para atender! ✨`, 'info');
+    // A. PUERTA PRINCIPAL (Entrada, Salida y Refrigerio fuera)
+    if (esPuerta) {
+      if (estadoActual.includes('FUERA') || estadoActual === 'INACTIVO' || estadoActual === 'DESCONECTADO') {
+        // Marcación de Llegada
+        await ejecutarMarcacionNfcDirecta('ENTRADA', 'Puerta Principal (Entrada)', payload.raw);
         return;
       }
-    }
-
-    try {
-      const res = await validarYRegistrarAsistenciaNfc({
-        agente_id: agente.id,
-        agente_nombre: agente.nombre,
-        sede_id: sedeActiva?.id,
-        sede_nombre: sedeActiva?.nombre,
-        tipo_movimiento: tipoMovimiento,
-        nfc_tag_id: payload.id,
-        nfc_tag_raw: payload.raw,
-        punto_acceso: payload.nombre,
-        dispositivo: 'Web NFC Background Auto-Reader',
-        metadatos: { metodo: 'WEB_NFC', serialNumber: payload.serialNumber }
-      });
-
-      if (res.ok && res.estadoSugerido) {
-        setAgente(prev => ({ ...prev, estado_operativo: res.estadoSugerido! }));
-        showAlert(res.mensaje, 'success');
-      } else {
-        showAlert(res.mensaje, res.duplicado ? 'info' : 'warning');
+      if (estadoActual.includes('REFRIGERIO')) {
+        // Retorno de refrigerio fuera
+        await ejecutarMarcacionNfcDirecta('FIN_REFRIGERIO', 'Puerta Principal (Retorno Refrigerio)', payload.raw);
+        return;
       }
-    } catch (err: any) {
-      console.error('Error procesando marcación NFC:', err);
-      showAlert('No se pudo procesar la marcación NFC.', 'error');
+      // Si está disponible u ocupado, preguntar al colaborador si sale a almorzar fuera o fin de turno
+      setModalPuertaNfcOpen(true);
+      return;
     }
-  }, [agente.id, agente.nombre, agente.estado_operativo, sedeActiva, sedeConfig, showAlert]);
+
+    // B. COMEDOR / CAFETERÍA (Refrigerio interno en sede)
+    if (esComedor) {
+      if (estadoActual.includes('FUERA') || estadoActual === 'INACTIVO') {
+        showAlert('ℹ️ Debes registrar tu Entrada en Puerta Principal antes de iniciar refrigerio.', 'warning');
+        return;
+      }
+      if (estadoActual.includes('REFRIGERIO')) {
+        await ejecutarMarcacionNfcDirecta('FIN_REFRIGERIO', 'Comedor (Fin Refrigerio)', payload.raw);
+      } else {
+        await ejecutarMarcacionNfcDirecta('INICIO_REFRIGERIO', 'Comedor (Inicio Refrigerio)', payload.raw);
+      }
+      return;
+    }
+
+    // C. Otros puntos de control genéricos de sede
+    if (estadoActual.includes('FUERA') || estadoActual === 'INACTIVO') {
+      await ejecutarMarcacionNfcDirecta('ENTRADA', payload.nombre || 'Punto de Acceso Sede', payload.raw);
+    } else {
+      showAlert(`ℹ️ ¡Hola ${agente.nombre}! Tu turno ya se encuentra activo en sede.`, 'info');
+    }
+  }, [agente.id, agente.nombre, agente.estado_operativo, sedeConfig, showAlert, ejecutarMarcacionNfcDirecta]);
 
   // Hook de escucha continua Web NFC en segundo plano
   const { isSupported: isNfcSupported, isListening: isNfcListening } = useNfcBackgroundListener({
@@ -248,41 +307,37 @@ export default function MobileOperacionPage() {
     onTagScanned: handleTagNfcEscaneado
   });
 
-  // 🔘 PROCESADOR MANUAL DE MARCACIÓN (Opción "0 Automatizaciones" táctil)
-  const handleMarcarAsistenciaManual = async (nuevoEstado: string, motivo: string) => {
-    let tipoMovimiento: TipoMovimientoAsistencia = 'ENTRADA';
-    if (nuevoEstado === 'REFRIGERIO' || nuevoEstado === 'EN_REFRIGERIO') {
-      tipoMovimiento = 'INICIO_REFRIGERIO';
-    } else if (motivo.toLowerCase().includes('fin') || motivo.toLowerCase().includes('retorno')) {
-      tipoMovimiento = 'FIN_REFRIGERIO';
-    } else if (nuevoEstado.includes('FUERA') || motivo.toLowerCase().includes('salida') || motivo.toLowerCase().includes('acabó')) {
-      tipoMovimiento = 'SALIDA';
-    } else {
-      tipoMovimiento = 'ENTRADA';
+  // 🔘 PROCESADOR TÁCTIL: SOLICITUD DE CAMBIO DE TURNO (Petición enviada a Recepción)
+  const handleSolicitarCambioTurno = async (nombrePeticion: string, tipoId: string) => {
+    if (!sedeActiva?.id || !agente.id) {
+      showAlert('No se puede enviar la solicitud: Sede o colaborador no identificados.', 'error');
+      return;
     }
 
     try {
-      const res = await validarYRegistrarAsistenciaNfc({
+      const { data, error } = await supabase.from('cola_peticiones').insert([{
+        sede_id: sedeActiva.id,
         agente_id: agente.id,
-        agente_nombre: agente.nombre,
-        sede_id: sedeActiva?.id,
-        sede_nombre: sedeActiva?.nombre,
-        tipo_movimiento: tipoMovimiento,
-        punto_acceso: 'Botonera Manual Móvil',
-        dispositivo: 'Botón Táctil 1-Tap',
-        metadatos: { metodo: 'DIGITAL_1TAP', motivo }
-      });
+        tipo_id: tipoId,
+        tipo: 'TURNO_PETICION',
+        solicitante_nombre: agente.nombre,
+        detalle: `Solicitud de ${nombrePeticion}`,
+        estado: 'PENDIENTE',
+        metadata: { motivo: nombrePeticion, creado_en: new Date().toISOString() }
+      }]).select().single();
 
-      if (res.ok && res.estadoSugerido) {
-        setAgente(prev => ({ ...prev, estado_operativo: res.estadoSugerido! }));
-        setModalTurnoOpen(false);
-        showAlert(res.mensaje, 'success');
-      } else {
-        showAlert(res.mensaje, res.duplicado ? 'info' : 'warning');
+      if (error) {
+        console.error('Error solicitando cambio de turno:', error);
+        showAlert('Error al enviar la solicitud a Recepción.', 'error');
+        return;
       }
-    } catch (err) {
+
+      setPeticionPendiente(data);
+      setModalTurnoOpen(false);
+      showAlert(`📨 Solicitud de "${nombrePeticion}" enviada a Recepción. Esperando aprobación...`, 'info');
+    } catch (err: any) {
       console.error(err);
-      showAlert('Error al registrar asistencia manual.', 'error');
+      showAlert('Error enviando la petición de turno.', 'error');
     }
   };
 
@@ -377,6 +432,14 @@ export default function MobileOperacionPage() {
             icon: <User className="w-4 h-4 text-slate-400" />,
             onSelect: () => setActiveHub('cuenta'),
           },
+          {
+            id: 'cmd-bar',
+            title: 'Workspace de Bar & Cafetería',
+            subtitle: 'Gestión de comandas en vivo e insumos propios',
+            category: 'Operaciones',
+            icon: <Coffee className="w-4 h-4 text-amber-400" />,
+            onSelect: () => router.push('/mobile/bar'),
+          },
         ]}
       />
 
@@ -390,7 +453,8 @@ export default function MobileOperacionPage() {
             agenteNombre={agente.nombre}
             oatcActiva={oatcActiva}
             estadoOperativo={agente.estado_operativo}
-            onMarcarAsistencia={handleMarcarAsistenciaManual}
+            peticionPendiente={peticionPendiente}
+            onSolicitarCambioTurno={handleSolicitarCambioTurno}
             onEstacionVinculada={(nombre) => setAgente(prev => ({ ...prev, estacion: nombre }))}
             onServicioFinalizado={() => cargarOatcActiva(agente.id, agente.nombre)}
             onRefrescar={() => cargarOatcActiva(agente.id, agente.nombre)}
@@ -445,51 +509,122 @@ export default function MobileOperacionPage() {
         mostrarCartera={agente.rol === 'SUPERADMIN' || agente.rol === 'ADMIN' || agente.rol === 'SOPORTE'}
       />
 
-      {/* MODAL CONTROL DE ASISTENCIA / TURNO */}
+      {/* MODAL CONTROL DE ASISTENCIA / TURNO (SOLICITUDES A RECEPCIÓN) */}
       {modalTurnoOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-950/80 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl transition-colors duration-200 animate-in slide-in-from-bottom">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl transition-colors duration-200">
             <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                <h3 className="text-sm font-black text-slate-900 dark:text-white">Control de Turno & Asistencia</h3>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white">Control de Turno & Asistencia</h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Solicitar cambio de estado a Recepción</p>
+                </div>
               </div>
               <button onClick={() => setModalTurnoOpen(false)} className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
+            {peticionPendiente && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-2xl text-xs space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-black">
+                  <Clock className="w-3.5 h-3.5 animate-spin" />
+                  <span>Solicitud en curso</span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                  Esperando aprobación de: <strong>{peticionPendiente.detalle || 'Cambio de Turno'}</strong>
+                </p>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => handleMarcarAsistenciaManual('DISPONIBLE', 'Llegada / Inicio de Turno')}
-                className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
+              <button
+                type="button"
+                onClick={() => handleSolicitarCambioTurno('Inicio de Turno / Asistencia', '11111111-1111-1111-1111-111111111111')}
+                className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-2xl text-center space-y-1 transition active:scale-95 cursor-pointer"
               >
                 <span className="text-2xl block">👋</span>
                 <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 block">YA LLEGUÉ</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Inicio de Turno</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Solicitar Entrada</span>
               </button>
 
-              <button onClick={() => handleMarcarAsistenciaManual('REFRIGERIO', 'Pausa Refrigerio')}
-                className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
+              <button
+                type="button"
+                onClick={() => handleSolicitarCambioTurno('Refrigerio', '22222222-2222-2222-2222-222222222222')}
+                className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-2xl text-center space-y-1 transition active:scale-95 cursor-pointer"
               >
                 <span className="text-2xl block">🍕</span>
                 <span className="text-xs font-black text-amber-700 dark:text-amber-300 block">VOY A COMER</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Pausa Refrigerio</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Solicitar Refrigerio</span>
               </button>
 
-              <button onClick={() => handleMarcarAsistenciaManual('DISPONIBLE', 'Retorno de Refrigerio')}
-                className="p-4 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
+              <button
+                type="button"
+                onClick={() => handleSolicitarCambioTurno('Retorno de Servicio', '54c59ee3-12cf-42cd-bfe9-aa400cdef0a4')}
+                className="p-4 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-2xl text-center space-y-1 transition active:scale-95 cursor-pointer"
               >
                 <span className="text-2xl block">🔄</span>
                 <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 block">REGRESÉ</span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400">Fin de Refrigerio</span>
               </button>
 
-              <button onClick={() => handleMarcarAsistenciaManual('FUERA_DE_TURNO', 'Fin de Jornada')}
-                className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-2xl text-center space-y-1 transition cursor-pointer"
+              <button
+                type="button"
+                onClick={() => handleSolicitarCambioTurno('Fin de Turno / Salida', '33333333-3333-3333-3333-333333333333')}
+                className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-2xl text-center space-y-1 transition active:scale-95 cursor-pointer"
               >
                 <span className="text-2xl block">🏁</span>
                 <span className="text-xs font-black text-rose-700 dark:text-rose-300 block">ACABÓ MI DÍA</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400">Salida del Salón</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Solicitar Salida</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PUERTA PRINCIPAL DETECTADA (ELECCIÓN DE ALMUERZO FUERA O SALIDA) */}
+      {modalPuertaNfcOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🚪</span>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white">Puerta Principal Detectada</h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Selecciona tu movimiento en salida física</p>
+                </div>
+              </div>
+              <button onClick={() => setModalPuertaNfcOpen(false)} className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  setModalPuertaNfcOpen(false);
+                  await ejecutarMarcacionNfcDirecta('INICIO_REFRIGERIO', 'Puerta Principal (Salida a Almorzar fuera)');
+                }}
+                className="p-4 bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-200 dark:border-amber-500/50 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer"
+              >
+                <span className="text-2xl block">🍕</span>
+                <span className="text-xs font-black text-amber-700 dark:text-amber-300 block">SALGO A ALMORZAR</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Pausa Refrigerio</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setModalPuertaNfcOpen(false);
+                  await ejecutarMarcacionNfcDirecta('SALIDA', 'Puerta Principal (Fin de Turno)');
+                }}
+                className="p-4 bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-200 dark:border-rose-500/50 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer"
+              >
+                <span className="text-2xl block">🏁</span>
+                <span className="text-xs font-black text-rose-700 dark:text-rose-300 block">ACABÓ MI DÍA</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Fin de Jornada</span>
               </button>
             </div>
           </div>

@@ -35,7 +35,8 @@ interface TabEstacionProps {
   agenteNombre: string;
   oatcActiva?: any | null;
   estadoOperativo?: string;
-  onMarcarAsistencia?: (nuevoEstado: string, motivo: string) => void;
+  peticionPendiente?: any;
+  onSolicitarCambioTurno?: (nombrePeticion: string, tipoId: string) => void;
   onEstacionVinculada: (nombre: string) => void;
   onServicioFinalizado: () => void;
   onRefrescar?: () => void;
@@ -68,12 +69,13 @@ export function TabEstacion({
   agenteNombre,
   oatcActiva,
   estadoOperativo,
-  onMarcarAsistencia,
+  peticionPendiente,
+  onSolicitarCambioTurno,
   onEstacionVinculada,
   onServicioFinalizado,
   onRefrescar
 }: TabEstacionProps) {
-  const [subTab, setSubTab] = useState<'silla' | 'turno' | 'bar' | 'cola'>('silla');
+  const [subTab, setSubTab] = useState<'silla' | 'cola' | 'bar'>('silla');
   const [modalNfcOpen, setModalNfcOpen] = useState(false);
   const [modalSelectorEstacionOpen, setModalSelectorEstacionOpen] = useState(false);
   const [modalLabOpen, setModalLabOpen] = useState(false);
@@ -569,11 +571,12 @@ export function TabEstacion({
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       
-      {/* 3 Sub-Tabs Principales en Estación: Silla, Bar y Cola */}
-      <div className="flex gap-1 bg-slate-100 dark:bg-slate-900/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner transition-colors w-full">
-        <button type="button"
+      {/* 3 Sub-Tabs Principales en Estación: Silla, Cola y Bar */}
+      <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-900/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner transition-colors w-full">
+        <button
+          type="button"
           onClick={() => setSubTab('silla')}
-          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          className={`flex-1 py-2 px-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'silla'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -583,33 +586,10 @@ export function TabEstacion({
           <span className="truncate">🛋️ Mi Silla</span>
         </button>
 
-        <button type="button"
-          onClick={() => setSubTab('turno')}
-          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
-            subTab === 'turno'
-              ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-          }`}
-        >
-          <Clock className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">⏰ Asistencia</span>
-        </button>
-
-        <button type="button"
-          onClick={() => setSubTab('bar')}
-          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
-            subTab === 'bar'
-              ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-          }`}
-        >
-          <Coffee className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">🍹 Bar</span>
-        </button>
-
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setSubTab('cola')}
-          className={`flex-1 py-2 px-1 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer ${
+          className={`flex-1 py-2 px-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
             subTab === 'cola'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -617,6 +597,19 @@ export function TabEstacion({
         >
           <Users className="w-3.5 h-3.5 shrink-0" />
           <span className="truncate">👥 Cola</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSubTab('bar')}
+          className={`flex-1 py-2 px-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            subTab === 'bar'
+              ? 'bg-indigo-600 text-white shadow-md'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <Coffee className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">🍹 Bar</span>
         </button>
       </div>
 
@@ -627,67 +620,45 @@ export function TabEstacion({
         </div>
       )}
 
-      {/* 1. Vista: Mi Silla Activa / Mi Turno */}
+      {/* 1. Vista: Mi Silla Activa */}
       {subTab === 'silla' && (
         <div className="space-y-4 animate-in fade-in">
           
-          {/* Si está Fuera de Turno: Muestra la Botonera de Asistencia y Turno Completa */}
+          {/* Si está Fuera de Turno: Muestra Invitación Elegante de Entrada */}
           {esFueraDeTurno ? (
-            <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-xl transition-colors">
-              <div className="text-center py-1 space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/30">
-                  WFM & Control Horario
+            <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl backdrop-blur-xl text-center transition-colors">
+              <div className="w-14 h-14 mx-auto rounded-3xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center text-2xl shadow-inner">
+                🚪
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                  Fuera de Turno
                 </span>
-                <h3 className="text-base font-black text-slate-900 dark:text-white mt-2">Botonera de Asistencia y Turno</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 w-full mx-auto">
-                  Valida tu estado para activar tu estación de trabajo y recibir atenciones en tiempo real.
+                <h3 className="text-base font-black text-slate-900 dark:text-white pt-2">Tu estación está inactiva</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+                  Acerca tu dispositivo al tag de <strong>Puerta Principal</strong> para marcar llegada automáticamente, o solicita tu inicio de turno a Recepción.
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <button type="button"
-                  onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Llegada / Inicio de Turno')}
-                  className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-200 dark:border-emerald-500/50 hover:bg-emerald-900/50 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-emerald-950/50 group"
+              {peticionPendiente ? (
+                <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-2xl text-xs space-y-1 text-left">
+                  <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-black">
+                    <Clock className="w-4 h-4 animate-spin shrink-0" />
+                    <span>Solicitud de Entrada en curso</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                    Tu petición está pendiente de confirmación en Recepción central.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onSolicitarCambioTurno?.('Inicio de Turno / Asistencia', '11111111-1111-1111-1111-111111111111')}
+                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-600/20 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <span className="text-3xl block group-hover:scale-110 transition-transform">👋</span>
-                  <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 block tracking-wide">YA LLEGUÉ</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Inicio de Turno</span>
+                  <span>👋 Solicitar Inicio de Turno a Recepción</span>
                 </button>
-
-                <button type="button"
-                  onClick={() => onMarcarAsistencia?.('REFRIGERIO', 'Pausa Refrigerio')}
-                  className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-amber-950/50 group"
-                >
-                  <span className="text-3xl block group-hover:scale-110 transition-transform">🍕</span>
-                  <span className="text-xs font-black text-amber-700 dark:text-amber-300 block tracking-wide">VOY A COMER</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Pausa Refrigerio</span>
-                </button>
-
-                <button type="button"
-                  onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Retorno de Refrigerio')}
-                  className="p-4 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-indigo-950/50 group"
-                >
-                  <span className="text-3xl block group-hover:scale-110 transition-transform">🔄</span>
-                  <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 block tracking-wide">REGRESÉ</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Fin de Refrigerio</span>
-                </button>
-
-                <button type="button"
-                  onClick={() => onMarcarAsistencia?.('FUERA_DE_TURNO', 'Fin de Jornada')}
-                  className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/30 hover:bg-rose-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-lg shadow-rose-950/50 group"
-                >
-                  <span className="text-3xl block group-hover:scale-110 transition-transform">🏁</span>
-                  <span className="text-xs font-black text-rose-700 dark:text-rose-300 block tracking-wide">ACABÓ MI DÍA</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Fin de Jornada</span>
-                </button>
-              </div>
-
-              <button type="button"
-                onClick={() => setModalNfcOpen(true)}
-                className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer border border-slate-300 dark:border-slate-700"
-              >
-                <Wifi className="w-3.5 h-3.5 text-indigo-400" /> Validar con Tag NFC de Sede
-              </button>
+              )}
             </div>
           ) : (
             /* Cuando el colaborador YA ESTÁ EN TURNO: Muestra la Estación Física y la OATC */
@@ -1048,82 +1019,28 @@ export function TabEstacion({
       )}
 
       
-      {/* 2. Sub-Tab: Control de Turno & Asistencia Permanente */}
-      {subTab === 'turno' && (
-        <div className="space-y-4 animate-in fade-in w-full">
-          <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4 backdrop-blur-xl transition-colors">
-            <div className="text-center space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-500/30">
-                WFM • Control de Jornada
-              </span>
-              <h3 className="text-base font-black text-slate-900 dark:text-white mt-2">
-                Control de Turno & Asistencia
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-                Registra tu presencia en tiempo real para activar la recepción de órdenes en salón.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <button type="button"
-                onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Llegada / Inicio de Turno')}
-                className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-200 dark:border-emerald-500/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-xs group"
-              >
-                <span className="text-3xl block group-hover:scale-110 transition-transform">👋</span>
-                <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 block tracking-wide">YA LLEGUÉ</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Inicio de Turno</span>
-              </button>
-
-              <button type="button"
-                onClick={() => onMarcarAsistencia?.('REFRIGERIO', 'Pausa Refrigerio')}
-                className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-xs group"
-              >
-                <span className="text-3xl block group-hover:scale-110 transition-transform">🍕</span>
-                <span className="text-xs font-black text-amber-700 dark:text-amber-300 block tracking-wide">VOY A COMER</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Pausa Refrigerio</span>
-              </button>
-
-              <button type="button"
-                onClick={() => onMarcarAsistencia?.('DISPONIBLE', 'Retorno de Refrigerio')}
-                className="p-4 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-xs group"
-              >
-                <span className="text-3xl block group-hover:scale-110 transition-transform">🔄</span>
-                <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 block tracking-wide">REGRESÉ</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Fin de Refrigerio</span>
-              </button>
-
-              <button type="button"
-                onClick={() => onMarcarAsistencia?.('FUERA_DE_TURNO', 'Fin de Jornada')}
-                className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-2xl text-center space-y-1.5 transition active:scale-95 cursor-pointer shadow-xs group"
-              >
-                <span className="text-3xl block group-hover:scale-110 transition-transform">🏁</span>
-                <span className="text-xs font-black text-rose-700 dark:text-rose-300 block tracking-wide">ACABÓ MI DÍA</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Salida del Salón</span>
-              </button>
-            </div>
-
-            <button type="button"
-              onClick={() => setModalNfcOpen(true)}
-              className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer border border-slate-200 dark:border-slate-700"
-            >
-              <Wifi className="w-4 h-4 text-indigo-500" /> Validar con Tag NFC de Sede
-            </button>
-          </div>
+      {/* 2. Vista: Cola en Vivo Incrustada */}
+      {subTab === 'cola' && (
+        <div className="animate-in fade-in">
+          <TabCola
+            miNombre={agenteNombre}
+            estacionNombre={estacionNombre}
+            onClienteSeleccionado={() => {
+              setSubTab('silla');
+              if (onRefrescar) onRefrescar();
+            }}
+          />
         </div>
       )}
-
 
       {/* 3. Vista: Bar & Cafetería */}
       {subTab === 'bar' && (
         <div className="animate-in fade-in">
-          <TabBar clienteNombre={oatcActiva?.cliente_nombre} />
-        </div>
-      )}
-
-      {/* 3. Vista: Cola en Vivo Incrustada */}
-      {subTab === 'cola' && (
-        <div className="animate-in fade-in">
-          <TabCola miNombre={agenteNombre} />
+          <TabBar
+            clienteNombre={oatcActiva?.cliente_nombre}
+            estacionNombre={estacionNombre}
+            agenteNombre={agenteNombre}
+          />
         </div>
       )}
 
