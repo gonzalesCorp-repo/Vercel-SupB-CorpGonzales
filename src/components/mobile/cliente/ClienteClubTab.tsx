@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { 
   Award, Sparkles, User, Phone, Mail, Edit3, 
-  LogOut, Dna, ShieldCheck, CheckCircle2, ChevronRight, Gift, Share2, Copy, HeartHandshake 
+  LogOut, Dna, ShieldCheck, CheckCircle2, ChevronRight, Gift, Share2, Copy, Check, HeartHandshake 
 } from 'lucide-react';
 import { LuminaHqPluginConfig } from '@/types/clienteLifestyle';
 import { StitchHolographicVipCard } from './StitchHolographicVipCard';
@@ -40,6 +40,7 @@ export function ClienteClubTab({
   const [celular, setCelular] = useState(cliente.celular || '');
   const [email, setEmail] = useState(cliente.email || '');
   const [guardando, setGuardando] = useState(false);
+  const [codigoCopiado, setCodigoCopiado] = useState(false);
 
   const handleGuardar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,9 +121,11 @@ export function ClienteClubTab({
           Comparte la experiencia boutique de <strong>Gloss Salón and Relax</strong>. Tu amiga recibe <strong>S/ 30 de descuento</strong> en su primer servicio y tú recibes <strong>150 LuminaCoins</strong> de bienestar cuando complete su visita.
         </p>
 
-        <div className="p-3 bg-white/70 dark:bg-slate-950/70 border border-pink-200 dark:border-pink-500/20 rounded-2xl flex items-center justify-between">
+        <div className="p-3 bg-white/80 dark:bg-slate-950/80 border border-pink-200 dark:border-pink-500/20 rounded-2xl flex items-center justify-between gap-3">
           <div className="text-left">
-            <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest block">Tu Código VIP</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-black tracking-widest block">
+              Tu Código VIP
+            </span>
             <span className="text-sm font-mono font-black text-purple-600 dark:text-purple-400">
               {cliente.dni ? `GLOSS-${cliente.dni.slice(-4)}` : `GLOSS-${cliente.id.slice(0, 4).toUpperCase()}`}
             </span>
@@ -130,15 +133,27 @@ export function ClienteClubTab({
 
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               const code = cliente.dni ? `GLOSS-${cliente.dni.slice(-4)}` : `GLOSS-${cliente.id.slice(0, 4).toUpperCase()}`;
-              navigator.clipboard?.writeText(code);
-              showAlert(`Código ${code} copiado al portapapeles.`, 'success');
+              try {
+                if (navigator.clipboard?.writeText) {
+                  await navigator.clipboard.writeText(code);
+                }
+                setCodigoCopiado(true);
+                showAlert(`Código ${code} copiado al portapapeles.`, 'success');
+                setTimeout(() => setCodigoCopiado(false), 2000);
+              } catch {
+                showAlert(`Código: ${code}`, 'info');
+              }
             }}
-            className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-300 hover:bg-purple-100 transition cursor-pointer"
-            title="Copiar Código"
+            aria-label={codigoCopiado ? "Código copiado al portapapeles" : "Copiar código de pase VIP"}
+            className="min-w-[44px] min-h-[44px] rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-300 hover:bg-purple-100 transition flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
           >
-            <Copy className="w-4 h-4" />
+            {codigoCopiado ? (
+              <Check className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+            ) : (
+              <Copy className="w-4 h-4" aria-hidden="true" />
+            )}
           </button>
         </div>
 
@@ -151,9 +166,10 @@ export function ClienteClubTab({
           )}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full h-11 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition cursor-pointer active:scale-95"
+          aria-label="Compartir invitación de bienvenida por WhatsApp (se abre en una nueva pestaña)"
+          className="w-full min-h-[48px] h-auto py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition cursor-pointer active:scale-95 motion-safe:active:scale-95 text-center leading-normal"
         >
-          <Share2 className="w-4 h-4" />
+          <Share2 className="w-4 h-4 shrink-0" aria-hidden="true" />
           <span>Compartir Invitación por WhatsApp</span>
         </a>
       </div>
