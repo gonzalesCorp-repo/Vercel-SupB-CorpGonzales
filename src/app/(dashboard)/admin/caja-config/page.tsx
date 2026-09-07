@@ -13,6 +13,7 @@ interface Emisor {
   razon_social: string;
   nombre_comercial: string;
   estado: string;
+  created_at?: string;
 }
 
 interface Serie {
@@ -22,6 +23,7 @@ interface Serie {
   serie: string;
   correlativo_actual: number;
   estado: string;
+  created_at?: string;
 }
 
 interface Sede {
@@ -29,26 +31,44 @@ interface Sede {
   nombre: string;
 }
 
+export interface EmisorSede {
+  id: string;
+  emisor_id: string;
+  sede_id: string;
+  estado?: string;
+  created_at?: string;
+}
+
 export default function CajaConfigPage() {
   const [activeTab, setActiveTab] = useState<'emisores' | 'series'>('emisores');
   const [emisores, setEmisores] = useState<Emisor[]>([]);
   const [series, setSeries] = useState<Serie[]>([]);
   const [sedes, setSedes] = useState<Sede[]>([]);
-  const [emisoresSedes, setEmisoresSedes] = useState<any[]>([]); // relations
+  const [emisoresSedes, setEmisoresSedes] = useState<EmisorSede[]>([]); // relations
   const { showAlert } = useUIStore();
 
   const loadData = async () => {
-    const { data: eData } = await supabase.from('emisores').select('*').order('created_at', { ascending: false });
-    if (eData) setEmisores(eData);
+    const { data: eData } = await supabase
+      .from('emisores')
+      .select('id, ruc, razon_social, nombre_comercial, estado, created_at')
+      .order('created_at', { ascending: false });
+    if (eData) setEmisores(eData as unknown as Emisor[]);
 
-    const { data: sData } = await supabase.from('emisores_series').select('*').order('created_at', { ascending: false });
-    if (sData) setSeries(sData);
+    const { data: sData } = await supabase
+      .from('emisores_series')
+      .select('id, emisor_id, tipo_comprobante, serie, correlativo_actual, estado, created_at')
+      .order('created_at', { ascending: false });
+    if (sData) setSeries(sData as unknown as Serie[]);
 
-    const { data: sedData } = await supabase.from('sedes').select('*');
-    if (sedData) setSedes(sedData);
+    const { data: sedData } = await supabase
+      .from('sedes')
+      .select('id, nombre');
+    if (sedData) setSedes(sedData as unknown as Sede[]);
 
-    const { data: esData } = await supabase.from('emisores_sedes').select('*');
-    if (esData) setEmisoresSedes(esData);
+    const { data: esData } = await supabase
+      .from('emisores_sedes')
+      .select('id, emisor_id, sede_id');
+    if (esData) setEmisoresSedes(esData as unknown as EmisorSede[]);
   };
 
   useEffect(() => {

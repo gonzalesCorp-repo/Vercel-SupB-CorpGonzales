@@ -3,19 +3,42 @@ import { createClient } from '@supabase/supabase-js';
 import { evaluarYDispararLiquidacionCierreJornada } from '@/services/liquidaciones';
 import { formatearHoraLima } from '@/services/asistencias';
 
+interface AlertaColaborador {
+  usuario_email: string;
+  mensaje: string;
+  resuelta: boolean;
+}
+
 export async function GET(request: Request) {
   try {
-    // 1. Verificar token del cron (seguridad de Vercel)
+    // 1. Verificar token del cron (seguridad de Vercel - SEC-001)
+    const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret) {
+      console.error('CRON_SECRET no está configurado en las variables de entorno del servidor');
+      return NextResponse.json(
+        { error: 'Configuración del servidor incompleta (CRON_SECRET no configurado)' },
+        { status: 500 }
+      );
+    }
+
     const authHeader = request.headers.get('authorization');
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // 2. Cliente administrativo estricto con Service Role Key (SEC-002)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error('Variables de Supabase incompletas para ejecución de CRON (se requiere SUPABASE_SERVICE_ROLE_KEY)');
+      return NextResponse.json(
+        { error: 'Configuración del servidor incompleta: se requiere SUPABASE_SERVICE_ROLE_KEY' },
+        { status: 500 }
+      );
+    }
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // 2. Consultar colaboradores que siguen con turno activo al cierre del día
+    // 3. Consultar colaboradores que siguen con turno activo al cierre del día
     const { data: agentesActivos, error: agError } = await supabase
       .from('agentes')
       .select('id, nombre, email, rol, regimen_laboral, ubicacion_id, estado_operativo')
@@ -33,7 +56,7 @@ export async function GET(request: Request) {
 
     const timestampIso = new Date().toISOString();
     const horaLima = formatearHoraLima(timestampIso);
-    const alertasToInsert: any[] = [];
+    const alertasToInsert: AlertaColaborador[] = [];
     let freelancersLiquidados = 0;
     let planillaRHEAuditados = 0;
 
@@ -109,8 +132,11 @@ export async function GET(request: Request) {
       freelancersLiquidados,
       planillaRHEAuditados
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error en cron check-salidas:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error interno del servidor al procesar el cierre nocturno de salidas' },
+      { status: 500 }
+    );
   }
 }

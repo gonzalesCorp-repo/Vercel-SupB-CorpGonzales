@@ -23,7 +23,7 @@ export interface RegistroAsistencia {
   timestamp_registro?: string;
   ip_origen?: string;
   dispositivo?: string;
-  metadatos?: Record<string, any>;
+  metadatos?: Record<string, unknown>;
 }
 
 export interface ResultadoValidacionAsistencia {
@@ -57,7 +57,7 @@ export function obtenerInicioDiaLimaIso(): string {
   const parts = formatoFecha.formatToParts(ahora);
   const month = parts.find(p => p.type === 'month')?.value || '01';
   const day = parts.find(p => p.type === 'day')?.value || '01';
-  const year = parts.find(p => p.type === 'year')?.value || '2026';
+  const year = parts.find(p => p.type === 'year')?.value || new Date().getFullYear().toString();
   return `${year}-${month}-${day}T00:00:00.000-05:00`;
 }
 
@@ -362,11 +362,12 @@ export async function registrarMarcacionManualExcepcion(params: {
       registro: data || registro,
       estadoSugerido
     };
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const errorMsg = e instanceof Error ? e.message : 'Error desconocido';
     console.error('Error en marcacion manual:', e);
     return {
       ok: false,
-      mensaje: `❌ Error al registrar marcación manual: ${e.message}`
+      mensaje: `❌ Error al registrar marcación manual: ${errorMsg}`
     };
   }
 }
@@ -380,6 +381,39 @@ export const TIPO_PETICION_ASISTENCIA_MAP: Record<TipoMovimientoAsistencia, stri
   OTRO: '5ef41109-0c11-469c-b79d-2e2e74a79d25'
 };
 
+export const NOMBRES_TIPO_PETICION_ASISTENCIA: Record<TipoMovimientoAsistencia, string[]> = {
+  ENTRADA: ['Inicio de Turno', 'Entrada', 'Ingreso'],
+  INICIO_REFRIGERIO: ['Pausa Refrigerio', 'Refrigerio', 'Almuerzo'],
+  FIN_REFRIGERIO: ['Fin Refrigerio', 'Retorno de Refrigerio'],
+  SALIDA: ['Fin de Turno', 'Salida', 'Cierre de Jornada'],
+  CAMBIO_ESTACION: ['Cambio de Estación', 'Estación'],
+  OTRO: ['Otro', 'Asistencia General', 'Retorno de Servicio']
+};
+
+/**
+ * Resuelve dinámicamente el tipo de petición desde config_peticiones
+ * utilizando fallback resiliente al mapeo estático para evitar dependencia única de UUIDs quemados (QUAL-002).
+ */
+export async function resolverTipoPeticionId(tipoMovimiento: TipoMovimientoAsistencia): Promise<string> {
+  const fallbackId = TIPO_PETICION_ASISTENCIA_MAP[tipoMovimiento] || '11111111-1111-1111-1111-111111111111';
+  try {
+    const supabase = createClient();
+    const nombres = NOMBRES_TIPO_PETICION_ASISTENCIA[tipoMovimiento] || [];
+    if (nombres.length > 0) {
+      const { data } = await supabase
+        .from('config_peticiones')
+        .select('id')
+        .in('nombre', nombres)
+        .limit(1)
+        .maybeSingle();
+      if (data?.id) return data.id;
+    }
+  } catch (err: unknown) {
+    console.warn('[Asistencias] Fallback dinámico a UUID predeterminado para tipo de petición:', err);
+  }
+  return fallbackId;
+}
+
 export async function crearSolicitudAsistenciaCola(params: {
   agenteId: string;
   agenteNombre: string;
@@ -389,7 +423,7 @@ export async function crearSolicitudAsistenciaCola(params: {
   dispositivo?: string;
 }): Promise<{ ok: boolean; peticionId?: string; pinTemporal?: string; mensaje: string }> {
   const supabase = createClient();
-  const tipoId = TIPO_PETICION_ASISTENCIA_MAP[params.tipoMovimiento] || '11111111-1111-1111-1111-111111111111';
+  const tipoId = await resolverTipoPeticionId(params.tipoMovimiento);
   const pinTemporal = '1234';
 
   try {
@@ -418,11 +452,12 @@ export async function crearSolicitudAsistenciaCola(params: {
       pinTemporal,
       mensaje: `📨 Solicitud enviada al local. Valídala en el Tótem Kiosko ingresando tu PIN personal de 4 dígitos o en Recepción.`
     };
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const errorMsg = e instanceof Error ? e.message : 'Error desconocido';
     console.error('Error creando solicitud en cola_peticiones:', e);
     return {
       ok: false,
-      mensaje: `Error al enviar solicitud: ${e?.message || 'Error desconocido'}`
+      mensaje: `Error al enviar solicitud: ${errorMsg}`
     };
   }
 }

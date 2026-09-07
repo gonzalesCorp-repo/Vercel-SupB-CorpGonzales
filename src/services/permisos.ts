@@ -61,12 +61,100 @@ export interface PermisoAgente {
   created_at: string;
 }
 
+export interface PermisosCacheEstructura {
+  keys: string[];
+  timestamp: number;
+}
+
+export const PERMISOS_CACHE_TTL_MS = 300_000; // 5 minutos (300,000 ms)
+
+/**
+ * Lee y valida la caché de permisos en localStorage usando TTL de 5 minutos (SEC-008).
+ * Si ha expirado o está corrupta, purga la entrada y retorna null para refrescar desde Supabase.
+ */
+export function leerPermisosCacheLocal(agenteId: string): string[] | null {
+  if (typeof window === 'undefined') return null;
+  const storageKey = `vaikuntha_permisos_${agenteId}`;
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return null;
+
+    const parsed: unknown = JSON.parse(raw);
+
+    // Estructura válida con TTL: { keys: string[], timestamp: number }
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      'keys' in parsed &&
+      'timestamp' in parsed
+    ) {
+      const data = parsed as PermisosCacheEstructura;
+      const ahora = Date.now();
+      const tiempoTranscurrido = ahora - data.timestamp;
+
+      if (tiempoTranscurrido > PERMISOS_CACHE_TTL_MS) {
+        console.warn(
+          `[Permisos] TTL de caché expirado para el agente ${agenteId} (${tiempoTranscurrido}ms > ${PERMISOS_CACHE_TTL_MS}ms). Purgando y retornando null para refrescar desde Supabase.`
+        );
+        localStorage.removeItem(storageKey);
+        return null;
+      }
+
+      if (Array.isArray(data.keys)) {
+        return data.keys;
+      }
+    }
+
+    // Compatibilidad: Si detectamos formato legacy (array directo), lo purgamos y devolvemos null para migrar
+    if (Array.isArray(parsed)) {
+      console.warn(`[Permisos] Formato legacy de permisos detectado para ${agenteId}. Purgando para renovar con TTL.`);
+      localStorage.removeItem(storageKey);
+      return null;
+    }
+
+    localStorage.removeItem(storageKey);
+    return null;
+  } catch (err: unknown) {
+    console.warn(`[Permisos] Error al leer o deserializar la caché local para el agente ${agenteId}:`, err);
+    try {
+      localStorage.removeItem(storageKey);
+    } catch (e: unknown) {
+      console.warn('[Permisos] Error al purgar clave dañada de localStorage:', e);
+    }
+    return null;
+  }
+}
+
+/**
+ * Guarda los permisos en localStorage con estructura { keys: string[], timestamp: number } (SEC-008).
+ */
+export function guardarPermisosCacheLocal(agenteId: string, keys: string[]): void {
+  if (typeof window === 'undefined') return;
+  const storageKey = `vaikuntha_permisos_${agenteId}`;
+  try {
+    const payload: PermisosCacheEstructura = {
+      keys,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(storageKey, JSON.stringify(payload));
+  } catch (err: unknown) {
+    console.warn(`[Permisos] Error al persistir permisos en localStorage para el agente ${agenteId}:`, err);
+  }
+}
+
 /**
  * Obtiene las claves de herramientas asignadas a un agente de forma resiliente
  */
 export async function obtenerHerramientasAgente(agenteId: string): Promise<string[]> {
   if (!agenteId) return [];
 
+  // 1. Intentar obtener desde caché local validando el TTL de 5 minutos
+  const cached = leerPermisosCacheLocal(agenteId);
+  if (cached !== null) {
+    return cached;
+  }
+
+  // 2. Si no hay caché o expiró (retornó null), refrescar desde Supabase
   try {
     const { data, error } = await supabase
       .from('agente_herramientas')
@@ -74,25 +162,21 @@ export async function obtenerHerramientasAgente(agenteId: string): Promise<strin
       .eq('agente_id', agenteId);
 
     if (error) {
-      // Si la tabla no existe aún en Supabase, usamos fallback de almacenamiento local
-      if (typeof window !== 'undefined') {
-        const local = localStorage.getItem(`vaikuntha_permisos_${agenteId}`);
-        if (local) {
-          try { return JSON.parse(local); } catch {}
-        }
-      }
+      // Si la tabla no existe aún en Supabase o falla la red
+      console.warn('[Permisos] Error consultando agente_herramientas en Supabase:', error);
       return [];
     }
 
     const keys = (data || []).map((p: { herramienta_key: string }) => p.herramienta_key);
     
-    // Guardar en caché local
-    if (typeof window !== 'undefined' && keys.length > 0) {
-      localStorage.setItem(`vaikuntha_permisos_${agenteId}`, JSON.stringify(keys));
+    // Guardar en caché local con estructura { keys, timestamp }
+    if (keys.length > 0) {
+      guardarPermisosCacheLocal(agenteId, keys);
     }
 
     return keys;
-  } catch {
+  } catch (err: unknown) {
+    console.warn('[Permisos] Excepción capturada en obtenerHerramientasAgente:', err);
     return [];
   }
 }
@@ -112,7 +196,9 @@ export async function concederHerramienta(agenteId: string, herramientaKey: stri
         .ilike('email', adminEmail.trim())
         .maybeSingle();
       adminId = adminAgente?.id || null;
-    } catch {}
+    } catch (err: unknown) {
+      console.warn('[Permisos] Error al resolver ID del agente administrador por email:', err);
+    }
   }
 
   try {
@@ -128,21 +214,21 @@ export async function concederHerramienta(agenteId: string, herramientaKey: stri
 
     // Fallback local para Sandbox / Offline
     if (typeof window !== 'undefined') {
-      const local = localStorage.getItem(`vaikuntha_permisos_${agenteId}`);
-      const list: string[] = local ? JSON.parse(local) : [];
-      if (!list.includes(herramientaKey)) {
-        list.push(herramientaKey);
-        localStorage.setItem(`vaikuntha_permisos_${agenteId}`, JSON.stringify(list));
+      const cached = leerPermisosCacheLocal(agenteId) || [];
+      if (!cached.includes(herramientaKey)) {
+        const list = [...cached, herramientaKey];
+        guardarPermisosCacheLocal(agenteId, list);
       }
     }
 
     if (error) {
-      console.warn('[Permisos - Fallback Local] Guardado en caché local para el agente.');
+      console.warn('[Permisos - Fallback Local] Guardado en caché local para el agente:', error);
     }
 
     await registrarLog('SISTEMA', `Concedió herramienta ${herramientaKey}`, { agente_id: agenteId });
     return true;
-  } catch {
+  } catch (err: unknown) {
+    console.warn('[Permisos] Error capturado al conceder herramienta:', err);
     return false;
   }
 }
@@ -160,17 +246,17 @@ export async function revocarHerramienta(agenteId: string, herramientaKey: strin
 
     // Actualizar caché local
     if (typeof window !== 'undefined') {
-      const local = localStorage.getItem(`vaikuntha_permisos_${agenteId}`);
-      if (local) {
-        const list: string[] = JSON.parse(local);
-        const filtered = list.filter(k => k !== herramientaKey);
-        localStorage.setItem(`vaikuntha_permisos_${agenteId}`, JSON.stringify(filtered));
+      const cached = leerPermisosCacheLocal(agenteId);
+      if (cached) {
+        const filtered = cached.filter(k => k !== herramientaKey);
+        guardarPermisosCacheLocal(agenteId, filtered);
       }
     }
 
     await registrarLog('SISTEMA', `Revocó herramienta ${herramientaKey}`, { agente_id: agenteId });
     return true;
-  } catch {
+  } catch (err: unknown) {
+    console.warn('[Permisos] Error capturado al revocar herramienta:', err);
     return false;
   }
 }

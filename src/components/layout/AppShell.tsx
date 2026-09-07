@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -24,7 +25,7 @@ import { obtenerConfiguracionSede } from '@/services/sedesConfig';
 import { IncidenciasGlobalBell } from './IncidenciasGlobalBell';
 import { getBrandingForSede } from '@/config/branding';
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Inbox,
   CreditCard: Briefcase,
   Beaker,
@@ -336,9 +337,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             }}
           >
             {branding.logoUrl ? (
-              <img 
+              <Image 
                 src={branding.logoUrl} 
                 alt={branding.brandName} 
+                width={40}
+                height={40}
+                priority
                 className="w-full h-full object-cover rounded-2xl" 
               />
             ) : (

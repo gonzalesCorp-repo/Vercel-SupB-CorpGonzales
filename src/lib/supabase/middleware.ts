@@ -63,11 +63,96 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is logged in and tries to go to login or home, redirect to dashboard
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/recepcion'
-    return NextResponse.redirect(url)
+  // Si el usuario está autenticado, validar autorización por rol y redirecciones adaptativas (SEC-003 / SEC-004)
+  if (user) {
+    const pathname = request.nextUrl.pathname;
+    const userRole = typeof user.user_metadata?.rol === 'string'
+      ? user.user_metadata.rol.trim().toUpperCase()
+      : '';
+
+    // Helper para verificar coincidencia exacta o subrutas
+    const matchesPrefix = (path: string, prefixes: string[]): boolean => {
+      return prefixes.some(prefix => path === prefix || path.startsWith(`${prefix}/`));
+    };
+
+    // Si el usuario autenticado intenta acceder a /login o /
+    if (pathname === '/login' || pathname === '/') {
+      const url = request.nextUrl.clone();
+      if (userRole === 'CLIENTE') {
+        url.pathname = '/mobile/cliente';
+      } else if (userRole === 'STAFF') {
+        url.pathname = '/mobile/operacion';
+      } else if (userRole === 'ADMIN') {
+        url.pathname = '/admin/usuarios';
+      } else {
+        url.pathname = '/recepcion';
+      }
+      return NextResponse.redirect(url);
+    }
+
+    // Reglas de autorización adaptativa por rol:
+    // 1. CLIENTE: no puede acceder a rutas de gestión
+    if (userRole === 'CLIENTE') {
+      const forbidden = [
+        '/admin',
+        '/finanzas',
+        '/rrhh',
+        '/recepcion',
+        '/lab',
+        '/wfm',
+        '/mobile/superadmin',
+        '/mobile/admin',
+        '/mobile/soporte'
+      ];
+      if (matchesPrefix(pathname, forbidden)) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/mobile/cliente';
+        return NextResponse.redirect(url);
+      }
+    }
+
+    // 2. STAFF: no puede acceder a administración o finanzas/rrhh/superadmin/admin
+    if (userRole === 'STAFF') {
+      const forbidden = [
+        '/admin',
+        '/finanzas',
+        '/rrhh',
+        '/mobile/superadmin',
+        '/mobile/admin'
+      ];
+      if (matchesPrefix(pathname, forbidden)) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/mobile/operacion';
+        return NextResponse.redirect(url);
+      }
+    }
+
+    // 3. OPERADOR: no puede acceder a admin/finanzas/rrhh/superadmin
+    if (userRole === 'OPERADOR') {
+      const forbidden = [
+        '/admin',
+        '/finanzas',
+        '/rrhh',
+        '/mobile/superadmin'
+      ];
+      if (matchesPrefix(pathname, forbidden)) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/recepcion';
+        return NextResponse.redirect(url);
+      }
+    }
+
+    // 4. ADMIN: no puede acceder a superadmin
+    if (userRole === 'ADMIN') {
+      const forbidden = [
+        '/mobile/superadmin'
+      ];
+      if (matchesPrefix(pathname, forbidden)) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin/usuarios';
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return supabaseResponse

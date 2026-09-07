@@ -24,9 +24,29 @@ import {
   obtenerConfiguracionLuminaHq, 
   guardarConfiguracionLuminaHq 
 } from '@/services/clienteLifestyleService';
-import { calcularEtiquetasCliente } from '@/services/reglasClientes';
-
+import { calcularEtiquetasCliente, ReglaEtiquetaCliente } from '@/services/reglasClientes';
 import dynamic from 'next/dynamic';
+
+export interface ClienteActivoMobile {
+  id: string;
+  nombre: string;
+  dni?: string;
+  celular?: string;
+  email?: string;
+  notas?: string;
+  rango_vip?: string;
+  puntos_lumina?: number;
+  [key: string]: unknown;
+}
+
+export interface AtencionHistorial {
+  id: string;
+  created_at: string;
+  estado_proceso: string;
+  total: number;
+  agente_nombre?: string;
+  oatc_tickets?: Array<{ descripcion: string; precio_total: number }>;
+}
 
 // Subcomponentes Stitch & Opal del Cliente
 import { ClienteHeaderShell } from '@/components/mobile/cliente/ClienteHeaderShell';
@@ -62,7 +82,7 @@ export default function MobileClientePage() {
 
   // Estados de Autenticación / Sesión de Cliente
   const [dni, setDni] = useState('');
-  const [clienteActivo, setClienteActivo] = useState<any>(null);
+  const [clienteActivo, setClienteActivo] = useState<ClienteActivoMobile | null>(null);
   const [buscando, setBuscando] = useState(false);
   const [mostrarRegistro, setMostrarRegistro] = useState(false);
   const [nuevoNombre, setNuevoNombre] = useState('');
@@ -77,9 +97,9 @@ export default function MobileClientePage() {
   const [vitalidad, setVitalidad] = useState<VitalidadCapilarStitch | null>(null);
   const [rutinaOpal, setRutinaOpal] = useState<RutinaClimatologicaOpal | null>(null);
   const [predictorOpal, setPredictorOpal] = useState<PredictorCicloCapilarOpal | null>(null);
-  const [historialAtenciones, setHistorialAtenciones] = useState<any[]>([]);
-  const [ordenActiva, setOrdenActiva] = useState<any>(null);
-  const [insignias, setInsignias] = useState<any[]>([]);
+  const [historialAtenciones, setHistorialAtenciones] = useState<AtencionHistorial[]>([]);
+  const [ordenActiva, setOrdenActiva] = useState<AtencionHistorial | null>(null);
+  const [insignias, setInsignias] = useState<ReglaEtiquetaCliente[]>([]);
 
   // 1. Cargar sesión previa del cliente
   useEffect(() => {
@@ -98,29 +118,30 @@ export default function MobileClientePage() {
   // 2. Cargar ecosistema de bienestar cuando el cliente está activo
   useEffect(() => {
     if (!clienteActivo?.id) return;
+    const cliente = clienteActivo;
 
     async function cargarEcosistemaBienestar() {
       // a. Cargar o inicializar preferencias sensoriales
-      const prefs = cargarPreferenciaSensorial(clienteActivo.id, clienteActivo.notas);
+      const prefs = cargarPreferenciaSensorial(cliente.id, cliente.notas);
       setPreferencias(prefs);
 
       // b. Cargar historial de OATCs e insignias en paralelo para eliminar waterfall de red
-      let atenciones: any[] = [];
+      let atenciones: AtencionHistorial[] = [];
       try {
         const [resOatcs, tags] = await Promise.all([
           supabase
             .from('oatc')
             .select('id, created_at, estado_proceso, total, agente_nombre, oatc_tickets(descripcion, precio_total)')
-            .eq('cliente_id', clienteActivo.id)
+            .eq('cliente_id', cliente.id)
             .order('created_at', { ascending: false })
             .limit(6),
-          calcularEtiquetasCliente(clienteActivo.id).catch(err => {
+          calcularEtiquetasCliente(cliente.id).catch(err => {
             console.error('Error cargando insignias:', err);
-            return [];
+            return [] as ReglaEtiquetaCliente[];
           }),
         ]);
 
-        atenciones = resOatcs.data || [];
+        atenciones = (resOatcs.data as unknown as AtencionHistorial[]) || [];
         setHistorialAtenciones(atenciones);
         setInsignias(tags || []);
 
@@ -288,7 +309,11 @@ export default function MobileClientePage() {
               </div>
 
               <form onSubmit={handleBuscarCliente} className="space-y-3">
+                <label htmlFor="cliente-dni-input" className="sr-only">
+                  DNI o Celular del Cliente
+                </label>
                 <input
+                  id="cliente-dni-input"
                   type="text"
                   placeholder="Ingresa tu DNI o Celular..."
                   value={dni}
@@ -320,10 +345,11 @@ export default function MobileClientePage() {
 
               <form onSubmit={handleRegistrarCliente} className="space-y-3">
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">
+                  <label htmlFor="nuevo-nombre-input" className="text-[10px] font-black uppercase text-slate-400 block mb-1">
                     Tu Nombre Completo
                   </label>
                   <input
+                    id="nuevo-nombre-input"
                     type="text"
                     placeholder="Ej. Valeria Mendoza"
                     value={nuevoNombre}
@@ -334,10 +360,11 @@ export default function MobileClientePage() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">
+                  <label htmlFor="nuevo-telefono-input" className="text-[10px] font-black uppercase text-slate-400 block mb-1">
                     WhatsApp (Opcional)
                   </label>
                   <input
+                    id="nuevo-telefono-input"
                     type="tel"
                     placeholder="+51 999 999 999"
                     value={nuevoTelefono}
@@ -405,7 +432,7 @@ export default function MobileClientePage() {
         )}
 
         {/* TAB 2: SALUD & DIAGNÓSTICO (FICHA SENSORIAL + BIOMETRÍA LUMINA) */}
-        {activeTab === 'salud' && preferencias && (
+        {activeTab === 'salud' && preferencias && clienteActivo && (
           <ClienteSaludDiagnosticoTab
             cliente={clienteActivo}
             preferencias={preferencias}
@@ -415,7 +442,7 @@ export default function MobileClientePage() {
         )}
 
         {/* TAB 3: EXPERIENCIA SALÓN & CITAS ZEN */}
-        {activeTab === 'salon' && predictorOpal && (
+        {activeTab === 'salon' && predictorOpal && clienteActivo && (
           <ClienteExperienciaSalonTab
             cliente={clienteActivo}
             predictorOpal={predictorOpal}
@@ -427,7 +454,7 @@ export default function MobileClientePage() {
         )}
 
         {/* TAB 4: MI CLUB & AJUSTES */}
-        {activeTab === 'club' && (
+        {activeTab === 'club' && clienteActivo && (
           <ClienteClubTab
             cliente={clienteActivo}
             insignias={insignias}
@@ -435,7 +462,8 @@ export default function MobileClientePage() {
             onTogglePluginLumina={handleTogglePluginLumina}
             onCerrarSesion={handleCerrarSesion}
             onActualizarDatosCliente={async (nuevos) => {
-              const actualizado = { ...clienteActivo, ...nuevos };
+              if (!clienteActivo) return;
+              const actualizado: ClienteActivoMobile = { ...clienteActivo, ...nuevos };
               setClienteActivo(actualizado);
               localStorage.setItem('vaikuntha_cliente_sesion', JSON.stringify(actualizado));
               await supabase.from('clientes').update(nuevos).eq('id', clienteActivo.id);

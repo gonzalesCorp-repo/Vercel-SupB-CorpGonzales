@@ -3,10 +3,12 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { KioskModo } from './types';
+import { TenantBranding } from '@/config/branding';
 
 export interface KioskHeaderProps {
-  branding: any;
+  branding: TenantBranding;
   modo: KioskModo;
   onVolverHome: () => void;
 }
@@ -18,7 +20,14 @@ export function KioskHeader({ branding, modo, onVolverHome }: KioskHeaderProps) 
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-lg shadow-indigo-500/20 overflow-hidden">
           <div className="w-full h-full bg-slate-950 rounded-2xl flex items-center justify-center overflow-hidden">
             {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover rounded-2xl" />
+              <Image 
+                src={branding.logoUrl} 
+                alt={branding.brandName} 
+                width={48}
+                height={48}
+                priority
+                className="w-full h-full object-cover rounded-2xl" 
+              />
             ) : (
               <span className="text-white font-black text-xl">{branding.logoLetter}</span>
             )}

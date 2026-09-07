@@ -62,7 +62,7 @@ export async function POST(request: Request) {
         .select('sede_id')
         .eq('agente_id', callerAgente.id);
       
-      const permittedSedeIds = (callerSedes || []).map((s: any) => s.sede_id);
+      const permittedSedeIds = (callerSedes || []).map((s: { sede_id: string }) => s.sede_id);
       const sedesValidas = (sedes_ids || []).every((sid: string) => permittedSedeIds.includes(sid));
 
       if (!sedesValidas || (sedes_ids && sedes_ids.length === 0 && permittedSedeIds.length > 0)) {
@@ -158,8 +158,19 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, userId, message: 'Usuario creado exitosamente' });
 
-  } catch (error: any) {
-    console.error("Error inesperado en API:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("Error inesperado en API admin/users:", error);
+
+    let clientMessage = 'Error interno del servidor al procesar la solicitud.';
+    if (error instanceof Error) {
+      const msg = error.message;
+      // Sanitizar para evitar filtrar detalles internos de base de datos o postgresql
+      const containsDbDetails = /syntax|relation|column|database|postgres|pg_|foreign key|duplicate key|violat|table|schema|connection|auth\./i.test(msg);
+      if (!containsDbDetails && msg.length > 0 && msg.length < 150) {
+        clientMessage = msg;
+      }
+    }
+
+    return NextResponse.json({ error: clientMessage }, { status: 500 });
   }
 }

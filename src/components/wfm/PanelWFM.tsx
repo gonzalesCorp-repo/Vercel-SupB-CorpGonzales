@@ -119,7 +119,11 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
     if (agenteData.data?.estado === 'DISPONIBLE') {
       const operativos = operativosActivos
         .filter(a => a.estado !== 'INACTIVO' && a.rol === 'STAFF')
-        .sort((a,b) => new Date((a as any).ultimo_cambio_estado || a.created_at).getTime() - new Date((b as any).ultimo_cambio_estado || b.created_at).getTime());
+        .sort((a,b) => {
+          const aTime = (a as unknown as { ultimo_cambio_estado?: string; created_at?: string }).ultimo_cambio_estado || (a as unknown as { created_at?: string }).created_at || '';
+          const bTime = (b as unknown as { ultimo_cambio_estado?: string; created_at?: string }).ultimo_cambio_estado || (b as unknown as { created_at?: string }).created_at || '';
+          return new Date(aTime).getTime() - new Date(bTime).getTime();
+        });
       
       const idx = operativos.findIndex(a => a.id === agId);
       if (idx !== -1) setMiPosicionCola(idx + 1);
@@ -142,8 +146,8 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
         await solicitarAsistenciaKiosko(actionId, miAgenteId);
         showAlert("Solicitud enviada a Recepción.", "success");
         checkAgenteStatus(miAgenteId);
-      } catch (err: any) {
-        showAlert(err.message, "error");
+      } catch (err: unknown) {
+        showAlert(err instanceof Error ? err.message : 'Error desconocido', "error");
       } finally {
         setIsLoading(false);
       }
@@ -177,8 +181,8 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
         showAlert("Solicitud enviada a Recepción.", "success");
         checkAgenteStatus(selectedAgenteId);
       }
-    } catch (err: any) {
-      showAlert(err.message, "error");
+    } catch (err: unknown) {
+      showAlert(err instanceof Error ? err.message : 'Error desconocido', "error");
     } finally {
       setIsLoading(false);
     }
@@ -217,8 +221,13 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
     
     if (isPending) {
       return (
-        <button disabled className="flex-1 md:flex-none flex flex-col items-center justify-center gap-1 bg-indigo-50 text-indigo-500 px-4 py-1.5 rounded-xl font-bold border border-indigo-200 shadow-sm opacity-90 cursor-not-allowed min-w-[120px]">
-          <Loader2 className="w-4 h-4 animate-spin" />
+        <button 
+          type="button"
+          disabled 
+          aria-label={`Esperando aprobación de ${label}${timeLeft !== null ? `, tiempo restante: ${formatTimeLeft(timeLeft)}` : ''}`}
+          className="flex-1 md:flex-none flex flex-col items-center justify-center gap-1 bg-indigo-50 text-indigo-500 px-4 py-1.5 rounded-xl font-bold border border-indigo-200 shadow-sm opacity-90 cursor-not-allowed min-w-[120px]"
+        >
+          <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
           <span className="text-xs">Esperando...</span>
           {timeLeft !== null && <span className="text-[10px] font-mono">{formatTimeLeft(timeLeft)}</span>}
         </button>
@@ -227,8 +236,13 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
 
     if (isLocked) {
       return (
-        <button disabled className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-100 text-slate-400 px-4 py-2.5 rounded-xl font-bold cursor-not-allowed min-w-[120px]">
-          <CheckCircle className="w-5 h-5" />
+        <button 
+          type="button"
+          disabled 
+          aria-label={lockedLabel || label}
+          className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-100 text-slate-400 px-4 py-2.5 rounded-xl font-bold cursor-not-allowed min-w-[120px]"
+        >
+          <CheckCircle className="w-5 h-5" aria-hidden="true" />
           <span className="hidden lg:inline">{lockedLabel}</span>
         </button>
       );
@@ -236,7 +250,9 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
 
     return (
       <button 
+        type="button"
         onClick={() => handleActionClick(id)}
+        aria-label={label}
         className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-colors shadow-sm min-w-[120px] ${colorClass}`}
       >
         {icon}
@@ -312,10 +328,12 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
         )}
 
       <button 
+        type="button"
         onClick={() => handleActionClick('OTRAS')}
+        aria-label="Más opciones de solicitudes WFM"
         className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
       >
-        <MoreHorizontal className="w-5 h-5" />
+        <MoreHorizontal className="w-5 h-5" aria-hidden="true" />
         <span className="hidden lg:inline">Opciones</span>
       </button>
       </div>
@@ -392,16 +410,18 @@ export default function PanelWFM({ isPersonalMode = false, miAgenteId = '' }: Pa
           {configs.map(conf => (
             <button
               key={conf.id}
+              type="button"
               onClick={() => {
                 setIsOtrasOpen(false);
                 handleActionClick(conf.id);
               }}
+              aria-label={`Solicitar ${conf.nombre}`}
               className="w-full flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 transition-all text-left group"
             >
               <div>
                 <div className="font-bold text-slate-800 text-sm group-hover:text-indigo-700">{conf.nombre}</div>
               </div>
-              <Send className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+              <Send className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" aria-hidden="true" />
             </button>
           ))}
         </div>

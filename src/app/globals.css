@@ -131,6 +131,7 @@ input[type="email"],
   border-radius: inherit;
   z-index: -1;
   animation: spin-angle 4s linear infinite;
+  will-change: --angle;
   pointer-events: none;
 }
 
@@ -152,6 +153,7 @@ input[type="email"],
   filter: blur(16px);
   opacity: var(--glow-opacity, 0.6);
   animation: spin-angle 4s linear infinite;
+  will-change: --angle;
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
