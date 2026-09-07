@@ -69,13 +69,25 @@ export async function obtenerConfiguracionSede(sedeId?: string): Promise<SedeFea
       }
     }
 
-    // Auto-sanación: Si no hay sedeId o el sedeId almacenado ya no existe en la BD
-    const { data: defaultSede } = await supabase
+    // Auto-sanación: Priorizar sede de producción real (evitando 'Sandbox' o 'Prueba')
+    let { data: defaultSede } = await supabase
       .from('sedes')
       .select('id, nombre, atributos')
-      .order('created_at', { ascending: true })
+      .not('nombre', 'ilike', '%sandbox%')
+      .not('nombre', 'ilike', '%prueba%')
+      .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+
+    if (!defaultSede) {
+      const { data: fallbackSede } = await supabase
+        .from('sedes')
+        .select('id, nombre, atributos')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      defaultSede = fallbackSede;
+    }
 
     if (defaultSede) {
       useAppStore.getState().setSedeActiva({

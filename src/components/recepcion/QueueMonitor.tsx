@@ -15,6 +15,7 @@ import { createClient } from '@/lib/supabase/client';
 import { format } from 'date-fns';
 import { useUIStore } from '@/store/useUIStore';
 import { Modal } from '@/components/ui/Modal';
+import { reproducirChimeNuevaOrden } from '@/lib/audio/chime';
 
 interface QueueMonitorProps {
   onSelectAgente?: (agente: Agente) => void;
@@ -76,7 +77,14 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
       .subscribe();
       
     const channelPeticiones = supabase.channel(`realtime-peticiones-queue-${sedeKey}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cola_peticiones' }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cola_peticiones' }, (payload: any) => {
+        cargarDatos();
+        if (payload.eventType === 'INSERT') {
+          reproducirChimeNuevaOrden();
+          const nombre = payload.new?.solicitante_nombre || 'Colaborador';
+          showAlert(`📨 Nueva solicitud de turno recibida de ${nombre}`, 'info');
+        }
+      })
       .subscribe();
       
     return () => {
@@ -185,6 +193,11 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
         <div>
           <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
             Monitor de disponibilidad
+            {peticiones.length > 0 && (
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-white animate-pulse shadow-sm">
+                {peticiones.length} {peticiones.length === 1 ? 'solicitud' : 'solicitudes'}
+              </span>
+            )}
           </h3>
         </div>
         
@@ -216,37 +229,63 @@ export default function QueueMonitor({ onSelectAgente }: QueueMonitorProps) {
 
       {/* BUZON DE ENTRADA (WFM INBOX) */}
       {peticiones.length > 0 && (
-        <div className="bg-indigo-50/70 dark:bg-indigo-950/30 border-b border-indigo-100 dark:border-indigo-900/40 p-4 shrink-0">
-          <div className="flex items-center gap-2 mb-3">
-            <Inbox className="w-4 h-4 text-indigo-600" />
-            <h4 className="font-bold text-indigo-900 dark:text-indigo-300 text-xs">Solicitudes WFM ({peticiones.length})</h4>
+        <div className="bg-gradient-to-r from-indigo-50/90 to-purple-50/90 dark:from-indigo-950/40 dark:to-purple-950/40 border-b border-indigo-200 dark:border-indigo-800/60 p-4 shrink-0 shadow-inner animate-in fade-in">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2">
+              <Inbox className="w-4 h-4 text-indigo-600 dark:text-indigo-400 animate-bounce" />
+              <h4 className="font-black text-indigo-950 dark:text-indigo-200 text-xs tracking-wide uppercase">
+                Solicitudes de Turno ({peticiones.length})
+              </h4>
+            </div>
+            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-white dark:bg-slate-900 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800 shadow-xs">
+              Requiere Aprobación
+            </span>
           </div>
-          <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-            {peticiones.map(pet => (
-              <div key={pet.id} className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-xs border border-indigo-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-slate-800 dark:text-slate-100 text-xs">
-                    {(pet as any).agente?.nombre || 'Colaborador'} <span className="text-[10px] text-slate-400">({(pet as any).agente?.rol || ''})</span>
+          <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+            {peticiones.map(pet => {
+              const agenteNombre = (pet as any).agente?.nombre || (pet as any).agentes?.nombre || pet.solicitante_nombre || 'Colaborador';
+              const agenteRol = (pet as any).agente?.rol || (pet as any).agentes?.rol || 'STAFF';
+              const motivoNombre = pet.config_peticiones?.nombre || pet.detalle || 'Cambio de Turno';
+              const colorBadge = pet.config_peticiones?.color || 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300';
+
+              return (
+                <div key={pet.id} className="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-xs border border-indigo-100 dark:border-slate-700 flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-black text-slate-800 dark:text-slate-100 text-xs truncate flex items-center gap-1.5">
+                      <span>{agenteNombre}</span>
+                      <span className="text-[10px] font-normal text-slate-400 shrink-0">({agenteRol})</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border border-black/5 dark:border-white/10 ${colorBadge}`}>
+                        {motivoNombre}
+                      </span>
+                      <span className="text-[9px] text-slate-400">
+                        {pet.created_at ? format(new Date(pet.created_at), 'hh:mm a') : ''}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md ${pet.config_peticiones?.color || 'bg-indigo-100 text-indigo-700'}`}>
-                      {pet.config_peticiones?.nombre}
-                    </span>
-                    <span className="text-[9px] text-slate-400">
-                      {format(new Date(pet.created_at), 'hh:mm a')}
-                    </span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button 
+                      type="button"
+                      onClick={() => handleResolver(pet, 'RECHAZADO')} 
+                      title="Rechazar solicitud"
+                      className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition cursor-pointer"
+                    >
+                      <XCircle className="w-5 h-5" />
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => handleResolver(pet, 'APROBADO')} 
+                      title="Aprobar e iniciar turno / cambio"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow-sm shadow-emerald-600/20 active:scale-95 cursor-pointer"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Aprobar</span>
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => handleResolver(pet, 'RECHAZADO')} className="p-1.5 text-rose-400 hover:bg-rose-50 rounded-lg">
-                    <XCircle className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleResolver(pet, 'APROBADO')} className="p-1.5 text-emerald-500 hover:bg-emerald-50 rounded-lg bg-emerald-50/50">
-                    <CheckCircle className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

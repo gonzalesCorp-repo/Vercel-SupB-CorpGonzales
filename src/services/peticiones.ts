@@ -10,12 +10,19 @@ export interface Peticion {
   estado: string;
   created_at: string;
   resolved_at?: string;
+  tipo?: string;
+  solicitante_nombre?: string;
+  detalle?: string;
   config_peticiones?: {
     nombre: string;
     color: string;
     estado_destino: string;
     actualiza_timestamp: boolean;
     penaliza_cola: boolean;
+  };
+  agente?: {
+    nombre: string;
+    rol: string;
   };
   agentes?: {
     nombre: string;
@@ -133,26 +140,42 @@ export async function obtenerPeticionPendientePorAgente(agente_id: string): Prom
 export async function obtenerPeticionesPendientesPorSede(): Promise<Peticion[]> {
   const supabase = createClient();
   const { sedeActiva } = useAppStore.getState();
-  if (!sedeActiva) return [];
+  if (!sedeActiva?.id) return [];
 
   try {
-    const { data, error } = await supabase
+    // 1. Obtener los agentes asignados a la sede activa para no perder ninguna solicitud
+    const { data: suData } = await supabase
+      .from('sedes_usuarios')
+      .select('agente_id')
+      .eq('sede_id', sedeActiva.id);
+
+    const agenteIds = (suData || []).map((r: any) => r.agente_id).filter(Boolean);
+
+    // 2. Query ultra-resiliente: coincide la sede, la sede es nula, o el agente pertenece a esta sede
+    let query = supabase
       .from('cola_peticiones')
       .select(`
-        id, created_at, agente_id, estado, tipo_id, oatc_id,
+        id, created_at, agente_id, estado, tipo_id, oatc_id, sede_id, tipo, solicitante_nombre, detalle,
         agente:agentes(nombre, rol),
-        config_peticiones(nombre, estado_destino, actualiza_timestamp, penaliza_cola)
+        config_peticiones(nombre, estado_destino, actualiza_timestamp, penaliza_cola, color)
       `)
-      .eq('estado', 'PENDIENTE')
-      .eq('sede_id', sedeActiva.id)
-      .order('created_at', { ascending: true });
+      .eq('estado', 'PENDIENTE');
+
+    if (agenteIds.length > 0) {
+      query = query.or(`sede_id.eq.${sedeActiva.id},sede_id.is.null,agente_id.in.(${agenteIds.join(',')})`);
+    } else {
+      query = query.or(`sede_id.eq.${sedeActiva.id},sede_id.is.null`);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: true });
 
     if (error) {
-      // Si la tabla no existe o hay restricción RLS en modo demo, retornar arreglo vacío
+      console.warn('Error al obtener peticiones pendientes por sede:', error);
       return [];
     }
-    return (data as Peticion[]) || [];
+    return (data as unknown as Peticion[]) || [];
   } catch (e) {
+    console.warn('Excepción en obtenerPeticionesPendientesPorSede:', e);
     return [];
   }
 }
@@ -199,7 +222,7 @@ export async function resolverPeticion(pet: Peticion, estado: 'APROBADO' | 'RECH
     }
 
     // Registrar en asistencias_turnos si corresponde a un movimiento de turno/asistencia
-    const nombrePet = conf?.nombre || '';
+    const nombrePet = conf?.nombre || pet.detalle || '';
     let tipoMov: any = null;
     if (nombrePet.includes('Inicio de Turno') || nombrePet.includes('Asistencia')) {
       tipoMov = 'ENTRADA';
@@ -213,11 +236,13 @@ export async function resolverPeticion(pet: Peticion, estado: 'APROBADO' | 'RECH
 
     if (tipoMov) {
       try {
+        const targetSede = pet.sede_id || useAppStore.getState().sedeActiva?.id;
+        const targetNombre = (pet as any).agente?.nombre || (pet as any).agentes?.nombre || pet.solicitante_nombre || 'Colaborador';
         const { validarYRegistrarAsistenciaNfc } = await import('./asistencias');
         await validarYRegistrarAsistenciaNfc({
           agente_id: pet.agente_id,
-          agente_nombre: (pet as any).agente?.nombre || (pet as any).agentes?.nombre || 'Colaborador',
-          sede_id: pet.sede_id,
+          agente_nombre: targetNombre,
+          sede_id: targetSede,
           tipo_movimiento: tipoMov,
           punto_acceso: 'Recepción Central (Desktop)',
           dispositivo: 'Recepción Workspace',

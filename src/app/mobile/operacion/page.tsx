@@ -120,6 +120,25 @@ export default function MobileOperacionPage() {
         currentId = data.id;
         currentNombre = data.nombre;
 
+        // Auto-sincronizar sede real del agente desde sedes_usuarios
+        const { data: suData } = await supabase
+          .from('sedes_usuarios')
+          .select('sede_id, sedes(id, nombre)')
+          .eq('agente_id', data.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (suData?.sedes) {
+          const sedeReal: any = Array.isArray(suData.sedes) ? suData.sedes[0] : suData.sedes;
+          if (sedeReal?.id) {
+            useAppStore.getState().setSedeActiva({
+              id: sedeReal.id,
+              nombre: sedeReal.nombre
+            });
+          }
+        }
+
         // Cargar comisiones reales de hoy
         const estadoCta = await obtenerEstadoCuentaContinuo(data.id);
         const hoy = new Date().toISOString().split('T')[0];
@@ -309,14 +328,49 @@ export default function MobileOperacionPage() {
 
   // 🔘 PROCESADOR TÁCTIL: SOLICITUD DE CAMBIO DE TURNO (Petición enviada a Recepción)
   const handleSolicitarCambioTurno = async (nombrePeticion: string, tipoId: string) => {
-    if (!sedeActiva?.id || !agente.id) {
-      showAlert('No se puede enviar la solicitud: Sede o colaborador no identificados.', 'error');
+    if (!agente.id) {
+      showAlert('No se puede enviar la solicitud: Colaborador no identificado.', 'error');
       return;
+    }
+
+    // Resolver sede garantizada (sedeActiva -> sedes_usuarios -> fallback no-sandbox)
+    let targetSedeId = sedeActiva?.id;
+    if (!targetSedeId || targetSedeId === 'd954b259-69a0-4546-9156-2f6ad392853f') {
+      const { data: su } = await supabase
+        .from('sedes_usuarios')
+        .select('sede_id, sedes(id, nombre)')
+        .eq('agente_id', agente.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (su?.sede_id) {
+        targetSedeId = su.sede_id;
+        const sedeObj: any = Array.isArray(su.sedes) ? su.sedes[0] : su.sedes;
+        if (sedeObj?.id) {
+          useAppStore.getState().setSedeActiva({ id: sedeObj.id, nombre: sedeObj.nombre });
+        }
+      }
+    }
+
+    if (!targetSedeId) {
+      const { data: sFallback } = await supabase
+        .from('sedes')
+        .select('id, nombre')
+        .not('nombre', 'ilike', '%sandbox%')
+        .not('nombre', 'ilike', '%prueba%')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (sFallback?.id) {
+        targetSedeId = sFallback.id;
+        useAppStore.getState().setSedeActiva({ id: sFallback.id, nombre: sFallback.nombre });
+      }
     }
 
     try {
       const { data, error } = await supabase.from('cola_peticiones').insert([{
-        sede_id: sedeActiva.id,
+        sede_id: targetSedeId,
         agente_id: agente.id,
         tipo_id: tipoId,
         tipo: 'TURNO_PETICION',
