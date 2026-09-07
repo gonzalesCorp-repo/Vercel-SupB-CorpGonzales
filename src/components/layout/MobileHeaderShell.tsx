@@ -2,11 +2,13 @@
 
 import React from 'react';
 import { Toolbar, ToolbarButton } from '../ui/motion-primitives/toolbar';
-import { Search, LogOut, Radio, User } from 'lucide-react';
+import { Search, LogOut, Radio, User, ChevronDown, MapPin } from 'lucide-react';
 
 export interface MobileHeaderShellProps {
   agenteNombre: string;
   estacionNombre?: string;
+  sedeNombre?: string;
+  tieneMultiSede?: boolean;
   estadoOperativo?: string;
   badgeLabel: string;
   badgeBg: string;
@@ -17,6 +19,7 @@ export interface MobileHeaderShellProps {
   onOpenSearch: () => void;
   onLogout: () => void;
   onOpenCuenta: () => void;
+  onOpenSelectorSede?: () => void;
 }
 
 function sanitizarNombreEstacion(nombre?: string | null): string {
@@ -46,6 +49,8 @@ function formatearLabelEstado(label: string, estado?: string): string {
 export function MobileHeaderShell({
   agenteNombre,
   estacionNombre = 'Estación de Piso',
+  sedeNombre,
+  tieneMultiSede = false,
   estadoOperativo = 'DISPONIBLE',
   badgeLabel,
   badgeBg,
@@ -56,6 +61,7 @@ export function MobileHeaderShell({
   onOpenSearch,
   onLogout,
   onOpenCuenta,
+  onOpenSelectorSede,
 }: MobileHeaderShellProps) {
   const estacionLimpia = sanitizarNombreEstacion(estacionNombre);
   const estadoTexto = formatearLabelEstado(badgeLabel, estadoOperativo);
@@ -93,9 +99,32 @@ export function MobileHeaderShell({
                 </span>
               )}
             </div>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[130px] sm:max-w-[200px]">
-              {estacionLimpia}
-            </p>
+            <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[150px] sm:max-w-[220px]">
+              <span className="truncate">{estacionLimpia}</span>
+              {sedeNombre && (
+                <>
+                  <span className="text-slate-300 dark:text-slate-600 shrink-0">•</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      if (tieneMultiSede && onOpenSelectorSede) {
+                        e.stopPropagation();
+                        onOpenSelectorSede();
+                      }
+                    }}
+                    className={`inline-flex items-center gap-0.5 font-bold shrink-0 truncate max-w-[90px] sm:max-w-[130px] ${
+                      tieneMultiSede
+                        ? 'text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer'
+                        : 'text-slate-400'
+                    }`}
+                    title={tieneMultiSede ? "Cambiar de sede operativa" : sedeNombre}
+                  >
+                    <span className="truncate">{sedeNombre}</span>
+                    {tieneMultiSede && <ChevronDown className="w-2.5 h-2.5 shrink-0" />}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

@@ -26,6 +26,8 @@ import { obtenerEstadoCuentaContinuo } from '@/services/compensaciones';
 import { MobileHeaderShell } from '@/components/layout/MobileHeaderShell';
 import { CommandPalette, CommandItem } from '@/components/ui/watermelon-patterns/command-palette';
 import { AnimatedNumber } from '@/components/ui/motion-primitives/animated-number';
+import { SinSedeBloqueoView } from '@/components/mobile/SinSedeBloqueoView';
+import { ModalSelectorSedeMulti, SedeOpcion } from '@/components/mobile/ModalSelectorSedeMulti';
 
 export default function MobileOperacionPage() {
   const router = useRouter();
@@ -42,6 +44,11 @@ export default function MobileOperacionPage() {
   const [modalLiquidacionOpen, setModalLiquidacionOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [sedeConfig, setSedeConfig] = useState<SedeFeatureToggles | null>(null);
+
+  // Gobernanza de Sedes asignadas
+  const [misSedes, setMisSedes] = useState<SedeOpcion[]>([]);
+  const [modalMultiSedeOpen, setModalMultiSedeOpen] = useState(false);
+  const [sinSedeAsignada, setSinSedeAsignada] = useState(false);
 
   const [agente, setAgente] = useState({
     id: '',
@@ -120,22 +127,47 @@ export default function MobileOperacionPage() {
         currentId = data.id;
         currentNombre = data.nombre;
 
-        // Auto-sincronizar sede real del agente desde sedes_usuarios
+        // Cargar todas las sedes asignadas al colaborador en sedes_usuarios
         const { data: suData } = await supabase
           .from('sedes_usuarios')
-          .select('sede_id, sedes(id, nombre)')
+          .select('sede_id, sedes(id, nombre, direccion)')
           .eq('agente_id', data.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+          .order('created_at', { ascending: false });
 
-        if (suData?.sedes) {
-          const sedeReal: any = Array.isArray(suData.sedes) ? suData.sedes[0] : suData.sedes;
-          if (sedeReal?.id) {
+        const sedesEncontradas: SedeOpcion[] = (suData || [])
+          .map((r: any) => {
+            const s = Array.isArray(r.sedes) ? r.sedes[0] : r.sedes;
+            return s && !s.nombre.toLowerCase().includes('sandbox')
+              ? { id: s.id, nombre: s.nombre, direccion: s.direccion }
+              : null;
+          })
+          .filter((s: SedeOpcion | null): s is SedeOpcion => !!s);
+
+        setMisSedes(sedesEncontradas);
+
+        // CASO 1: Si no tiene ninguna sede asignada -> Activar pantalla de bloqueo
+        if (sedesEncontradas.length === 0) {
+          setSinSedeAsignada(true);
+          return;
+        }
+
+        setSinSedeAsignada(false);
+
+        // CASO 2: Si tiene exactamente 1 sede -> Asignarla automáticamente
+        if (sedesEncontradas.length === 1) {
+          useAppStore.getState().setSedeActiva({
+            id: sedesEncontradas[0].id,
+            nombre: sedesEncontradas[0].nombre
+          });
+        } else {
+          // CASO 3: Si tiene múltiples sedes -> Validar si la actual es válida o abrir modal selector
+          const sedeActual = useAppStore.getState().sedeActiva;
+          if (!sedeActual || !sedesEncontradas.some(s => s.id === sedeActual.id)) {
             useAppStore.getState().setSedeActiva({
-              id: sedeReal.id,
-              nombre: sedeReal.nombre
+              id: sedesEncontradas[0].id,
+              nombre: sedesEncontradas[0].nombre
             });
+            setModalMultiSedeOpen(true);
           }
         }
 
@@ -411,13 +443,43 @@ export default function MobileOperacionPage() {
 
   const badgeInfo = getBadgeEstado(agente.estado_operativo);
 
+  const handleLogout = useCallback(async () => {
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabaseClient = createClient();
+    await supabaseClient.auth.signOut();
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('vaikuntha_user_email');
+      localStorage.removeItem('vaikuntha_user_role');
+      localStorage.removeItem('vaikuntha_user_name');
+    }
+    clearSede();
+    window.location.href = '/login';
+  }, [clearSede]);
+
+  // Si el colaborador no tiene ninguna sede asignada en sedes_usuarios -> Bloqueo con contacto a Diana Laiza
+  if (sinSedeAsignada) {
+    return (
+      <SinSedeBloqueoView
+        colaboradorNombre={agente.nombre}
+        colaboradorEmail={typeof window !== 'undefined' ? localStorage.getItem('vaikuntha_user_email') || '' : ''}
+        onReintentar={() => {
+          if (typeof window !== 'undefined') window.location.reload();
+        }}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-start w-full  pb-28 font-sans select-none transition-colors duration-200">
       
-      {/* 📱 HEADER PRINCIPAL (MobileHeaderShell Compacto) */}
+      {/* 📱 HEADER PRINCIPAL (MobileHeaderShell Compacto con Sede y Selector Multi-Sede) */}
       <MobileHeaderShell
         agenteNombre={agente.nombre}
         estacionNombre={agente.estacion || undefined}
+        sedeNombre={sedeActiva?.nombre}
+        tieneMultiSede={misSedes.length > 1}
+        onOpenSelectorSede={() => setModalMultiSedeOpen(true)}
         estadoOperativo={agente.estado_operativo}
         badgeLabel={badgeInfo.label}
         badgeBg={badgeInfo.bg}
@@ -427,18 +489,7 @@ export default function MobileOperacionPage() {
         onOpenTurno={() => setModalTurnoOpen(true)}
         onOpenSearch={() => setSearchOpen(true)}
         onOpenCuenta={() => setActiveHub('cuenta')}
-        onLogout={async () => {
-          const { createClient } = await import('@/lib/supabase/client');
-          const supabaseClient = createClient();
-          await supabaseClient.auth.signOut();
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('vaikuntha_user_email');
-            localStorage.removeItem('vaikuntha_user_role');
-            localStorage.removeItem('vaikuntha_user_name');
-          }
-          clearSede();
-          window.location.href = '/login';
-        }}
+        onLogout={handleLogout}
       />
 
       {/* 🔍 Buscador Táctil Modal / CommandPalette */}
@@ -551,6 +602,9 @@ export default function MobileOperacionPage() {
             agente={agente}
             gamProfile={gamProfile}
             hallOfFame={hallOfFame}
+            sedeNombre={sedeActiva?.nombre}
+            tieneMultiSede={misSedes.length > 1}
+            onOpenSelectorSede={() => setModalMultiSedeOpen(true)}
           />
         )}
 
@@ -691,6 +745,18 @@ export default function MobileOperacionPage() {
         onClose={() => setModalLiquidacionOpen(false)}
         agenteId={agente.id}
         agenteNombre={agente.nombre}
+      />
+
+      {/* MODAL SELECTOR MULTI-SEDE PARA COLABORADORES CON MÁS DE 1 SALÓN */}
+      <ModalSelectorSedeMulti
+        isOpen={modalMultiSedeOpen}
+        onClose={() => setModalMultiSedeOpen(false)}
+        sedes={misSedes}
+        sedeActualId={sedeActiva?.id}
+        onSelectSede={(s) => {
+          useAppStore.getState().setSedeActiva({ id: s.id, nombre: s.nombre });
+          showAlert(`📍 Sede cambiada a: ${s.nombre}`, 'info');
+        }}
       />
 
     </div>

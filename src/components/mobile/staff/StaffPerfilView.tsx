@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, X, Edit3, Award, Heart, LogOut, Sliders, 
   KeyRound, Check, Sparkles, Shield, Trophy, Settings, 
-  Calendar, Mail, Lock
+  Calendar, Mail, Lock, Building2
 } from 'lucide-react';
 import StreakCounter from '@/components/mobile/StreakCounter';
 import HallOfFameBanner from '@/components/mobile/HallOfFameBanner';
@@ -22,6 +22,9 @@ export interface StaffPerfilViewProps {
   agente?: any;
   gamProfile?: any;
   hallOfFame?: any[];
+  sedeNombre?: string;
+  tieneMultiSede?: boolean;
+  onOpenSelectorSede?: () => void;
   setShowKudosModal?: (val: boolean) => void;
   setKudosTargetId?: (id: string) => void;
   setKudosTargetName?: (name: string) => void;
@@ -33,6 +36,9 @@ export default function StaffPerfilView({
   agente: initialAgente,
   gamProfile,
   hallOfFame = [],
+  sedeNombre,
+  tieneMultiSede = false,
+  onOpenSelectorSede,
   setShowKudosModal,
   setKudosTargetId,
   setKudosTargetName,
@@ -239,6 +245,26 @@ export default function StaffPerfilView({
                   </span>
                 </div>
                 <Mail className="w-4 h-4 text-slate-400" />
+              </div>
+
+              {/* Sede Operativa Actual con cambio rápido si tiene multi-sede */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Sede Operativa</span>
+                  <span className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5 mt-0.5">
+                    <Building2 className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>{sedeNombre || 'Gloss Salón and Relax'}</span>
+                  </span>
+                </div>
+                {tieneMultiSede && onOpenSelectorSede && (
+                  <button
+                    type="button"
+                    onClick={onOpenSelectorSede}
+                    className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl text-[11px] font-bold border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 transition cursor-pointer"
+                  >
+                    Cambiar
+                  </button>
+                )}
               </div>
             </div>
           </div>
