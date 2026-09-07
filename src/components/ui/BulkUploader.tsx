@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import * as XLSX from "xlsx";
 import { 
   Upload, X, CheckCircle2, AlertCircle, Loader2, Database, 
   ChevronDown, AlertTriangle, Layers, Network 
@@ -84,8 +83,9 @@ export function BulkUploader({
     setLoading(true);
 
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
       try {
+        const XLSX = await import("xlsx");
         const bstr = evt.target?.result;
         const wb = XLSX.read(bstr, { type: "binary" });
         const wsname = wb.SheetNames[0];

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import * as XLSX from "xlsx";
 import { 
   Download, FileSpreadsheet, ChevronDown, Check, 
   Building2, Users, Package, Scissors, Sparkles, Layers,
@@ -629,14 +628,14 @@ export function TemplateDownloader() {
   }, []);
 
   // Función para autocalcular anchos de columna para visualización pulcra
-  const formatWorksheet = (data: any[]) => {
+  const formatWorksheet = (XLSX: any, data: any[]) => {
     const ws = XLSX.utils.json_to_sheet(data);
     if (data.length > 0) {
       const keys = Object.keys(data[0]);
-      ws["!cols"] = keys.map((key) => {
+      ws["!cols"] = keys.map((key: string) => {
         const maxLen = Math.max(
           key.length,
-          ...data.map((row) => String(row[key] || "").length)
+          ...data.map((row: any) => String(row[key] || "").length)
         );
         return { wch: Math.min(Math.max(maxLen + 4, 14), 45) };
       });
@@ -645,44 +644,46 @@ export function TemplateDownloader() {
   };
 
   // Descarga del Libro Maestro Multi-Pestaña con Jerarquía Oficial (15 Hojas)
-  const descargarLibroMaestro = () => {
+  const descargarLibroMaestro = async () => {
+    const XLSX = await import("xlsx");
     const wb = XLSX.utils.book_new();
 
     // 00. Hoja de Guía Jerárquica
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(HOJA_GUIA_JERARQUIA), "00_GUIA_JERARQUIA");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, HOJA_GUIA_JERARQUIA), "00_GUIA_JERARQUIA");
 
     // NIVEL 1: Raíz
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SEDES), "N1_01_Sedes");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_CLIENTES), "N1_02_Clientes");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_ROLES), "N1_03_Config_Roles");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_EMISORES), "N1_04_Emisores_SUNAT");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_SEDES), "N1_01_Sedes");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_CLIENTES), "N1_02_Clientes");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_ROLES), "N1_03_Config_Roles");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_EMISORES), "N1_04_Emisores_SUNAT");
 
     // NIVEL 2: Dependientes
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_AGENTES), "N2_05_Personal_Agentes");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_BIENES), "N2_06_Catalogo_Bienes");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SERVICIOS), "N2_07_Servicios_Salon");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_UBICACIONES), "N2_08_Ubicaciones_WFM");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_CUENTAS_FINANCIERAS), "N2_09_Cuentas_Financieras");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_EMISORES_SERIES), "N2_10_Emisores_Series");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_AGENTES), "N2_05_Personal_Agentes");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_BIENES), "N2_06_Catalogo_Bienes");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_SERVICIOS), "N2_07_Servicios_Salon");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_UBICACIONES), "N2_08_Ubicaciones_WFM");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_CUENTAS_FINANCIERAS), "N2_09_Cuentas_Financieras");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_EMISORES_SERIES), "N2_10_Emisores_Series");
 
     // NIVEL 3: Puentes & Configuración
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_PASARELAS_POS), "N3_11_Pasarelas_POS");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_ESQUEMAS_REMUNERACION), "N3_12_Esquemas_Remuneracion");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_INVENTARIO_INICIAL), "N3_13_Inventario_Inicial");
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(PLANTILLA_SEDES_ASIGNACIONES), "N3_14_Sedes_Asignaciones");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_PASARELAS_POS), "N3_11_Pasarelas_POS");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_ESQUEMAS_REMUNERACION), "N3_12_Esquemas_Remuneracion");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_INVENTARIO_INICIAL), "N3_13_Inventario_Inicial");
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, PLANTILLA_SEDES_ASIGNACIONES), "N3_14_Sedes_Asignaciones");
 
     XLSX.writeFile(wb, "Plantilla_Maestra_Aprovisionamiento_Sede_Vaikuntha.xlsx");
     setDropdownOpen(false);
   };
 
   // Descargas individuales modulares prefijadas
-  const descargarModulo = (
+  const descargarModulo = async (
     nombreArchivo: string, 
     nombreHoja: string, 
     dataset: any[]
   ) => {
+    const XLSX = await import("xlsx");
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, formatWorksheet(dataset), nombreHoja);
+    XLSX.utils.book_append_sheet(wb, formatWorksheet(XLSX, dataset), nombreHoja);
     XLSX.writeFile(wb, `${nombreArchivo}.xlsx`);
     setDropdownOpen(false);
   };

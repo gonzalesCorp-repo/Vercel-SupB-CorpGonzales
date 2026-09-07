@@ -26,12 +26,34 @@ import {
 } from '@/services/clienteLifestyleService';
 import { calcularEtiquetasCliente } from '@/services/reglasClientes';
 
+import dynamic from 'next/dynamic';
+
 // Subcomponentes Stitch & Opal del Cliente
 import { ClienteHeaderShell } from '@/components/mobile/cliente/ClienteHeaderShell';
 import { ClienteSantuarioTab } from '@/components/mobile/cliente/ClienteSantuarioTab';
-import { ClienteSaludDiagnosticoTab } from '@/components/mobile/cliente/ClienteSaludDiagnosticoTab';
-import { ClienteExperienciaSalonTab } from '@/components/mobile/cliente/ClienteExperienciaSalonTab';
-import { ClienteClubTab } from '@/components/mobile/cliente/ClienteClubTab';
+
+const TabLoadingSkeleton = () => (
+  <div className="w-full space-y-4 py-6 animate-pulse" role="status" aria-label="Cargando experiencia...">
+    <div className="h-32 bg-slate-200/60 dark:bg-slate-800/60 rounded-3xl" />
+    <div className="h-44 bg-slate-200/60 dark:bg-slate-800/60 rounded-3xl" />
+    <div className="h-20 bg-slate-200/60 dark:bg-slate-800/60 rounded-2xl" />
+  </div>
+);
+
+const ClienteSaludDiagnosticoTab = dynamic(
+  () => import('@/components/mobile/cliente/ClienteSaludDiagnosticoTab').then(m => m.ClienteSaludDiagnosticoTab),
+  { loading: () => <TabLoadingSkeleton /> }
+);
+
+const ClienteExperienciaSalonTab = dynamic(
+  () => import('@/components/mobile/cliente/ClienteExperienciaSalonTab').then(m => m.ClienteExperienciaSalonTab),
+  { loading: () => <TabLoadingSkeleton /> }
+);
+
+const ClienteClubTab = dynamic(
+  () => import('@/components/mobile/cliente/ClienteClubTab').then(m => m.ClienteClubTab),
+  { loading: () => <TabLoadingSkeleton /> }
+);
 
 export default function MobileClientePage() {
   const supabase = createClient();
@@ -82,24 +104,31 @@ export default function MobileClientePage() {
       const prefs = cargarPreferenciaSensorial(clienteActivo.id, clienteActivo.notas);
       setPreferencias(prefs);
 
-      // b. Cargar historial de OATCs
+      // b. Cargar historial de OATCs e insignias en paralelo para eliminar waterfall de red
       let atenciones: any[] = [];
       try {
-        const { data: oatcs } = await supabase
-          .from('oatc')
-          .select('id, created_at, estado_proceso, total, agente_nombre, oatc_tickets(descripcion, precio_total)')
-          .eq('cliente_id', clienteActivo.id)
-          .order('created_at', { ascending: false })
-          .limit(6);
+        const [resOatcs, tags] = await Promise.all([
+          supabase
+            .from('oatc')
+            .select('id, created_at, estado_proceso, total, agente_nombre, oatc_tickets(descripcion, precio_total)')
+            .eq('cliente_id', clienteActivo.id)
+            .order('created_at', { ascending: false })
+            .limit(6),
+          calcularEtiquetasCliente(clienteActivo.id).catch(err => {
+            console.error('Error cargando insignias:', err);
+            return [];
+          }),
+        ]);
 
-        atenciones = oatcs || [];
+        atenciones = resOatcs.data || [];
         setHistorialAtenciones(atenciones);
+        setInsignias(tags || []);
 
         // Detectar si hay orden en atención ahora
         const enCurso = atenciones.find(o => o.estado_proceso === 'EN_ATENCION' || o.estado_proceso === 'RECEPCIONADO');
         setOrdenActiva(enCurso || null);
       } catch (err) {
-        console.error('Error cargando OATCs de cliente:', err);
+        console.error('Error cargando ecosistema de cliente:', err);
       }
 
       // c. Motores Opal & Stitch
@@ -110,14 +139,6 @@ export default function MobileClientePage() {
       setVitalidad(calcularVitalidadCapilarStitch(prefs, diasUltimoServicio));
       setRutinaOpal(procesarRutinaClimatologicaOpal(prefs.meta_principal, diasUltimoServicio));
       setPredictorOpal(calcularPredictorCicloCapilarOpal(atenciones));
-
-      // d. Insignias de fidelidad
-      try {
-        const tags = await calcularEtiquetasCliente(clienteActivo.id);
-        setInsignias(tags || []);
-      } catch (err) {
-        console.error('Error cargando insignias:', err);
-      }
     }
 
     cargarEcosistemaBienestar();

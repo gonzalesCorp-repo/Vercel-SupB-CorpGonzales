@@ -19,15 +19,40 @@ import {
 } from '@/services/clientes';
 import { getBrandingForSede } from '@/config/branding';
 
+import dynamic from 'next/dynamic';
+
 // Subcomponentes Modulares Stitch + Opal AI
 import { KioskModo, KioskStaffTab, ColaboradorKiosk } from '@/components/kiosk/types';
 import { KioskHeader } from '@/components/kiosk/KioskHeader';
 import { KioskHeroWelcome } from '@/components/kiosk/KioskHeroWelcome';
 import { KioskVipCheckIn } from '@/components/kiosk/KioskVipCheckIn';
-import { KioskVipHub } from '@/components/kiosk/KioskVipHub';
-import { KioskStaffDirectory } from '@/components/kiosk/KioskStaffDirectory';
-import { KioskStaffStation } from '@/components/kiosk/KioskStaffStation';
-import { KioskPinModal } from '@/components/kiosk/KioskPinModal';
+
+const KioskLoadingSkeleton = () => (
+  <div className="w-full flex-1 flex flex-col items-center justify-center p-8 space-y-4 animate-pulse" role="status" aria-label="Iniciando módulo táctil...">
+    <div className="w-20 h-20 rounded-full bg-slate-200/60 dark:bg-slate-800/60" />
+    <div className="h-6 w-48 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl" />
+    <div className="h-4 w-64 bg-slate-200/40 dark:bg-slate-800/40 rounded-lg" />
+  </div>
+);
+
+const KioskVipHub = dynamic(
+  () => import('@/components/kiosk/KioskVipHub').then(m => m.KioskVipHub),
+  { loading: () => <KioskLoadingSkeleton /> }
+);
+
+const KioskStaffDirectory = dynamic(
+  () => import('@/components/kiosk/KioskStaffDirectory').then(m => m.KioskStaffDirectory),
+  { loading: () => <KioskLoadingSkeleton /> }
+);
+
+const KioskStaffStation = dynamic(
+  () => import('@/components/kiosk/KioskStaffStation').then(m => m.KioskStaffStation),
+  { loading: () => <KioskLoadingSkeleton /> }
+);
+
+const KioskPinModal = dynamic(
+  () => import('@/components/kiosk/KioskPinModal').then(m => m.KioskPinModal)
+);
 
 export default function KioskoDualPage() {
   const [modo, setModo] = useState<KioskModo>('HOME');
