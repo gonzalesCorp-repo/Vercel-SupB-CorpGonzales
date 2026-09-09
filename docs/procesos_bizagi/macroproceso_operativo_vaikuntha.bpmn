@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
+  id="Definitions_Macro_Salón" 
+  targetNamespace="http://bpmn.io/schema/bpmn" 
+  exporter="Vaikuntha ERP Bizagi BPMN Generator" 
+  exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_Macro_Salón">
+    <bpmn:participant id="Participant_Macro_Salón" name="Macroproceso Operativo de Salón - Vaikuntha ERP (Gloss Salon &amp; Relax)" processRef="Process_Macro_Salón" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Macro_Salón" name="Macroproceso Operativo de Salón - Vaikuntha ERP (Gloss Salon &amp; Relax)" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Macro_Salón">
+      <bpmn:lane id="Lane_Cli" name="Cliente VIP / Visitante">
+        <bpmn:flowNodeRef>Start_Cliente</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Cli_CheckIn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Cli_Espera</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Cli_Sillon</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Cli_Servicio</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Cli_Pago</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Cliente</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Kiosk" name="Kiosko Táctil / Concierge Opal AI">
+        <bpmn:flowNodeRef>Task_Kiosk_Search</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gate_Kiosk_Cita</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Kiosk_Opal</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Kiosk_OATC</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Recep" name="Recepción Central">
+        <bpmn:flowNodeRef>Task_Recep_Monitor</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gate_Recep_Asig</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Recep_Asignar</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Estil" name="Estilista / Cosmiatra en Sillón">
+        <bpmn:flowNodeRef>Task_Estil_Reclamar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Estil_Diag</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gate_Estil_Reqs</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Estil_PedLab</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Estil_PedBar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Estil_Ejecutar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Estil_FinServ</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Lab" name="Laboratorio Químico">
+        <bpmn:flowNodeRef>Task_Lab_Pesar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Lab_Entregar</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Bar" name="Bar Boutique &amp; Cafetería">
+        <bpmn:flowNodeRef>Task_Bar_Prep</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Bar_Servir</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Caja" name="Caja POS &amp; Facturación">
+        <bpmn:flowNodeRef>Task_Caja_Cargar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Caja_Cobro</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Caja_Boleta</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="Start_Cliente" name="Llegada al Salón">
+      <bpmn:documentation>El cliente VIP o espontáneo ingresa a las instalaciones del salón.</bpmn:documentation>
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_Cli_CheckIn" name="Interacción en Kiosko / Check-in">
+      <bpmn:documentation>El cliente digita su DNI o celular en la pantalla táctil del tótem o se acerca al mostrador.</bpmn:documentation>
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:manualTask id="Task_Cli_Espera" name="Espera en Lounge &amp; Selección Amenidad">
+      <bpmn:documentation>El cliente espera confortablemente en el lounge y selecciona su bebida de cortesía sugerida por Opal AI.</bpmn:documentation>
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="Task_Cli_Sillon" name="Traslado a Sillón de Estilista">
+      <bpmn:documentation>El cliente es llamado y se ubica en el sillón o cabina asignada.</bpmn:documentation>
+      <bpmn:incoming>Flow_13</bpmn:incoming>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="Task_Cli_Servicio" name="Recepción de Servicio &amp; Consulta Lumina Club">
+      <bpmn:documentation>El cliente disfruta su servicio y visualiza en su móvil consejos capilares y balance de LuminaCoins.</bpmn:documentation>
+      <bpmn:incoming>Flow_18</bpmn:incoming>
+      <bpmn:incoming>Flow_24</bpmn:incoming>
+    </bpmn:manualTask>
+    <bpmn:userTask id="Task_Cli_Pago" name="Validación de Pre-cuenta &amp; Pago">
+      <bpmn:documentation>El cliente revisa su cuenta en Caja POS y efectúa el pago.</bpmn:documentation>
+      <bpmn:incoming>Flow_28</bpmn:incoming>
+      <bpmn:outgoing>Flow_29</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="End_Cliente" name="Salida del Salón con Puntos Ganados">
+      <bpmn:documentation>Atención finalizada satisfactoriamente, acumulación de puntos registrada.</bpmn:documentation>
+      <bpmn:incoming>Flow_30</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_Kiosk_Search" name="Búsqueda de Cliente &amp; Cita en Supabase">
+      <bpmn:documentation>Componente KioskVipCheckIn.tsx consulta tabla public.clientes y citas programadas.</bpmn:documentation>
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gate_Kiosk_Cita" name="¿Tiene Cita Programada?">
+      <bpmn:documentation>Evalúa si el cliente tiene orden OATC existente o es ingreso a demanda.</bpmn:documentation>
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Kiosk_Opal" name="Bienvenida &amp; Sugerencia Opal Concierge">
+      <bpmn:documentation>KioskConciergeAgent.tsx infiere bebida de bienvenida y tiempo estimado.</bpmn:documentation>
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Kiosk_OATC" name="Creación/Actualización Orden OATC">
+      <bpmn:documentation>Inserta orden en public.oatc con estado EN_ESPERA y notifica a Recepción en Realtime.</bpmn:documentation>
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Task_Recep_Monitor" name="Monitoreo de Cola OATC (QueueMonitor)">
+      <bpmn:documentation>Recepción valida cola en vivo (QueueMonitor.tsx) y evalúa carga de estilistas.</bpmn:documentation>
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gate_Recep_Asig" name="¿Orden Tiene Estilista Asignado?">
+      <bpmn:documentation>Si tiene estilista asignado pasa a su sillón; si no, queda abierta para rotación.</bpmn:documentation>
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+      <bpmn:outgoing>Flow_11</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_Recep_Asignar" name="Asignación Manual o Reagendamiento">
+      <bpmn:documentation>Recepción asigna estilista según rotación de piso o brinda tiempo estimado al cliente.</bpmn:documentation>
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_12</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Estil_Reclamar" name="Reclamación de Orden en Móvil (TabCola)">
+      <bpmn:documentation>El estilista visualiza la orden en TabCola.tsx y presiona &quot;Atender en mi Sillón&quot;.</bpmn:documentation>
+      <bpmn:incoming>Flow_11</bpmn:incoming>
+      <bpmn:incoming>Flow_12</bpmn:incoming>
+      <bpmn:outgoing>Flow_13</bpmn:outgoing>
+      <bpmn:outgoing>Flow_14</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Estil_Diag" name="Diagnóstico &amp; Cronómetro Químico (Chairside)">
+      <bpmn:documentation>StaffChairsideAssistant.tsx registra historial, activa cronómetro para tintes/decoloración.</bpmn:documentation>
+      <bpmn:incoming>Flow_14</bpmn:incoming>
+      <bpmn:outgoing>Flow_15</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="Gate_Estil_Reqs" name="Requerimientos de Atención">
+      <bpmn:documentation>Dispara en paralelo solicitud a Laboratorio (químicos) y/o Bar (cortesías).</bpmn:documentation>
+      <bpmn:incoming>Flow_15</bpmn:incoming>
+      <bpmn:outgoing>Flow_16</bpmn:outgoing>
+      <bpmn:outgoing>Flow_17</bpmn:outgoing>
+      <bpmn:outgoing>Flow_18</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="Task_Estil_PedLab" name="Solicitud de Fórmula a Laboratorio">
+      <bpmn:documentation>El estilista solicita fórmula de tintes/decolorante con gramaje estimado.</bpmn:documentation>
+      <bpmn:incoming>Flow_16</bpmn:incoming>
+      <bpmn:outgoing>Flow_19</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Estil_PedBar" name="Comanda de Bebida a Bar (TabBar)">
+      <bpmn:documentation>Registra comanda de cortesía en cola_peticiones (tipo BAR_BEBIDA).</bpmn:documentation>
+      <bpmn:incoming>Flow_17</bpmn:incoming>
+      <bpmn:outgoing>Flow_22</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:manualTask id="Task_Estil_Ejecutar" name="Ejecución de Servicio y Venta Cruzada">
+      <bpmn:documentation>Aplicación del tratamiento o corte, recomendaciones asistidas por Opal Copilot.</bpmn:documentation>
+      <bpmn:incoming>Flow_21</bpmn:incoming>
+      <bpmn:outgoing>Flow_25</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:userTask id="Task_Estil_FinServ" name="Finalizar Servicio &amp; Derivar a Caja POS">
+      <bpmn:documentation>Marca orden OATC como COMPLETADO y notifica al módulo de Caja en vivo.</bpmn:documentation>
+      <bpmn:incoming>Flow_25</bpmn:incoming>
+      <bpmn:outgoing>Flow_26</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Lab_Pesar" name="Pesaje en Balanza Web Serial (±2g)">
+      <bpmn:documentation>LabDespachoView.tsx lee peso exacto de la balanza, formula con precisión y descuenta stock.</bpmn:documentation>
+      <bpmn:incoming>Flow_19</bpmn:incoming>
+      <bpmn:outgoing>Flow_20</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:manualTask id="Task_Lab_Entregar" name="Entrega de Bowl al Estilista">
+      <bpmn:documentation>Entrega física de la preparación al especialista.</bpmn:documentation>
+      <bpmn:incoming>Flow_20</bpmn:incoming>
+      <bpmn:outgoing>Flow_21</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:userTask id="Task_Bar_Prep" name="Preparación de Bebida / Café Especial">
+      <bpmn:documentation>BarWorkspaceView.tsx reproduce campana Web Audio, barista toma orden y prepara.</bpmn:documentation>
+      <bpmn:incoming>Flow_22</bpmn:incoming>
+      <bpmn:outgoing>Flow_23</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:manualTask id="Task_Bar_Servir" name="Servicio en Sillón de Cliente">
+      <bpmn:documentation>Entrega de la bebida de cortesía al cliente en su estación.</bpmn:documentation>
+      <bpmn:incoming>Flow_23</bpmn:incoming>
+      <bpmn:outgoing>Flow_24</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:userTask id="Task_Caja_Cargar" name="Carga de Orden OATC &amp; Liquidación">
+      <bpmn:documentation>Cajero abre orden OATC en POS, audita ítems de cortesía marcados con badge ámbar.</bpmn:documentation>
+      <bpmn:incoming>Flow_26</bpmn:incoming>
+      <bpmn:outgoing>Flow_27</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Caja_Cobro" name="Procesamiento de Cobro Multimoneda">
+      <bpmn:documentation>Cobro en efectivo/POS/transferencia, cálculo de propina y comisiones de staff.</bpmn:documentation>
+      <bpmn:incoming>Flow_27</bpmn:incoming>
+      <bpmn:outgoing>Flow_28</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_Caja_Boleta" name="Emisión Boleta SUNAT &amp; Puntos Lumina">
+      <bpmn:documentation>Genera comprobante electrónico en public.comprobantes y abona LuminaCoins al cliente.</bpmn:documentation>
+      <bpmn:incoming>Flow_29</bpmn:incoming>
+      <bpmn:outgoing>Flow_30</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="Start_Cliente" targetRef="Task_Cli_CheckIn" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Cli_CheckIn" targetRef="Task_Kiosk_Search" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_Kiosk_Search" targetRef="Gate_Kiosk_Cita" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Gate_Kiosk_Cita" targetRef="Task_Kiosk_Opal" name="Con Cita" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Gate_Kiosk_Cita" targetRef="Task_Kiosk_OATC" name="Sin Cita" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_Kiosk_Opal" targetRef="Task_Cli_Espera" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Task_Kiosk_Opal" targetRef="Task_Kiosk_OATC" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="Task_Kiosk_OATC" targetRef="Task_Recep_Monitor" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="Task_Recep_Monitor" targetRef="Gate_Recep_Asig" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Gate_Recep_Asig" targetRef="Task_Recep_Asignar" name="Sin Asignar" />
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="Gate_Recep_Asig" targetRef="Task_Estil_Reclamar" name="Asignado" />
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="Task_Recep_Asignar" targetRef="Task_Estil_Reclamar" />
+    <bpmn:sequenceFlow id="Flow_13" sourceRef="Task_Estil_Reclamar" targetRef="Task_Cli_Sillon" />
+    <bpmn:sequenceFlow id="Flow_14" sourceRef="Task_Estil_Reclamar" targetRef="Task_Estil_Diag" />
+    <bpmn:sequenceFlow id="Flow_15" sourceRef="Task_Estil_Diag" targetRef="Gate_Estil_Reqs" />
+    <bpmn:sequenceFlow id="Flow_16" sourceRef="Gate_Estil_Reqs" targetRef="Task_Estil_PedLab" />
+    <bpmn:sequenceFlow id="Flow_17" sourceRef="Gate_Estil_Reqs" targetRef="Task_Estil_PedBar" />
+    <bpmn:sequenceFlow id="Flow_18" sourceRef="Gate_Estil_Reqs" targetRef="Task_Cli_Servicio" />
+    <bpmn:sequenceFlow id="Flow_19" sourceRef="Task_Estil_PedLab" targetRef="Task_Lab_Pesar" />
+    <bpmn:sequenceFlow id="Flow_20" sourceRef="Task_Lab_Pesar" targetRef="Task_Lab_Entregar" />
+    <bpmn:sequenceFlow id="Flow_21" sourceRef="Task_Lab_Entregar" targetRef="Task_Estil_Ejecutar" />
+    <bpmn:sequenceFlow id="Flow_22" sourceRef="Task_Estil_PedBar" targetRef="Task_Bar_Prep" />
+    <bpmn:sequenceFlow id="Flow_23" sourceRef="Task_Bar_Prep" targetRef="Task_Bar_Servir" />
+    <bpmn:sequenceFlow id="Flow_24" sourceRef="Task_Bar_Servir" targetRef="Task_Cli_Servicio" />
+    <bpmn:sequenceFlow id="Flow_25" sourceRef="Task_Estil_Ejecutar" targetRef="Task_Estil_FinServ" />
+    <bpmn:sequenceFlow id="Flow_26" sourceRef="Task_Estil_FinServ" targetRef="Task_Caja_Cargar" />
+    <bpmn:sequenceFlow id="Flow_27" sourceRef="Task_Caja_Cargar" targetRef="Task_Caja_Cobro" />
+    <bpmn:sequenceFlow id="Flow_28" sourceRef="Task_Caja_Cobro" targetRef="Task_Cli_Pago" />
+    <bpmn:sequenceFlow id="Flow_29" sourceRef="Task_Cli_Pago" targetRef="Task_Caja_Boleta" />
+    <bpmn:sequenceFlow id="Flow_30" sourceRef="Task_Caja_Boleta" targetRef="End_Cliente" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Macro_Salón">
+    <bpmndi:BPMNPlane id="BPMNPlane_Macro_Salón" bpmnElement="Collaboration_Macro_Salón">
+      <bpmndi:BPMNShape id="Participant_Macro_Salón_di" bpmnElement="Participant_Macro_Salón" isHorizontal="true">
+        <dc:Bounds x="100" y="80" width="3400" height="1050" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Cli_di" bpmnElement="Lane_Cli" isHorizontal="true">
+        <dc:Bounds x="130" y="80" width="3370" height="145" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Kiosk_di" bpmnElement="Lane_Kiosk" isHorizontal="true">
+        <dc:Bounds x="130" y="225" width="3370" height="145" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Recep_di" bpmnElement="Lane_Recep" isHorizontal="true">
+        <dc:Bounds x="130" y="370" width="3370" height="145" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Estil_di" bpmnElement="Lane_Estil" isHorizontal="true">
+        <dc:Bounds x="130" y="515" width="3370" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Lab_di" bpmnElement="Lane_Lab" isHorizontal="true">
+        <dc:Bounds x="130" y="695" width="3370" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Bar_di" bpmnElement="Lane_Bar" isHorizontal="true">
+        <dc:Bounds x="130" y="815" width="3370" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Caja_di" bpmnElement="Lane_Caja" isHorizontal="true">
+        <dc:Bounds x="130" y="935" width="3370" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Cliente_di" bpmnElement="Start_Cliente">
+        <dc:Bounds x="180" y="135" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Cli_CheckIn_di" bpmnElement="Task_Cli_CheckIn">
+        <dc:Bounds x="260" y="125" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Cli_Espera_di" bpmnElement="Task_Cli_Espera">
+        <dc:Bounds x="650" y="125" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Cli_Sillon_di" bpmnElement="Task_Cli_Sillon">
+        <dc:Bounds x="1040" y="125" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Cli_Servicio_di" bpmnElement="Task_Cli_Servicio">
+        <dc:Bounds x="1720" y="125" width="140" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Cli_Pago_di" bpmnElement="Task_Cli_Pago">
+        <dc:Bounds x="2850" y="125" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Cliente_di" bpmnElement="End_Cliente">
+        <dc:Bounds x="3100" y="135" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Kiosk_Search_di" bpmnElement="Task_Kiosk_Search">
+        <dc:Bounds x="260" y="265" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gate_Kiosk_Cita_di" bpmnElement="Gate_Kiosk_Cita">
+        <dc:Bounds x="440" y="270" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Kiosk_Opal_di" bpmnElement="Task_Kiosk_Opal">
+        <dc:Bounds x="530" y="265" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Kiosk_OATC_di" bpmnElement="Task_Kiosk_OATC">
+        <dc:Bounds x="700" y="265" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Recep_Monitor_di" bpmnElement="Task_Recep_Monitor">
+        <dc:Bounds x="860" y="410" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gate_Recep_Asig_di" bpmnElement="Gate_Recep_Asig">
+        <dc:Bounds x="1030" y="415" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Recep_Asignar_di" bpmnElement="Task_Recep_Asignar">
+        <dc:Bounds x="1120" y="410" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Estil_Reclamar_di" bpmnElement="Task_Estil_Reclamar">
+        <dc:Bounds x="1290" y="560" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Estil_Diag_di" bpmnElement="Task_Estil_Diag">
+        <dc:Bounds x="1460" y="560" width="140" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gate_Estil_Reqs_di" bpmnElement="Gate_Estil_Reqs">
+        <dc:Bounds x="1640" y="565" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Estil_PedLab_di" bpmnElement="Task_Estil_PedLab">
+        <dc:Bounds x="1730" y="620" width="130" height="55" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Estil_PedBar_di" bpmnElement="Task_Estil_PedBar">
+        <dc:Bounds x="1730" y="520" width="130" height="55" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Estil_Ejecutar_di" bpmnElement="Task_Estil_Ejecutar">
+        <dc:Bounds x="2260" y="560" width="140" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Estil_FinServ_di" bpmnElement="Task_Estil_FinServ">
+        <dc:Bounds x="2450" y="560" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Lab_Pesar_di" bpmnElement="Task_Lab_Pesar">
+        <dc:Bounds x="1910" y="725" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Lab_Entregar_di" bpmnElement="Task_Lab_Entregar">
+        <dc:Bounds x="2080" y="725" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Bar_Prep_di" bpmnElement="Task_Bar_Prep">
+        <dc:Bounds x="1910" y="845" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Bar_Servir_di" bpmnElement="Task_Bar_Servir">
+        <dc:Bounds x="2080" y="845" width="120" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Caja_Cargar_di" bpmnElement="Task_Caja_Cargar">
+        <dc:Bounds x="2630" y="965" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Caja_Cobro_di" bpmnElement="Task_Caja_Cobro">
+        <dc:Bounds x="2820" y="965" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Caja_Boleta_di" bpmnElement="Task_Caja_Boleta">
+        <dc:Bounds x="3000" y="965" width="140" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="216" y="153" />
+        <di:waypoint x="260" y="153" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="320" y="185" />
+        <di:waypoint x="320" y="265" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="390" y="295" />
+        <di:waypoint x="440" y="295" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="490" y="295" />
+        <di:waypoint x="530" y="295" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="465" y="320" />
+        <di:waypoint x="465" y="345" />
+        <di:waypoint x="765" y="345" />
+        <di:waypoint x="765" y="325" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="595" y="265" />
+        <di:waypoint x="595" y="155" />
+        <di:waypoint x="650" y="155" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="660" y="295" />
+        <di:waypoint x="700" y="295" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="830" y="295" />
+        <di:waypoint x="925" y="295" />
+        <di:waypoint x="925" y="410" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="990" y="440" />
+        <di:waypoint x="1030" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
+        <di:waypoint x="1080" y="440" />
+        <di:waypoint x="1120" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11">
+        <di:waypoint x="1055" y="465" />
+        <di:waypoint x="1055" y="505" />
+        <di:waypoint x="1355" y="505" />
+        <di:waypoint x="1355" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12">
+        <di:waypoint x="1250" y="440" />
+        <di:waypoint x="1355" y="440" />
+        <di:waypoint x="1355" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13">
+        <di:waypoint x="1355" y="560" />
+        <di:waypoint x="1355" y="155" />
+        <di:waypoint x="1160" y="155" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14">
+        <di:waypoint x="1420" y="590" />
+        <di:waypoint x="1460" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15">
+        <di:waypoint x="1600" y="590" />
+        <di:waypoint x="1640" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16">
+        <di:waypoint x="1665" y="615" />
+        <di:waypoint x="1665" y="647" />
+        <di:waypoint x="1730" y="647" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17">
+        <di:waypoint x="1665" y="565" />
+        <di:waypoint x="1665" y="547" />
+        <di:waypoint x="1730" y="547" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_di" bpmnElement="Flow_18">
+        <di:waypoint x="1665" y="565" />
+        <di:waypoint x="1665" y="155" />
+        <di:waypoint x="1720" y="155" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19_di" bpmnElement="Flow_19">
+        <di:waypoint x="1860" y="647" />
+        <di:waypoint x="1880" y="647" />
+        <di:waypoint x="1880" y="755" />
+        <di:waypoint x="1910" y="755" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_20_di" bpmnElement="Flow_20">
+        <di:waypoint x="2040" y="755" />
+        <di:waypoint x="2080" y="755" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_21_di" bpmnElement="Flow_21">
+        <di:waypoint x="2200" y="755" />
+        <di:waypoint x="2230" y="755" />
+        <di:waypoint x="2230" y="590" />
+        <di:waypoint x="2260" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_22_di" bpmnElement="Flow_22">
+        <di:waypoint x="1860" y="547" />
+        <di:waypoint x="1880" y="547" />
+        <di:waypoint x="1880" y="875" />
+        <di:waypoint x="1910" y="875" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_23_di" bpmnElement="Flow_23">
+        <di:waypoint x="2040" y="875" />
+        <di:waypoint x="2080" y="875" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_24_di" bpmnElement="Flow_24">
+        <di:waypoint x="2200" y="875" />
+        <di:waypoint x="2220" y="875" />
+        <di:waypoint x="2220" y="185" />
+        <di:waypoint x="1860" y="155" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_25_di" bpmnElement="Flow_25">
+        <di:waypoint x="2400" y="590" />
+        <di:waypoint x="2450" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_26_di" bpmnElement="Flow_26">
+        <di:waypoint x="2580" y="590" />
+        <di:waypoint x="2600" y="590" />
+        <di:waypoint x="2600" y="995" />
+        <di:waypoint x="2630" y="995" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_27_di" bpmnElement="Flow_27">
+        <di:waypoint x="2760" y="995" />
+        <di:waypoint x="2820" y="995" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_28_di" bpmnElement="Flow_28">
+        <di:waypoint x="2885" y="965" />
+        <di:waypoint x="2885" y="185" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_29_di" bpmnElement="Flow_29">
+        <di:waypoint x="2980" y="155" />
+        <di:waypoint x="3070" y="155" />
+        <di:waypoint x="3070" y="965" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_30_di" bpmnElement="Flow_30">
+        <di:waypoint x="3070" y="965" />
+        <di:waypoint x="3118" y="965" />
+        <di:waypoint x="3118" y="171" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
