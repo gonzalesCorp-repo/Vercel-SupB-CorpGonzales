@@ -8,7 +8,7 @@
   id="Definitions_WFM_Turnos" 
   targetNamespace="http://bpmn.io/schema/bpmn" 
   exporter="Vaikuntha ERP Bizagi BPMN Generator" 
-  exporterVersion="2.0">
+  exporterVersion="2.2">
   <bpmn:collaboration id="Collaboration_WFM_Turnos">
     <bpmn:participant id="Participant_WFM_Turnos" name="Gestión de Asistencia, Turnos NFC y Rotación de Piso (WFM Vaikuntha)" processRef="Process_WFM_Turnos" />
   </bpmn:collaboration>
@@ -20,14 +20,15 @@
         <bpmn:flowNodeRef>Task_Scan_NFC</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Sol_Manual</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Sel_Mov</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_Banner_Espera</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_Staff_ThrowSol</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_Staff_CatchDecision</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gate_Staff_Feedback</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Staff_Rechazo</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Staff_Activo</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_Staff_Ok</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_Wfm_Recep" name="Recepción Central / Supervisor">
-        <bpmn:flowNodeRef>Task_Recep_Alerta</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_Recep_CatchWfm</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Recep_Eval</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gate_Recep_Decide</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Recep_ModalRech</bpmn:flowNodeRef>
@@ -35,7 +36,7 @@
       </bpmn:lane>
       <bpmn:lane id="Lane_Wfm_Engine" name="Motor Supabase Realtime &amp; PostgreSQL">
         <bpmn:flowNodeRef>Task_DB_InsertPet</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_DB_WalBroadcast</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_DB_ThrowWal</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_DB_Audit</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_DB_SyncEstado</bpmn:flowNodeRef>
       </bpmn:lane>
@@ -43,6 +44,13 @@
         <bpmn:flowNodeRef>Task_Piso_Recalc</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
+
+    <bpmn:dataStoreReference id="DS_Wfm_ColaPet" name="(BD) Supabase: public.cola_peticiones">
+      <bpmn:documentation>Cola de peticiones con REPLICA IDENTITY FULL.</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="DS_Wfm_Asistencias" name="(BD) Supabase: public.asistencias_turnos">
+      <bpmn:documentation>Historial inmutable de asistencias auditado.</bpmn:documentation>
+    </bpmn:dataStoreReference>
 
     <bpmn:startEvent id="Start_Staff" name="Llegada del Colaborador">
       <bpmn:documentation>Colaborador se presenta a laborar en su sede asignada.</bpmn:documentation>
@@ -70,34 +78,43 @@
       <bpmn:incoming>Wfm_F5</bpmn:incoming>
       <bpmn:outgoing>Wfm_F6</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:manualTask id="Task_Banner_Espera" name="Visualización de Banner &quot;Solicitud en Curso&quot;">
-      <bpmn:documentation>Muestra tarjeta ámbar reactiva con suscripción Realtime a cola_peticiones.</bpmn:documentation>
-      <bpmn:incoming>Wfm_F7</bpmn:incoming>
-    </bpmn:manualTask>
-    <bpmn:exclusiveGateway id="Gate_Staff_Feedback" name="Resultado Recepción">
-      <bpmn:documentation>Determina si la solicitud fue aprobada o rechazada en tiempo real.</bpmn:documentation>
+    <bpmn:intermediateThrowEvent id="Event_Staff_ThrowSol" name="Emitir Solicitud a Cola de Peticiones">
+      <bpmn:documentation>Dispara inserción en cola_peticiones y activa banner reactivo.</bpmn:documentation>
+      <bpmn:incoming>Wfm_F6</bpmn:incoming>
+      <bpmn:outgoing>Wfm_F7</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MsgDef_Event_Staff_ThrowSol" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Event_Staff_CatchDecision" name="Notificación Háptica &amp; Realtime de Decisión">
+      <bpmn:documentation>Captura el evento WAL Realtime con vibración del dispositivo y toast.</bpmn:documentation>
       <bpmn:incoming>Wfm_F15</bpmn:incoming>
       <bpmn:outgoing>Wfm_F16</bpmn:outgoing>
-      <bpmn:outgoing>Wfm_F17</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:userTask id="Task_Staff_Rechazo" name="Banner Carmesí de Rechazo con Motivo">
-      <bpmn:documentation>TabEstacion.tsx muestra alerta con motivo de rechazo y botón &quot;Volver a Solicitar&quot;.</bpmn:documentation>
+      <bpmn:messageEventDefinition id="MsgDef_Event_Staff_CatchDecision" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="Gate_Staff_Feedback" name="¿Resultado Aprobado?">
+      <bpmn:documentation>Determina si la solicitud fue autorizada o rechazada.</bpmn:documentation>
       <bpmn:incoming>Wfm_F16</bpmn:incoming>
+      <bpmn:outgoing>Wfm_F17</bpmn:outgoing>
+      <bpmn:outgoing>Wfm_F18</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_Staff_Rechazo" name="Banner Carmesí con Motivo de Rechazo">
+      <bpmn:documentation>TabEstacion.tsx muestra motivo recibido y botón &quot;Volver a Solicitar&quot;.</bpmn:documentation>
+      <bpmn:incoming>Wfm_F17</bpmn:incoming>
     </bpmn:userTask>
     <bpmn:manualTask id="Task_Staff_Activo" name="Turno Activo &amp; Disponibilidad en Sillón">
-      <bpmn:documentation>Colaborador listo para recibir órdenes de clientes en sillón asignado.</bpmn:documentation>
-      <bpmn:incoming>Wfm_F19</bpmn:incoming>
-      <bpmn:outgoing>Wfm_F21</bpmn:outgoing>
+      <bpmn:documentation>Colaborador listo para recibir órdenes de clientes.</bpmn:documentation>
+      <bpmn:incoming>Wfm_F20</bpmn:incoming>
+      <bpmn:outgoing>Wfm_F22</bpmn:outgoing>
     </bpmn:manualTask>
     <bpmn:endEvent id="End_Staff_Ok" name="Jornada Iniciada">
       <bpmn:documentation>Turno operativo iniciado con sincronización en tiempo real.</bpmn:documentation>
-      <bpmn:incoming>Wfm_F21</bpmn:incoming>
+      <bpmn:incoming>Wfm_F22</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:serviceTask id="Task_Recep_Alerta" name="Alerta Sonora &amp; Toast de Petición WFM">
-      <bpmn:documentation>QueueMonitor.tsx reproduce sonido agradable de campana y toast informativo.</bpmn:documentation>
+    <bpmn:intermediateCatchEvent id="Event_Recep_CatchWfm" name="Recepción de Alerta WFM (Campana Sonora)">
+      <bpmn:documentation>QueueMonitor.tsx reproduce sonido agradable de campana y toast.</bpmn:documentation>
       <bpmn:incoming>Wfm_F8</bpmn:incoming>
       <bpmn:outgoing>Wfm_F9</bpmn:outgoing>
-    </bpmn:serviceTask>
+      <bpmn:messageEventDefinition id="MsgDef_Event_Recep_CatchWfm" />
+    </bpmn:intermediateCatchEvent>
     <bpmn:userTask id="Task_Recep_Eval" name="Auditoría de Horario y Presencia Física">
       <bpmn:documentation>Recepcionista verifica si el colaborador está presente y programado para hoy.</bpmn:documentation>
       <bpmn:incoming>Wfm_F9</bpmn:incoming>
@@ -121,30 +138,30 @@
     </bpmn:userTask>
     <bpmn:serviceTask id="Task_DB_InsertPet" name="Inserción en cola_peticiones (PENDIENTE)">
       <bpmn:documentation>peticiones.ts inserta con sede_id verificado y agente_id autenticado.</bpmn:documentation>
-      <bpmn:incoming>Wfm_F6</bpmn:incoming>
-      <bpmn:outgoing>Wfm_F7</bpmn:outgoing>
+      <bpmn:incoming>Wfm_F7</bpmn:incoming>
       <bpmn:outgoing>Wfm_F8</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Task_DB_WalBroadcast" name="Emisión WAL Realtime (REPLICA IDENTITY FULL)">
-      <bpmn:documentation>PostgreSQL WAL emite registro completo garantizando entrega a canales suscritos.</bpmn:documentation>
+    <bpmn:intermediateThrowEvent id="Event_DB_ThrowWal" name="Emisión WAL Realtime (REPLICA IDENTITY FULL)">
+      <bpmn:documentation>PostgreSQL emite todas las columnas al canal suscrito.</bpmn:documentation>
       <bpmn:incoming>Wfm_F13</bpmn:incoming>
       <bpmn:incoming>Wfm_F14</bpmn:incoming>
       <bpmn:outgoing>Wfm_F15</bpmn:outgoing>
-    </bpmn:serviceTask>
+      <bpmn:messageEventDefinition id="MsgDef_Event_DB_ThrowWal" />
+    </bpmn:intermediateThrowEvent>
     <bpmn:serviceTask id="Task_DB_Audit" name="Registro Inmutable en asistencias_turnos">
       <bpmn:documentation>Guarda timestamp UTC/Perú, método (NFC/DIGITAL) y metadata de auditoría laboral.</bpmn:documentation>
-      <bpmn:incoming>Wfm_F17</bpmn:incoming>
-      <bpmn:outgoing>Wfm_F18</bpmn:outgoing>
+      <bpmn:incoming>Wfm_F18</bpmn:incoming>
+      <bpmn:outgoing>Wfm_F19</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Task_DB_SyncEstado" name="Auto-sanación de Estado Operativo Diario">
       <bpmn:documentation>obtenerEstadoOperativoDinamicoAgente actualiza public.agentes con estado dinámico hoy.</bpmn:documentation>
-      <bpmn:incoming>Wfm_F18</bpmn:incoming>
-      <bpmn:outgoing>Wfm_F19</bpmn:outgoing>
+      <bpmn:incoming>Wfm_F19</bpmn:incoming>
       <bpmn:outgoing>Wfm_F20</bpmn:outgoing>
+      <bpmn:outgoing>Wfm_F21</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:businessRuleTask id="Task_Piso_Recalc" name="Recálculo de Posición en Piso (#X de Y)">
       <bpmn:documentation>Algoritmo de rotación asigna turno para clientes a demanda y actualiza TabCola.tsx.</bpmn:documentation>
-      <bpmn:incoming>Wfm_F20</bpmn:incoming>
+      <bpmn:incoming>Wfm_F21</bpmn:incoming>
     </bpmn:businessRuleTask>
 
     <bpmn:sequenceFlow id="Wfm_F1" sourceRef="Start_Staff" targetRef="Gate_Metodo_Marc" />
@@ -152,39 +169,46 @@
     <bpmn:sequenceFlow id="Wfm_F3" sourceRef="Gate_Metodo_Marc" targetRef="Task_Sol_Manual" name="Sin NFC" />
     <bpmn:sequenceFlow id="Wfm_F4" sourceRef="Task_Scan_NFC" targetRef="Task_Sel_Mov" />
     <bpmn:sequenceFlow id="Wfm_F5" sourceRef="Task_Sol_Manual" targetRef="Task_Sel_Mov" />
-    <bpmn:sequenceFlow id="Wfm_F6" sourceRef="Task_Sel_Mov" targetRef="Task_DB_InsertPet" />
-    <bpmn:sequenceFlow id="Wfm_F7" sourceRef="Task_DB_InsertPet" targetRef="Task_Banner_Espera" />
-    <bpmn:sequenceFlow id="Wfm_F8" sourceRef="Task_DB_InsertPet" targetRef="Task_Recep_Alerta" />
-    <bpmn:sequenceFlow id="Wfm_F9" sourceRef="Task_Recep_Alerta" targetRef="Task_Recep_Eval" />
+    <bpmn:sequenceFlow id="Wfm_F6" sourceRef="Task_Sel_Mov" targetRef="Event_Staff_ThrowSol" />
+    <bpmn:sequenceFlow id="Wfm_F7" sourceRef="Event_Staff_ThrowSol" targetRef="Task_DB_InsertPet" />
+    <bpmn:sequenceFlow id="Wfm_F8" sourceRef="Task_DB_InsertPet" targetRef="Event_Recep_CatchWfm" />
+    <bpmn:sequenceFlow id="Wfm_F9" sourceRef="Event_Recep_CatchWfm" targetRef="Task_Recep_Eval" />
     <bpmn:sequenceFlow id="Wfm_F10" sourceRef="Task_Recep_Eval" targetRef="Gate_Recep_Decide" />
     <bpmn:sequenceFlow id="Wfm_F11" sourceRef="Gate_Recep_Decide" targetRef="Task_Recep_ModalRech" name="Rechazar" />
     <bpmn:sequenceFlow id="Wfm_F12" sourceRef="Gate_Recep_Decide" targetRef="Task_Recep_Aprobar" name="Aprobar" />
-    <bpmn:sequenceFlow id="Wfm_F13" sourceRef="Task_Recep_ModalRech" targetRef="Task_DB_WalBroadcast" />
-    <bpmn:sequenceFlow id="Wfm_F14" sourceRef="Task_Recep_Aprobar" targetRef="Task_DB_WalBroadcast" />
-    <bpmn:sequenceFlow id="Wfm_F15" sourceRef="Task_DB_WalBroadcast" targetRef="Gate_Staff_Feedback" />
-    <bpmn:sequenceFlow id="Wfm_F16" sourceRef="Gate_Staff_Feedback" targetRef="Task_Staff_Rechazo" name="Rechazado" />
-    <bpmn:sequenceFlow id="Wfm_F17" sourceRef="Gate_Staff_Feedback" targetRef="Task_DB_Audit" name="Aprobado" />
-    <bpmn:sequenceFlow id="Wfm_F18" sourceRef="Task_DB_Audit" targetRef="Task_DB_SyncEstado" />
-    <bpmn:sequenceFlow id="Wfm_F19" sourceRef="Task_DB_SyncEstado" targetRef="Task_Staff_Activo" />
-    <bpmn:sequenceFlow id="Wfm_F20" sourceRef="Task_DB_SyncEstado" targetRef="Task_Piso_Recalc" />
-    <bpmn:sequenceFlow id="Wfm_F21" sourceRef="Task_Staff_Activo" targetRef="End_Staff_Ok" />
+    <bpmn:sequenceFlow id="Wfm_F13" sourceRef="Task_Recep_ModalRech" targetRef="Event_DB_ThrowWal" />
+    <bpmn:sequenceFlow id="Wfm_F14" sourceRef="Task_Recep_Aprobar" targetRef="Event_DB_ThrowWal" />
+    <bpmn:sequenceFlow id="Wfm_F15" sourceRef="Event_DB_ThrowWal" targetRef="Event_Staff_CatchDecision" />
+    <bpmn:sequenceFlow id="Wfm_F16" sourceRef="Event_Staff_CatchDecision" targetRef="Gate_Staff_Feedback" />
+    <bpmn:sequenceFlow id="Wfm_F17" sourceRef="Gate_Staff_Feedback" targetRef="Task_Staff_Rechazo" name="Rechazado" />
+    <bpmn:sequenceFlow id="Wfm_F18" sourceRef="Gate_Staff_Feedback" targetRef="Task_DB_Audit" name="Aprobado" />
+    <bpmn:sequenceFlow id="Wfm_F19" sourceRef="Task_DB_Audit" targetRef="Task_DB_SyncEstado" />
+    <bpmn:sequenceFlow id="Wfm_F20" sourceRef="Task_DB_SyncEstado" targetRef="Task_Staff_Activo" />
+    <bpmn:sequenceFlow id="Wfm_F21" sourceRef="Task_DB_SyncEstado" targetRef="Task_Piso_Recalc" />
+    <bpmn:sequenceFlow id="Wfm_F22" sourceRef="Task_Staff_Activo" targetRef="End_Staff_Ok" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_WFM_Turnos">
     <bpmndi:BPMNPlane id="BPMNPlane_WFM_Turnos" bpmnElement="Collaboration_WFM_Turnos">
       <bpmndi:BPMNShape id="Participant_WFM_Turnos_di" bpmnElement="Participant_WFM_Turnos" isHorizontal="true">
-        <dc:Bounds x="100" y="80" width="2800" height="750" />
+        <dc:Bounds x="100" y="80" width="2900" height="750" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Wfm_Staff_di" bpmnElement="Lane_Wfm_Staff" isHorizontal="true">
-        <dc:Bounds x="130" y="80" width="2770" height="180" />
+        <dc:Bounds x="130" y="80" width="2870" height="180" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Wfm_Recep_di" bpmnElement="Lane_Wfm_Recep" isHorizontal="true">
-        <dc:Bounds x="130" y="260" width="2770" height="180" />
+        <dc:Bounds x="130" y="260" width="2870" height="180" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Wfm_Engine_di" bpmnElement="Lane_Wfm_Engine" isHorizontal="true">
-        <dc:Bounds x="130" y="440" width="2770" height="200" />
+        <dc:Bounds x="130" y="440" width="2870" height="200" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Wfm_Piso_di" bpmnElement="Lane_Wfm_Piso" isHorizontal="true">
-        <dc:Bounds x="130" y="640" width="2770" height="150" />
+        <dc:Bounds x="130" y="640" width="2870" height="150" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_Wfm_ColaPet_di" bpmnElement="DS_Wfm_ColaPet">
+        <dc:Bounds x="800" y="580" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_Wfm_Asistencias_di" bpmnElement="DS_Wfm_Asistencias">
+        <dc:Bounds x="2050" y="580" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Start_Staff_di" bpmnElement="Start_Staff">
         <dc:Bounds x="180" y="150" width="36" height="36" />
@@ -201,50 +225,53 @@
       <bpmndi:BPMNShape id="Task_Sel_Mov_di" bpmnElement="Task_Sel_Mov">
         <dc:Bounds x="550" y="138" width="140" height="60" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_Banner_Espera_di" bpmnElement="Task_Banner_Espera">
-        <dc:Bounds x="1000" y="138" width="140" height="60" />
+      <bpmndi:BPMNShape id="Event_Staff_ThrowSol_di" bpmnElement="Event_Staff_ThrowSol">
+        <dc:Bounds x="740" y="150" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Staff_CatchDecision_di" bpmnElement="Event_Staff_CatchDecision">
+        <dc:Bounds x="1800" y="150" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gate_Staff_Feedback_di" bpmnElement="Gate_Staff_Feedback">
-        <dc:Bounds x="1800" y="143" width="50" height="50" />
+        <dc:Bounds x="1900" y="143" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Staff_Rechazo_di" bpmnElement="Task_Staff_Rechazo">
-        <dc:Bounds x="1920" y="105" width="150" height="60" />
+        <dc:Bounds x="2010" y="105" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Staff_Activo_di" bpmnElement="Task_Staff_Activo">
-        <dc:Bounds x="2150" y="138" width="140" height="60" />
+        <dc:Bounds x="2220" y="138" width="140" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_Staff_Ok_di" bpmnElement="End_Staff_Ok">
-        <dc:Bounds x="2360" y="150" width="36" height="36" />
+        <dc:Bounds x="2430" y="150" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_Recep_Alerta_di" bpmnElement="Task_Recep_Alerta">
-        <dc:Bounds x="1000" y="320" width="140" height="60" />
+      <bpmndi:BPMNShape id="Event_Recep_CatchWfm_di" bpmnElement="Event_Recep_CatchWfm">
+        <dc:Bounds x="970" y="332" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Recep_Eval_di" bpmnElement="Task_Recep_Eval">
-        <dc:Bounds x="1200" y="320" width="140" height="60" />
+        <dc:Bounds x="1060" y="320" width="140" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gate_Recep_Decide_di" bpmnElement="Gate_Recep_Decide">
-        <dc:Bounds x="1400" y="325" width="50" height="50" />
+        <dc:Bounds x="1260" y="325" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Recep_ModalRech_di" bpmnElement="Task_Recep_ModalRech">
-        <dc:Bounds x="1520" y="280" width="150" height="60" />
+        <dc:Bounds x="1380" y="280" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Recep_Aprobar_di" bpmnElement="Task_Recep_Aprobar">
-        <dc:Bounds x="1520" y="380" width="140" height="60" />
+        <dc:Bounds x="1380" y="380" width="140" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_DB_InsertPet_di" bpmnElement="Task_DB_InsertPet">
         <dc:Bounds x="760" y="505" width="150" height="60" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_DB_WalBroadcast_di" bpmnElement="Task_DB_WalBroadcast">
-        <dc:Bounds x="1680" y="505" width="160" height="60" />
+      <bpmndi:BPMNShape id="Event_DB_ThrowWal_di" bpmnElement="Event_DB_ThrowWal">
+        <dc:Bounds x="1680" y="517" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_DB_Audit_di" bpmnElement="Task_DB_Audit">
-        <dc:Bounds x="1900" y="505" width="150" height="60" />
+        <dc:Bounds x="1970" y="505" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_DB_SyncEstado_di" bpmnElement="Task_DB_SyncEstado">
-        <dc:Bounds x="2100" y="505" width="150" height="60" />
+        <dc:Bounds x="2170" y="505" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Piso_Recalc_di" bpmnElement="Task_Piso_Recalc">
-        <dc:Bounds x="2100" y="685" width="150" height="60" />
+        <dc:Bounds x="2170" y="685" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Wfm_F1_di" bpmnElement="Wfm_F1">
         <di:waypoint x="216" y="168" />
@@ -274,80 +301,81 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F6_di" bpmnElement="Wfm_F6">
         <di:waypoint x="690" y="168" />
-        <di:waypoint x="720" y="168" />
-        <di:waypoint x="720" y="535" />
-        <di:waypoint x="760" y="535" />
+        <di:waypoint x="740" y="168" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F7_di" bpmnElement="Wfm_F7">
-        <di:waypoint x="910" y="535" />
-        <di:waypoint x="950" y="535" />
-        <di:waypoint x="950" y="168" />
-        <di:waypoint x="1000" y="168" />
+        <di:waypoint x="758" y="186" />
+        <di:waypoint x="758" y="350" />
+        <di:waypoint x="835" y="350" />
+        <di:waypoint x="835" y="505" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F8_di" bpmnElement="Wfm_F8">
-        <di:waypoint x="910" y="535" />
-        <di:waypoint x="950" y="535" />
-        <di:waypoint x="950" y="350" />
-        <di:waypoint x="1000" y="350" />
+        <di:waypoint x="835" y="505" />
+        <di:waypoint x="835" y="350" />
+        <di:waypoint x="970" y="350" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F9_di" bpmnElement="Wfm_F9">
-        <di:waypoint x="1140" y="350" />
-        <di:waypoint x="1200" y="350" />
+        <di:waypoint x="1006" y="350" />
+        <di:waypoint x="1060" y="350" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F10_di" bpmnElement="Wfm_F10">
-        <di:waypoint x="1340" y="350" />
-        <di:waypoint x="1400" y="350" />
+        <di:waypoint x="1200" y="350" />
+        <di:waypoint x="1260" y="350" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F11_di" bpmnElement="Wfm_F11">
-        <di:waypoint x="1425" y="325" />
-        <di:waypoint x="1425" y="310" />
-        <di:waypoint x="1520" y="310" />
+        <di:waypoint x="1285" y="325" />
+        <di:waypoint x="1285" y="310" />
+        <di:waypoint x="1380" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F12_di" bpmnElement="Wfm_F12">
-        <di:waypoint x="1425" y="375" />
-        <di:waypoint x="1425" y="410" />
-        <di:waypoint x="1520" y="410" />
+        <di:waypoint x="1285" y="375" />
+        <di:waypoint x="1285" y="410" />
+        <di:waypoint x="1380" y="410" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F13_di" bpmnElement="Wfm_F13">
-        <di:waypoint x="1670" y="310" />
-        <di:waypoint x="1760" y="310" />
-        <di:waypoint x="1760" y="505" />
+        <di:waypoint x="1530" y="310" />
+        <di:waypoint x="1698" y="310" />
+        <di:waypoint x="1698" y="517" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F14_di" bpmnElement="Wfm_F14">
-        <di:waypoint x="1660" y="410" />
-        <di:waypoint x="1760" y="410" />
-        <di:waypoint x="1760" y="505" />
+        <di:waypoint x="1520" y="410" />
+        <di:waypoint x="1698" y="410" />
+        <di:waypoint x="1698" y="517" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F15_di" bpmnElement="Wfm_F15">
-        <di:waypoint x="1760" y="505" />
-        <di:waypoint x="1760" y="168" />
+        <di:waypoint x="1698" y="517" />
+        <di:waypoint x="1698" y="168" />
         <di:waypoint x="1800" y="168" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F16_di" bpmnElement="Wfm_F16">
-        <di:waypoint x="1825" y="143" />
-        <di:waypoint x="1825" y="135" />
-        <di:waypoint x="1920" y="135" />
+        <di:waypoint x="1836" y="168" />
+        <di:waypoint x="1900" y="168" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F17_di" bpmnElement="Wfm_F17">
-        <di:waypoint x="1825" y="193" />
-        <di:waypoint x="1825" y="535" />
-        <di:waypoint x="1900" y="535" />
+        <di:waypoint x="1925" y="143" />
+        <di:waypoint x="1925" y="135" />
+        <di:waypoint x="2010" y="135" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F18_di" bpmnElement="Wfm_F18">
-        <di:waypoint x="2050" y="535" />
-        <di:waypoint x="2100" y="535" />
+        <di:waypoint x="1925" y="193" />
+        <di:waypoint x="1925" y="535" />
+        <di:waypoint x="1970" y="535" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F19_di" bpmnElement="Wfm_F19">
-        <di:waypoint x="2175" y="505" />
-        <di:waypoint x="2175" y="198" />
+        <di:waypoint x="2120" y="535" />
+        <di:waypoint x="2170" y="535" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F20_di" bpmnElement="Wfm_F20">
-        <di:waypoint x="2175" y="565" />
-        <di:waypoint x="2175" y="685" />
+        <di:waypoint x="2245" y="505" />
+        <di:waypoint x="2245" y="198" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Wfm_F21_di" bpmnElement="Wfm_F21">
-        <di:waypoint x="2290" y="168" />
+        <di:waypoint x="2245" y="565" />
+        <di:waypoint x="2245" y="685" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Wfm_F22_di" bpmnElement="Wfm_F22">
         <di:waypoint x="2360" y="168" />
+        <di:waypoint x="2430" y="168" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

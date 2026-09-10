@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
+  id="Definitions_Sub_OATC" 
+  targetNamespace="http://bpmn.io/schema/bpmn" 
+  exporter="Vaikuntha ERP Bizagi BPMN Generator" 
+  exporterVersion="2.2">
+  <bpmn:collaboration id="Collaboration_Sub_OATC">
+    <bpmn:participant id="Participant_Sub_OATC" name="Subproceso: Gestión del Ciclo de Vida y Emisión Térmica de OATC (80mm ESC/POS)" processRef="Process_Sub_OATC" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Sub_OATC" name="Subproceso: Gestión del Ciclo de Vida y Emisión Térmica de OATC (80mm ESC/POS)" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Sub_OATC">
+      <bpmn:lane id="Lane_Sub_Op" name="Operador / Kiosko / Recepción">
+        <bpmn:flowNodeRef>Start_Sub_Oatc</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sub_SelDestino</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sub_Confirmar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sub_EntregarTicket</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Sub_OatcOk</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Sub_Back" name="Motor Backend Supabase (public.oatc)">
+        <bpmn:flowNodeRef>Task_Sub_GenCode</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sub_SaveDB</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sub_AuditItem</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Sub_Spool" name="Subsistema de Impresión Térmica (ESC/POS)">
+        <bpmn:flowNodeRef>Task_Sub_BuildPayload</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gate_Sub_CanalPrint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sub_PrintNetwork</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sub_PrintSerial</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gate_Sub_JoinCanal</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sub_CheckStatus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gate_Sub_PrintOk</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sub_Reintentar</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Sub_Hw" name="Hardware Impresora Térmica de Sede">
+        <bpmn:flowNodeRef>Task_Sub_HwPrint</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:dataObject id="DO_DO_Sub_TicketRendered" />
+    <bpmn:dataObjectReference id="DO_Sub_TicketRendered" name="Ticket OATC ESC/POS Renderizado (80mm)" dataObjectRef="DO_DO_Sub_TicketRendered">
+      <bpmn:documentation>Buffer binario con comandos ESC/POS para 80mm, código QR, logo, ítems y corte parcial.</bpmn:documentation>
+    </bpmn:dataObjectReference>
+    <bpmn:dataObject id="DO_DO_Sub_TicketFisico" />
+    <bpmn:dataObjectReference id="DO_Sub_TicketFisico" name="Ticket OATC Impreso (Salida Física)" dataObjectRef="DO_DO_Sub_TicketFisico">
+      <bpmn:documentation>Documento impreso entregado físicamente para control de salón o comanda.</bpmn:documentation>
+    </bpmn:dataObjectReference>
+    <bpmn:dataStoreReference id="DS_Sub_SupabaseOATC" name="(BD) Supabase: public.oatc &amp; public.oatc_items">
+      <bpmn:documentation>Persistencia central de la orden y sus detalles con estado auditado.</bpmn:documentation>
+    </bpmn:dataStoreReference>
+
+    <bpmn:startEvent id="Start_Sub_Oatc" name="Disparo de Creación/Actualización OATC">
+      <bpmn:documentation>Se inicia por check-in de cliente, apertura de orden en recepción o re-impresión.</bpmn:documentation>
+      <bpmn:outgoing>SubF_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_Sub_SelDestino" name="Selección de Impresora Destino de Sede">
+      <bpmn:documentation>Permite elegir la impresora térmica asignada: Recepción, Bar o Laboratorio.</bpmn:documentation>
+      <bpmn:incoming>SubF_1</bpmn:incoming>
+      <bpmn:incoming>SubF_15</bpmn:incoming>
+      <bpmn:outgoing>SubF_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Sub_Confirmar" name="Confirmación de Orden &amp; Servicios">
+      <bpmn:documentation>Operador verifica datos del cliente, estilista asignado y servicios.</bpmn:documentation>
+      <bpmn:incoming>SubF_2</bpmn:incoming>
+      <bpmn:outgoing>SubF_3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:manualTask id="Task_Sub_EntregarTicket" name="Toma y Entrega de Ticket a Estilista/Cliente">
+      <bpmn:documentation>Se entrega el ticket térmico para guiado y control de atención.</bpmn:documentation>
+      <bpmn:incoming>SubF_17</bpmn:incoming>
+      <bpmn:outgoing>SubF_18</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:endEvent id="End_Sub_OatcOk" name="OATC Emitida e Impresa">
+      <bpmn:documentation>Ciclo de emisión concluido exitosamente.</bpmn:documentation>
+      <bpmn:incoming>SubF_18</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_Sub_GenCode" name="Generación de Código Único OATC-YYYYMMDD-XXX">
+      <bpmn:documentation>Genera correlativo diario garantizando unicidad por sede.</bpmn:documentation>
+      <bpmn:incoming>SubF_3</bpmn:incoming>
+      <bpmn:outgoing>SubF_4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Sub_SaveDB" name="Persistencia en public.oatc (EN_ESPERA)">
+      <bpmn:documentation>Inserta registro de orden con sede_id, cliente_id y metadata de impresión.</bpmn:documentation>
+      <bpmn:incoming>SubF_4</bpmn:incoming>
+      <bpmn:outgoing>SubF_5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Sub_AuditItem" name="Registro de Servicios e Insumos en public.oatc_items">
+      <bpmn:documentation>Guarda desglose de servicios programados con precios y tiempos proyectados.</bpmn:documentation>
+      <bpmn:incoming>SubF_5</bpmn:incoming>
+      <bpmn:outgoing>SubF_6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Sub_BuildPayload" name="Construcción de Template ESC/POS (80mm)">
+      <bpmn:documentation>Compila texto formateado: Cabecera con logo, QR de validación, cliente, lista y corte de papel.</bpmn:documentation>
+      <bpmn:incoming>SubF_6</bpmn:incoming>
+      <bpmn:outgoing>SubF_7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gate_Sub_CanalPrint" name="Canal de Conexión de Impresora">
+      <bpmn:documentation>Determina si la impresora es de Red IP/LAN, Web Serial (USB) o Web Bluetooth.</bpmn:documentation>
+      <bpmn:incoming>SubF_7</bpmn:incoming>
+      <bpmn:outgoing>SubF_8</bpmn:outgoing>
+      <bpmn:outgoing>SubF_9</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Sub_PrintNetwork" name="Envío Socket TCP/RAW (Puerto 9100)">
+      <bpmn:documentation>Impresora de red ethernet/wifi de la sede.</bpmn:documentation>
+      <bpmn:incoming>SubF_8</bpmn:incoming>
+      <bpmn:outgoing>SubF_10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Sub_PrintSerial" name="Envío Web Serial API (USB Directo)">
+      <bpmn:documentation>Impresora conectada directamente por puerto COM/USB.</bpmn:documentation>
+      <bpmn:incoming>SubF_9</bpmn:incoming>
+      <bpmn:outgoing>SubF_11</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gate_Sub_JoinCanal" name="Convergencia de Impresión">
+      <bpmn:documentation>Unifica canales de despacho hacia la cola física.</bpmn:documentation>
+      <bpmn:incoming>SubF_10</bpmn:incoming>
+      <bpmn:incoming>SubF_11</bpmn:incoming>
+      <bpmn:outgoing>SubF_12</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Sub_CheckStatus" name="Monitoreo de Estado de Impresora (ACK / Status)">
+      <bpmn:documentation>Comprueba respuesta de la impresora térmica (¿sin papel? ¿cubierta abierta?).</bpmn:documentation>
+      <bpmn:incoming>SubF_12</bpmn:incoming>
+      <bpmn:outgoing>SubF_13</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gate_Sub_PrintOk" name="¿Impresión Exitosa?">
+      <bpmn:documentation>Valida confirmación de impresión física.</bpmn:documentation>
+      <bpmn:incoming>SubF_13</bpmn:incoming>
+      <bpmn:outgoing>SubF_14</bpmn:outgoing>
+      <bpmn:outgoing>SubF_16</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_Sub_Reintentar" name="Alerta en Pantalla &amp; Reintento / Re-enrutamiento">
+      <bpmn:documentation>Muestra error al operador y permite elegir otra impresora de respaldo.</bpmn:documentation>
+      <bpmn:incoming>SubF_14</bpmn:incoming>
+      <bpmn:outgoing>SubF_15</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:manualTask id="Task_Sub_HwPrint" name="Impresión de Ticket Térmico &amp; Corte Automático">
+      <bpmn:documentation>El cabezal térmico imprime 80mm y la guillotina realiza corte parcial.</bpmn:documentation>
+      <bpmn:incoming>SubF_16</bpmn:incoming>
+      <bpmn:outgoing>SubF_17</bpmn:outgoing>
+    </bpmn:manualTask>
+
+    <bpmn:sequenceFlow id="SubF_1" sourceRef="Start_Sub_Oatc" targetRef="Task_Sub_SelDestino" />
+    <bpmn:sequenceFlow id="SubF_2" sourceRef="Task_Sub_SelDestino" targetRef="Task_Sub_Confirmar" />
+    <bpmn:sequenceFlow id="SubF_3" sourceRef="Task_Sub_Confirmar" targetRef="Task_Sub_GenCode" />
+    <bpmn:sequenceFlow id="SubF_4" sourceRef="Task_Sub_GenCode" targetRef="Task_Sub_SaveDB" />
+    <bpmn:sequenceFlow id="SubF_5" sourceRef="Task_Sub_SaveDB" targetRef="Task_Sub_AuditItem" />
+    <bpmn:sequenceFlow id="SubF_6" sourceRef="Task_Sub_AuditItem" targetRef="Task_Sub_BuildPayload" />
+    <bpmn:sequenceFlow id="SubF_7" sourceRef="Task_Sub_BuildPayload" targetRef="Gate_Sub_CanalPrint" />
+    <bpmn:sequenceFlow id="SubF_8" sourceRef="Gate_Sub_CanalPrint" targetRef="Task_Sub_PrintNetwork" name="Red LAN/WiFi" />
+    <bpmn:sequenceFlow id="SubF_9" sourceRef="Gate_Sub_CanalPrint" targetRef="Task_Sub_PrintSerial" name="USB Serial" />
+    <bpmn:sequenceFlow id="SubF_10" sourceRef="Task_Sub_PrintNetwork" targetRef="Gate_Sub_JoinCanal" />
+    <bpmn:sequenceFlow id="SubF_11" sourceRef="Task_Sub_PrintSerial" targetRef="Gate_Sub_JoinCanal" />
+    <bpmn:sequenceFlow id="SubF_12" sourceRef="Gate_Sub_JoinCanal" targetRef="Task_Sub_CheckStatus" />
+    <bpmn:sequenceFlow id="SubF_13" sourceRef="Task_Sub_CheckStatus" targetRef="Gate_Sub_PrintOk" />
+    <bpmn:sequenceFlow id="SubF_14" sourceRef="Gate_Sub_PrintOk" targetRef="Task_Sub_Reintentar" name="Falla/Sin Papel" />
+    <bpmn:sequenceFlow id="SubF_15" sourceRef="Task_Sub_Reintentar" targetRef="Task_Sub_SelDestino" />
+    <bpmn:sequenceFlow id="SubF_16" sourceRef="Gate_Sub_PrintOk" targetRef="Task_Sub_HwPrint" name="Correcto" />
+    <bpmn:sequenceFlow id="SubF_17" sourceRef="Task_Sub_HwPrint" targetRef="Task_Sub_EntregarTicket" />
+    <bpmn:sequenceFlow id="SubF_18" sourceRef="Task_Sub_EntregarTicket" targetRef="End_Sub_OatcOk" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Sub_OATC">
+    <bpmndi:BPMNPlane id="BPMNPlane_Sub_OATC" bpmnElement="Collaboration_Sub_OATC">
+      <bpmndi:BPMNShape id="Participant_Sub_OATC_di" bpmnElement="Participant_Sub_OATC" isHorizontal="true">
+        <dc:Bounds x="100" y="80" width="2900" height="780" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Sub_Op_di" bpmnElement="Lane_Sub_Op" isHorizontal="true">
+        <dc:Bounds x="130" y="80" width="2870" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Sub_Back_di" bpmnElement="Lane_Sub_Back" isHorizontal="true">
+        <dc:Bounds x="130" y="260" width="2870" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Sub_Spool_di" bpmnElement="Lane_Sub_Spool" isHorizontal="true">
+        <dc:Bounds x="130" y="460" width="2870" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Sub_Hw_di" bpmnElement="Lane_Sub_Hw" isHorizontal="true">
+        <dc:Bounds x="130" y="640" width="2870" height="140" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Sub_TicketRendered_di" bpmnElement="DO_Sub_TicketRendered">
+        <dc:Bounds x="1550" y="515" width="36" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Sub_TicketFisico_di" bpmnElement="DO_Sub_TicketFisico">
+        <dc:Bounds x="2350" y="680" width="36" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_Sub_SupabaseOATC_di" bpmnElement="DS_Sub_SupabaseOATC">
+        <dc:Bounds x="800" y="320" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Sub_Oatc_di" bpmnElement="Start_Sub_Oatc">
+        <dc:Bounds x="180" y="150" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_SelDestino_di" bpmnElement="Task_Sub_SelDestino">
+        <dc:Bounds x="260" y="138" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_Confirmar_di" bpmnElement="Task_Sub_Confirmar">
+        <dc:Bounds x="460" y="138" width="140" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_EntregarTicket_di" bpmnElement="Task_Sub_EntregarTicket">
+        <dc:Bounds x="2450" y="138" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Sub_OatcOk_di" bpmnElement="End_Sub_OatcOk">
+        <dc:Bounds x="2680" y="150" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_GenCode_di" bpmnElement="Task_Sub_GenCode">
+        <dc:Bounds x="460" y="320" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_SaveDB_di" bpmnElement="Task_Sub_SaveDB">
+        <dc:Bounds x="670" y="320" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_AuditItem_di" bpmnElement="Task_Sub_AuditItem">
+        <dc:Bounds x="880" y="320" width="160" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_BuildPayload_di" bpmnElement="Task_Sub_BuildPayload">
+        <dc:Bounds x="1100" y="520" width="160" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gate_Sub_CanalPrint_di" bpmnElement="Gate_Sub_CanalPrint">
+        <dc:Bounds x="1320" y="525" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_PrintNetwork_di" bpmnElement="Task_Sub_PrintNetwork">
+        <dc:Bounds x="1440" y="480" width="150" height="55" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_PrintSerial_di" bpmnElement="Task_Sub_PrintSerial">
+        <dc:Bounds x="1440" y="560" width="150" height="55" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gate_Sub_JoinCanal_di" bpmnElement="Gate_Sub_JoinCanal">
+        <dc:Bounds x="1650" y="525" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_CheckStatus_di" bpmnElement="Task_Sub_CheckStatus">
+        <dc:Bounds x="1760" y="520" width="150" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gate_Sub_PrintOk_di" bpmnElement="Gate_Sub_PrintOk">
+        <dc:Bounds x="1970" y="525" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_Reintentar_di" bpmnElement="Task_Sub_Reintentar">
+        <dc:Bounds x="1920" y="440" width="150" height="55" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sub_HwPrint_di" bpmnElement="Task_Sub_HwPrint">
+        <dc:Bounds x="2150" y="675" width="160" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SubF_1_di" bpmnElement="SubF_1">
+        <di:waypoint x="216" y="168" />
+        <di:waypoint x="260" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_2_di" bpmnElement="SubF_2">
+        <di:waypoint x="410" y="168" />
+        <di:waypoint x="460" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_3_di" bpmnElement="SubF_3">
+        <di:waypoint x="530" y="198" />
+        <di:waypoint x="530" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_4_di" bpmnElement="SubF_4">
+        <di:waypoint x="610" y="350" />
+        <di:waypoint x="670" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_5_di" bpmnElement="SubF_5">
+        <di:waypoint x="820" y="350" />
+        <di:waypoint x="880" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_6_di" bpmnElement="SubF_6">
+        <di:waypoint x="1040" y="350" />
+        <di:waypoint x="1180" y="350" />
+        <di:waypoint x="1180" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_7_di" bpmnElement="SubF_7">
+        <di:waypoint x="1260" y="550" />
+        <di:waypoint x="1320" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_8_di" bpmnElement="SubF_8">
+        <di:waypoint x="1345" y="525" />
+        <di:waypoint x="1345" y="507" />
+        <di:waypoint x="1440" y="507" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_9_di" bpmnElement="SubF_9">
+        <di:waypoint x="1345" y="575" />
+        <di:waypoint x="1345" y="587" />
+        <di:waypoint x="1440" y="587" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_10_di" bpmnElement="SubF_10">
+        <di:waypoint x="1590" y="507" />
+        <di:waypoint x="1675" y="507" />
+        <di:waypoint x="1675" y="525" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_11_di" bpmnElement="SubF_11">
+        <di:waypoint x="1590" y="587" />
+        <di:waypoint x="1675" y="587" />
+        <di:waypoint x="1675" y="575" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_12_di" bpmnElement="SubF_12">
+        <di:waypoint x="1700" y="550" />
+        <di:waypoint x="1760" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_13_di" bpmnElement="SubF_13">
+        <di:waypoint x="1910" y="550" />
+        <di:waypoint x="1970" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_14_di" bpmnElement="SubF_14">
+        <di:waypoint x="1995" y="525" />
+        <di:waypoint x="1995" y="495" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_15_di" bpmnElement="SubF_15">
+        <di:waypoint x="1920" y="467" />
+        <di:waypoint x="335" y="467" />
+        <di:waypoint x="335" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_16_di" bpmnElement="SubF_16">
+        <di:waypoint x="2020" y="550" />
+        <di:waypoint x="2230" y="550" />
+        <di:waypoint x="2230" y="675" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_17_di" bpmnElement="SubF_17">
+        <di:waypoint x="2310" y="705" />
+        <di:waypoint x="2525" y="705" />
+        <di:waypoint x="2525" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SubF_18_di" bpmnElement="SubF_18">
+        <di:waypoint x="2600" y="168" />
+        <di:waypoint x="2680" y="168" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

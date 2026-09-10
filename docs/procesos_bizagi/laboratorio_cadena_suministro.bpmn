@@ -8,7 +8,7 @@
   id="Definitions_Lab_Suministros" 
   targetNamespace="http://bpmn.io/schema/bpmn" 
   exporter="Vaikuntha ERP Bizagi BPMN Generator" 
-  exporterVersion="2.0">
+  exporterVersion="2.2">
   <bpmn:collaboration id="Collaboration_Lab_Suministros">
     <bpmn:participant id="Participant_Lab_Suministros" name="Cadena de Suministro y Laboratorio Químico - Vaikuntha ERP" processRef="Process_Lab_Suministros" />
   </bpmn:collaboration>
@@ -19,6 +19,7 @@
         <bpmn:flowNodeRef>Task_Estil_Formulacion</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Estil_RecibeBowl</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Estil_Aplicar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_Estil_TimerExp</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_Estil_Sobrante</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_Lab_Serv</bpmn:flowNodeRef>
       </bpmn:lane>
@@ -41,6 +42,14 @@
       </bpmn:lane>
     </bpmn:laneSet>
 
+    <bpmn:dataObject id="DO_DO_Lab_Formula" />
+    <bpmn:dataObjectReference id="DO_Lab_Formula" name="Ticket de Fórmula Química (Gramaje)" dataObjectRef="DO_DO_Lab_Formula">
+      <bpmn:documentation>Especificación de tintes, decolorantes y peróxidos solicitados.</bpmn:documentation>
+    </bpmn:dataObjectReference>
+    <bpmn:dataStoreReference id="DS_Lab_Kardex" name="(BD) Supabase: public.inventario_movimientos">
+      <bpmn:documentation>Kardex continuo con auditoría de salidas por consumo de salón.</bpmn:documentation>
+    </bpmn:dataStoreReference>
+
     <bpmn:startEvent id="Start_Lab_Req" name="Necesidad de Mezcla Química">
       <bpmn:documentation>Estilista diagnostica servicio (tinte, decoloración, plex).</bpmn:documentation>
       <bpmn:outgoing>Lab_F1</bpmn:outgoing>
@@ -55,19 +64,27 @@
       <bpmn:incoming>Lab_F8</bpmn:incoming>
       <bpmn:outgoing>Lab_F10</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:manualTask id="Task_Estil_Aplicar" name="Aplicación en Cabello &amp; Control Cronómetro">
-      <bpmn:documentation>Aplicación química y control de tiempo de exposición.</bpmn:documentation>
+    <bpmn:manualTask id="Task_Estil_Aplicar" name="Aplicación en Cabello">
+      <bpmn:documentation>Aplicación química en el sillón.</bpmn:documentation>
       <bpmn:incoming>Lab_F10</bpmn:incoming>
       <bpmn:outgoing>Lab_F11</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:userTask id="Task_Estil_Sobrante" name="Declaración de Sobrante o Merma">
-      <bpmn:documentation>Registra si sobró producto para auditoría de desperdicio.</bpmn:documentation>
+    <bpmn:intermediateCatchEvent id="Event_Estil_TimerExp" name="Cronómetro Químico (20-45 min)">
+      <bpmn:documentation>Control estricto de tiempo de exposición para no maltratar la hebra capilar.</bpmn:documentation>
       <bpmn:incoming>Lab_F11</bpmn:incoming>
       <bpmn:outgoing>Lab_F12</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerDef_Event_Estil_TimerExp">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT35M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="Task_Estil_Sobrante" name="Declaración de Sobrante o Merma">
+      <bpmn:documentation>Registra si sobró producto para auditoría de desperdicio.</bpmn:documentation>
+      <bpmn:incoming>Lab_F12</bpmn:incoming>
+      <bpmn:outgoing>Lab_F13</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:endEvent id="End_Lab_Serv" name="Aplicación Química Concluida">
       <bpmn:documentation>Servicio químico aplicado exitosamente.</bpmn:documentation>
-      <bpmn:incoming>Lab_F12</bpmn:incoming>
+      <bpmn:incoming>Lab_F13</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:userTask id="Task_Lab_MonitorDespacho" name="Monitor de Despacho (/lab/despacho)">
       <bpmn:documentation>Visualiza pedido entrante con detalles de producto y gramaje solicitado.</bpmn:documentation>
@@ -100,31 +117,31 @@
     <bpmn:serviceTask id="Task_Kardex_Deduccion" name="Deducción Automática en Kardex">
       <bpmn:documentation>Inserta fila en public.inventario_movimientos con tipo SALIDA_CONSUMO.</bpmn:documentation>
       <bpmn:incoming>Lab_F9</bpmn:incoming>
-      <bpmn:outgoing>Lab_F13</bpmn:outgoing>
+      <bpmn:outgoing>Lab_F14</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gate_Kardex_Minimo" name="¿Stock &lt; Umbral Mínimo?">
       <bpmn:documentation>Compara stock restante vs. punto de reorden configurado.</bpmn:documentation>
-      <bpmn:incoming>Lab_F13</bpmn:incoming>
-      <bpmn:outgoing>Lab_F14</bpmn:outgoing>
+      <bpmn:incoming>Lab_F14</bpmn:incoming>
+      <bpmn:outgoing>Lab_F15</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="Task_Kardex_Alerta" name="Emisión de Alerta de Reabastecimiento">
       <bpmn:documentation>Notifica al administrador y activa badge de insumo por agotarse.</bpmn:documentation>
-      <bpmn:incoming>Lab_F14</bpmn:incoming>
-      <bpmn:outgoing>Lab_F15</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:serviceTask id="Task_Compras_OpalPredictor" name="Proyección de Demanda 7 Días con Opal AI">
-      <bpmn:documentation>LabInsumosPredictorOpal.tsx proyecta consumo por citas agendadas.</bpmn:documentation>
       <bpmn:incoming>Lab_F15</bpmn:incoming>
       <bpmn:outgoing>Lab_F16</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:userTask id="Task_Compras_GenerarOC" name="Generación de Orden de Compra o Traslado">
-      <bpmn:documentation>Aprobación de orden a proveedor o transferencia entre sedes.</bpmn:documentation>
+    <bpmn:serviceTask id="Task_Compras_OpalPredictor" name="Proyección de Demanda 7 Días con Opal AI">
+      <bpmn:documentation>LabInsumosPredictorOpal.tsx proyecta consumo por citas agendadas.</bpmn:documentation>
       <bpmn:incoming>Lab_F16</bpmn:incoming>
       <bpmn:outgoing>Lab_F17</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Task_Compras_GenerarOC" name="Generación de Orden de Compra o Traslado">
+      <bpmn:documentation>Aprobación de orden a proveedor o transferencia entre sedes.</bpmn:documentation>
+      <bpmn:incoming>Lab_F17</bpmn:incoming>
+      <bpmn:outgoing>Lab_F18</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:endEvent id="End_Lab_StockOk" name="Reposición Programada">
       <bpmn:documentation>Insumo reabastecido en Kardex.</bpmn:documentation>
-      <bpmn:incoming>Lab_F17</bpmn:incoming>
+      <bpmn:incoming>Lab_F18</bpmn:incoming>
     </bpmn:endEvent>
 
     <bpmn:sequenceFlow id="Lab_F1" sourceRef="Start_Lab_Req" targetRef="Task_Estil_Formulacion" />
@@ -137,30 +154,37 @@
     <bpmn:sequenceFlow id="Lab_F8" sourceRef="Task_Lab_ConfirmarDespacho" targetRef="Task_Estil_RecibeBowl" />
     <bpmn:sequenceFlow id="Lab_F9" sourceRef="Task_Lab_ConfirmarDespacho" targetRef="Task_Kardex_Deduccion" />
     <bpmn:sequenceFlow id="Lab_F10" sourceRef="Task_Estil_RecibeBowl" targetRef="Task_Estil_Aplicar" />
-    <bpmn:sequenceFlow id="Lab_F11" sourceRef="Task_Estil_Aplicar" targetRef="Task_Estil_Sobrante" />
-    <bpmn:sequenceFlow id="Lab_F12" sourceRef="Task_Estil_Sobrante" targetRef="End_Lab_Serv" />
-    <bpmn:sequenceFlow id="Lab_F13" sourceRef="Task_Kardex_Deduccion" targetRef="Gate_Kardex_Minimo" />
-    <bpmn:sequenceFlow id="Lab_F14" sourceRef="Gate_Kardex_Minimo" targetRef="Task_Kardex_Alerta" name="Stock Bajo" />
-    <bpmn:sequenceFlow id="Lab_F15" sourceRef="Task_Kardex_Alerta" targetRef="Task_Compras_OpalPredictor" />
-    <bpmn:sequenceFlow id="Lab_F16" sourceRef="Task_Compras_OpalPredictor" targetRef="Task_Compras_GenerarOC" />
-    <bpmn:sequenceFlow id="Lab_F17" sourceRef="Task_Compras_GenerarOC" targetRef="End_Lab_StockOk" />
+    <bpmn:sequenceFlow id="Lab_F11" sourceRef="Task_Estil_Aplicar" targetRef="Event_Estil_TimerExp" />
+    <bpmn:sequenceFlow id="Lab_F12" sourceRef="Event_Estil_TimerExp" targetRef="Task_Estil_Sobrante" />
+    <bpmn:sequenceFlow id="Lab_F13" sourceRef="Task_Estil_Sobrante" targetRef="End_Lab_Serv" />
+    <bpmn:sequenceFlow id="Lab_F14" sourceRef="Task_Kardex_Deduccion" targetRef="Gate_Kardex_Minimo" />
+    <bpmn:sequenceFlow id="Lab_F15" sourceRef="Gate_Kardex_Minimo" targetRef="Task_Kardex_Alerta" name="Stock Bajo" />
+    <bpmn:sequenceFlow id="Lab_F16" sourceRef="Task_Kardex_Alerta" targetRef="Task_Compras_OpalPredictor" />
+    <bpmn:sequenceFlow id="Lab_F17" sourceRef="Task_Compras_OpalPredictor" targetRef="Task_Compras_GenerarOC" />
+    <bpmn:sequenceFlow id="Lab_F18" sourceRef="Task_Compras_GenerarOC" targetRef="End_Lab_StockOk" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Lab_Suministros">
     <bpmndi:BPMNPlane id="BPMNPlane_Lab_Suministros" bpmnElement="Collaboration_Lab_Suministros">
       <bpmndi:BPMNShape id="Participant_Lab_Suministros_di" bpmnElement="Participant_Lab_Suministros" isHorizontal="true">
-        <dc:Bounds x="100" y="80" width="2600" height="750" />
+        <dc:Bounds x="100" y="80" width="2700" height="750" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Lab_Estil_di" bpmnElement="Lane_Lab_Estil" isHorizontal="true">
-        <dc:Bounds x="130" y="80" width="2570" height="180" />
+        <dc:Bounds x="130" y="80" width="2670" height="180" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Lab_Quimico_di" bpmnElement="Lane_Lab_Quimico" isHorizontal="true">
-        <dc:Bounds x="130" y="260" width="2570" height="200" />
+        <dc:Bounds x="130" y="260" width="2670" height="200" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Lab_Kardex_di" bpmnElement="Lane_Lab_Kardex" isHorizontal="true">
-        <dc:Bounds x="130" y="460" width="2570" height="150" />
+        <dc:Bounds x="130" y="460" width="2670" height="150" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Lab_Compras_di" bpmnElement="Lane_Lab_Compras" isHorizontal="true">
-        <dc:Bounds x="130" y="610" width="2570" height="140" />
+        <dc:Bounds x="130" y="610" width="2670" height="140" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Lab_Formula_di" bpmnElement="DO_Lab_Formula">
+        <dc:Bounds x="380" y="220" width="36" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_Lab_Kardex_di" bpmnElement="DS_Lab_Kardex">
+        <dc:Bounds x="1190" y="585" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Start_Lab_Req_di" bpmnElement="Start_Lab_Req">
         <dc:Bounds x="180" y="150" width="36" height="36" />
@@ -172,13 +196,16 @@
         <dc:Bounds x="1350" y="138" width="130" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Estil_Aplicar_di" bpmnElement="Task_Estil_Aplicar">
-        <dc:Bounds x="1550" y="138" width="140" height="60" />
+        <dc:Bounds x="1540" y="138" width="130" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Estil_TimerExp_di" bpmnElement="Event_Estil_TimerExp">
+        <dc:Bounds x="1720" y="150" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Estil_Sobrante_di" bpmnElement="Task_Estil_Sobrante">
-        <dc:Bounds x="1750" y="138" width="130" height="60" />
+        <dc:Bounds x="1810" y="138" width="130" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_Lab_Serv_di" bpmnElement="End_Lab_Serv">
-        <dc:Bounds x="1950" y="150" width="36" height="36" />
+        <dc:Bounds x="2000" y="150" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Lab_MonitorDespacho_di" bpmnElement="Task_Lab_MonitorDespacho">
         <dc:Bounds x="450" y="330" width="140" height="60" />
@@ -256,33 +283,37 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Lab_F10_di" bpmnElement="Lab_F10">
         <di:waypoint x="1480" y="168" />
-        <di:waypoint x="1550" y="168" />
+        <di:waypoint x="1540" y="168" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Lab_F11_di" bpmnElement="Lab_F11">
-        <di:waypoint x="1690" y="168" />
-        <di:waypoint x="1750" y="168" />
+        <di:waypoint x="1670" y="168" />
+        <di:waypoint x="1720" y="168" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Lab_F12_di" bpmnElement="Lab_F12">
-        <di:waypoint x="1880" y="168" />
-        <di:waypoint x="1950" y="168" />
+        <di:waypoint x="1756" y="168" />
+        <di:waypoint x="1810" y="168" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Lab_F13_di" bpmnElement="Lab_F13">
+        <di:waypoint x="1940" y="168" />
+        <di:waypoint x="2000" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Lab_F14_di" bpmnElement="Lab_F14">
         <di:waypoint x="1290" y="535" />
         <di:waypoint x="1350" y="535" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Lab_F14_di" bpmnElement="Lab_F14">
+      <bpmndi:BPMNEdge id="Lab_F15_di" bpmnElement="Lab_F15">
         <di:waypoint x="1400" y="535" />
         <di:waypoint x="1470" y="535" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Lab_F15_di" bpmnElement="Lab_F15">
+      <bpmndi:BPMNEdge id="Lab_F16_di" bpmnElement="Lab_F16">
         <di:waypoint x="1545" y="565" />
         <di:waypoint x="1545" y="650" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Lab_F16_di" bpmnElement="Lab_F16">
+      <bpmndi:BPMNEdge id="Lab_F17_di" bpmnElement="Lab_F17">
         <di:waypoint x="1620" y="680" />
         <di:waypoint x="1680" y="680" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Lab_F17_di" bpmnElement="Lab_F17">
+      <bpmndi:BPMNEdge id="Lab_F18_di" bpmnElement="Lab_F18">
         <di:waypoint x="1830" y="680" />
         <di:waypoint x="1900" y="680" />
       </bpmndi:BPMNEdge>

@@ -20,6 +20,7 @@ for (const file of files) {
     allOk = false;
   }
 
+  // Find all sequence flows
   const flowRegex = /<bpmn:sequenceFlow id="([^"]+)" sourceRef="([^"]+)" targetRef="([^"]+)"/g;
   let match;
   const flows = [];
@@ -27,6 +28,7 @@ for (const file of files) {
     flows.push({ id: match[1], src: match[2], tgt: match[3] });
   }
 
+  // Find all node IDs (tasks, events, gateways, subprocesses, dataObjects, dataStores)
   const idRegex = /<bpmn:[a-zA-Z]+ id="([^"]+)"/g;
   const ids = new Set();
   while ((match = idRegex.exec(content)) !== null) {
@@ -44,7 +46,19 @@ for (const file of files) {
     }
   }
 
-  console.log(`✅ ${file} validado: ${ids.size} elementos BPMN, ${flows.length} flujos secuenciales.`);
+  // Count subprocesses, intermediate events, data objects, data stores
+  const subprocCount = (content.match(/<bpmn:subProcess/g) || []).length;
+  const intermediateCount = (content.match(/<bpmn:intermediate/g) || []).length;
+  const dataObjCount = (content.match(/<bpmn:dataObjectReference/g) || []).length;
+  const dataStoreCount = (content.match(/<bpmn:dataStoreReference/g) || []).length;
+
+  console.log(`✅ ${file}:
+     - Elementos totales: ${ids.size}
+     - Flujos de secuencia: ${flows.length}
+     - Subprocesos: ${subprocCount}
+     - Eventos Intermedios: ${intermediateCount}
+     - Data Objects: ${dataObjCount}
+     - Data Stores: ${dataStoreCount}`);
 }
 
 if (allOk) {

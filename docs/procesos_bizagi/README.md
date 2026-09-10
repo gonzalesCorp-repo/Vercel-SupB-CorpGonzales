@@ -1,97 +1,95 @@
 # 🏛️ Procesos de Negocio Vaikuntha ERP (Gloss Salon & Relax) - Bizagi Modeler (BPMN 2.0)
 
-Este directorio contiene los diagramas oficiales de arquitectura de procesos de negocio de **Vaikuntha ERP** modelados bajo el estándar internacional **BPMN 2.0 (Business Process Model and Notation)** de la OMG, 100% optimizados para su apertura, edición, simulación y publicación documental en **Bizagi Modeler**.
+Este directorio contiene la arquitectura integral de procesos de negocio de **Vaikuntha ERP**, modelada bajo el estándar internacional **BPMN 2.0 (Business Process Model and Notation)** de la OMG, 100% optimizada para su apertura, edición, simulación y publicación documental en **Bizagi Modeler**.
+
+La suite incluye elementos de notación avanzada: **Subprocesos Colapsados e Hijos Dedicados**, **Eventos Intermedios de Mensaje (WebSockets Realtime)**, **Eventos de Temporizador (Cronómetros Químicos y Lounge)**, **Objetos de Datos (Documentos físicos/digitales)** y **Almacenes de Datos (Supabase PostgreSQL)**.
 
 ---
 
 ## 📁 Catálogo de Diagramas BPMN 2.0
 
-| Archivo BPMN | Proceso Modelado | Roles / Lanes Involucrados | Elementos | Flujos |
+| Archivo BPMN | Proceso Modelado | Notación Avanzada Incorporada | Elementos | Flujos |
 | :--- | :--- | :--- | :---: | :---: |
-| [`macroproceso_operativo_vaikuntha.bpmn`](./macroproceso_operativo_vaikuntha.bpmn) | **Macroproceso Operativo de Salón (End-to-End)**: Desde la llegada y check-in del cliente hasta la liquidación en caja y fidelización. | Cliente VIP, Kiosko Táctil (Opal AI), Recepción Central, Estilista en Sillón, Laboratorio, Bar Boutique, Caja POS. | 69 | 30 |
-| [`wfm_control_asistencia_turnos.bpmn`](./wfm_control_asistencia_turnos.bpmn) | **Workforce Management & Control de Turnos**: Marcación física NFC (Puerta/Comedor), peticiones asíncronas, aprobación en recepción y rotación de piso. | Colaborador (Staff Móvil), Recepción / Supervisor, Motor Supabase Realtime (WAL FULL), Algoritmo Rotación de Piso. | 49 | 21 |
-| [`laboratorio_cadena_suministro.bpmn`](./laboratorio_cadena_suministro.bpmn) | **Laboratorio Químico & Cadena de Suministro**: Formulación química, pesaje en balanza Web Serial (±2g), deducción en Kardex y predicción Opal. | Estilista Solicitante, Encargado de Laboratorio, Motor de Kardex Supabase, Administración / Compras. | 42 | 17 |
+| [**`macroproceso_operativo_vaikuntha.bpmn`**](./macroproceso_operativo_vaikuntha.bpmn) | **Macroproceso Operativo de Salón (End-to-End)**: Atención integral del cliente desde el Kiosko hasta Caja POS. | **Subproceso Colapsado `[+]` OATC**, 8 Eventos Intermedios (Mensaje Realtime y Temporizador), 3 Data Objects, 2 Data Stores. | **93** | **34** |
+| [**`subproceso_oatc_impresion_termica.bpmn`**](./subproceso_oatc_impresion_termica.bpmn) | **Subproceso: Ciclo de Vida y Emisión Térmica OATC**: Generación, guardado en Supabase, renderizado ESC/POS (80mm) y enrutador a cualquier impresora térmica de la sede. | Enrutamiento Multi-Canal (Red IP, Web Serial USB), control de ACK/errores de hardware, 2 Data Objects (Buffer ESC/POS y Ticket Físico), 1 Data Store. | **48** | **18** |
+| [**`wfm_control_asistencia_turnos.bpmn`**](./wfm_control_asistencia_turnos.bpmn) | **Workforce Management & Control de Turnos**: Marcaciones NFC, solicitudes asíncronas, auditoría de recepción y rotación de piso. | 4 Eventos Intermedios de Mensaje (solicitud, campana de alerta, WAL Realtime FULL, vibración háptica staff), 2 Data Stores. | **57** | **22** |
+| [**`laboratorio_cadena_suministro.bpmn`**](./laboratorio_cadena_suministro.bpmn) | **Laboratorio Químico & Cadena de Suministro**: Formulación, pesaje en balanza Web Serial (±2g), Kardex y reposición con Opal AI. | Evento Intermedio de Temporizador (exposición química), 1 Data Object (Fórmula), 1 Data Store (Kardex). | **48** | **18** |
 
 ---
 
-## 🚀 Guía Rápida: Cómo Abrir los Procesos en Bizagi Modeler
+## 🖨️ Arquitectura del Subproceso OATC e Impresión Térmica
 
-### Paso 1: Descargar o Abrir Bizagi Modeler
-Asegúrate de contar con **Bizagi Modeler** (versión de escritorio gratuita o empresarial, v3.8+ recomendada) en tu equipo.
+La Orden de Atención Técnica y Comercial (**OATC**) se concibe como un **Subproceso de Negocio** y no como una simple tarea:
+1. **Generación de Correlativo Diario**: `OATC-YYYYMMDD-XXX` único por sede.
+2. **Persistencia Transaccional**: Registro central en `public.oatc` y `public.oatc_items` en Supabase.
+3. **Formateo del Payload ESC/POS**:
+   - Ancho estándar: **80mm** (48 columnas).
+   - Cabecera boutique: Logo de Gloss Salon & Relax y datos de la sede.
+   - Código QR dinámico con URL de seguimiento para el cliente o escáner del staff.
+   - Desglose de servicios, estilista asignado y notas de diagnóstico.
+4. **Enrutador de Impresión por Sede**:
+   - Permite al operador dirigir la comanda a la impresora térmica asignada de **Recepción**, **Laboratorio Químico** o **Bar Boutique**.
+   - Soporte para canales de conexión: **Impresoras de Red LAN/WiFi (Socket TCP RAW puerto 9100)** y **Web Serial API (USB directo)**.
+5. **Resiliencia de Hardware**:
+   - Monitoreo de estado (ACK): Detección de falta de papel o cubierta abierta con opción de reintento o re-enrutamiento a impresora de respaldo.
 
-### Paso 2: Importar el Archivo BPMN
-1. Abre Bizagi Modeler.
-2. En la cinta de opciones superior, ve a la pestaña **Inicio** (Home).
-3. Haz clic en el botón **Importar** y selecciona la opción **BPMN** (o presiona `Ctrl + O` y cambia el filtro a `Archivos BPMN (*.bpmn)`).
-4. Navega hasta la carpeta del proyecto:
+---
+
+## ⏱️ Catálogo de Eventos Intermedios en los Procesos
+
+| Evento Intermedio | Tipo BPMN | Semántica Operativa en Vaikuntha ERP |
+| :--- | :--- | :--- |
+| **Llegada de Cliente en Sala** | Catch / Throw Message | Disparado por el Kiosko y capturado instantáneamente por el monitor de Recepción (`QueueMonitor.tsx`) vía Supabase Realtime Channel. |
+| **Aviso: Bebida de Bar Lista** | Catch / Throw Message | Notificación emitida desde `/mobile/bar` (`BarWorkspaceView.tsx`) al sillón del estilista cuando el café o cóctel de cortesía está servido. |
+| **Aviso: Mezcla Química Lista** | Catch / Throw Message | Notificación emitida por el Encargado de Laboratorio (`/lab/despacho`) tras el pesaje en la balanza digital hacia la suite del estilista. |
+| **Notificación Háptica WFM** | Catch Message | Recepción en el móvil del staff del cambio de estado (`APROBADO` o `RECHAZADO` con motivo) con vibración física del dispositivo (`navigator.vibrate`). |
+| **Espera en Lounge (Timer)** | Catch Timer | Temporizador visual estimado por Opal Concierge mientras se acondiciona el sillón de atención. |
+| **Cronómetro Químico (Timer)** | Catch Timer | Alarma de cuenta regresiva en sillón (20-45 min) para control estricto de tintes, decoloraciones y plex sin sobre-procesar el cabello. |
+
+---
+
+## 📄 Objetos de Datos y Almacenes (BPMN Data Elements)
+
+- **`[DataObject: Ticket OATC Térmico (80mm ESC/POS)]`**: Formato impreso con QR para control de salón.
+- **`[DataObject: Ficha Técnica Capilar]`**: Historial clínico y formulación química del cliente (`StaffChairsideAssistant.tsx`).
+- **`[DataObject: Comprobante SUNAT]`**: Boleta o factura electrónica emitida en Caja POS.
+- **`[DataStore: public.oatc]`**: Almacén central de órdenes en Supabase PostgreSQL.
+- **`[DataStore: public.cola_peticiones]`**: Cola asíncrona de solicitudes en tiempo real con `REPLICA IDENTITY FULL`.
+- **`[DataStore: public.asistencias_turnos]`**: Tabla de auditoría laboral inmutable.
+- **`[DataStore: public.inventario_movimientos]`**: Kardex continuo de insumos químicos por gramaje.
+
+---
+
+## 🚀 Cómo Abrir y Navegar los Diagramas en Bizagi Modeler
+
+### Paso 1: Abrir Bizagi Modeler
+Ejecuta **Bizagi Modeler** en tu computadora (v3.8 o superior).
+
+### Paso 2: Importar los Procesos
+1. Ve a la pestaña **Inicio** -> **Importar** -> **BPMN**.
+2. Selecciona cualquiera de los archivos en:
    ```text
-   ERP-Supabase-VERCEL-Gonzales/docs/procesos_bizagi/
+   ERP-Supabase-VERCEL-Gonzales\docs\procesos_bizagi\
    ```
-5. Selecciona el diagrama deseado (ej. `macroproceso_operativo_vaikuntha.bpmn`) y haz clic en **Abrir**.
+3. Comienza importando `macroproceso_operativo_vaikuntha.bpmn`.
+4. Observa el bloque de subproceso **`Subproceso: Gestión y Emisión Térmica de OATC`** con su ícono `[+]`.
+5. En una segunda pestaña o ventana, importa `subproceso_oatc_impresion_termica.bpmn` para ver el detalle de ingeniería del ticket térmico y los canales de impresión.
 
-### Paso 3: Visualización y Edición
-- El diagrama se cargará automáticamente con su **Pool principal**, sus **Lanes por rol** y todos los nodos distribuidos de izquierda a derecha.
-- Al hacer clic en cualquier tarea y presionar `F4` (o clic derecho -> *Propiedades*), podrás ver la **Documentación Técnica embebida** que explica la regla de negocio, los componentes del frontend y las tablas de Supabase asociadas.
+### Paso 3: Consultar Documentación Técnica de Actividades
+Presiona `F4` sobre cualquier tarea, evento o almacén de datos para ver su ficha técnica completa, incluyendo tablas de Supabase, hooks y componentes React asociados.
 
-### Paso 4: Publicar Documentación Institucional
-Desde Bizagi Modeler puedes generar automáticamente los manuales corporativos del salón:
-- Pestaña **Publicar** -> **Word**, **PDF**, **Web** o **SharePoint**.
-- Bizagi generará un documento estructurado con el índice, la imagen del diagrama y la ficha técnica de cada actividad.
+### Paso 4: Generar Documentación Institucional
+Pestaña **Publicar** -> **Word** o **PDF**: Bizagi compilará automáticamente el manual de operaciones del salón con diagramas en alta resolución, descripción de eventos y matrices de responsabilidades.
 
 ---
 
-## 🧬 Matriz de Trazabilidad Técnica: BPMN vs. Código Vaikuntha ERP
+## 🛠️ Pipeline Automatizado de Mantenimiento
 
-### 1. Macroproceso Operativo de Salón
-| ID Nodo BPMN | Actividad | Tipo BPMN | Componente Frontend | Tabla / Servicio Backend |
-| :--- | :--- | :--- | :--- | :--- |
-| `Task_Cli_CheckIn` | Check-in en Kiosko | User Task | `KioskVipCheckIn.tsx` | `public.clientes` |
-| `Task_Kiosk_Opal` | Bienvenida Opal Concierge | Service Task | `KioskConciergeAgent.tsx` | Inferencia Google Opal AI |
-| `Task_Kiosk_OATC` | Registro de Orden en Espera | Service Task | `useAppStore.ts` | `public.oatc` (`estado: EN_ESPERA`) |
-| `Task_Recep_Monitor` | Monitoreo de Cola en Recepción | User Task | `QueueMonitor.tsx` | Realtime Channel `cola_oatc` |
-| `Task_Estil_Reclamar` | Reclamar Orden en Sillón | User Task | `TabCola.tsx` | `oatc.estado = 'EN_ATENCION'` |
-| `Task_Estil_Diag` | Diagnóstico y Cronómetro | User Task | `StaffChairsideAssistant.tsx` | Web Timer + Ficha Técnica |
-| `Task_Estil_PedBar` | Comanda de Bebida a Bar | User Task | `TabBar.tsx` | `cola_peticiones` (`BAR_BEBIDA`) |
-| `Task_Bar_Prep` | Preparación en Bar | User Task | `BarWorkspaceView.tsx` | Notificación Web Audio API |
-| `Task_Lab_Pesar` | Pesaje en Balanza Digital | User Task | `LabDespachoView.tsx` | Web Serial API (`±2g`) |
-| `Task_Caja_Cargar` | Pre-cuenta y Liquidación | User Task | `CajaPosView.tsx` | `oatc`, `cortesias` |
-| `Task_Caja_Boleta` | Emisión Boleta SUNAT | Service Task | `FacturacionService.ts` | `public.comprobantes`, `gamification_events` |
+Para regenerar o validar los 4 diagramas:
+```bash
+# 1. Regenerar los 4 archivos BPMN 2.0 XML
+node scripts/generate-bizagi-bpmn.mjs
 
-### 2. Workforce Management (WFM) y Asistencia
-| ID Nodo BPMN | Actividad | Tipo BPMN | Componente Frontend | Tabla / Servicio Backend |
-| :--- | :--- | :--- | :--- | :--- |
-| `Task_Scan_NFC` | Escaneo de Tag Puerta/Comedor | User Task | `useNfcBackgroundListener.ts` | NDEF Web NFC Reader |
-| `Task_Sel_Mov` | Selector Desambiguado (1-Tap) | User Task | `ModalPuertaNfc.tsx` | Entrada, Refrigerio, Salida |
-| `Task_DB_InsertPet` | Registro de Solicitud | Service Task | `services/peticiones.ts` | `cola_peticiones` (`PENDIENTE`) |
-| `Task_Recep_ModalRech`| Modal Rechazo con Motivo | User Task | `QueueMonitor.tsx` | `metadata.motivo_rechazo` |
-| `Task_DB_WalBroadcast`| Emisión WAL Realtime | Service Task | PostgreSQL Engine | `REPLICA IDENTITY FULL` |
-| `Task_Staff_Rechazo` | Banner Carmesí de Rechazo | User Task | `TabEstacion.tsx` | Vibración Háptica + Toast |
-| `Task_DB_Audit` | Asistencia Inmutable | Service Task | `services/peticiones.ts` | `public.asistencias_turnos` |
-| `Task_DB_SyncEstado` | Sincronización Diaria Dinámica| Service Task | `services/peticiones.ts` | `obtenerEstadoOperativoDinamicoAgente` |
-| `Task_Piso_Recalc` | Posición en Piso (#X de Y) | Rule Task | `TabCola.tsx` | Rotación dinámica de estilistas |
-
-### 3. Laboratorio Químico y Suministros
-| ID Nodo BPMN | Actividad | Tipo BPMN | Componente Frontend | Tabla / Servicio Backend |
-| :--- | :--- | :--- | :--- | :--- |
-| `Task_Estil_Formulacion` | Selección de Fórmula en Móvil | User Task | `StaffChairsideAssistant.tsx`| Catálogo de Insumos Químicos |
-| `Task_Lab_ConnectBalanza`| Lectura Balanza Digital | Service Task | `BalanzaWebSerial.ts` | Web Serial API (COM / USB) |
-| `Task_Lab_TaraPesaje` | Tara y Dosificación | Manual Task | `LabDespachoView.tsx` | Validación tolerancia `±2g` |
-| `Task_Kardex_Deduccion` | Deducción en Kardex | Service Task | `services/inventario.ts` | `public.inventario_movimientos` |
-| `Task_Compras_OpalPredictor`| Proyección Demanda 7 Días | Service Task | `LabInsumosPredictorOpal.tsx`| Google Opal Copilot AI |
-
----
-
-## 🛠️ Cómo Regenerar o Extender los Diagramas
-
-El proyecto cuenta con scripts automatizados en Node.js para reconstruir o ampliar los diagramas BPMN 2.0 cuando se incorporen nuevas pantallas o reglas operativas:
-
-1. **Regenerar los diagramas**:
-   ```bash
-   node scripts/generate-bizagi-bpmn.mjs
-   ```
-2. **Validar la integridad sintáctica y de flujos**:
-   ```bash
-   node scripts/validate-bpmn.mjs
-   ```
-
-Ambos scripts garantizan el cumplimiento de los esquemas XML oficiales de la OMG (`http://www.omg.org/spec/BPMN/20100524/MODEL` y `http://www.omg.org/spec/BPMN/20100524/DI`), asegurando que Bizagi Modeler siempre los abra sin errores de esquema.
+# 2. Validar estructura, referencias y conectores
+node scripts/validate-bpmn.mjs
+```
