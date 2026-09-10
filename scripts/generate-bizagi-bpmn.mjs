@@ -32,6 +32,18 @@ function buildBpmnXml({ id, name, lanes, nodes, flows, poolBounds, dataObjects =
   const collaborationId = `Collaboration_${id}`;
   const participantId = `Participant_${id}`;
 
+  // 0. Root DataStore elements under <bpmn:definitions>
+  // Required by Bizagi Modeler: DataStoreMapper requires dataStoreReference.DataStore to be non-null.
+  let rootDataStoresXml = '';
+  dataStores.forEach((ds) => {
+    rootDataStoresXml += `  <bpmn:dataStore id="DataStore_${ds.id}" name="${escapeXml(ds.name)}"`;
+    if (ds.doc) {
+      rootDataStoresXml += `>\n    <bpmn:documentation>${escapeXml(ds.doc)}</bpmn:documentation>\n  </bpmn:dataStore>\n`;
+    } else {
+      rootDataStoresXml += ` />\n`;
+    }
+  });
+
   // 1. Process Lanes & Flow Node References
   let laneSetXml = `    <bpmn:laneSet id="LaneSet_${id}">\n`;
   lanes.forEach((lane) => {
@@ -44,17 +56,18 @@ function buildBpmnXml({ id, name, lanes, nodes, flows, poolBounds, dataObjects =
   laneSetXml += `    </bpmn:laneSet>\n`;
 
   // 2. Data Objects & Data Stores definitions in Process
+  // Bizagi Modeler: DataObjectMapper casts graphicalElement as DataObject.
+  // Emitting <bpmn:dataObject> directly with id matching BPMNShape satisfies DataObjectMapper.
   let dataXml = '';
   dataObjects.forEach((dob) => {
-    dataXml += `    <bpmn:dataObject id="DO_${dob.id}" />\n`;
-    dataXml += `    <bpmn:dataObjectReference id="${dob.id}" name="${escapeXml(dob.name)}" dataObjectRef="DO_${dob.id}">\n`;
+    dataXml += `    <bpmn:dataObject id="${dob.id}" name="${escapeXml(dob.name)}">\n`;
     if (dob.doc) {
       dataXml += `      <bpmn:documentation>${escapeXml(dob.doc)}</bpmn:documentation>\n`;
     }
-    dataXml += `    </bpmn:dataObjectReference>\n`;
+    dataXml += `    </bpmn:dataObject>\n`;
   });
   dataStores.forEach((ds) => {
-    dataXml += `    <bpmn:dataStoreReference id="${ds.id}" name="${escapeXml(ds.name)}">\n`;
+    dataXml += `    <bpmn:dataStoreReference id="${ds.id}" name="${escapeXml(ds.name)}" dataStoreRef="DataStore_${ds.id}">\n`;
     if (ds.doc) {
       dataXml += `      <bpmn:documentation>${escapeXml(ds.doc)}</bpmn:documentation>\n`;
     }
@@ -103,6 +116,10 @@ function buildBpmnXml({ id, name, lanes, nodes, flows, poolBounds, dataObjects =
         break;
       case 'subProcess':
         nodesXml += `    <bpmn:subProcess id="${node.id}" name="${escapeXml(node.name)}">${docXml}${incomingXml}${outgoingXml}\n    </bpmn:subProcess>\n`;
+        break;
+      case 'callActivity':
+        const calledAttr = node.calledElement ? ` calledElement="${escapeXml(node.calledElement)}"` : '';
+        nodesXml += `    <bpmn:callActivity id="${node.id}" name="${escapeXml(node.name)}"${calledAttr}>${docXml}${incomingXml}${outgoingXml}\n    </bpmn:callActivity>\n`;
         break;
       case 'intermediateCatchMessage':
         nodesXml += `    <bpmn:intermediateCatchEvent id="${node.id}" name="${escapeXml(node.name)}">${docXml}${incomingXml}${outgoingXml}\n      <bpmn:messageEventDefinition id="MsgDef_${node.id}" />\n    </bpmn:intermediateCatchEvent>\n`;
@@ -190,7 +207,7 @@ function buildBpmnXml({ id, name, lanes, nodes, flows, poolBounds, dataObjects =
   targetNamespace="http://bpmn.io/schema/bpmn" 
   exporter="Vaikuntha ERP Bizagi BPMN Generator" 
   exporterVersion="2.2">
-  <bpmn:collaboration id="${collaborationId}">
+${rootDataStoresXml}  <bpmn:collaboration id="${collaborationId}">
     <bpmn:participant id="${participantId}" name="${escapeXml(name)}" processRef="${processId}" />
   </bpmn:collaboration>
   <bpmn:process id="${processId}" name="${escapeXml(name)}" isExecutable="false">
@@ -246,7 +263,7 @@ function generateMacroproceso() {
     { id: 'Task_Kiosk_Search', type: 'serviceTask', laneId: 'Lane_Kiosk', name: 'Búsqueda de Cliente & Cita en Supabase', x: 260, y: 265, w: 130, h: 60, doc: 'KioskVipCheckIn.tsx consulta public.clientes.' },
     { id: 'Gate_Kiosk_Cita', type: 'exclusiveGateway', laneId: 'Lane_Kiosk', name: '¿Tiene Cita Programada?', x: 430, y: 270, w: 50, h: 50, doc: 'Evalúa si el cliente cuenta con cita en agenda o ingresa por demanda espontánea.' },
     { id: 'Task_Kiosk_Opal', type: 'serviceTask', laneId: 'Lane_Kiosk', name: 'Bienvenida & Sugerencia Opal Concierge', x: 520, y: 265, w: 130, h: 60, doc: 'KioskConciergeAgent.tsx infiere bebida de bienvenida y tiempo estimado.' },
-    { id: 'SubProcess_OATC', type: 'subProcess', laneId: 'Lane_Kiosk', name: 'Subproceso: Gestión y Emisión Térmica de OATC', x: 700, y: 255, w: 160, h: 80, doc: 'Subproceso colapsado: Generación de OATC, guardado en Supabase, renderizado ESC/POS y despacho a impresora térmica de sede.' },
+    { id: 'SubProcess_OATC', type: 'callActivity', laneId: 'Lane_Kiosk', name: 'Subproceso: Gestión y Emisión Térmica de OATC', calledElement: 'Process_Sub_OATC', x: 700, y: 255, w: 160, h: 80, doc: 'Subproceso reutilizable: Generación de OATC, guardado en Supabase, renderizado ESC/POS y despacho a impresora térmica de sede.' },
     { id: 'Event_Kiosk_MsgLlegada', type: 'intermediateThrowMessage', laneId: 'Lane_Kiosk', name: 'Emitir Llegada de Cliente en Realtime', x: 910, y: 277, w: 36, h: 36, doc: 'Dispara evento en Realtime Channel hacia el monitor central de recepción.' },
 
     // 3. Recepción Central

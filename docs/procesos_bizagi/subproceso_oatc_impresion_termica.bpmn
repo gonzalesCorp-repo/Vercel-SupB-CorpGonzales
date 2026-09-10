@@ -9,6 +9,9 @@
   targetNamespace="http://bpmn.io/schema/bpmn" 
   exporter="Vaikuntha ERP Bizagi BPMN Generator" 
   exporterVersion="2.2">
+  <bpmn:dataStore id="DataStore_DS_Sub_SupabaseOATC" name="(BD) Supabase: public.oatc &amp; public.oatc_items">
+    <bpmn:documentation>Persistencia central de la orden y sus detalles con estado auditado.</bpmn:documentation>
+  </bpmn:dataStore>
   <bpmn:collaboration id="Collaboration_Sub_OATC">
     <bpmn:participant id="Participant_Sub_OATC" name="Subproceso: Gestión del Ciclo de Vida y Emisión Térmica de OATC (80mm ESC/POS)" processRef="Process_Sub_OATC" />
   </bpmn:collaboration>
@@ -41,15 +44,13 @@
       </bpmn:lane>
     </bpmn:laneSet>
 
-    <bpmn:dataObject id="DO_DO_Sub_TicketRendered" />
-    <bpmn:dataObjectReference id="DO_Sub_TicketRendered" name="Ticket OATC ESC/POS Renderizado (80mm)" dataObjectRef="DO_DO_Sub_TicketRendered">
+    <bpmn:dataObject id="DO_Sub_TicketRendered" name="Ticket OATC ESC/POS Renderizado (80mm)">
       <bpmn:documentation>Buffer binario con comandos ESC/POS para 80mm, código QR, logo, ítems y corte parcial.</bpmn:documentation>
-    </bpmn:dataObjectReference>
-    <bpmn:dataObject id="DO_DO_Sub_TicketFisico" />
-    <bpmn:dataObjectReference id="DO_Sub_TicketFisico" name="Ticket OATC Impreso (Salida Física)" dataObjectRef="DO_DO_Sub_TicketFisico">
+    </bpmn:dataObject>
+    <bpmn:dataObject id="DO_Sub_TicketFisico" name="Ticket OATC Impreso (Salida Física)">
       <bpmn:documentation>Documento impreso entregado físicamente para control de salón o comanda.</bpmn:documentation>
-    </bpmn:dataObjectReference>
-    <bpmn:dataStoreReference id="DS_Sub_SupabaseOATC" name="(BD) Supabase: public.oatc &amp; public.oatc_items">
+    </bpmn:dataObject>
+    <bpmn:dataStoreReference id="DS_Sub_SupabaseOATC" name="(BD) Supabase: public.oatc &amp; public.oatc_items" dataStoreRef="DataStore_DS_Sub_SupabaseOATC">
       <bpmn:documentation>Persistencia central de la orden y sus detalles con estado auditado.</bpmn:documentation>
     </bpmn:dataStoreReference>
 

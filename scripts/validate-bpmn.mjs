@@ -46,16 +46,16 @@ for (const file of files) {
     }
   }
 
-  // Count subprocesses, intermediate events, data objects, data stores
-  const subprocCount = (content.match(/<bpmn:subProcess/g) || []).length;
+  // Count subprocesses / call activities, intermediate events, data objects, data stores
+  const subprocCount = (content.match(/<bpmn:(subProcess|callActivity)/g) || []).length;
   const intermediateCount = (content.match(/<bpmn:intermediate/g) || []).length;
-  const dataObjCount = (content.match(/<bpmn:dataObjectReference/g) || []).length;
-  const dataStoreCount = (content.match(/<bpmn:dataStoreReference/g) || []).length;
+  const dataObjCount = (content.match(/<bpmn:dataObject\b/g) || []).length;
+  const dataStoreCount = (content.match(/<bpmn:dataStoreReference\b/g) || []).length;
 
   console.log(`✅ ${file}:
      - Elementos totales: ${ids.size}
      - Flujos de secuencia: ${flows.length}
-     - Subprocesos: ${subprocCount}
+     - Subprocesos / Call Activities: ${subprocCount}
      - Eventos Intermedios: ${intermediateCount}
      - Data Objects: ${dataObjCount}
      - Data Stores: ${dataStoreCount}`);

@@ -10,9 +10,9 @@ La suite incluye elementos de notación avanzada: **Subprocesos Colapsados e Hij
 
 | Archivo BPMN | Proceso Modelado | Notación Avanzada Incorporada | Elementos | Flujos |
 | :--- | :--- | :--- | :---: | :---: |
-| [**`macroproceso_operativo_vaikuntha.bpmn`**](./macroproceso_operativo_vaikuntha.bpmn) | **Macroproceso Operativo de Salón (End-to-End)**: Atención integral del cliente desde el Kiosko hasta Caja POS. | **Subproceso Colapsado `[+]` OATC**, 8 Eventos Intermedios (Mensaje Realtime y Temporizador), 3 Data Objects, 2 Data Stores. | **93** | **34** |
-| [**`subproceso_oatc_impresion_termica.bpmn`**](./subproceso_oatc_impresion_termica.bpmn) | **Subproceso: Ciclo de Vida y Emisión Térmica OATC**: Generación, guardado en Supabase, renderizado ESC/POS (80mm) y enrutador a cualquier impresora térmica de la sede. | Enrutamiento Multi-Canal (Red IP, Web Serial USB), control de ACK/errores de hardware, 2 Data Objects (Buffer ESC/POS y Ticket Físico), 1 Data Store. | **48** | **18** |
-| [**`wfm_control_asistencia_turnos.bpmn`**](./wfm_control_asistencia_turnos.bpmn) | **Workforce Management & Control de Turnos**: Marcaciones NFC, solicitudes asíncronas, auditoría de recepción y rotación de piso. | 4 Eventos Intermedios de Mensaje (solicitud, campana de alerta, WAL Realtime FULL, vibración háptica staff), 2 Data Stores. | **57** | **22** |
+| [**`macroproceso_operativo_vaikuntha.bpmn`**](./macroproceso_operativo_vaikuntha.bpmn) | **Macroproceso Operativo de Salón (End-to-End)**: Atención integral del cliente desde el Kiosko hasta Caja POS. | **Subproceso Reutilizable (Call Activity)** `OATC`, 8 Eventos Intermedios (Mensaje Realtime y Temporizador), 3 Data Objects, 2 Data Stores. | **92** | **34** |
+| [**`subproceso_oatc_impresion_termica.bpmn`**](./subproceso_oatc_impresion_termica.bpmn) | **Subproceso: Ciclo de Vida y Emisión Térmica OATC**: Generación, guardado en Supabase, renderizado ESC/POS (80mm) y enrutador a cualquier impresora térmica de la sede. | Enrutamiento Multi-Canal (Red IP, Web Serial USB), control de ACK/errores de hardware, 2 Data Objects (Buffer ESC/POS y Ticket Físico), 1 Data Store. | **47** | **18** |
+| [**`wfm_control_asistencia_turnos.bpmn`**](./wfm_control_asistencia_turnos.bpmn) | **Workforce Management & Control de Turnos**: Marcaciones NFC, solicitudes asíncronas, auditoría de recepción y rotación de piso. | 4 Eventos Intermedios de Mensaje (solicitud, campana de alerta, WAL Realtime FULL, vibración háptica staff), 2 Data Stores. | **59** | **22** |
 | [**`laboratorio_cadena_suministro.bpmn`**](./laboratorio_cadena_suministro.bpmn) | **Laboratorio Químico & Cadena de Suministro**: Formulación, pesaje en balanza Web Serial (±2g), Kardex y reposición con Opal AI. | Evento Intermedio de Temporizador (exposición química), 1 Data Object (Fórmula), 1 Data Store (Kardex). | **48** | **18** |
 
 ---
@@ -72,14 +72,14 @@ Ejecuta **Bizagi Modeler** en tu computadora (v3.8 o superior).
    ERP-Supabase-VERCEL-Gonzales\docs\procesos_bizagi\
    ```
 3. Comienza importando `macroproceso_operativo_vaikuntha.bpmn`.
-4. Observa el bloque de subproceso **`Subproceso: Gestión y Emisión Térmica de OATC`** con su ícono `[+]`.
+4. Observa el bloque de subproceso reutilizable **`Subproceso: Gestión y Emisión Térmica de OATC`** (`callActivity`).
 5. En una segunda pestaña o ventana, importa `subproceso_oatc_impresion_termica.bpmn` para ver el detalle de ingeniería del ticket térmico y los canales de impresión.
 
 ### Paso 3: Consultar Documentación Técnica de Actividades
 Presiona `F4` sobre cualquier tarea, evento o almacén de datos para ver su ficha técnica completa, incluyendo tablas de Supabase, hooks y componentes React asociados.
 
-### Paso 4: Generar Documentación Institucional
-Pestaña **Publicar** -> **Word** o **PDF**: Bizagi compilará automáticamente el manual de operaciones del salón con diagramas en alta resolución, descripción de eventos y matrices de responsabilidades.
+### Paso 4: Generar Documentación Institucional (PDF / Word / Web)
+Pestaña **Publicar** -> **PDF** o **Word**: Bizagi compilará automáticamente el manual de operaciones del salón con diagramas en alta resolución, descripción de eventos, artefactos documentados y matrices de responsabilidades sin errores de elementos gráficos.
 
 ---
 

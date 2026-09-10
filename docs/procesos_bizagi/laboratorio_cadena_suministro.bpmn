@@ -9,6 +9,9 @@
   targetNamespace="http://bpmn.io/schema/bpmn" 
   exporter="Vaikuntha ERP Bizagi BPMN Generator" 
   exporterVersion="2.2">
+  <bpmn:dataStore id="DataStore_DS_Lab_Kardex" name="(BD) Supabase: public.inventario_movimientos">
+    <bpmn:documentation>Kardex continuo con auditoría de salidas por consumo de salón.</bpmn:documentation>
+  </bpmn:dataStore>
   <bpmn:collaboration id="Collaboration_Lab_Suministros">
     <bpmn:participant id="Participant_Lab_Suministros" name="Cadena de Suministro y Laboratorio Químico - Vaikuntha ERP" processRef="Process_Lab_Suministros" />
   </bpmn:collaboration>
@@ -42,11 +45,10 @@
       </bpmn:lane>
     </bpmn:laneSet>
 
-    <bpmn:dataObject id="DO_DO_Lab_Formula" />
-    <bpmn:dataObjectReference id="DO_Lab_Formula" name="Ticket de Fórmula Química (Gramaje)" dataObjectRef="DO_DO_Lab_Formula">
+    <bpmn:dataObject id="DO_Lab_Formula" name="Ticket de Fórmula Química (Gramaje)">
       <bpmn:documentation>Especificación de tintes, decolorantes y peróxidos solicitados.</bpmn:documentation>
-    </bpmn:dataObjectReference>
-    <bpmn:dataStoreReference id="DS_Lab_Kardex" name="(BD) Supabase: public.inventario_movimientos">
+    </bpmn:dataObject>
+    <bpmn:dataStoreReference id="DS_Lab_Kardex" name="(BD) Supabase: public.inventario_movimientos" dataStoreRef="DataStore_DS_Lab_Kardex">
       <bpmn:documentation>Kardex continuo con auditoría de salidas por consumo de salón.</bpmn:documentation>
     </bpmn:dataStoreReference>
 

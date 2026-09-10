@@ -9,6 +9,12 @@
   targetNamespace="http://bpmn.io/schema/bpmn" 
   exporter="Vaikuntha ERP Bizagi BPMN Generator" 
   exporterVersion="2.2">
+  <bpmn:dataStore id="DataStore_DS_Wfm_ColaPet" name="(BD) Supabase: public.cola_peticiones">
+    <bpmn:documentation>Cola de peticiones con REPLICA IDENTITY FULL.</bpmn:documentation>
+  </bpmn:dataStore>
+  <bpmn:dataStore id="DataStore_DS_Wfm_Asistencias" name="(BD) Supabase: public.asistencias_turnos">
+    <bpmn:documentation>Historial inmutable de asistencias auditado.</bpmn:documentation>
+  </bpmn:dataStore>
   <bpmn:collaboration id="Collaboration_WFM_Turnos">
     <bpmn:participant id="Participant_WFM_Turnos" name="Gestión de Asistencia, Turnos NFC y Rotación de Piso (WFM Vaikuntha)" processRef="Process_WFM_Turnos" />
   </bpmn:collaboration>
@@ -45,10 +51,10 @@
       </bpmn:lane>
     </bpmn:laneSet>
 
-    <bpmn:dataStoreReference id="DS_Wfm_ColaPet" name="(BD) Supabase: public.cola_peticiones">
+    <bpmn:dataStoreReference id="DS_Wfm_ColaPet" name="(BD) Supabase: public.cola_peticiones" dataStoreRef="DataStore_DS_Wfm_ColaPet">
       <bpmn:documentation>Cola de peticiones con REPLICA IDENTITY FULL.</bpmn:documentation>
     </bpmn:dataStoreReference>
-    <bpmn:dataStoreReference id="DS_Wfm_Asistencias" name="(BD) Supabase: public.asistencias_turnos">
+    <bpmn:dataStoreReference id="DS_Wfm_Asistencias" name="(BD) Supabase: public.asistencias_turnos" dataStoreRef="DataStore_DS_Wfm_Asistencias">
       <bpmn:documentation>Historial inmutable de asistencias auditado.</bpmn:documentation>
     </bpmn:dataStoreReference>
 

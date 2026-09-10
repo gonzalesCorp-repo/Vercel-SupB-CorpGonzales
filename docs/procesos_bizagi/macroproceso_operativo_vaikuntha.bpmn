@@ -9,6 +9,12 @@
   targetNamespace="http://bpmn.io/schema/bpmn" 
   exporter="Vaikuntha ERP Bizagi BPMN Generator" 
   exporterVersion="2.2">
+  <bpmn:dataStore id="DataStore_DS_SupabaseOatc" name="(BD) Supabase: public.oatc">
+    <bpmn:documentation>Tabla central de órdenes de atención y colas de espera con Realtime Channel.</bpmn:documentation>
+  </bpmn:dataStore>
+  <bpmn:dataStore id="DataStore_DS_SupabaseColaPet" name="(BD) Supabase: public.cola_peticiones">
+    <bpmn:documentation>Cola asíncrona para comandas de bar, solicitudes químicas y peticiones WFM.</bpmn:documentation>
+  </bpmn:dataStore>
   <bpmn:collaboration id="Collaboration_Macro_Salón">
     <bpmn:participant id="Participant_Macro_Salón" name="Macroproceso Operativo de Salón - Vaikuntha ERP (Gloss Salon &amp; Relax)" processRef="Process_Macro_Salón" />
   </bpmn:collaboration>
@@ -62,22 +68,19 @@
       </bpmn:lane>
     </bpmn:laneSet>
 
-    <bpmn:dataObject id="DO_DO_TicketOatc" />
-    <bpmn:dataObjectReference id="DO_TicketOatc" name="Ticket OATC Térmico (80mm ESC/POS)" dataObjectRef="DO_DO_TicketOatc">
+    <bpmn:dataObject id="DO_TicketOatc" name="Ticket OATC Térmico (80mm ESC/POS)">
       <bpmn:documentation>Ticket físico generado con código de barras, QR de seguimiento, estilista y servicios solicitados.</bpmn:documentation>
-    </bpmn:dataObjectReference>
-    <bpmn:dataObject id="DO_DO_FichaCapilar" />
-    <bpmn:dataObjectReference id="DO_FichaCapilar" name="Ficha Técnica Capilar" dataObjectRef="DO_DO_FichaCapilar">
+    </bpmn:dataObject>
+    <bpmn:dataObject id="DO_FichaCapilar" name="Ficha Técnica Capilar">
       <bpmn:documentation>Diagnóstico biométrico y formulación química registrada en StaffChairsideAssistant.tsx.</bpmn:documentation>
-    </bpmn:dataObjectReference>
-    <bpmn:dataObject id="DO_DO_ComprobanteSunat" />
-    <bpmn:dataObjectReference id="DO_ComprobanteSunat" name="Comprobante SUNAT (Boleta/Factura)" dataObjectRef="DO_DO_ComprobanteSunat">
+    </bpmn:dataObject>
+    <bpmn:dataObject id="DO_ComprobanteSunat" name="Comprobante SUNAT (Boleta/Factura)">
       <bpmn:documentation>Documento tributario emitido electrónicamente con validación fiscal.</bpmn:documentation>
-    </bpmn:dataObjectReference>
-    <bpmn:dataStoreReference id="DS_SupabaseOatc" name="(BD) Supabase: public.oatc">
+    </bpmn:dataObject>
+    <bpmn:dataStoreReference id="DS_SupabaseOatc" name="(BD) Supabase: public.oatc" dataStoreRef="DataStore_DS_SupabaseOatc">
       <bpmn:documentation>Tabla central de órdenes de atención y colas de espera con Realtime Channel.</bpmn:documentation>
     </bpmn:dataStoreReference>
-    <bpmn:dataStoreReference id="DS_SupabaseColaPet" name="(BD) Supabase: public.cola_peticiones">
+    <bpmn:dataStoreReference id="DS_SupabaseColaPet" name="(BD) Supabase: public.cola_peticiones" dataStoreRef="DataStore_DS_SupabaseColaPet">
       <bpmn:documentation>Cola asíncrona para comandas de bar, solicitudes químicas y peticiones WFM.</bpmn:documentation>
     </bpmn:dataStoreReference>
 
@@ -131,12 +134,12 @@
       <bpmn:outgoing>Flow_6</bpmn:outgoing>
       <bpmn:outgoing>Flow_7</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:subProcess id="SubProcess_OATC" name="Subproceso: Gestión y Emisión Térmica de OATC">
-      <bpmn:documentation>Subproceso colapsado: Generación de OATC, guardado en Supabase, renderizado ESC/POS y despacho a impresora térmica de sede.</bpmn:documentation>
+    <bpmn:callActivity id="SubProcess_OATC" name="Subproceso: Gestión y Emisión Térmica de OATC" calledElement="Process_Sub_OATC">
+      <bpmn:documentation>Subproceso reutilizable: Generación de OATC, guardado en Supabase, renderizado ESC/POS y despacho a impresora térmica de sede.</bpmn:documentation>
       <bpmn:incoming>Flow_5</bpmn:incoming>
       <bpmn:incoming>Flow_7</bpmn:incoming>
       <bpmn:outgoing>Flow_8</bpmn:outgoing>
-    </bpmn:subProcess>
+    </bpmn:callActivity>
     <bpmn:intermediateThrowEvent id="Event_Kiosk_MsgLlegada" name="Emitir Llegada de Cliente en Realtime">
       <bpmn:documentation>Dispara evento en Realtime Channel hacia el monitor central de recepción.</bpmn:documentation>
       <bpmn:incoming>Flow_8</bpmn:incoming>
@@ -364,7 +367,7 @@
       <bpmndi:BPMNShape id="Task_Kiosk_Opal_di" bpmnElement="Task_Kiosk_Opal">
         <dc:Bounds x="520" y="265" width="130" height="60" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="SubProcess_OATC_di" bpmnElement="SubProcess_OATC" isExpanded="false">
+      <bpmndi:BPMNShape id="SubProcess_OATC_di" bpmnElement="SubProcess_OATC">
         <dc:Bounds x="700" y="255" width="160" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_Kiosk_MsgLlegada_di" bpmnElement="Event_Kiosk_MsgLlegada">
