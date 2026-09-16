@@ -86,7 +86,7 @@ export default function MobileConfigPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col pb-28 transition-colors duration-200">
       {/* Mobile Top Navigation */}
-      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3.5 flex items-center justify-between shadow-sm transition-colors">
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3.5 safe-top flex items-center justify-between shadow-sm transition-colors">
         <div className="flex items-center gap-3">
           <Link
             href="/mobile/admin"

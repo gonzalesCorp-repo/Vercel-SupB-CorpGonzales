@@ -159,7 +159,7 @@ export default function MobileAdminPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-start w-full pb-24 font-sans select-none transition-colors duration-200">
       
       {/* 📱 TOP BAR EJECUTIVO CON LOGO DE MARCA */}
-      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 transition-colors">
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-2.5 safe-top transition-colors">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button

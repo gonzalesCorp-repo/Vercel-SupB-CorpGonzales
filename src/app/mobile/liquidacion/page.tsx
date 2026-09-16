@@ -92,7 +92,7 @@ export default function MobileLiquidacionPage() {
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col antialiased transition-colors duration-200">
       {/* 📱 Header Superior Móvil Adaptativo Edge-to-Edge */}
-      <header className="sticky top-0 z-30 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-30 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 py-3 safe-top flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             href="/mobile/operacion"

@@ -67,7 +67,7 @@ export function MobileHeaderShell({
   const estadoTexto = formatearLabelEstado(badgeLabel, estadoOperativo);
 
   return (
-    <header className="sticky top-0 z-30 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 py-2 font-sans transition-colors">
+    <header className="sticky top-0 z-30 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 py-2 safe-top font-sans transition-colors">
       <div className="flex items-center justify-between gap-3">
         {/* Colaborador Avatar & Info */}
         <div

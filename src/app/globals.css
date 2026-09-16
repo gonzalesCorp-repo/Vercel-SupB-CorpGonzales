@@ -70,9 +70,11 @@ input[type="email"],
   }
   .safe-top {
     padding-top: env(safe-area-inset-top, 0px);
+    padding-top: max(env(safe-area-inset-top, 0px), 0px);
   }
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
   }
   .safe-left {
     padding-left: env(safe-area-inset-left, 0px);
