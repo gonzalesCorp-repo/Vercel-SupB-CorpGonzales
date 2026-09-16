@@ -1,0 +1,617 @@
+{
+  "$schema": "https://archify.dev/schemas/v2/architecture.json",
+  "id": "vaikuntha-erp-core",
+  "name": "Vaikuntha ERP — 4-Layer Technical Architecture Map",
+  "subtitle": "Gloss Salon & Relax — Modern Fullstack Enterprise Architecture",
+  "version": "2.0.0",
+  "description": "Mapa de arquitectura reactiva de 4 capas: Frontend Next.js, Servicios & Hooks, Persistencia Supabase Realtime y Periféricos de Hardware.",
+  "meta": {
+    "framework": "Next.js 16 (App Router) + React 19",
+    "database": "Supabase PostgreSQL 15 + Realtime WAL FULL",
+    "hardware": "Web NFC (NDEF), Web Serial (COM/USB), Socket TCP RAW 9100",
+    "ai": "Google Opal Concierge AI + Google Stitch UI",
+    "updatedAt": "2026-09-16"
+  },
+  "layers": [
+    {
+      "id": "layer-ui",
+      "name": "Capa 1: Interfaces de Usuario (Next.js 16 + React 19 + Tailwind v4)",
+      "role": "ui",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "layer-services",
+      "name": "Capa 2: Servicios, Hooks & Motores de Inteligencia",
+      "role": "service",
+      "color": "#a855f7"
+    },
+    {
+      "id": "layer-database",
+      "name": "Capa 3: Persistencia Transaccional & Supabase Realtime",
+      "role": "database",
+      "color": "#10b981"
+    },
+    {
+      "id": "layer-hardware",
+      "name": "Capa 4: Periféricos de Hardware de Salón",
+      "role": "hardware",
+      "color": "#f59e0b"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "ui_kiosk",
+      "layer": "layer-ui",
+      "role": "ui",
+      "title": "Tótem Kiosko VIP",
+      "tech": "KioskVipCheckIn.tsx",
+      "path": "src/app/kiosk/page.tsx",
+      "description": "Check-in biométrico táctil express, búsqueda por DNI/celular y bienvenida personalizada.",
+      "badge": "Touch Totem"
+    },
+    {
+      "id": "ui_mobile_staff",
+      "layer": "layer-ui",
+      "role": "ui",
+      "title": "Staff Chairside Assistant",
+      "tech": "StaffChairsideAssistant.tsx",
+      "path": "src/components/mobile/staff/StaffChairsideAssistant.tsx",
+      "description": "Asistente de sillón táctil Stitch (44px+), cronómetro químico y gestión de comanda.",
+      "badge": "Mobile PWA"
+    },
+    {
+      "id": "ui_mobile_client",
+      "layer": "layer-ui",
+      "role": "ui",
+      "title": "Lumina Club & Bienestar",
+      "tech": "ClienteSantuarioTab.tsx",
+      "path": "src/app/mobile/cliente/page.tsx",
+      "description": "App de cliente con HUD de Vitalidad Capilar Stitch, citas zen y respiración guiada 4-4-4.",
+      "badge": "Mobile VIP"
+    },
+    {
+      "id": "ui_mobile_admin",
+      "layer": "layer-ui",
+      "role": "ui",
+      "title": "Admin Floor Control",
+      "tech": "AdminPinModal.tsx",
+      "path": "src/app/mobile/admin/page.tsx",
+      "description": "Panel móvil gerencial: monitoreo de piso, aprobación de liquidaciones y PIN de seguridad.",
+      "badge": "Executive"
+    },
+    {
+      "id": "ui_mobile_soporte",
+      "layer": "layer-ui",
+      "role": "ui",
+      "title": "Soporte & Despacho Químico",
+      "tech": "BarWorkspaceView.tsx",
+      "path": "src/app/mobile/soporte/page.tsx",
+      "description": "Terminal móvil para laboratorio y barra con campanas Web Audio y confirmación táctil.",
+      "badge": "Operations"
+    },
+    {
+      "id": "ui_desktop_recep",
+      "layer": "layer-ui",
+      "role": "ui",
+      "title": "Monitor Central Recepción",
+      "tech": "QueueMonitor.tsx",
+      "path": "src/components/recepcion/QueueMonitor.tsx",
+      "description": "Monitor en vivo de colas OATC, auditoría de asistencias WFM y asignación de sillones.",
+      "badge": "Desktop POS"
+    },
+    {
+      "id": "ui_desktop_caja",
+      "layer": "layer-ui",
+      "role": "ui",
+      "title": "Caja POS & Facturación",
+      "tech": "CajaAuditorOpal.tsx",
+      "path": "src/components/caja/CajaAuditorOpal.tsx",
+      "description": "Liquidación de órdenes OATC, cobro multimoneda, emisión SUNAT y arqueos ciegos.",
+      "badge": "Desktop POS"
+    },
+    {
+      "id": "ui_desktop_lab",
+      "layer": "layer-ui",
+      "role": "ui",
+      "title": "Predictor Kardex Lab",
+      "tech": "LabInsumosPredictorOpal.tsx",
+      "path": "src/components/lab/LabInsumosPredictorOpal.tsx",
+      "description": "Auditoría de insumos por gramaje y cálculo de reorden con IA predictiva.",
+      "badge": "Desktop ERP"
+    },
+    {
+      "id": "svc_realtime",
+      "layer": "layer-services",
+      "role": "service",
+      "title": "Supabase Realtime Client",
+      "tech": "supabase/client.ts",
+      "path": "src/lib/supabase/client.ts",
+      "description": "Multiplexor WebSockets de baja latencia con reconexión automática y filtros Postgres.",
+      "badge": "WebSockets"
+    },
+    {
+      "id": "svc_wfm",
+      "layer": "layer-services",
+      "role": "service",
+      "title": "Motor WFM & Asistencia",
+      "tech": "peticiones.ts",
+      "path": "src/lib/peticiones.ts",
+      "description": "Auto-sanación de estado operativo diario y gestión transaccional de cola_peticiones.",
+      "badge": "WFM Engine"
+    },
+    {
+      "id": "svc_nfc",
+      "layer": "layer-services",
+      "role": "service",
+      "title": "Web NFC Background Listener",
+      "tech": "useNfcBackgroundListener.ts",
+      "path": "src/hooks/useNfcBackgroundListener.ts",
+      "description": "Escucha continua de tags NFC con sanitización de prefijos y desambiguación táctil.",
+      "badge": "Hardware API"
+    },
+    {
+      "id": "svc_serial_scale",
+      "layer": "layer-services",
+      "role": "service",
+      "title": "Web Serial Scale Driver",
+      "tech": "useSerialScale.ts",
+      "path": "src/hooks/useSerialScale.ts",
+      "description": "Controlador Web Serial API para lectura continua de balanzas digitales (±2g de tolerancia).",
+      "badge": "Hardware API"
+    },
+    {
+      "id": "svc_escpos",
+      "layer": "layer-services",
+      "role": "service",
+      "title": "Spooler Térmico ESC/POS",
+      "tech": "escposSpooler.ts",
+      "path": "src/lib/printer/escposSpooler.ts",
+      "description": "Renderizador de tickets 80mm con código QR, cabecera de salón y corte automático.",
+      "badge": "Print Engine"
+    },
+    {
+      "id": "svc_audio",
+      "layer": "layer-services",
+      "role": "service",
+      "title": "Web Audio Synthesizer",
+      "tech": "clienteLifestyleService.ts",
+      "path": "src/services/clienteLifestyleService.ts",
+      "description": "Síntesis acústica nativa (cuencos tibetanos 432 Hz y campana de comanda) con 0ms de latencia.",
+      "badge": "Web Audio"
+    },
+    {
+      "id": "ai_opal_concierge",
+      "layer": "layer-services",
+      "role": "ai",
+      "title": "Google Opal Concierge AI",
+      "tech": "KioskConciergeAgent.tsx",
+      "path": "src/components/kiosk/KioskConciergeAgent.tsx",
+      "description": "Inferencia predictiva de tiempos de espera y sugerencias de bebidas de cortesía en tótem.",
+      "badge": "Opal AI"
+    },
+    {
+      "id": "ai_opal_predictor",
+      "layer": "layer-services",
+      "role": "ai",
+      "title": "Opal Inventory Predictor",
+      "tech": "LabInsumosPredictorOpal.tsx",
+      "path": "src/components/lab/LabInsumosPredictorOpal.tsx",
+      "description": "Proyección de demanda de tintes y decolorantes a 7 días basada en la agenda del salón.",
+      "badge": "Opal AI"
+    },
+    {
+      "id": "db_oatc",
+      "layer": "layer-database",
+      "role": "database",
+      "title": "public.oatc & oatc_items",
+      "tech": "PostgreSQL Table",
+      "path": "supabase/migrations/oatc.sql",
+      "description": "Órdenes de Atención Técnica y Comercial con correlativo único diario y estados auditados.",
+      "badge": "Table"
+    },
+    {
+      "id": "db_cola_peticiones",
+      "layer": "layer-database",
+      "role": "database",
+      "title": "public.cola_peticiones",
+      "tech": "PostgreSQL + WAL FULL",
+      "path": "supabase/migrations/cola_peticiones.sql",
+      "description": "Cola asíncrona en tiempo real con REPLICA IDENTITY FULL para comandas y turnos.",
+      "badge": "Realtime WAL"
+    },
+    {
+      "id": "db_asistencias",
+      "layer": "layer-database",
+      "role": "database",
+      "title": "public.asistencias_turnos",
+      "tech": "PostgreSQL Table",
+      "path": "supabase/migrations/asistencias.sql",
+      "description": "Historial inmutable de marcaciones auditadas con marca temporal UTC y hora local Perú.",
+      "badge": "Audit Log"
+    },
+    {
+      "id": "db_inventario",
+      "layer": "layer-database",
+      "role": "database",
+      "title": "public.inventario_movimientos",
+      "tech": "PostgreSQL Table",
+      "path": "supabase/migrations/inventario.sql",
+      "description": "Kardex continuo con control de mermas y deducción automática por gramaje pesado.",
+      "badge": "Kardex"
+    },
+    {
+      "id": "db_clientes",
+      "layer": "layer-database",
+      "role": "database",
+      "title": "public.clientes & historial",
+      "tech": "PostgreSQL Table",
+      "path": "supabase/migrations/clientes.sql",
+      "description": "Fichas clínicas capilares, diagnóstico biométrico y balance de LuminaCoins.",
+      "badge": "CRM Core"
+    },
+    {
+      "id": "hw_printers",
+      "layer": "layer-hardware",
+      "role": "hardware",
+      "title": "Impresoras Térmicas (80mm)",
+      "tech": "Socket TCP RAW 9100 / USB",
+      "path": "Periférico de Sede",
+      "description": "Hardware térmico distribuido en Recepción, Laboratorio y Bar con monitoreo de ACK.",
+      "badge": "ESC/POS"
+    },
+    {
+      "id": "hw_scale",
+      "layer": "layer-hardware",
+      "role": "hardware",
+      "title": "Balanza Digital de Precisión",
+      "tech": "Web Serial COM/USB Port",
+      "path": "Periférico de Laboratorio",
+      "description": "Balanza de laboratorio conectada por puerto serie con calibración en tiempo real (±2g).",
+      "badge": "Precision Lab"
+    },
+    {
+      "id": "hw_nfc_tags",
+      "layer": "layer-hardware",
+      "role": "hardware",
+      "title": "Tags Físicos NFC",
+      "tech": "NDEF Tag Tipo 2/4",
+      "path": "Puntos Físicos de Salón",
+      "description": "Tags instalados en puerta de acceso principal y comedor para marcación con 1 toque.",
+      "badge": "NFC Contactless"
+    },
+    {
+      "id": "hw_haptic",
+      "layer": "layer-hardware",
+      "role": "hardware",
+      "title": "Motor Háptico Móvil",
+      "tech": "navigator.vibrate",
+      "path": "Dispositivo Móvil Staff",
+      "description": "Feedback táctil vibratorio inmediato al autorizarse o rechazarse una petición de turno.",
+      "badge": "Haptic Engine"
+    }
+  ],
+  "edges": [
+    {
+      "from": "ui_kiosk",
+      "to": "ai_opal_concierge",
+      "label": "Inferencia de Bienvenida",
+      "type": "sync"
+    },
+    {
+      "from": "ui_kiosk",
+      "to": "svc_escpos",
+      "label": "Solicitud Emisión Ticket",
+      "type": "sync"
+    },
+    {
+      "from": "ui_mobile_staff",
+      "to": "svc_nfc",
+      "label": "Escaneo NDEF",
+      "type": "hardware"
+    },
+    {
+      "from": "ui_mobile_staff",
+      "to": "svc_wfm",
+      "label": "Petición de Turno / Marcación",
+      "type": "sync"
+    },
+    {
+      "from": "ui_mobile_staff",
+      "to": "svc_realtime",
+      "label": "Reclamar Orden en Sillón",
+      "type": "realtime"
+    },
+    {
+      "from": "ui_mobile_client",
+      "to": "svc_audio",
+      "label": "Pausa Zen (Cuenco 432 Hz)",
+      "type": "sync"
+    },
+    {
+      "from": "ui_mobile_soporte",
+      "to": "svc_serial_scale",
+      "label": "Lectura de Peso Real",
+      "type": "hardware"
+    },
+    {
+      "from": "ui_mobile_soporte",
+      "to": "svc_audio",
+      "label": "Campana Comanda Servida",
+      "type": "sync"
+    },
+    {
+      "from": "ui_desktop_recep",
+      "to": "svc_realtime",
+      "label": "Suscripción Monitor Colas",
+      "type": "realtime"
+    },
+    {
+      "from": "ui_desktop_caja",
+      "to": "svc_escpos",
+      "label": "Emisión Comprobante Físico",
+      "type": "sync"
+    },
+    {
+      "from": "ui_desktop_lab",
+      "to": "ai_opal_predictor",
+      "label": "Proyección 7 Días",
+      "type": "sync"
+    },
+    {
+      "from": "ai_opal_concierge",
+      "to": "db_clientes",
+      "label": "Consulta Historial & Citas",
+      "type": "database"
+    },
+    {
+      "from": "svc_wfm",
+      "to": "db_cola_peticiones",
+      "label": "Insertar Petición PENDIENTE",
+      "type": "database"
+    },
+    {
+      "from": "ui_desktop_recep",
+      "to": "db_cola_peticiones",
+      "label": "Aprobar/Rechazar Solicitud",
+      "type": "database"
+    },
+    {
+      "from": "ui_desktop_recep",
+      "to": "db_asistencias",
+      "label": "Auditoría Transaccional",
+      "type": "database"
+    },
+    {
+      "from": "ui_kiosk",
+      "to": "db_oatc",
+      "label": "Crear Orden OATC (EN_ESPERA)",
+      "type": "database"
+    },
+    {
+      "from": "ui_mobile_staff",
+      "to": "db_oatc",
+      "label": "Mutar a EN_ATENCION",
+      "type": "database"
+    },
+    {
+      "from": "ui_mobile_soporte",
+      "to": "db_inventario",
+      "label": "Descontar Insumos Químicos",
+      "type": "database"
+    },
+    {
+      "from": "ai_opal_predictor",
+      "to": "db_inventario",
+      "label": "Auditoría Histórica Kardex",
+      "type": "database"
+    },
+    {
+      "from": "ui_desktop_caja",
+      "to": "db_oatc",
+      "label": "Marcar OATC FACTURADO",
+      "type": "database"
+    },
+    {
+      "from": "db_cola_peticiones",
+      "to": "svc_realtime",
+      "label": "WAL FULL Changefeed",
+      "type": "realtime"
+    },
+    {
+      "from": "db_oatc",
+      "to": "svc_realtime",
+      "label": "Eventos OATC Realtime",
+      "type": "realtime"
+    },
+    {
+      "from": "svc_realtime",
+      "to": "ui_desktop_recep",
+      "label": "Alerta Sonora & Toast",
+      "type": "realtime"
+    },
+    {
+      "from": "svc_realtime",
+      "to": "ui_mobile_staff",
+      "label": "Notificación Turno / Decisión",
+      "type": "realtime"
+    },
+    {
+      "from": "svc_realtime",
+      "to": "hw_haptic",
+      "label": "Disparo de Vibración Móvil",
+      "type": "hardware"
+    },
+    {
+      "from": "svc_escpos",
+      "to": "hw_printers",
+      "label": "Buffer ESC/POS (Puerto 9100/USB)",
+      "type": "hardware"
+    },
+    {
+      "from": "hw_scale",
+      "to": "svc_serial_scale",
+      "label": "Flujo Continuo RS-232/USB",
+      "type": "hardware"
+    },
+    {
+      "from": "hw_nfc_tags",
+      "to": "svc_nfc",
+      "label": "Campo Magnético NDEF",
+      "type": "hardware"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-checkin",
+      "title": "Capítulo 1: Check-in VIP & Bienvenida Concierge Opal",
+      "description": "El cliente VIP interactúa con el tótem kiosko, Opal AI deduce preferencias de bienvenida, se genera la orden OATC y se notifica a recepción.",
+      "steps": [
+        {
+          "node": "ui_kiosk",
+          "note": "El cliente digita su DNI o celular en pantalla táctil."
+        },
+        {
+          "node": "ai_opal_concierge",
+          "note": "Opal AI evalúa citas programadas y sugiere bebida de bienvenida."
+        },
+        {
+          "node": "db_clientes",
+          "note": "Consulta historial de fidelidad Lumina Club en Supabase."
+        },
+        {
+          "node": "db_oatc",
+          "note": "Genera correlativo OATC-YYYYMMDD-XXX en estado EN_ESPERA."
+        },
+        {
+          "node": "svc_escpos",
+          "note": "Renderiza comanda térmica con código QR y detalles del servicio."
+        },
+        {
+          "node": "hw_printers",
+          "note": "La impresora de sede imprime y realiza corte parcial de 80mm."
+        },
+        {
+          "node": "svc_realtime",
+          "note": "Emite broadcast a WebSocket para alertar al monitor de recepción."
+        },
+        {
+          "node": "ui_desktop_recep",
+          "note": "Recepción visualiza al cliente en sala con chime sonoro."
+        }
+      ]
+    },
+    {
+      "id": "story-chairside",
+      "title": "Capítulo 2: Atención en Sillón, Diagnóstico & Despacho Químico",
+      "description": "El estilista atiende al cliente, formula mezclas en el móvil, solicita preparación al laboratorio y el químico pesa en la balanza digital.",
+      "steps": [
+        {
+          "node": "ui_mobile_staff",
+          "note": "Estilista presiona \"Atender en mi Sillón\" en TabCola.tsx."
+        },
+        {
+          "node": "db_oatc",
+          "note": "Actualiza orden a EN_ATENCION y bloquea colas duplicadas."
+        },
+        {
+          "node": "ui_mobile_soporte",
+          "note": "El encargado de laboratorio recibe el pedido en monitor /lab/despacho."
+        },
+        {
+          "node": "svc_serial_scale",
+          "note": "Web Serial API lee el puerto COM de la balanza en tiempo real."
+        },
+        {
+          "node": "hw_scale",
+          "note": "Se coloca el bowl y dosifica tintes/peróxidos con tolerancia ±2g."
+        },
+        {
+          "node": "db_inventario",
+          "note": "Deducción automática en Kardex como SALIDA_CONSUMO."
+        },
+        {
+          "node": "svc_realtime",
+          "note": "Aviso instantáneo al sillón: \"Mezcla Química Lista\"."
+        },
+        {
+          "node": "ai_opal_predictor",
+          "note": "Opal recalcula proyección de stock y puntos de reorden."
+        }
+      ]
+    },
+    {
+      "id": "story-wfm",
+      "title": "Capítulo 3: Workforce Management & Marcación NFC",
+      "description": "El colaborador acerca su teléfono al tag NFC en puerta o comedor, recepción audita en 1-clic y Supabase auto-sana el estado del staff.",
+      "steps": [
+        {
+          "node": "hw_nfc_tags",
+          "note": "El colaborador acerca su teléfono al tag de puerta o comedor."
+        },
+        {
+          "node": "svc_nfc",
+          "note": "useNfcBackgroundListener sanitiza el payload NDEF."
+        },
+        {
+          "node": "ui_mobile_staff",
+          "note": "Desambigua movimiento táctil: Entrada, Refrigerio o Fin Jornada."
+        },
+        {
+          "node": "svc_wfm",
+          "note": "Inserta fila PENDIENTE en public.cola_peticiones con sede verificada."
+        },
+        {
+          "node": "svc_realtime",
+          "note": "WAL Realtime emite cambio inmediato a terminal de recepción."
+        },
+        {
+          "node": "ui_desktop_recep",
+          "note": "Recepcionista evalúa presencia física y aprueba con 1 toque."
+        },
+        {
+          "node": "db_asistencias",
+          "note": "Registro inmutable en tabla asistencias_turnos para auditoría."
+        },
+        {
+          "node": "hw_haptic",
+          "note": "El teléfono del colaborador vibra confirmando su turno activo."
+        }
+      ]
+    },
+    {
+      "id": "story-pos",
+      "title": "Capítulo 4: Emisión Térmica OATC & Facturación en Caja POS",
+      "description": "El estilista completa el servicio, el cliente pasa a Caja POS, se auditan consumos de bar y se emite comprobante electrónico con puntos Lumina.",
+      "steps": [
+        {
+          "node": "ui_mobile_staff",
+          "note": "Estilista finaliza servicio y deriva OATC a Caja POS."
+        },
+        {
+          "node": "db_oatc",
+          "note": "Orden marcada como COMPLETADA con desglose de servicios ejecutados."
+        },
+        {
+          "node": "ui_desktop_caja",
+          "note": "Cajero abre orden OATC, revisa consumos de cortesía y cobra."
+        },
+        {
+          "node": "svc_escpos",
+          "note": "Compila template de boleta/factura electrónica SUNAT."
+        },
+        {
+          "node": "hw_printers",
+          "note": "Impresora térmica emite comprobante fiscal de 80mm."
+        },
+        {
+          "node": "db_clientes",
+          "note": "Acredita LuminaCoins en la cuenta VIP del cliente."
+        },
+        {
+          "node": "ui_desktop_caja",
+          "note": "Arqueo ciego de caja validado por CajaAuditorOpal.tsx."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaikuntha ERP — Mapa Arquitectural Interactivo (Archify)</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --card-border: rgba(56, 189, 248, 0.2);
+      --card-border-hover: #38bdf8;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --grid: rgba(56, 189, 248, 0.05);
+      --edge: rgba(148, 163, 184, 0.25);
+      --edge-active: #38bdf8;
+      --edge-glow: rgba(56, 189, 248, 0.6);
+    }
+    html.light {
+      --bg: #f8fafc;
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --card-border: rgba(148, 163, 184, 0.35);
+      --card-border-hover: #0284c7;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --accent: #0284c7;
+      --grid: rgba(2, 132, 199, 0.04);
+      --edge: rgba(148, 163, 184, 0.4);
+      --edge-active: #0284c7;
+      --edge-glow: rgba(2, 132, 199, 0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); overflow: hidden; height: 100vh; width: 100vw; display: flex; flex-direction: column; user-select: none; }
+    
+    /* Top Bar */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px; background: var(--card-bg); border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px); z-index: 50; flex-shrink: 0;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #38bdf8, #a855f7); display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 16px; }
+    .brand-title { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+    .brand-subtitle { font-size: 11px; color: var(--text-muted); }
+    
+    .toolbar { display: flex; align-items: center; gap: 12px; }
+    .search-box {
+      background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 6px 14px; color: var(--text); font-size: 13px; outline: none; width: 220px;
+      transition: all 0.2s ease;
+    }
+    .search-box:focus { border-color: var(--accent); width: 280px; box-shadow: 0 0 12px var(--edge-glow); }
+    .btn {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 6px 14px; color: var(--text); font-size: 13px; cursor: pointer; display: flex;
+      align-items: center; gap: 6px; font-weight: 500; transition: all 0.2s ease;
+    }
+    .btn:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.1); }
+    .btn-primary { background: linear-gradient(135deg, #0284c7, #7c3aed); border: none; color: white; }
+    .btn-primary:hover { opacity: 0.9; box-shadow: 0 0 14px rgba(56, 189, 248, 0.5); }
+
+    /* Canvas Stage */
+    #stage {
+      flex: 1; position: relative; overflow: auto; cursor: grab;
+      background-size: 32px 32px;
+      background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px),
+                        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    }
+    #stage:active { cursor: grabbing; }
+
+    #svg-canvas {
+      position: absolute; top: 0; left: 0; width: 2800px; height: 1600px; pointer-events: none;
+    }
+
+    /* Layer Swimlanes */
+    .swimlane {
+      position: absolute; border: 1px dashed var(--card-border); border-radius: 16px;
+      background: rgba(15, 23, 42, 0.2); pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .swimlane-header {
+      position: absolute; top: -14px; left: 24px; padding: 3px 12px;
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Architecture Nodes */
+    .node {
+      position: absolute; width: 250px; background: var(--card-bg);
+      border: 1px solid var(--card-border); border-radius: 12px;
+      padding: 14px 16px; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+      backdrop-filter: blur(12px); pointer-events: auto; display: flex; flex-direction: column; gap: 8px;
+    }
+    .node:hover {
+      transform: translateY(-2px); border-color: var(--card-border-hover);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px var(--edge-glow);
+      z-index: 30;
+    }
+    .node.active {
+      border-color: var(--accent); box-shadow: 0 0 20px var(--accent); z-index: 40;
+    }
+    .node.dimmed {
+      opacity: 0.2; filter: grayscale(80%);
+    }
+    .node-header { display: flex; align-items: center; justify-content: space-between; }
+    .node-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .node-title { font-size: 14px; font-weight: 700; line-height: 1.2; }
+    .node-tech { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+    .node-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* Role Colors */
+    .role-ui .node-badge { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .role-service .node-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .role-database .node-badge { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .role-hardware .node-badge { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .role-ai .node-badge { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+    /* SVG Edges */
+    .edge-path {
+      fill: none; stroke: var(--edge); stroke-width: 1.5; stroke-dasharray: 4 4;
+      transition: stroke 0.3s ease, stroke-width 0.3s ease;
+    }
+    .edge-path.highlighted {
+      stroke: var(--edge-active); stroke-width: 3; stroke-dasharray: none;
+      filter: drop-shadow(0 0 6px var(--edge-glow));
+    }
+    .edge-path.dimmed { opacity: 0.1; }
+
+    /* Side Panel */
+    #sidebar {
+      position: absolute; right: 0; top: 58px; bottom: 65px; width: 380px;
+      background: var(--card-bg); border-left: 1px solid var(--card-border);
+      backdrop-filter: blur(16px); z-index: 45; transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; flex-direction: column; padding: 24px; gap: 16px; overflow-y: auto;
+    }
+    #sidebar.open { transform: translateX(0); }
+    .sidebar-header { display: flex; align-items: flex-start; justify-content: space-between; }
+    .close-btn { background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; }
+    .sidebar-section { display: flex; flex-direction: column; gap: 8px; }
+    .sidebar-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
+    .sidebar-value { font-size: 13px; line-height: 1.5; }
+    .connection-list { display: flex; flex-direction: column; gap: 6px; }
+    .connection-item {
+      padding: 8px 12px; background: rgba(0,0,0,0.15); border: 1px solid var(--card-border);
+      border-radius: 8px; font-size: 12px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .connection-item:hover { border-color: var(--accent); }
+
+    /* Story Bottom Bar */
+    #story-bar {
+      height: 65px; background: var(--card-bg); border-top: 1px solid var(--card-border);
+      display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+      z-index: 50; flex-shrink: 0; backdrop-filter: blur(12px);
+    }
+    .story-nav { display: flex; align-items: center; gap: 12px; }
+    .story-select {
+      background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 6px 12px; color: var(--text); font-size: 13px; outline: none; cursor: pointer;
+    }
+    .story-info { display: flex; flex-direction: column; max-width: 600px; }
+    .story-title { font-size: 13px; font-weight: 700; }
+    .story-desc { font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Pill Filters */
+    .filter-pills { display: flex; align-items: center; gap: 6px; }
+    .pill {
+      font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 14px;
+      background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); cursor: pointer;
+      color: var(--text-muted); transition: all 0.2s;
+    }
+    .pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* Share Card Modal */
+    #modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-card {
+      background: #0b1120; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 16px;
+      width: 700px; padding: 28px; display: flex; flex-direction: column; gap: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">V</div>
+      <div>
+        <div class="brand-title">Vaikuntha ERP — Mapa Arquitectural Interactivo</div>
+        <div class="brand-subtitle">Gloss Salon & Relax · Powered by Archify (v2.17)</div>
+      </div>
+    </div>
+
+    <!-- FILTER PILLS -->
+    <div class="filter-pills">
+      <div class="pill active" onclick="filterRole('all')">Todos (24)</div>
+      <div class="pill" onclick="filterRole('ui')">UI / Next.js</div>
+      <div class="pill" onclick="filterRole('service')">Servicios & Hooks</div>
+      <div class="pill" onclick="filterRole('database')">Supabase DB</div>
+      <div class="pill" onclick="filterRole('hardware')">Hardware</div>
+      <div class="pill" onclick="filterRole('ai')">Opal AI</div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="search-input" class="search-box" placeholder="Buscar componente o tabla..." oninput="handleSearch(this.value)">
+      <button class="btn" onclick="toggleTheme()">🌓 Tema</button>
+      <button class="btn" onclick="togglePreset()">📐 Preset: <span id="preset-label">Blueprint</span></button>
+      <button class="btn btn-primary" onclick="openShareCard()">📋 Share Card (1200×630)</button>
+    </div>
+  </header>
+
+  <!-- STAGE CANVAS -->
+  <div id="stage">
+    <svg id="svg-canvas" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad-active" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#38bdf8" />
+          <stop offset="100%" stop-color="#a855f7" />
+        </linearGradient>
+      </defs>
+      <!-- Edges will be rendered here dynamically -->
+    </svg>
+
+    <!-- Layer Swimlanes -->
+    <div class="swimlane" style="top: 40px; left: 60px; width: 2680px; height: 260px;">
+      <div class="swimlane-header" style="color: #38bdf8; border-color: #38bdf8;">Capa 1: Interfaces de Usuario (Next.js 16 + React 19 + Tailwind v4)</div>
+    </div>
+    <div class="swimlane" style="top: 340px; left: 60px; width: 2680px; height: 260px;">
+      <div class="swimlane-header" style="color: #c084fc; border-color: #c084fc;">Capa 2: Servicios, Hooks & Motores de Inteligencia (Opal AI)</div>
+    </div>
+    <div class="swimlane" style="top: 640px; left: 60px; width: 2680px; height: 260px;">
+      <div class="swimlane-header" style="color: #34d399; border-color: #34d399;">Capa 3: Persistencia Transaccional & Supabase Realtime (PostgreSQL 15)</div>
+    </div>
+    <div class="swimlane" style="top: 940px; left: 60px; width: 2680px; height: 260px;">
+      <div class="swimlane-header" style="color: #fbbf24; border-color: #fbbf24;">Capa 4: Periféricos de Hardware de Salón (ESC/POS, NFC, Balanzas)</div>
+    </div>
+
+    <!-- Nodes Container -->
+    <div id="nodes-container"></div>
+  </div>
+
+  <!-- SIDEBAR INSPECTOR -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <div>
+        <div id="side-badge" class="node-badge">UI</div>
+        <div id="side-title" style="font-size: 18px; font-weight: 800; margin-top: 6px;">Nombre</div>
+      </div>
+      <button class="close-btn" onclick="closeSidebar()">&times;</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Ruta de Código / Archivo</div>
+      <div id="side-path" class="sidebar-value" style="font-family: monospace; color: var(--accent);">path/to/file.tsx</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Descripción Técnica & Responsabilidad</div>
+      <div id="side-desc" class="sidebar-value">Descripción completa...</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Dependencias Hacia Arriba (Upstream / Lecturas)</div>
+      <div id="side-upstream" class="connection-list"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Impacto Hacia Abajo (Downstream / Mutaciones)</div>
+      <div id="side-downstream" class="connection-list"></div>
+    </div>
+  </div>
+
+  <!-- STORY BAR -->
+  <div id="story-bar">
+    <div class="story-nav">
+      <span style="font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase;">Capítulos Guiados:</span>
+      <select id="story-dropdown" class="story-select" onchange="selectStory(this.value)">
+        <option value="story-checkin">1. Check-in VIP & Bienvenida Opal</option>
+        <option value="story-chairside">2. Operación en Sillón & Químicos</option>
+        <option value="story-wfm">3. WFM & Marcación NFC</option>
+        <option value="story-pos">4. Emisión Térmica OATC & Caja POS</option>
+      </select>
+      <button class="btn" onclick="prevStep()">◀ Anterior</button>
+      <button class="btn btn-primary" onclick="nextStep()">Siguiente ▶</button>
+    </div>
+
+    <div class="story-info">
+      <div id="story-step-title" class="story-title">Paso 1: Check-in Tótem Kiosko</div>
+      <div id="story-step-desc" class="story-desc">El cliente VIP digita su DNI en pantalla táctil.</div>
+    </div>
+
+    <div>
+      <span id="step-counter" style="font-size: 12px; font-weight: 700; font-family: monospace; color: var(--accent);">Paso 1 / 8</span>
+    </div>
+  </div>
+
+  <!-- SHARE CARD MODAL -->
+  <div id="modal-overlay" onclick="closeShareCard(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="font-size: 18px; font-weight: 700;">Share Card Oficial (1200 × 630 Canonical)</h3>
+        <button class="close-btn" onclick="closeShareCard()">&times;</button>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted);">Esta tarjeta canónica resume la arquitectura técnica de Vaikuntha ERP para presentaciones ejecutivas, README de GitHub y documentación institucional.</p>
+      
+      <div id="share-card-preview" style="width: 100%; height: 320px; background: linear-gradient(135deg, #090d16, #1e1b4b); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div style="width: 24px; height: 24px; border-radius: 6px; background: #38bdf8; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; color: #000;">V</div>
+              <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.05em; color: #38bdf8;">VAIKUNTHA ERP</span>
+            </div>
+            <h2 style="font-size: 22px; font-weight: 800; color: #fff;">Arquitectura de 4 Capas en Tiempo Real</h2>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Gloss Salon & Relax · Next.js 16 + Supabase Realtime + Hardware</p>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 11px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(56,189,248,0.4); font-weight: 700;">ARCHIFY 2.17 VERIFIED</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; background: rgba(0,0,0,0.3); padding: 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+          <div>
+            <div style="font-size: 10px; color: #38bdf8; font-weight: 700;">CAPA 1: UI</div>
+            <div style="font-size: 12px; font-weight: 600; color: #fff; margin-top: 2px;">Next.js App Router</div>
+          </div>
+          <div>
+            <div style="font-size: 10px; color: #c084fc; font-weight: 700;">CAPA 2: SERVICIOS</div>
+            <div style="font-size: 12px; font-weight: 600; color: #fff; margin-top: 2px;">Opal AI & WebSockets</div>
+          </div>
+          <div>
+            <div style="font-size: 10px; color: #34d399; font-weight: 700;">CAPA 3: DATOS</div>
+            <div style="font-size: 12px; font-weight: 600; color: #fff; margin-top: 2px;">Supabase WAL FULL</div>
+          </div>
+          <div>
+            <div style="font-size: 10px; color: #fbbf24; font-weight: 700;">CAPA 4: HARDWARE</div>
+            <div style="font-size: 12px; font-weight: 600; color: #fff; margin-top: 2px;">ESC/POS, NFC & Scale</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b;">
+          <span>Deterministic Graph Integrity: 100% Validated</span>
+          <span>github.com/tt-a1i/archify</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <button class="btn" onclick="closeShareCard()">Cerrar</button>
+        <button class="btn btn-primary" onclick="copyCardBadge()">Copiar Código Markdown</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    const data = {"$schema":"https://archify.dev/schemas/v2/architecture.json","id":"vaikuntha-erp-core","name":"Vaikuntha ERP — 4-Layer Technical Architecture Map","subtitle":"Gloss Salon & Relax — Modern Fullstack Enterprise Architecture","version":"2.0.0","description":"Mapa de arquitectura reactiva de 4 capas: Frontend Next.js, Servicios & Hooks, Persistencia Supabase Realtime y Periféricos de Hardware.","meta":{"framework":"Next.js 16 (App Router) + React 19","database":"Supabase PostgreSQL 15 + Realtime WAL FULL","hardware":"Web NFC (NDEF), Web Serial (COM/USB), Socket TCP RAW 9100","ai":"Google Opal Concierge AI + Google Stitch UI","updatedAt":"2026-09-16"},"layers":[{"id":"layer-ui","name":"Capa 1: Interfaces de Usuario (Next.js 16 + React 19 + Tailwind v4)","role":"ui","color":"#38bdf8"},{"id":"layer-services","name":"Capa 2: Servicios, Hooks & Motores de Inteligencia","role":"service","color":"#a855f7"},{"id":"layer-database","name":"Capa 3: Persistencia Transaccional & Supabase Realtime","role":"database","color":"#10b981"},{"id":"layer-hardware","name":"Capa 4: Periféricos de Hardware de Salón","role":"hardware","color":"#f59e0b"}],"nodes":[{"id":"ui_kiosk","layer":"layer-ui","role":"ui","title":"Tótem Kiosko VIP","tech":"KioskVipCheckIn.tsx","path":"src/app/kiosk/page.tsx","description":"Check-in biométrico táctil express, búsqueda por DNI/celular y bienvenida personalizada.","badge":"Touch Totem"},{"id":"ui_mobile_staff","layer":"layer-ui","role":"ui","title":"Staff Chairside Assistant","tech":"StaffChairsideAssistant.tsx","path":"src/components/mobile/staff/StaffChairsideAssistant.tsx","description":"Asistente de sillón táctil Stitch (44px+), cronómetro químico y gestión de comanda.","badge":"Mobile PWA"},{"id":"ui_mobile_client","layer":"layer-ui","role":"ui","title":"Lumina Club & Bienestar","tech":"ClienteSantuarioTab.tsx","path":"src/app/mobile/cliente/page.tsx","description":"App de cliente con HUD de Vitalidad Capilar Stitch, citas zen y respiración guiada 4-4-4.","badge":"Mobile VIP"},{"id":"ui_mobile_admin","layer":"layer-ui","role":"ui","title":"Admin Floor Control","tech":"AdminPinModal.tsx","path":"src/app/mobile/admin/page.tsx","description":"Panel móvil gerencial: monitoreo de piso, aprobación de liquidaciones y PIN de seguridad.","badge":"Executive"},{"id":"ui_mobile_soporte","layer":"layer-ui","role":"ui","title":"Soporte & Despacho Químico","tech":"BarWorkspaceView.tsx","path":"src/app/mobile/soporte/page.tsx","description":"Terminal móvil para laboratorio y barra con campanas Web Audio y confirmación táctil.","badge":"Operations"},{"id":"ui_desktop_recep","layer":"layer-ui","role":"ui","title":"Monitor Central Recepción","tech":"QueueMonitor.tsx","path":"src/components/recepcion/QueueMonitor.tsx","description":"Monitor en vivo de colas OATC, auditoría de asistencias WFM y asignación de sillones.","badge":"Desktop POS"},{"id":"ui_desktop_caja","layer":"layer-ui","role":"ui","title":"Caja POS & Facturación","tech":"CajaAuditorOpal.tsx","path":"src/components/caja/CajaAuditorOpal.tsx","description":"Liquidación de órdenes OATC, cobro multimoneda, emisión SUNAT y arqueos ciegos.","badge":"Desktop POS"},{"id":"ui_desktop_lab","layer":"layer-ui","role":"ui","title":"Predictor Kardex Lab","tech":"LabInsumosPredictorOpal.tsx","path":"src/components/lab/LabInsumosPredictorOpal.tsx","description":"Auditoría de insumos por gramaje y cálculo de reorden con IA predictiva.","badge":"Desktop ERP"},{"id":"svc_realtime","layer":"layer-services","role":"service","title":"Supabase Realtime Client","tech":"supabase/client.ts","path":"src/lib/supabase/client.ts","description":"Multiplexor WebSockets de baja latencia con reconexión automática y filtros Postgres.","badge":"WebSockets"},{"id":"svc_wfm","layer":"layer-services","role":"service","title":"Motor WFM & Asistencia","tech":"peticiones.ts","path":"src/lib/peticiones.ts","description":"Auto-sanación de estado operativo diario y gestión transaccional de cola_peticiones.","badge":"WFM Engine"},{"id":"svc_nfc","layer":"layer-services","role":"service","title":"Web NFC Background Listener","tech":"useNfcBackgroundListener.ts","path":"src/hooks/useNfcBackgroundListener.ts","description":"Escucha continua de tags NFC con sanitización de prefijos y desambiguación táctil.","badge":"Hardware API"},{"id":"svc_serial_scale","layer":"layer-services","role":"service","title":"Web Serial Scale Driver","tech":"useSerialScale.ts","path":"src/hooks/useSerialScale.ts","description":"Controlador Web Serial API para lectura continua de balanzas digitales (±2g de tolerancia).","badge":"Hardware API"},{"id":"svc_escpos","layer":"layer-services","role":"service","title":"Spooler Térmico ESC/POS","tech":"escposSpooler.ts","path":"src/lib/printer/escposSpooler.ts","description":"Renderizador de tickets 80mm con código QR, cabecera de salón y corte automático.","badge":"Print Engine"},{"id":"svc_audio","layer":"layer-services","role":"service","title":"Web Audio Synthesizer","tech":"clienteLifestyleService.ts","path":"src/services/clienteLifestyleService.ts","description":"Síntesis acústica nativa (cuencos tibetanos 432 Hz y campana de comanda) con 0ms de latencia.","badge":"Web Audio"},{"id":"ai_opal_concierge","layer":"layer-services","role":"ai","title":"Google Opal Concierge AI","tech":"KioskConciergeAgent.tsx","path":"src/components/kiosk/KioskConciergeAgent.tsx","description":"Inferencia predictiva de tiempos de espera y sugerencias de bebidas de cortesía en tótem.","badge":"Opal AI"},{"id":"ai_opal_predictor","layer":"layer-services","role":"ai","title":"Opal Inventory Predictor","tech":"LabInsumosPredictorOpal.tsx","path":"src/components/lab/LabInsumosPredictorOpal.tsx","description":"Proyección de demanda de tintes y decolorantes a 7 días basada en la agenda del salón.","badge":"Opal AI"},{"id":"db_oatc","layer":"layer-database","role":"database","title":"public.oatc & oatc_items","tech":"PostgreSQL Table","path":"supabase/migrations/oatc.sql","description":"Órdenes de Atención Técnica y Comercial con correlativo único diario y estados auditados.","badge":"Table"},{"id":"db_cola_peticiones","layer":"layer-database","role":"database","title":"public.cola_peticiones","tech":"PostgreSQL + WAL FULL","path":"supabase/migrations/cola_peticiones.sql","description":"Cola asíncrona en tiempo real con REPLICA IDENTITY FULL para comandas y turnos.","badge":"Realtime WAL"},{"id":"db_asistencias","layer":"layer-database","role":"database","title":"public.asistencias_turnos","tech":"PostgreSQL Table","path":"supabase/migrations/asistencias.sql","description":"Historial inmutable de marcaciones auditadas con marca temporal UTC y hora local Perú.","badge":"Audit Log"},{"id":"db_inventario","layer":"layer-database","role":"database","title":"public.inventario_movimientos","tech":"PostgreSQL Table","path":"supabase/migrations/inventario.sql","description":"Kardex continuo con control de mermas y deducción automática por gramaje pesado.","badge":"Kardex"},{"id":"db_clientes","layer":"layer-database","role":"database","title":"public.clientes & historial","tech":"PostgreSQL Table","path":"supabase/migrations/clientes.sql","description":"Fichas clínicas capilares, diagnóstico biométrico y balance de LuminaCoins.","badge":"CRM Core"},{"id":"hw_printers","layer":"layer-hardware","role":"hardware","title":"Impresoras Térmicas (80mm)","tech":"Socket TCP RAW 9100 / USB","path":"Periférico de Sede","description":"Hardware térmico distribuido en Recepción, Laboratorio y Bar con monitoreo de ACK.","badge":"ESC/POS"},{"id":"hw_scale","layer":"layer-hardware","role":"hardware","title":"Balanza Digital de Precisión","tech":"Web Serial COM/USB Port","path":"Periférico de Laboratorio","description":"Balanza de laboratorio conectada por puerto serie con calibración en tiempo real (±2g).","badge":"Precision Lab"},{"id":"hw_nfc_tags","layer":"layer-hardware","role":"hardware","title":"Tags Físicos NFC","tech":"NDEF Tag Tipo 2/4","path":"Puntos Físicos de Salón","description":"Tags instalados en puerta de acceso principal y comedor para marcación con 1 toque.","badge":"NFC Contactless"},{"id":"hw_haptic","layer":"layer-hardware","role":"hardware","title":"Motor Háptico Móvil","tech":"navigator.vibrate","path":"Dispositivo Móvil Staff","description":"Feedback táctil vibratorio inmediato al autorizarse o rechazarse una petición de turno.","badge":"Haptic Engine"}],"edges":[{"from":"ui_kiosk","to":"ai_opal_concierge","label":"Inferencia de Bienvenida","type":"sync"},{"from":"ui_kiosk","to":"svc_escpos","label":"Solicitud Emisión Ticket","type":"sync"},{"from":"ui_mobile_staff","to":"svc_nfc","label":"Escaneo NDEF","type":"hardware"},{"from":"ui_mobile_staff","to":"svc_wfm","label":"Petición de Turno / Marcación","type":"sync"},{"from":"ui_mobile_staff","to":"svc_realtime","label":"Reclamar Orden en Sillón","type":"realtime"},{"from":"ui_mobile_client","to":"svc_audio","label":"Pausa Zen (Cuenco 432 Hz)","type":"sync"},{"from":"ui_mobile_soporte","to":"svc_serial_scale","label":"Lectura de Peso Real","type":"hardware"},{"from":"ui_mobile_soporte","to":"svc_audio","label":"Campana Comanda Servida","type":"sync"},{"from":"ui_desktop_recep","to":"svc_realtime","label":"Suscripción Monitor Colas","type":"realtime"},{"from":"ui_desktop_caja","to":"svc_escpos","label":"Emisión Comprobante Físico","type":"sync"},{"from":"ui_desktop_lab","to":"ai_opal_predictor","label":"Proyección 7 Días","type":"sync"},{"from":"ai_opal_concierge","to":"db_clientes","label":"Consulta Historial & Citas","type":"database"},{"from":"svc_wfm","to":"db_cola_peticiones","label":"Insertar Petición PENDIENTE","type":"database"},{"from":"ui_desktop_recep","to":"db_cola_peticiones","label":"Aprobar/Rechazar Solicitud","type":"database"},{"from":"ui_desktop_recep","to":"db_asistencias","label":"Auditoría Transaccional","type":"database"},{"from":"ui_kiosk","to":"db_oatc","label":"Crear Orden OATC (EN_ESPERA)","type":"database"},{"from":"ui_mobile_staff","to":"db_oatc","label":"Mutar a EN_ATENCION","type":"database"},{"from":"ui_mobile_soporte","to":"db_inventario","label":"Descontar Insumos Químicos","type":"database"},{"from":"ai_opal_predictor","to":"db_inventario","label":"Auditoría Histórica Kardex","type":"database"},{"from":"ui_desktop_caja","to":"db_oatc","label":"Marcar OATC FACTURADO","type":"database"},{"from":"db_cola_peticiones","to":"svc_realtime","label":"WAL FULL Changefeed","type":"realtime"},{"from":"db_oatc","to":"svc_realtime","label":"Eventos OATC Realtime","type":"realtime"},{"from":"svc_realtime","to":"ui_desktop_recep","label":"Alerta Sonora & Toast","type":"realtime"},{"from":"svc_realtime","to":"ui_mobile_staff","label":"Notificación Turno / Decisión","type":"realtime"},{"from":"svc_realtime","to":"hw_haptic","label":"Disparo de Vibración Móvil","type":"hardware"},{"from":"svc_escpos","to":"hw_printers","label":"Buffer ESC/POS (Puerto 9100/USB)","type":"hardware"},{"from":"hw_scale","to":"svc_serial_scale","label":"Flujo Continuo RS-232/USB","type":"hardware"},{"from":"hw_nfc_tags","to":"svc_nfc","label":"Campo Magnético NDEF","type":"hardware"}],"stories":[{"id":"story-checkin","title":"Capítulo 1: Check-in VIP & Bienvenida Concierge Opal","description":"El cliente VIP interactúa con el tótem kiosko, Opal AI deduce preferencias de bienvenida, se genera la orden OATC y se notifica a recepción.","steps":[{"node":"ui_kiosk","note":"El cliente digita su DNI o celular en pantalla táctil."},{"node":"ai_opal_concierge","note":"Opal AI evalúa citas programadas y sugiere bebida de bienvenida."},{"node":"db_clientes","note":"Consulta historial de fidelidad Lumina Club en Supabase."},{"node":"db_oatc","note":"Genera correlativo OATC-YYYYMMDD-XXX en estado EN_ESPERA."},{"node":"svc_escpos","note":"Renderiza comanda térmica con código QR y detalles del servicio."},{"node":"hw_printers","note":"La impresora de sede imprime y realiza corte parcial de 80mm."},{"node":"svc_realtime","note":"Emite broadcast a WebSocket para alertar al monitor de recepción."},{"node":"ui_desktop_recep","note":"Recepción visualiza al cliente en sala con chime sonoro."}]},{"id":"story-chairside","title":"Capítulo 2: Atención en Sillón, Diagnóstico & Despacho Químico","description":"El estilista atiende al cliente, formula mezclas en el móvil, solicita preparación al laboratorio y el químico pesa en la balanza digital.","steps":[{"node":"ui_mobile_staff","note":"Estilista presiona \"Atender en mi Sillón\" en TabCola.tsx."},{"node":"db_oatc","note":"Actualiza orden a EN_ATENCION y bloquea colas duplicadas."},{"node":"ui_mobile_soporte","note":"El encargado de laboratorio recibe el pedido en monitor /lab/despacho."},{"node":"svc_serial_scale","note":"Web Serial API lee el puerto COM de la balanza en tiempo real."},{"node":"hw_scale","note":"Se coloca el bowl y dosifica tintes/peróxidos con tolerancia ±2g."},{"node":"db_inventario","note":"Deducción automática en Kardex como SALIDA_CONSUMO."},{"node":"svc_realtime","note":"Aviso instantáneo al sillón: \"Mezcla Química Lista\"."},{"node":"ai_opal_predictor","note":"Opal recalcula proyección de stock y puntos de reorden."}]},{"id":"story-wfm","title":"Capítulo 3: Workforce Management & Marcación NFC","description":"El colaborador acerca su teléfono al tag NFC en puerta o comedor, recepción audita en 1-clic y Supabase auto-sana el estado del staff.","steps":[{"node":"hw_nfc_tags","note":"El colaborador acerca su teléfono al tag de puerta o comedor."},{"node":"svc_nfc","note":"useNfcBackgroundListener sanitiza el payload NDEF."},{"node":"ui_mobile_staff","note":"Desambigua movimiento táctil: Entrada, Refrigerio o Fin Jornada."},{"node":"svc_wfm","note":"Inserta fila PENDIENTE en public.cola_peticiones con sede verificada."},{"node":"svc_realtime","note":"WAL Realtime emite cambio inmediato a terminal de recepción."},{"node":"ui_desktop_recep","note":"Recepcionista evalúa presencia física y aprueba con 1 toque."},{"node":"db_asistencias","note":"Registro inmutable en tabla asistencias_turnos para auditoría."},{"node":"hw_haptic","note":"El teléfono del colaborador vibra confirmando su turno activo."}]},{"id":"story-pos","title":"Capítulo 4: Emisión Térmica OATC & Facturación en Caja POS","description":"El estilista completa el servicio, el cliente pasa a Caja POS, se auditan consumos de bar y se emite comprobante electrónico con puntos Lumina.","steps":[{"node":"ui_mobile_staff","note":"Estilista finaliza servicio y deriva OATC a Caja POS."},{"node":"db_oatc","note":"Orden marcada como COMPLETADA con desglose de servicios ejecutados."},{"node":"ui_desktop_caja","note":"Cajero abre orden OATC, revisa consumos de cortesía y cobra."},{"node":"svc_escpos","note":"Compila template de boleta/factura electrónica SUNAT."},{"node":"hw_printers","note":"Impresora térmica emite comprobante fiscal de 80mm."},{"node":"db_clientes","note":"Acredita LuminaCoins en la cuenta VIP del cliente."},{"node":"ui_desktop_caja","note":"Arqueo ciego de caja validado por CajaAuditorOpal.tsx."}]}]};
+    let activeStory = data.stories[0];
+    let activeStepIdx = 0;
+    let selectedNodeId = null;
+    let currentRoleFilter = 'all';
+
+    // Layout positions
+    const nodeCoords = {
+      // Layer 1: UI (y: 80)
+      ui_kiosk: { x: 100, y: 80 },
+      ui_mobile_staff: { x: 420, y: 80 },
+      ui_mobile_client: { x: 740, y: 80 },
+      ui_mobile_admin: { x: 1060, y: 80 },
+      ui_mobile_soporte: { x: 1380, y: 80 },
+      ui_desktop_recep: { x: 1700, y: 80 },
+      ui_desktop_caja: { x: 2020, y: 80 },
+      ui_desktop_lab: { x: 2340, y: 80 },
+
+      // Layer 2: Services & AI (y: 380)
+      ai_opal_concierge: { x: 100, y: 380 },
+      svc_nfc: { x: 420, y: 380 },
+      svc_audio: { x: 740, y: 380 },
+      svc_wfm: { x: 1060, y: 380 },
+      svc_serial_scale: { x: 1380, y: 380 },
+      svc_realtime: { x: 1700, y: 380 },
+      svc_espos: { x: 2020, y: 380 },
+      ai_opal_predictor: { x: 2340, y: 380 },
+
+      // Layer 3: Database (y: 680)
+      db_clientes: { x: 100, y: 680 },
+      db_asistencias: { x: 580, y: 680 },
+      db_cola_peticiones: { x: 1060, y: 680 },
+      db_inventario: { x: 1540, y: 680 },
+      db_oatc: { x: 2020, y: 680 },
+
+      // Layer 4: Hardware (y: 980)
+      hw_nfc_tags: { x: 420, y: 980 },
+      hw_haptic: { x: 900, y: 980 },
+      hw_scale: { x: 1380, y: 980 },
+      hw_printers: { x: 2020, y: 980 }
+    };
+
+    function init() {
+      renderNodes();
+      renderEdges();
+      updateStoryView();
+    }
+
+    function renderNodes() {
+      const container = document.getElementById('nodes-container');
+      container.innerHTML = '';
+
+      data.nodes.forEach(node => {
+        const pos = nodeCoords[node.id] || { x: 100, y: 100 };
+        const el = document.createElement('div');
+        el.id = 'node-' + node.id;
+        el.className = 'node role-' + node.role;
+        el.style.left = pos.x + 'px';
+        el.style.top = pos.y + 'px';
+        el.onclick = () => selectNode(node.id);
+
+        el.innerHTML = `
+          <div class="node-header">
+            <span class="node-badge">${node.badge || node.role}</span>
+          </div>
+          <div class="node-title">${node.title}</div>
+          <div class="node-tech">${node.tech}</div>
+          <div class="node-desc">${node.description}</div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function renderEdges() {
+      const svg = document.getElementById('svg-canvas');
+      // Keep defs
+      const defs = svg.querySelector('defs');
+      svg.innerHTML = '';
+      svg.appendChild(defs);
+
+      data.edges.forEach((edge, idx) => {
+        const fromPos = nodeCoords[edge.from];
+        const toPos = nodeCoords[edge.to];
+        if (!fromPos || !toPos) return;
+
+        // Calculate center connectors
+        const x1 = fromPos.x + 125;
+        const y1 = fromPos.y + 50;
+        const x2 = toPos.x + 125;
+        const y2 = toPos.y + 50;
+
+        // Curve path
+        const cy1 = y1 + (y2 - y1) * 0.5;
+        const cy2 = y2 - (y2 - y1) * 0.5;
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.id = 'edge-' + edge.from + '-' + edge.to;
+        path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${cy1}, ${x2} ${cy2}, ${x2} ${y2}`);
+        path.setAttribute('class', 'edge-path');
+        path.setAttribute('data-from', edge.from);
+        path.setAttribute('data-to', edge.to);
+        svg.appendChild(path);
+      });
+    }
+
+    function selectNode(id) {
+      selectedNodeId = id;
+      const node = data.nodes.find(n => n.id === id);
+      if (!node) return;
+
+      // Update Node Highlight
+      document.querySelectorAll('.node').forEach(n => {
+        n.classList.remove('active', 'dimmed');
+      });
+      document.querySelectorAll('.edge-path').forEach(e => {
+        e.classList.remove('highlighted', 'dimmed');
+      });
+
+      const activeNodeEl = document.getElementById('node-' + id);
+      if (activeNodeEl) activeNodeEl.classList.add('active');
+
+      // Upstream (who calls this node) & Downstream (who this node calls)
+      const upstreamEdges = data.edges.filter(e => e.to === id);
+      const downstreamEdges = data.edges.filter(e => e.from === id);
+
+      const upstreamNodeIds = upstreamEdges.map(e => e.from);
+      const downstreamNodeIds = downstreamEdges.map(e => e.to);
+      const connectedNodeIds = new Set([id, ...upstreamNodeIds, ...downstreamNodeIds]);
+
+      document.querySelectorAll('.node').forEach(n => {
+        const nId = n.id.replace('node-', '');
+        if (!connectedNodeIds.has(nId)) {
+          n.classList.add('dimmed');
+        }
+      });
+
+      document.querySelectorAll('.edge-path').forEach(e => {
+        const from = e.getAttribute('data-from');
+        const to = e.getAttribute('data-to');
+        if (from === id || to === id) {
+          e.classList.add('highlighted');
+        } else {
+          e.classList.add('dimmed');
+        }
+      });
+
+      // Populate Sidebar
+      document.getElementById('side-badge').textContent = node.badge || node.role;
+      document.getElementById('side-title').textContent = node.title;
+      document.getElementById('side-path').textContent = node.path;
+      document.getElementById('side-desc').textContent = node.description;
+
+      const upList = document.getElementById('side-upstream');
+      upList.innerHTML = upstreamEdges.length === 0 ? '<div style="font-size:12px;color:var(--text-muted);">Sin dependencias upstream</div>' : '';
+      upstreamEdges.forEach(e => {
+        const srcNode = data.nodes.find(n => n.id === e.from);
+        const item = document.createElement('div');
+        item.className = 'connection-item';
+        item.innerHTML = `<span>${srcNode ? srcNode.title : e.from}</span><span style="color:var(--text-muted);font-size:10px;">${e.label}</span>`;
+        item.onclick = () => selectNode(e.from);
+        upList.appendChild(item);
+      });
+
+      const downList = document.getElementById('side-downstream');
+      downList.innerHTML = downstreamEdges.length === 0 ? '<div style="font-size:12px;color:var(--text-muted);">Sin dependencias downstream</div>' : '';
+      downEdges(downstreamEdges, downList);
+
+      document.getElementById('sidebar').classList.add('open');
+    }
+
+    function downEdges(downstreamEdges, downList) {
+      downstreamEdges.forEach(e => {
+        const tgtNode = data.nodes.find(n => n.id === e.to);
+        const item = document.createElement('div');
+        item.className = 'connection-item';
+        item.innerHTML = `<span>${tgtNode ? tgtNode.title : e.to}</span><span style="color:var(--text-muted);font-size:10px;">${e.label}</span>`;
+        item.onclick = () => selectNode(e.to);
+        downList.appendChild(item);
+      });
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.querySelectorAll('.node').forEach(n => n.classList.remove('active', 'dimmed'));
+      document.querySelectorAll('.edge-path').forEach(e => e.classList.remove('highlighted', 'dimmed'));
+      selectedNodeId = null;
+    }
+
+    // --- Story Engine ---
+    function selectStory(storyId) {
+      activeStory = data.stories.find(s => s.id === storyId) || data.stories[0];
+      activeStepIdx = 0;
+      updateStoryView();
+    }
+
+    function nextStep() {
+      if (activeStepIdx < activeStory.steps.length - 1) {
+        activeStepIdx++;
+        updateStoryView();
+      }
+    }
+
+    function prevStep() {
+      if (activeStepIdx > 0) {
+        activeStepIdx--;
+        updateStoryView();
+      }
+    }
+
+    function updateStoryView() {
+      const step = activeStory.steps[activeStepIdx];
+      const node = data.nodes.find(n => n.id === step.node);
+
+      document.getElementById('story-step-title').textContent = `Paso ${activeStepIdx + 1}: ${node ? node.title : step.node}`;
+      document.getElementById('story-step-desc').textContent = step.note;
+      document.getElementById('step-counter').textContent = `Paso ${activeStepIdx + 1} / ${activeStory.steps.length}`;
+
+      // Highlight current step node & center
+      selectNode(step.node);
+
+      const pos = nodeCoords[step.node];
+      if (pos) {
+        const stage = document.getElementById('stage');
+        stage.scrollTo({
+          left: Math.max(0, pos.x - stage.clientWidth / 2 + 125),
+          top: Math.max(0, pos.y - stage.clientHeight / 2 + 50),
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    // --- Filter by Role ---
+    function filterRole(role) {
+      currentRoleFilter = role;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.querySelectorAll('.node').forEach(n => {
+        const nId = n.id.replace('node-', '');
+        const node = data.nodes.find(item => item.id === nId);
+        if (role === 'all' || node.role === role) {
+          n.style.display = 'flex';
+        } else {
+          n.style.display = 'none';
+        }
+      });
+    }
+
+    // --- Search ---
+    function handleSearch(q) {
+      const term = q.trim().toLowerCase();
+      document.querySelectorAll('.node').forEach(n => {
+        const nId = n.id.replace('node-', '');
+        const node = data.nodes.find(item => item.id === nId);
+        const match = !term || node.title.toLowerCase().includes(term) || node.tech.toLowerCase().includes(term) || node.description.toLowerCase().includes(term);
+        n.style.display = match ? 'flex' : 'none';
+      });
+    }
+
+    // --- Theme & Presets ---
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      document.documentElement.classList.toggle('light');
+    }
+
+    let isBlueprint = true;
+    function togglePreset() {
+      isBlueprint = !isBlueprint;
+      document.getElementById('preset-label').textContent = isBlueprint ? 'Blueprint' : 'Signal Flow';
+      if (!isBlueprint) {
+        document.documentElement.style.setProperty('--accent', '#a855f7');
+        document.documentElement.style.setProperty('--card-border-hover', '#c084fc');
+      } else {
+        document.documentElement.style.setProperty('--accent', '#38bdf8');
+        document.documentElement.style.setProperty('--card-border-hover', '#38bdf8');
+      }
+    }
+
+    // --- Share Card Modal ---
+    function openShareCard() {
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function closeShareCard(e) {
+      document.getElementById('modal-overlay').style.display = 'none';
+    }
+
+    function copyCardBadge() {
+      const md = '[![Vaikuntha ERP Architecture](docs/arquitectura/vaikuntha_core.architecture.html)](https://github.com/gonzalesCorp-repo/Vercel-SupB-CorpGonzales)';
+      navigator.clipboard.writeText(md).then(() => {
+        alert('Enlace Markdown copiado al portapapeles.');
+      });
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
