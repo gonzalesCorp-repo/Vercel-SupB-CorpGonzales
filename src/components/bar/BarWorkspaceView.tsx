@@ -288,9 +288,16 @@ export function BarWorkspaceView() {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest block">
-                          📍 {cmd.metadata?.estacion || 'Estación de Piso'}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">
+                            📍 {cmd.metadata?.estacion || 'Estación de Piso'}
+                          </span>
+                          {cmd.metadata?.oatc_id && (
+                            <span className="text-[9px] font-mono font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 px-1.5 py-0.2 rounded-md">
+                              #OATC-{cmd.metadata.oatc_id.slice(0, 4)}
+                            </span>
+                          )}
+                        </div>
                         <h4 className="text-sm font-black text-slate-900 dark:text-white mt-0.5">
                           {cmd.cliente_nombre || 'Cliente en Silla'}
                         </h4>

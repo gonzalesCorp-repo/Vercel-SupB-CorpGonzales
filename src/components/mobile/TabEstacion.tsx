@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { ModalNfcScan } from './ModalNfcScan';
 import { TabCola } from './TabCola';
-import { TabBar } from './TabBar';
+import { ModalPedidoBarInSitu } from './ModalPedidoBarInSitu';
 import { OatcPhaseStepper, FaseOatc } from '@/components/ui/OatcPhaseStepper';
 import { ModalCatalogoPicker } from './ModalCatalogoPicker';
 import {
@@ -79,7 +79,8 @@ export function TabEstacion({
   onServicioFinalizado,
   onRefrescar
 }: TabEstacionProps) {
-  const [subTab, setSubTab] = useState<'silla' | 'cola' | 'bar'>('silla');
+  const [subTab, setSubTab] = useState<'silla' | 'cola'>('silla');
+  const [modalBarInSituOpen, setModalBarInSituOpen] = useState(false);
   const [modalNfcOpen, setModalNfcOpen] = useState(false);
   const [modalSelectorEstacionOpen, setModalSelectorEstacionOpen] = useState(false);
   const [modalLabOpen, setModalLabOpen] = useState(false);
@@ -575,7 +576,7 @@ export function TabEstacion({
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       
-      {/* 3 Sub-Tabs Principales en Estación: Silla, Cola y Bar */}
+      {/* 2 Sub-Tabs Principales en Estación: Silla y Cola */}
       <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-900/90 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner transition-colors w-full">
         <button
           type="button"
@@ -600,20 +601,7 @@ export function TabEstacion({
           }`}
         >
           <Users className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">👥 Cola</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setSubTab('bar')}
-          className={`flex-1 py-2 px-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-            subTab === 'bar'
-              ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-          }`}
-        >
-          <Coffee className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">🍹 Bar</span>
+          <span className="truncate">👥 Cola en Vivo</span>
         </button>
       </div>
 
@@ -749,9 +737,20 @@ export function TabEstacion({
                   </span>
                   <h3 className="text-xl font-black text-slate-900 dark:text-white mt-0.5">{oatcActiva.cliente_nombre}</h3>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">Tiempo</span>
-                  <span className="text-xs font-black text-indigo-400 font-mono">{tiempoTranscurrido} min</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setModalBarInSituOpen(true)}
+                    className="px-3 py-1.5 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-500 dark:text-amber-400 font-black text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition cursor-pointer"
+                    title="Pedir bebida de cortesía al bar"
+                  >
+                    <span className="text-sm">🍹</span>
+                    <span>Pedir Bar</span>
+                  </button>
+                  <div className="text-right pl-1">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">Tiempo</span>
+                    <span className="text-xs font-black text-indigo-400 font-mono">{tiempoTranscurrido} min</span>
+                  </div>
                 </div>
               </div>
 
@@ -1083,17 +1082,6 @@ export function TabEstacion({
         </div>
       )}
 
-      {/* 3. Vista: Bar & Cafetería */}
-      {subTab === 'bar' && (
-        <div className="animate-in fade-in">
-          <TabBar
-            clienteNombre={oatcActiva?.cliente_nombre}
-            estacionNombre={estacionNombre}
-            agenteNombre={agenteNombre}
-          />
-        </div>
-      )}
-
       {/* ========================================================================= */}
       {/* MODALES AUXILIARES ATÓMICOS */}
       {/* ========================================================================= */}
@@ -1210,6 +1198,17 @@ export function TabEstacion({
         titulo={contextoCatalogo === 'proforma' ? 'Añadir a Proforma desde Catálogo' : 'Seleccionar del Catálogo Oficial'}
         onClose={() => setModalCatalogoOpen(false)}
         onSelectBien={handleSeleccionarDelCatalogo}
+      />
+
+      {/* Modal 10: Pedido de Bar & Bebidas de Cortesía In-Situ */}
+      <ModalPedidoBarInSitu
+        isOpen={modalBarInSituOpen}
+        onClose={() => setModalBarInSituOpen(false)}
+        oatcId={oatcActiva?.id}
+        clienteId={oatcActiva?.cliente_id}
+        clienteNombre={oatcActiva?.cliente_nombre}
+        estacionNombre={estacionNombre}
+        agenteNombre={agenteNombre}
       />
 
     </div>

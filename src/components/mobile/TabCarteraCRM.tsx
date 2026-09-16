@@ -34,6 +34,12 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
   const [cargando, setCargando] = useState(true);
   const [modalRegistroOpen, setModalRegistroOpen] = useState(false);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteCartera | null>(null);
+  const [consumosBarCliente, setConsumosBarCliente] = useState<{
+    totalBebidas: number;
+    bebidaFavorita: string;
+    ultimasComandas: any[];
+    cargando: boolean;
+  }>({ totalBebidas: 0, bebidaFavorita: 'Ninguna', ultimasComandas: [], cargando: false });
   const [feedback, setFeedback] = useState('');
 
   // Estados del Wizard de 2 Pasos
@@ -100,6 +106,87 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
   useEffect(() => {
     cargarCartera();
   }, [agenteId, agenteNombre]);
+
+  // Cargar métricas de consumo de bar del cliente seleccionado
+  useEffect(() => {
+    if (!clienteSeleccionado) {
+      setConsumosBarCliente({ totalBebidas: 0, bebidaFavorita: 'Ninguna', ultimasComandas: [], cargando: false });
+      return;
+    }
+
+    const cargarMetricasBar = async () => {
+      setConsumosBarCliente(prev => ({ ...prev, cargando: true }));
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from('cola_peticiones')
+          .select('*')
+          .eq('tipo', 'BAR_BEBIDA')
+          .or(`cliente_nombre.eq.${clienteSeleccionado.nombre},metadata->>cliente_id.eq.${clienteSeleccionado.id}`)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (data && data.length > 0) {
+          let totalBebidas = 0;
+          const conteoPorBebida: Record<string, number> = {};
+
+          data.forEach((cmd: any) => {
+            const pedido = cmd.metadata?.pedido || {};
+            const c = Number(pedido.cafe || 0);
+            const inf = Number(pedido.infusion || 0);
+            const bDia = Number(pedido.bebidaDia || 0);
+            const ag = Number(pedido.agua || 0);
+
+            if (c > 0) {
+              totalBebidas += c;
+              conteoPorBebida['Café Expreso'] = (conteoPorBebida['Café Expreso'] || 0) + c;
+            }
+            if (inf > 0) {
+              totalBebidas += inf;
+              const nombreInf = `Infusión (${pedido.tipoInfusion || 'Hierbas'})`;
+              conteoPorBebida[nombreInf] = (conteoPorBebida[nombreInf] || 0) + inf;
+            }
+            if (bDia > 0) {
+              totalBebidas += bDia;
+              conteoPorBebida['Bebida del Día'] = (conteoPorBebida['Bebida del Día'] || 0) + bDia;
+            }
+            if (ag > 0) {
+              totalBebidas += ag;
+              conteoPorBebida['Agua Mineral'] = (conteoPorBebida['Agua Mineral'] || 0) + ag;
+            }
+
+            // Fallback si no venía en metadata.pedido
+            if (c === 0 && inf === 0 && bDia === 0 && ag === 0) {
+              totalBebidas += Number(cmd.metadata?.total_items || 1);
+            }
+          });
+
+          let favorita = 'Bebidas de cortesía';
+          let maxConteo = 0;
+          for (const [bebida, cant] of Object.entries(conteoPorBebida)) {
+            if (cant > maxConteo) {
+              maxConteo = cant;
+              favorita = `${bebida} (${cant}x)`;
+            }
+          }
+
+          setConsumosBarCliente({
+            totalBebidas,
+            bebidaFavorita: favorita,
+            ultimasComandas: data.slice(0, 3),
+            cargando: false
+          });
+        } else {
+          setConsumosBarCliente({ totalBebidas: 0, bebidaFavorita: 'Sin consumos previos', ultimasComandas: [], cargando: false });
+        }
+      } catch (e) {
+        console.warn('Error cargando consumos de bar:', e);
+        setConsumosBarCliente(prev => ({ ...prev, cargando: false }));
+      }
+    };
+
+    cargarMetricasBar();
+  }, [clienteSeleccionado]);
 
   // Búsqueda universal por Nombre, Apellido, DNI o Celular
   const filtrados = clientes.filter(c => {
@@ -489,6 +576,41 @@ export function TabCarteraCRM({ agenteNombre = '', agenteId }: TabCarteraCRMProp
                 <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                   {clienteSeleccionado.notasTecnicas || 'Sin notas técnicas registradas.'}
                 </p>
+              </div>
+
+              {/* 🍹 Consumo de Bar & Preferencias de Bebidas */}
+              <div className="p-3 bg-amber-50/40 dark:bg-amber-950/20 rounded-2xl border border-amber-200/60 dark:border-amber-800/40 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                    <span>🍹</span> Preferencias de Bar & Cafetería
+                  </span>
+                  <span className="text-[9px] bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold px-1.5 py-0.2 rounded-full border border-amber-500/30">
+                    {consumosBarCliente.totalBebidas} servidas
+                  </span>
+                </div>
+
+                {consumosBarCliente.cargando ? (
+                  <p className="text-[11px] text-slate-400 animate-pulse">Consultando historial de bar...</p>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="text-xs text-slate-800 dark:text-slate-200">
+                      Favorita: <strong className="text-amber-600 dark:text-amber-400">{consumosBarCliente.bebidaFavorita}</strong>
+                    </p>
+                    {consumosBarCliente.ultimasComandas.length > 0 && (
+                      <div className="pt-1 border-t border-amber-200/40 dark:border-amber-900/30 space-y-0.5">
+                        <span className="text-[9px] text-slate-500 uppercase tracking-wider block">Últimos pedidos en sala:</span>
+                        {consumosBarCliente.ultimasComandas.map((cmd) => (
+                          <div key={cmd.id} className="flex items-center justify-between text-[10px] text-slate-600 dark:text-slate-400">
+                            <span className="truncate max-w-[170px]">{cmd.detalle?.replace('Pedido Bar: ', '')}</span>
+                            <span className="font-mono text-[9px] text-slate-400 shrink-0">
+                              {new Date(cmd.created_at).toLocaleDateString([], { day: '2-digit', month: 'short' })}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
