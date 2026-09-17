@@ -46,3 +46,5 @@ next-env.d.ts
 .agents/
 scratch/
 ORIGINAL_REQUEST.md
+bienes_backup_cloud.json
+supabase/.temp/

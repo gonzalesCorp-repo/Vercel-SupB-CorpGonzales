@@ -10,7 +10,7 @@ import {
   Beaker, Truck, Settings, Activity, Shield, MapPin, ChevronDown, 
   User, PackageSearch, ArrowRightLeft, Layers, Download, BarChart3, 
   Database, Sliders, Calculator, Zap, Calendar, Users, Award, Sparkles, Landmark,
-  Scissors, ShieldCheck
+  Scissors, ShieldCheck, Workflow
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/store/useAppStore';
@@ -472,6 +472,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               {/* SISTEMA & GOBERNANZA */}
               <NavSection title="Sistema" isExpanded={isExpanded} icon={Shield}>
                 <NavItem href="/admin/reportes" icon={Activity} label="Dashboard Global" pathname={pathname} />
+                <NavItem href="/admin/flujos-canvas" icon={Workflow} label="Estudio Visual de Flujos" pathname={pathname} badge="Studio" />
                 <NavItem href="/admin/usuarios" icon={Users} label="Usuarios & Delegación" pathname={pathname} badge="Admin" />
                 <NavItem href="/admin/config" icon={Sliders} label="Configuración Sede" pathname={pathname} badge="Admin" />
                 <NavItem href="/admin/reglas-clientes" icon={Award} label="Reglas de Clientes" pathname={pathname} badge="Insignias" />
